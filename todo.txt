@@ -1,0 +1,8 @@
+- mitochondrium produces about 10M ATP molecules from ADP per second
+- Protein synthesis: 2M ATP/s, Transport: 1M ATP/s, DNA/RNA Synthesis: 1M ATP/s 
+
+- mitochondrium produces exactly enough atp per second to satisfy the cell
+- after a fixed time of atp consumption, the nucleus goes through the 6 cell division phases
+- the stages are animated accordingly
+- at the end the cell divides
+- done
