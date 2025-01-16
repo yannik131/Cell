@@ -10,11 +10,11 @@ cd ..
 # create the virtual environment to avoid installing conan globally
 if [ ! -d "env/bin" ] || [ ! -f "env/bin/activate" ]; then
     python3 -m venv env
-    source env/bin/activate
     pip3 install conan
 fi
 
 # build the project
+source env/bin/activate
 conan install . --output-folder=conan_release --build=missing
 conan install . --output-folder=conan_debug --build=missing -s build_type=Debug
 mkdir build_release

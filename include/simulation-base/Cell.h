@@ -37,25 +37,28 @@ public:
     };
 
 public:
-    Cell();
+    Cell() = default;
 
     Cell(const Cell&) = delete;
 
-    const std::vector<Mitochondrium::Ptr>& mitochondria() const;
+    auto operator=(const Cell&) -> Cell& = delete;
 
-    const std::vector<Nucleus::Ptr>& nuclei() const;
+    auto mitochondria() const -> const std::vector<Mitochondrium::Ptr>&;
 
-    int atpCount() const;
+    auto nuclei() const -> const std::vector<Nucleus::Ptr>&;
 
-    int adpCount() const;
+    auto atpCount() const -> int;
 
-    const CellCyclePhases cellCyclePhase() const;
+    auto adpCount() const -> int;
+
+    auto cellCyclePhase() const -> const CellCyclePhases;
 
 private:
     std::vector<Mitochondrium::Ptr> mitochondria_;
     std::vector<Nucleus::Ptr> nuclei_;
 
-    int atpCount_ = 1e7f;
+    const int StartATP = static_cast<int>(1e7f);
+    int atpCount_ = StartATP;
     int adpCount_ = 0;
     CellCyclePhases cellCyclePhase_ = CellCyclePhases::Interphase;
 };

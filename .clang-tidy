@@ -1,0 +1,1 @@
+Checks:             'clang-diagnostic-*,clang-analyzer-*,clang-analyzer-*,modernize-*,clang-diagnostic-*,cppcoreguidelines-*,-modernize-use-nodiscard,-cppcoreguidelines-special-member-functions'

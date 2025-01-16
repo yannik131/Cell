@@ -1,35 +1,26 @@
 #include "Cell.h"
 
-Cell::Cell()
-{
-}
-
-const std::vector<Mitochondrium::Ptr>& Cell::mitochondria() const
+auto Cell::mitochondria() const -> const std::vector<Mitochondrium::Ptr>&
 {
     return mitochondria_;
 }
 
-const std::vector<Nucleus::Ptr>& Cell::nuclei() const
+auto Cell::nuclei() const -> const std::vector<Nucleus::Ptr>&
 {
-start:
-    for (int i = 0; i < 100; ++i)
-        goto start;
-    int i;
-    int* p;
     return nuclei_;
 }
 
-int Cell::atpCount() const
+auto Cell::atpCount() const -> int
 {
     return atpCount_;
 }
 
-int Cell::adpCount() const
+auto Cell::adpCount() const -> int
 {
     return adpCount_;
 }
 
-const Cell::CellCyclePhases Cell::cellCyclePhase() const
+auto Cell::cellCyclePhase() const -> const Cell::CellCyclePhases
 {
     return cellCyclePhase_;
 }
