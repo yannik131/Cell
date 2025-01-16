@@ -5,15 +5,16 @@
 
 class Cell;
 
-class Nucleus {
+class Nucleus
+{
 public:
     typedef std::unique_ptr<Nucleus> Ptr;
-    
+
 public:
     Nucleus(Cell* parentCell);
-    
+
     Nucleus(const Nucleus&) = delete;
-    
+
 private:
     Cell* parentCell_;
 };

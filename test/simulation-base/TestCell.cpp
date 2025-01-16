@@ -5,8 +5,8 @@
 TEST(CellTest, TestCellInitialization)
 {
     Cell cell;
-    
-    //These are the start values a cell is equipped with 
+
+    // These are the start values a cell is equipped with
     ASSERT_EQ(cell.mitochondria().size(), 1);
     ASSERT_EQ(cell.nuclei().size(), 1);
     ASSERT_EQ(cell.atpCount(), 1e7);

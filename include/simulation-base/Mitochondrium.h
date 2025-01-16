@@ -5,15 +5,16 @@
 
 class Cell;
 
-class Mitochondrium {
+class Mitochondrium
+{
 public:
     typedef std::unique_ptr<Mitochondrium> Ptr;
-    
+
 public:
     Mitochondrium(Cell* parentCell);
-    
+
     Mitochondrium(const Mitochondrium&) = delete;
-    
+
 private:
     Cell* parentCell_;
 };

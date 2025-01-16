@@ -2,3 +2,4 @@ conan_release
 conan_debug
 build_release
 build_debug
+env
