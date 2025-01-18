@@ -3,6 +3,9 @@
 # echo commands
 set -x
 
+# abort upon failure
+set -e
+
 # change to workspace folder
 cd "$(dirname "$0")"
 cd ..
@@ -15,14 +18,15 @@ fi
 
 # build the project
 source env/bin/activate
+conan profile detect --force
 conan install . --output-folder=conan_release --build=missing
 conan install . --output-folder=conan_debug --build=missing -s build_type=Debug
-mkdir build_release
+mkdir -p build_release
 cd build_release
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 cd ..
-mkdir build_debug
+mkdir -p build_debug
 cd build_debug
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build . --config Debug 
