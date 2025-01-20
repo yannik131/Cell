@@ -1,6 +1,8 @@
 #ifndef NUCLEUS_H
 #define NUCLEUS_H
 
+#include "Phases.h"
+
 #include <memory>
 
 class Cell;
@@ -17,6 +19,8 @@ public:
 
 private:
     Cell* parentCell_;
+    
+    
 };
 
 #endif /* NUCLEUS_H */

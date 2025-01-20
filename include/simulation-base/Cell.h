@@ -3,6 +3,7 @@
 
 #include "Mitochondrium.h"
 #include "Nucleus.h"
+#include "Phases.h"
 
 #include <memory>
 #include <vector>
@@ -12,32 +13,8 @@ class Cell
 public:
     typedef std::unique_ptr<Cell> Ptr;
 
-    enum CellCyclePhases
-    {
-        Interphase,
-        Mitosis
-    };
-
-    enum InterphasePhases
-    {
-        G0,
-        G1,
-        S,
-        G2
-    };
-
-    enum MitosisPhases
-    {
-        Prophase,
-        Prometaphase,
-        Metaphase,
-        Anaphase,
-        Telophase,
-        Cytokinesis
-    };
-
 public:
-    Cell() = default;
+    Cell();
 
     Cell(const Cell&) = delete;
 
@@ -52,6 +29,9 @@ public:
     auto adpCount() const -> int;
 
     auto cellCyclePhase() const -> const CellCyclePhases;
+    
+private:
+    void buildCell();
 
 private:
     std::vector<Mitochondrium::Ptr> mitochondria_;
