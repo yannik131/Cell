@@ -1,0 +1,25 @@
+- Cyclin-Dependent Kinases (CDKs) phosphorylate proteins that drive the cell through the cell cycle
+- Cyclines activate the CDKs (partially)
+Cyclin-D + (Cdk4/Cdk6)  -> G1-Cdk
+Cyclin-E + Cdk2         -> G1/S-Cdk
+Cyclin-A + (Cdk2/Cdk1)  -> S-Cdk
+Cyclin-B + Cdk1         -> M-Cdk
+
+- G1/S-Cdk initiates the cell cycle in the dormant G1 phase 
+- S-Cdk triggers transition from the G1 to the S phase 
+- M-Cdk trigger transition from the G2 to the M phase 
+
+- CDK-activating kinase (CAK) activates any Cyclin-Cdk complex by phosphorylation
+- Cyclin-dependent kinase inhibitor protein (CKI) inhibits Cyclin-Cdk complexes by binding to them (mostly G1/S- and S-Cdks)
+
+- Wee1 inhibits Cyclin-Cdk complexes by phosphorylation 
+- Cdc25 reverses that inhibition by dephosphorylation
+
+- The anaphase-promoting complex/cyclosome (APC/C) triggers transition from the metaphase to the anaphase by ubiquitylation of securin and Cyclin-A/Cyclin-B, marking them for proteolysis
+- APC/C binds with Cdc20 (Mitosis) or Cdh1 (late Mitotis-G1) to identify target proteins 
+
+- SCF ubiquitylizes CKIs in the late G1 phase, thus activating S-Cdks; it's also responsibly for proteolysis of G1/S-Cdks in the early S phase
+- SCF is regulated by its F-Box subunits, which can only bind specifically phosphorylated proteins 
+
+Questions:
+- Do Cyclines simply disassociate with the Cdks over time on their own?
