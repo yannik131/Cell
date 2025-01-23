@@ -3,3 +3,7 @@ conan_debug
 build_release
 build_debug
 env
+*.aux
+*.out
+*.log
+*.gz
