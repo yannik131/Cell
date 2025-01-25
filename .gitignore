@@ -7,3 +7,5 @@ env
 *.out
 *.log
 *.gz
+*.toc
+*.pdf

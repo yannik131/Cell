@@ -7,6 +7,8 @@
 \usepackage{hyperref}
 
 \begin{document}
+	\tableofcontents
+	
 	\section{Cell cycle}
 	
 	\begin{figure}[H]
@@ -16,10 +18,17 @@
 	\end{figure}
 	
 	\subsection{Cdks}
-	Cyclin-Dependent Kinases (CDKs) phosphorylate proteins that drive the cell through the cell cycle. 
+	Cyclin-Dependent Kinases (CDKs) phosphorylate proteins that drive the cell through the cell cycle. This is regulated by
+	
+	\begin{enumerate}
+		\item Synthesis rate of the Cyclins
+		\item Ubiquitylation rate of the cyclins (marking them for proteolysis/degradation)
+		\item Phosphorylation of the Cdks
+		\item CKIs
+	\end{enumerate}
 	
 	\subsection{Cyclins}
-	Cyclins activate the CDKs (partially) by forming complexes. See table.
+	Cyclins activate the CDKs (partially) by forming complexes (see table). There are 4 types of cyclins (A, B, D and E) with various related forms (i. e. D1, D2 and D3 in humans). When characterized by the state of the cell cycle they are active in, they can further be divided into 4 groups: G1/S-Cyclins, S-Cyclins, M-Cyclins and G1-Cyclins.
 	
 	\begin{table}[h]
 		\centering
@@ -44,7 +53,7 @@
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\linewidth]{mpf_regulation_cooper.png}
-		\caption{MPF Regulation}
+		\caption{MPF Regulation. The "Phosphorylation" step is carried out by CAK}
 	\end{figure}
 
 	Cdk concentration remains mostly constant.\footnote{albert, p. 1093} Concentration of cyclins changes during the cell cycle (see images).
@@ -83,7 +92,7 @@
 	Binds with APC/C in late mitosis/G1 to specify target proteins.
 	
 	\subsection{SCF}
-	Another ubiquitin ligase. CF ubiquitylates CKIs in the late G1 phase, thus activating S-Cdks; it's also responsible for proteolysis of G1/S-Cdks in the early S phase. Marks p27. Typically requires phosphorylated targets.
+	Skp, Cullin, F-box containing complex is another ubiquitin ligase. SCF ubiquitylates CKIs in the late G1 phase, thus activating S-Cdks; it's also responsible for proteolysis of G1/S-Cdks in the early S phase. Marks p27. Typically requires phosphorylated targets.
 	
 	\subsubsection{F-Box-Proteins}
 	Exchangeable part of the SCF, specifying the target protein. There are more than 70 genes coding for F-Box-Proteins.\footnote{alberts, p. 178}
@@ -105,5 +114,8 @@
 	
 	\subsubsection{p16}
 	Inhibits G1-Cdk in G1. Frequently inactive in cancer cells.
+	
+	\subsection{CAK}
+	CDK-activating kinase (CAK) activates the cyclin-CDK complex.\footnote{\url{https://en.wikipedia.org/wiki/CDK-activating_kinase}}
 
 \end{document}
