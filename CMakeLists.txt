@@ -45,3 +45,19 @@ target_link_libraries(simulation-test
 
 include(GoogleTest)
 gtest_add_tests(TARGET simulation-test)
+
+# the sfml-spheres target
+find_package(SFML COMPONENTS system window graphics REQUIRED)
+find_package(glog REQUIRED)
+
+file(GLOB SFML_SPHERES_FILES src/sfml-spheres/*.cpp)
+add_executable(sfml-spheres ${SFML_SPHERES_FILES})
+
+target_include_directories(sfml-spheres PUBLIC ${CMAKE_SOURCE_DIR}/include/sfml-spheres)
+
+target_link_libraries(sfml-spheres PRIVATE 
+    sfml-graphics 
+    sfml-window 
+    sfml-system
+    glog::glog
+)

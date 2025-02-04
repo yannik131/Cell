@@ -6,3 +6,20 @@
 - the stages are animated accordingly
 - at the end the cell divides
 - done
+
+classes: 
+- state 
+    - phosphorylated count
+    - ubiquitination count 
+    - glycosylation count 
+    - methylation count 
+    
+- protein
+    - name
+    - state 
+    - attached proteins 
+    - activity (computed)
+    
+
+- nucleus produces proteins 
+    - register proteins 

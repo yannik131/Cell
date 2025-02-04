@@ -5,6 +5,8 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{hyperref}
+\usepackage{units}
+\usepackage{mhchem}
 
 \begin{document}
 	\tableofcontents
@@ -43,6 +45,7 @@
 	\end{table}
 
 	\begin{enumerate}[label=\textbullet]
+		\item G1-Cdk triggers the cell cycle (point of no return)
 		\item G1/S-Cdk initiates the cell cycle in the dormant G1 phase  (yeast: START, mammals: restriction point)
 		\item S-Cdk triggers transition from the G1 to the S phase 
 		\item M-Cdk triggers transition from the G2 to the M phase 
@@ -75,6 +78,9 @@
 		\includegraphics[width=0.8\linewidth]{cyclin_activity_karp.png}
 		\caption{Concentration of the cyclins during the cell cycle (karp). cdc2 = cdk1}
 	\end{figure}
+
+	\subsubsection{Cyclin A}
+	Cyclin A can bind to Cdk2 (replacing Cyclin E), causing the cell to go through with the S phase by initiating DNA replication, and Cdk1, causing transition from the G2 to M phase. Cyclin A/Cdk1 in the late G2 phase activates Cyclin B/Cdk1, which in return causes Cyclin A to be ubiquitylized and eventually degraded. Humans have 2 subforms: Cyclin A1, which is expressed during embryogenesis, and A2, expressed in dividing somatic cells.\footnote{\url{https://en.wikipedia.org/wiki/Cyclin_A}}\\
 	
 	\subsection{Wee1}
 	Wee1 inhibits Cyclin-Cdk complexes by phosphorylation, causing a delay of the M-Phase so that the cell can grow. If Wee1 is defective, the cells transition directly from S- to M-Phase without the growth in the G2 phase, resulting in \textit{wee} little cells :)
@@ -117,5 +123,102 @@
 	
 	\subsection{CAK}
 	CDK-activating kinase (CAK) activates the cyclin-CDK complex.\footnote{\url{https://en.wikipedia.org/wiki/CDK-activating_kinase}}
+	
+	\subsection{Rb}
+	When dephosphorylated, the retinoblastoma protein (Rb) binds E2F transcription factors, causing them to suppress gene expression that would lead to the cell progressing from G1 to the S-phase. Rb and other pocket proteins are mono-phosphorylated by G1-Cdk and thus inactivated.\footnote{\url{https://en.wikipedia.org/wiki/Retinoblastoma_protein}} During M-to-G1 transition, Rb is dephosphorylated again by PP1. Rb is responsible for keeping cells in G0 and delaying the transition from G1 to S-phase and DNA-replication in case of DNA-damage.
+	
+	\section{Math stuff}
+	
+	\subsection{Bimolecular Reaction $A + B \rightarrow C$}
+	%TODO: Identify relevant reaction types (A+B->C, A+B->AB, A+B->AC, ...)
+	Let's look at 2 proteins A and B participating in the bimolecular reaction \footnote{Chapter mostly copied from Wedler, G.; Freund, H.: Lehr- und Arbeitsbuch Physikalische Chemie. 7. Auflage, S. 565ff.}
+	
+	\begin{equation}
+	\ce{A + B <=>[\ce{k_1}][\ce{k_{-1}}] {AB} ->[\ce{k_2}] C.}
+	\end{equation}
+
+	For this we get the speed laws
+	
+	\begin{align}
+		\frac{d[{\ce{AB}}]}{dt} &= \ce{k_1[A][B]} - \ce{k_{-1}[AB]} - \ce{k_2[C]}\\
+		\frac{d\ce{[C]}}{dt} &= \ce{k_2[{AB}]}
+	\end{align}
+	
+	Assuming a quasi-static process, we can set $\frac{d[{\ce{AB}}]}{dt} = 0$: The intermediate product is short-lived and its concentation approximately constant. With this, we get
+	
+	\begin{equation}
+		\frac{d\ce{[C]}}{dt} = \frac{k_1k_2}{k_{-1}+k_2}\ce{[A][B]}.
+	\end{equation}	
+	
+	For the intermediate to be short-lived, there are 2 different cases to look at.
+	
+	\subsubsection{Diffusion-controlled reaction speed}
+	Here, we have $k_2 \gg k_1$ and $k_2 \gg k_{-1}$. In that case, we get
+	
+	\begin{equation}
+		\frac{d\ce{[C]}}{dt} = r \approx k_1\ce{[A][B]}.
+	\end{equation}
+	
+	This is the reaction speed $r$ in units $\frac{mol}{s\cdot m^3}$, which is what we want. To calculate how many B molecules collide with A moculecules each second, we can calculate the flow of B through a sphere of radius $r$ around A using Fick's first law. It gives the flow rate of molecules perpendicular to a given area in $\unit[]{\frac{mol}{m^2\cdot s}}$: 
+	
+	\begin{equation}
+		J_N = -D\frac{dN}{dz}
+	\end{equation}
+
+	We'll replace $z$ with the radius $r$ (which is perpendicular to the surface), take the absolute value and multiply with the surface of the sphere to get number of molecules per second passing through the surface of the sphere:
+	
+	\begin{equation}
+		J_B = 4\pi r^2D_B\frac{dN_B}{dr}
+	\end{equation}
+
+ 
+	
+	\begin{equation}
+		k_1 = 4\pi (D_A + D_B)(r_A + r_B)L. 
+	\end{equation}
+
+	$D$ is the diffusion coefficient, $r$ the radius of the protein and $L = \unit[2.687\cdot10^{25}]{m^{-3}}$ is the Loschmidt constant. If we use the molecule counts $N_A$ and $N_B$ directly instead of the concentrations, $L$ must be omitted.\\
+	$D$ can be calculated using the Stokes-Einstein equation:
+	
+	\begin{equation}
+		D = \frac{k_BT}{6\pi\eta R_0}
+	\end{equation}
+
+	where $k_B = \unit[1.381\cdot10^{-23}]{\frac{J}{K}}$ is the Boltzmann constant, $T$ is the temperature, $\eta$ is the viscosity of the fluid and $R_0$ is the hydrodynamic radius of the protein. We will use the approximation $r \approx R_0$. The literature value for the viscosity of the cytoplasma seems to be about $\unit[2]{cP} = \unit[2]{mPa\cdot s}$.\footnote{Luby-Phelps, K.: Cytoarchitecture and Physical Properties of Cytoplasm: Volume, Viscosity, Diffusion, lntracellular Surface Area} We will not use the Arrhenius equation
+	
+	\begin{equation}
+		\eta = A\exp{\left(-\frac{E_a}{RT}\right)}
+	\end{equation}
+
+	and simply assume $\eta$ to be constant. Putting it all together, we have
+	
+	\begin{equation}
+		k_1 = \frac{2}{3\eta}k_BTL
+	\end{equation}
+
+	\subsubsection{Numbers}
+	
+	We will use 
+	
+	\begin{align*}
+		k_B &= \unit[1.381\cdot10^{-23}]{\frac{kg\cdot m^2}{K\cdot s^2}}\\
+		T &= \unit[310]{K}\\
+		L &= \unit[2.687\cdot10^{25}]{m^{-3}}\\
+		\eta &= \unit[2\cdot10^{-3}]{\frac{kg}{m\cdot s}}\\
+		r_A &= \unit[10\cdot10^{-10}]{m}\\
+		r_B &= \unit[40\cdot10^{-10}]{m}\\
+		\ce{[A]} &= \unit[1]{\frac{mol}{m^3}}\\
+		\ce{[B]} &= \unit[0.1]{\frac{mol}{m^3}}
+	\end{align*}
+	
+	\begin{align}
+		\frac{d\ce{[C]}}{dt} &\approx 4\pi(D_A + D_B)(r_A + r_B)L\ce{[A][B]}\\
+		&= \frac{4\pi k_BT}{6\pi\eta}\left(\frac{1}{r_A}+\frac{1}{r_B}\right)(r_A+r_B)L\ce{[A][B]}\\
+		&= \frac{2k_BTL}{3\eta}\frac{(r_A+r_B)^2}{r_Ar_B}\ce{[A][B]}\\
+		&= 
+	\end{align}
+	
+	\subsubsection*{Reaction-controlled reaction speed}
+	$k_{-1} \gg k_2$
 
 \end{document}

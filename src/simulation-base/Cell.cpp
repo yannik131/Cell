@@ -1,4 +1,5 @@
 #include "Cell.h"
+#include "Phases.h"
 
 Cell::Cell()
 {
@@ -25,7 +26,7 @@ auto Cell::adpCount() const -> int
     return adpCount_;
 }
 
-auto Cell::cellCyclePhase() const -> const Cell::CellCyclePhases
+auto Cell::cellCyclePhase() const -> const CellCyclePhases
 {
     return cellCyclePhase_;
 }

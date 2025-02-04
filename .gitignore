@@ -9,3 +9,4 @@ env
 *.gz
 *.toc
 *.pdf
+CMakeUserPresets.json
