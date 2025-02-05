@@ -49,6 +49,7 @@ gtest_add_tests(TARGET simulation-test)
 # the sfml-spheres target
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
+find_package(nanoflann REQUIRED)
 
 file(GLOB SFML_SPHERES_FILES src/sfml-spheres/*.cpp)
 add_executable(sfml-spheres ${SFML_SPHERES_FILES})
@@ -60,4 +61,5 @@ target_link_libraries(sfml-spheres PRIVATE
     sfml-window 
     sfml-system
     glog::glog
+    nanoflann::nanoflann
 )
