@@ -5,10 +5,14 @@
 
 #include <glog/logging.h>
 
-const sf::Time Simulation::TimePerFrame = sf::milliseconds(1000.f / 60);
+const sf::Time Simulation::TimePerFrame = sf::milliseconds(1000.f / 100);
 
-Simulation::Simulation() : renderWindow_(sf::VideoMode(1000, 1000), "Balls", sf::Style::Close), world_(renderWindow_)
+Simulation::Simulation() : renderWindow_(sf::VideoMode(1000, 1000), "Balls", sf::Style::Fullscreen), world_(renderWindow_)
 {
+    font_.loadFromFile("../resources/Sansation.ttf");
+    statisticsText_.setFont(font_);
+    statisticsText_.setPosition(5.f, 5.f);
+    statisticsText_.setCharacterSize(10);
 }
 
 void Simulation::run()
@@ -27,6 +31,7 @@ void Simulation::run()
             world_.update(TimePerFrame);
         }
         
+        updateStatisticsText(elapsedTime);
         render();
     }
 }
@@ -45,5 +50,23 @@ void Simulation::render()
 {
     renderWindow_.clear(sf::Color::Black);
     world_.draw();
+    renderWindow_.draw(statisticsText_);
     renderWindow_.display();
+}
+
+void Simulation::updateStatisticsText(const sf::Time& dt)
+{
+    statisticsUpdateTime_ += dt;
+    statisticsFrameCount_++;
+    
+    if(statisticsUpdateTime_ < sf::seconds(1.f))
+        return;
+        
+    statisticsText_.setString(
+        "Frames/s: " + std::to_string(statisticsFrameCount_) + "\n" + 
+        "Time/Update: " + std::to_string(statisticsUpdateTime_.asMilliseconds() / statisticsFrameCount_) + "ms"
+    );
+    
+    statisticsUpdateTime_ -= sf::seconds(1.f);
+    statisticsFrameCount_ = 0;
 }
