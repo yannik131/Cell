@@ -22,7 +22,6 @@ private:
 private:
     static const sf::Time TimePerFrame;
     
-    sf::Clock clock_;
     sf::RenderWindow renderWindow_;
     World world_;
 };

@@ -6,7 +6,8 @@
                 "${workspaceFolder}/include/sfml-spheres/",
                 "/home/yannik/.conan2/p/b/gtest4d9f3254921ea/p/include/",
                 "/home/yannik/.conan2/p/b/sfmlf4c260a199de3/p/include/",
-                "/home/yannik/.conan2/p/nanofdf3cf2c8ea57d/p/include"
+                "/home/yannik/.conan2/p/nanofdf3cf2c8ea57d/p/include",
+                "/home/yannik/.conan2/p/b/glogf5a9827f0e737/p/include"
             ],
             "defines": [
                 "GLOG_USE_GLOG_EXPORT"

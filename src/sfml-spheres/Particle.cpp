@@ -1,7 +1,8 @@
 #include "Particle.hpp"
 
-Particle::Particle(float radius, std::size_t pointCount) : sf::CircleShape(radius, pointCount)
+Particle::Particle(float radius, std::size_t pointCount) : sf::CircleShape(radius, pointCount), mass(radius)
 {
+    setOrigin({radius, radius});
 }
 
 void Particle::update(const sf::Time& dt)
@@ -9,10 +10,7 @@ void Particle::update(const sf::Time& dt)
     move(dt.asSeconds() * velocity);
 }
 
-bool Particle::operator<(const Particle& other) const
+sf::Vector2f Particle::getPosition() const
 {
-    if (getPosition().x != other.getPosition().x) {
-        return getPosition().x < other.getPosition().x; // Compare x first
-    }
-    return getPosition().y < other.getPosition().y; // If x is equal, compare y
+    return sf::Transformable::getPosition();
 }

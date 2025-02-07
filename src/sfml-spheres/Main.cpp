@@ -1,10 +1,13 @@
 #include "Simulation.hpp"
+#include "Logging.hpp"
 
 #include <glog/logging.h>
 
 #include <exception>
 
-int main() {
+int main(int argc, char** argv) {
+    initLogging(argc, argv);
+    
     Simulation simulation;
     
     try {

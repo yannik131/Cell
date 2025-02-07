@@ -3,6 +3,8 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <glog/logging.h>
+
 const sf::Time Simulation::TimePerFrame = sf::milliseconds(1000.f / 60);
 
 Simulation::Simulation() : renderWindow_(sf::VideoMode(1000, 1000), "Balls", sf::Style::Close), world_(renderWindow_)
@@ -11,18 +13,20 @@ Simulation::Simulation() : renderWindow_(sf::VideoMode(1000, 1000), "Balls", sf:
 
 void Simulation::run()
 {
-    clock_.restart();
-    sf::Time dt = sf::Time::Zero;
+    sf::Clock clock;
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
     
     while(renderWindow_.isOpen()) {
-        dt += clock_.restart();
+        sf::Time elapsedTime = clock.restart();
+        timeSinceLastUpdate += elapsedTime;
 
-        while(dt > TimePerFrame) {
-            world_.update(dt);
-            dt -= TimePerFrame;
+        while(timeSinceLastUpdate > TimePerFrame) {
+            timeSinceLastUpdate -= TimePerFrame;
+            
+            processEvents();
+            world_.update(TimePerFrame);
         }
         
-        processEvents();
         render();
     }
 }
