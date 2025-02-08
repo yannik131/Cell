@@ -7,6 +7,7 @@
 #include <random>
 #include <set>
 #include <cmath>
+#include <algorithm>
 
 World::World(sf::RenderWindow& renderWindow)
     : renderWindow_(renderWindow)
@@ -37,7 +38,7 @@ void World::buildScene()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution(0, 1);
-    std::uniform_int_distribution<int> velocityDistribution(-200, 200);
+    std::uniform_int_distribution<int> velocityDistribution(-350, 300);
 
     particles_.reserve(ParticleCount);
     std::map<int, int> counts;
@@ -73,14 +74,16 @@ void World::buildScene()
 void World::initializeStartPositions()
 {
     startPositions_.reserve(625);
+    std::random_device rd;
+    std::mt19937 g(rd());
 
     for (int i = 0; i < 25; ++i)
     {
         for (int j = 0; j < 25; ++j)
-            startPositions_.push_back(sf::Vector2f(20 + i * 40, 20 + j * 40));
+            startPositions_.push_back(sf::Vector2f(20 + i * 100, 20 + j * 50));
     }
 
-    std::random_shuffle(startPositions_.begin(), startPositions_.end());
+    std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 
 void World::handleWorldBoundCollision(Particle& particle)
@@ -155,8 +158,10 @@ CollisionSet World::findCollidingParticles()
                 std::pow(position.x - otherPosition.x, 2) + std::pow(position.y - otherPosition.y, 2);
             const double radiusSum = std::pow(particle.getRadius() + otherParticle.getRadius(), 2);
 
-            if (distance <= radiusSum)
+            if (distance <= radiusSum) {
                 collidingParticles.insert(std::make_pair(&particle, &otherParticle));
+                break;
+            }
         }
     }
 

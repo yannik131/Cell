@@ -26,8 +26,8 @@
             "configuration": "Debug",
             "jobs": 4,
             "targets": [
-                "sfml-spheres",
-                "simulation-test"
+                "libcell",
+                "qt-gui"
             ]
         },
         {
@@ -37,8 +37,8 @@
             "configuration": "Release",
             "jobs": 4,
             "targets": [
-                "sfml-spheres",
-                "simulation-test"
+                "libcell",
+                "qt-gui"
             ]
         }
     ]

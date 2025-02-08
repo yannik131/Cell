@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "float.h": "c"
-    }
+        "float.h": "c",
+        "format": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp"
+    },
+    "terminal.integrated.shellArgs.windows": ["-noexit", "chcp 65001"]
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.20)
 cmake_policy(SET CMP0091 NEW) # conan does not set this but cmake wants it
 cmake_policy(SET CMP0057 NEW) # again..
 project(Cell)
@@ -16,50 +16,47 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# c++17 for std::filesystem
+
+if(MSVC)
+    add_compile_options(/W4 /wd4244)
+else()
+    add_compile_options(-Wall)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-# the simulation-base target
-file(GLOB LIB_SRC_FILES src/simulation-base/*.cpp)
-add_library(simulation-base STATIC ${LIB_SRC_FILES})
-
-target_include_directories(simulation-base PUBLIC 
-  ${CMAKE_SOURCE_DIR}/include/simulation-base/
-)
-
-# the test target
-enable_testing()
-
-find_package(GTest REQUIRED)
-
-file(GLOB TEST_SRC_FILES test/simulation-base/*.cpp)
-add_executable(simulation-test ${TEST_SRC_FILES})
-
-target_link_libraries(simulation-test
-  simulation-base
-  GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_add_tests(TARGET simulation-test)
-
-# the sfml-spheres target
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
+find_package(Qt6 REQUIRED)
 
-file(GLOB SFML_SPHERES_FILES src/sfml-spheres/*.cpp)
-add_executable(sfml-spheres ${SFML_SPHERES_FILES})
+add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
-target_include_directories(sfml-spheres PUBLIC ${CMAKE_SOURCE_DIR}/include/sfml-spheres)
+file(GLOB LIBCELL_SRC src/libcell/*.cpp)
+add_library(libcell ${LIBCELL_SRC})
 
-target_link_libraries(sfml-spheres PRIVATE 
+target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/include/libcell)
+
+target_link_libraries(libcell PRIVATE 
     sfml-graphics 
     sfml-window 
     sfml-system
-    glog::glog
     nanoflann::nanoflann
 )
+
+# the gui target
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+
+file(GLOB QT_GUI_SRC src/qt-gui/*.cpp src/gui/*.ui include/qt-gui/*.h)
+
+#the header files have to be added here as well for Q_OBJECT to work
+add_executable(qt-gui WIN32
+  ${QT_GUI_SRC} 
+)
+
+target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
+
+target_link_libraries(qt-gui libcell Qt6::Core Qt6::Widgets Qt6::QWindowsIntegrationPlugin)

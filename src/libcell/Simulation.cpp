@@ -7,7 +7,7 @@
 
 const sf::Time Simulation::TimePerFrame = sf::milliseconds(1000.f / 100);
 
-Simulation::Simulation() : renderWindow_(sf::VideoMode(1000, 1000), "Balls", sf::Style::Fullscreen), world_(renderWindow_)
+Simulation::Simulation() : renderWindow_(sf::VideoMode(2560, 1440), "Balls", sf::Style::Fullscreen), world_(renderWindow_)
 {
     font_.loadFromFile("../resources/Sansation.ttf");
     statisticsText_.setFont(font_);
