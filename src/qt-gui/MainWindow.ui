@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1160</width>
-    <height>808</height>
+    <width>1762</width>
+    <height>1219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,7 @@
      <widget class="QWidget" name="simulationWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QWidget" name="simulationWindowWidget" native="true"/>
+        <widget class="SimulationCanvas" name="simulationCanvas" native="true"/>
        </item>
        <item>
         <widget class="QWidget" name="simulationSettingsWidget" native="true">
@@ -60,13 +60,21 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1160</width>
+     <width>1762</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SimulationCanvas</class>
+   <extends>QWidget</extends>
+   <header>SimulationCanvas.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

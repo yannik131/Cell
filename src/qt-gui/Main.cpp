@@ -1,13 +1,12 @@
 #include "MainWindow.hpp"
+#include "Logging.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
 
-#include <QtPlugin>
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-
 int main(int argc, char* argv[])
 {
+    initLogging(argc, argv);
     QApplication app(argc, argv);
 
     try

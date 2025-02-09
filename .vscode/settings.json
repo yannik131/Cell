@@ -9,7 +9,12 @@
         "functional": "cpp",
         "future": "cpp",
         "memory": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "qtimer": "cpp"
     },
-    "terminal.integrated.shellArgs.windows": ["-noexit", "chcp 65001"]
+    "terminal.integrated.shellArgs.windows": [
+        "-noexit",
+        "chcp 65001"
+    ],
+    "git.ignoreLimitWarning": true
 }

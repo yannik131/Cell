@@ -7,33 +7,17 @@
 
 const sf::Time Simulation::TimePerFrame = sf::milliseconds(1000.f / 100);
 
-Simulation::Simulation() : renderWindow_(sf::VideoMode(2560, 1440), "Balls", sf::Style::Fullscreen), world_(renderWindow_)
+Simulation::Simulation(sf::RenderWindow& renderWindow) : renderWindow_(renderWindow), world_(renderWindow_)
 {
-    font_.loadFromFile("../resources/Sansation.ttf");
+    font_.loadFromFile("../../resources/Sansation.ttf");
     statisticsText_.setFont(font_);
     statisticsText_.setPosition(5.f, 5.f);
     statisticsText_.setCharacterSize(10);
 }
 
-void Simulation::run()
+void Simulation::update(const sf::Time& dt)
 {
-    sf::Clock clock;
-    sf::Time timeSinceLastUpdate = sf::Time::Zero;
-    
-    while(renderWindow_.isOpen()) {
-        sf::Time elapsedTime = clock.restart();
-        timeSinceLastUpdate += elapsedTime;
-
-        while(timeSinceLastUpdate > TimePerFrame) {
-            timeSinceLastUpdate -= TimePerFrame;
-            
-            processEvents();
-            world_.update(TimePerFrame);
-        }
-        
-        updateStatisticsText(elapsedTime);
-        render();
-    }
+    world_.update(dt);
 }
 
 void Simulation::processEvents()
@@ -51,7 +35,6 @@ void Simulation::render()
     renderWindow_.clear(sf::Color::Black);
     world_.draw();
     renderWindow_.draw(statisticsText_);
-    renderWindow_.display();
 }
 
 void Simulation::updateStatisticsText(const sf::Time& dt)

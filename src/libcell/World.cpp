@@ -80,7 +80,7 @@ void World::initializeStartPositions()
     for (int i = 0; i < 25; ++i)
     {
         for (int j = 0; j < 25; ++j)
-            startPositions_.push_back(sf::Vector2f(20 + i * 100, 20 + j * 50));
+            startPositions_.push_back(sf::Vector2f(20 + i * 20, 20 + j * 20));
     }
 
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);

@@ -1,18 +1,22 @@
-#!/bin/bash
+# Change to the script directory and then to the parent directory
+Set-Location (Split-Path -Path $MyInvocation.MyCommand.Path -Parent)
+Set-Location ..
 
-cd "$(dirname "$0")"
-cd ..
+# Check if the first argument is -c
+if ($args.Count -gt 0 -and $args[0] -eq "-c") {
+    Write-Host "Checking with clang-format..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/, test/ | 
+        ForEach-Object { & clang-format --dry-run --Werror $_.FullName }
 
-if [[ "$1" == "-c" ]]; then
-    echo "Checking with clang-format..."
-    find src/ include/ test/ -name '*.h' -o -name '*.hpp' -o -name '*.inl' -o -name '*.cpp' | xargs clang-format --dry-run --Werror
+    Write-Host "Checking with clang-tidy..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/ | 
+        ForEach-Object { & clang-tidy -p=build_debug $_.FullName }
+} else {
+    Write-Host "Formatting files..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/, test/ | 
+        ForEach-Object { & clang-format -i $_.FullName }
 
-    echo "Checking with clang-tidy..."
-    find src/ include/ -name '*.h' -o -name '*.hpp' -o -name '*.inl' -o -name '*.cpp' | xargs clang-tidy -p=build_debug
-else
-    echo "Formatting files..."
-    find src/ include/ test/ -name '*.h' -o -name '*.hpp' -o -name '*.inl' -o -name '*.cpp' | xargs clang-format -i
-    
-    echo "Letting clang-tidy try to fix stuff..."
-    find src/ include/ -name '*.h' -o -name '*.hpp' -o -name '*.inl' -o -name '*.cpp' | xargs clang-tidy -p=build_debug --fix
-fi
+    Write-Host "Letting clang-tidy try to fix stuff..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/ | 
+        ForEach-Object { & clang-tidy -p=build_debug --fix $_.FullName }
+}

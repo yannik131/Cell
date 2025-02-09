@@ -10,22 +10,23 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
 
+#include <memory>
+
 class Simulation : private sf::NonCopyable 
 {
 public:
-    Simulation();
+    explicit Simulation(sf::RenderWindow& renderWindow);
     
-    void run();
+    void update(const sf::Time& dt);
+    void updateStatisticsText(const sf::Time& dt);
     
-private:
     void processEvents();
     void render();
-    void updateStatisticsText(const sf::Time& dt);
     
 private:
     static const sf::Time TimePerFrame;
     
-    sf::RenderWindow renderWindow_;
+    sf::RenderWindow& renderWindow_;
     World world_;
     sf::Font font_;
     sf::Text statisticsText_;
