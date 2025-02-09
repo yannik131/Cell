@@ -3,7 +3,13 @@
         "float.h": "c",
         "format": "cpp",
         "vector": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "any": "cpp",
+        "exception": "cpp",
+        "functional": "cpp",
+        "future": "cpp",
+        "memory": "cpp",
+        "optional": "cpp"
     },
     "terminal.integrated.shellArgs.windows": ["-noexit", "chcp 65001"]
 }

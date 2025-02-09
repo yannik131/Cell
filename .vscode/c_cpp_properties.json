@@ -2,8 +2,9 @@
     "configurations": [
         {
             "includePath": [
-                "${workspaceFolder}/include/simulation-base/",
-                "${workspaceFolder}/include/sfml-spheres/",
+                "${workspaceFolder}/include/libcell/",
+                "${workspaceFolder}/include/qt-gui/",
+                "${workspaceFolder}/build_release/qt-gui_autogen/include_Release",
                 "/home/yannik/.conan2/p/b/gtest4d9f3254921ea/p/include/",
                 "/home/yannik/.conan2/p/b/sfmlf4c260a199de3/p/include/",
                 "/home/yannik/.conan2/p/nanofdf3cf2c8ea57d/p/include",
@@ -12,7 +13,20 @@
                 "C:/Users/yanni/.conan2/p/sfml2029fced886b7/p/include",
                 "C:/Users/yanni/.conan2/p/nanofdf3cf2c8ea57d/p/include",
                 "C:/Users/yanni/.conan2/p/glog3c498cdf1dce0/p/include",
-                "C:/Users/yanni/.conan2/p/gflag23ec506c11924/p/include"
+                "C:/Users/yanni/.conan2/p/gflag23ec506c11924/p/include",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtOpenGLWidgets",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtPrintSupport",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtOpenGL",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtWidgets",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtXml",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtConcurrent",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtTest",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtSql",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtNetwork",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtGui",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/mkspecs/win32-msvc",
+                "C:/Users/yanni/.conan2/p/b/qt0bec94fc1ec9b/p/include/QtCore"
             ],
             "defines": [
                 "GLOG_USE_GLOG_EXPORT"
