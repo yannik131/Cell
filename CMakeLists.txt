@@ -60,4 +60,4 @@ add_executable(qt-gui WIN32
 
 target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
 
-target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::QWindowsIntegrationPlugin)
+target_link_libraries(qt-gui Qt6::Core Qt6::Widgets Qt6::QWindowsIntegrationPlugin)

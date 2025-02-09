@@ -1,4 +1,3 @@
-#include "Logging.hpp"
 #include "MainWindow.hpp"
 
 #include <QApplication>
@@ -9,7 +8,6 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 int main(int argc, char* argv[])
 {
-    initLogging(argc, argv);
     QApplication app(argc, argv);
 
     try

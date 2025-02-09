@@ -1,0 +1,5 @@
+#ifndef STATISTICSPLOT_H
+#define STATISTICSPLOT_H
+
+
+#endif /* STATISTICSPLOT_H */
