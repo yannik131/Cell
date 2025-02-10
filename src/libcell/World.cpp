@@ -14,6 +14,9 @@ World::World(sf::RenderWindow& renderWindow)
 {
     initializeStartPositions();
     buildScene();
+    maxRadius_ = std::max_element(RadiusDistribution_.begin(), RadiusDistribution_.end(),
+                                     [](const auto& a, const auto& b) { return a.second < b.second; })
+                        ->second;
 }
 
 void World::update(const sf::Time& dt)
@@ -129,7 +132,7 @@ void World::handleWorldBoundCollision(Particle& particle)
     
 }
 
-CollisionSet World::findCollidingParticles()
+std::set<std::pair<Particle*, Particle*>> World::findCollidingParticles()
 {
     NanoflannAdapter adapter(particles_);
     typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>, NanoflannAdapter,
@@ -137,15 +140,12 @@ CollisionSet World::findCollidingParticles()
         KDTree;
     KDTree kdtree(2, adapter);
 
-    CollisionSet collidingParticles;
-    int maxRadius = std::max_element(RadiusDistribution_.begin(), RadiusDistribution_.end(),
-                                     [](const auto& a, const auto& b) { return a.second < b.second; })
-                        ->second;
+    std::set<std::pair<Particle*, Particle*>> collidingParticles;
 
     for (auto& particle : particles_)
     {
         std::vector<nanoflann::ResultItem<uint32_t, float>> results;
-        const float maxCollisionDistance = particle.getRadius() + maxRadius;
+        const float maxCollisionDistance = particle.getRadius() + maxRadius_;
         const auto& position = particle.getPosition();
 
         kdtree.radiusSearch(&position.x, maxCollisionDistance * maxCollisionDistance, results);
@@ -153,13 +153,13 @@ CollisionSet World::findCollidingParticles()
         for (size_t i = 1; i < results.size(); ++i)
         {
             auto& otherParticle = particles_[results[i].first];
-            const auto& otherPosition = otherParticle.getPosition();
-            const double distance =
-                std::pow(position.x - otherPosition.x, 2) + std::pow(position.y - otherPosition.y, 2);
-            const double radiusSum = std::pow(particle.getRadius() + otherParticle.getRadius(), 2);
+            const float radiusSum = particle.getRadius() + otherParticle.getRadius();
 
-            if (distance <= radiusSum) {
-                collidingParticles.insert(std::make_pair(&particle, &otherParticle));
+            if (results[i].second <= radiusSum * radiusSum) {
+                auto p1 = &particle;
+                auto p2 = &otherParticle;
+                if(p2 < p1) std::swap(p1, p2);
+                collidingParticles.insert(std::make_pair(p1, p2));
                 break;
             }
         }
@@ -168,8 +168,9 @@ CollisionSet World::findCollidingParticles()
     return collidingParticles;
 }
 
-void World::handleParticleCollisions(const CollisionSet& collidingParticles, const sf::Time& dt)
+void World::handleParticleCollisions(const std::set<std::pair<Particle*, Particle*>>& collidingParticles, const sf::Time& dt)
 {
+    //DeepSeek-generated 
     for (const auto& [p1, p2] : collidingParticles)
     {
         auto pos1 = p1->getPosition();
@@ -178,52 +179,51 @@ void World::handleParticleCollisions(const CollisionSet& collidingParticles, con
         auto& v2 = p2->velocity;
         const auto& m1 = p1->mass;
         const auto& m2 = p2->mass;
-        constexpr float PI = 3.14159265f;
+        const auto& r1 = p1->getRadius();
+        const auto& r2 = p2->getRadius();
 
-        float phi;
-        if (pos1.x == pos2.x)
-            // Spezialfall pos1.x == pos2.x (die Kugeln befinden sich senkrecht übereinander)
-            phi = pos2.y > pos1.y ? PI / 2 : -PI / 2;
-        else
-        {
-            // Hier muss pos1.x <> pos2.x sein!
-            phi = std::atan((pos2.y - pos1.y) / (pos2.x - pos1.x));
-        }
+        // Normalenvektor der Kollision
+        sf::Vector2f normal = pos2 - pos1;
+        float distance = std::sqrt(normal.x * normal.x + normal.y * normal.y);
+        normal /= distance;
 
-        // Rechenterme, die in den Formeln mehrfach auftreten, werden erst einmal in Variablen gespeichert
-        const float sinphi = std::sin(phi);
-        const float cosphi = std::cos(phi);
-        const float v1xsinphi = v1.x * sinphi;
-        const float v1xcosphi = v1.x * cosphi;
-        const float v1ysinphi = v1.y * sinphi;
-        const float v1ycosphi = v1.y * cosphi;
-        const float v2xsinphi = v2.x * sinphi;
-        const float v2xcosphi = v2.x * cosphi;
-        const float v2ysinphi = v2.y * sinphi;
-        const float v2ycosphi = v2.y * cosphi;
-        const float v1zaehler = (m1 - m2) * (v1xcosphi + v1ysinphi) + 2 * m2 * (v2xcosphi + v2ysinphi);
-        const float v2zaehler = (m2 - m1) * (v2xcosphi + v2ysinphi) + 2 * m1 * (v1xcosphi + v1ysinphi);
-        const float msum = m1 + m2;
+        // Tangentialvektor der Kollision
+        sf::Vector2f tangent(-normal.y, normal.x);
 
-        // Berechnung der neuen Geschwindigkeiten
-        // (Die Bezeichnungen sind in Anlehnung an die Formeln gewählt, die in der ausführlichen
-        // Herleitung - siehe PDF-Datei - gewählt wurden)
-        v1.x = (v1xsinphi - v1ycosphi) * sinphi + v1zaehler * cosphi / msum;
-        v1.y = (-v1xsinphi + v1ycosphi) * cosphi + v1zaehler * sinphi / msum;
-        v2.x = (v2xsinphi - v2ycosphi) * sinphi + v2zaehler * cosphi / msum;
-        v2.y = (-v2xsinphi + v2ycosphi) * cosphi + v2zaehler * sinphi / msum;
+        // Relative Geschwindigkeit
+        sf::Vector2f relativeVelocity = v2 - v1;
+        float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
+        float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
 
-        // Wenn sich zwei Kugeln überlappen, müssen sie zuerst wieder getrennt werden, bevor es weiter geht.
-        // Sonst kann es vorkommen, dass sie gar nicht mehr auseinander kommen, weil beim nächsten Schritt
-        // wieder eine Überlappung (ein Stoß) registriert wird und die Richtung der Geschwindigkeiten
-        // erneut geändert wird
-        while ((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y) <= (p1->getRadius() + p2->getRadius()) * (p1->getRadius() + p2->getRadius()))
-        {
-            p1->move(v1 * dt.asSeconds());
-            p2->move(v2 * dt.asSeconds());
-            
-            pos1 = p1->getPosition();
-            pos2 = p2->getPosition();
-        }
+        // Wenn sich die Partikel voneinander entfernen, keine Kollision
+        if (velocityAlongNormal > 0)
+            continue;
+
+        // Restitutionskoeffizient (Elastizität der Kollision)
+        const float e = 1.f; // Vollständig elastisch
+
+        // Impulsaustausch in der Normalenrichtung
+        float jNormal = -(1 + e) * velocityAlongNormal;
+        jNormal /= (1 / m1 + 1 / m2);
+
+        // Impulsaustausch in der Tangentialrichtung (Reibung berücksichtigen)
+        const float friction = 0.01f; // Reibungskoeffizient
+        float jTangent = -friction * velocityAlongTangent;
+        jTangent /= (1 / m1 + 1 / m2);
+
+        // Gesamtimpuls
+        sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
+
+        // Anwenden des Impulses
+        v1 -= impulse / m1;
+        v2 += impulse / m2;
+
+        // Positionen korrigieren, um Überlappungen zu vermeiden
+        float overlap = (r1 + r2) - distance;
+        pos1 -= overlap * normal / 2.0f;
+        pos2 += overlap * normal / 2.0f;
+
+        p1->setPosition(pos1);
+        p2->setPosition(pos2);
     }
 }

@@ -22,6 +22,8 @@ private:
     Simulation simulation_;
     sf::Clock clock_;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
+    const sf::Time TimePerFrameTarget = sf::milliseconds(2);
+    sf::Time timePerFrame_ = sf::milliseconds(30);
 };
 
 #endif /* SIMULATIONCANVAS_H */

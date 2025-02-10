@@ -8,20 +8,20 @@ SimulationCanvas::SimulationCanvas(QWidget* parent) : QSFMLCanvas(parent), simul
 
 void SimulationCanvas::onInit()
 {
-    //setSize(sf::Vector2u(QWidget::width(), QWidget::height()));
 }
 
 void SimulationCanvas::onUpdate()
 {
-    const sf::Time TimePerFrame = sf::milliseconds(1000.f / 60);
-
+    if(timePerFrame_ > TimePerFrameTarget)
+        timePerFrame_ -= sf::microseconds(5);
+    
     sf::Time elapsedTime = clock_.restart();
     timeSinceLastUpdate += elapsedTime;
 
-    while(timeSinceLastUpdate > TimePerFrame) {
-        timeSinceLastUpdate -= TimePerFrame;
+    while(timeSinceLastUpdate > timePerFrame_) {
+        timeSinceLastUpdate -= timePerFrame_;
         simulation_.processEvents();
-        simulation_.update(TimePerFrame);
+        simulation_.update(timePerFrame_);
     }
 
     simulation_.updateStatisticsText(elapsedTime);
