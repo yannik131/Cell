@@ -8,7 +8,7 @@
 class QSFMLCanvas : public QWidget, public sf::RenderWindow
 {
 public:
-    QSFMLCanvas(QWidget* parent, unsigned int frameTime = 0);
+    QSFMLCanvas(QWidget* parent, unsigned int frameTime = 5);
 
     virtual ~QSFMLCanvas() = default;
     void resizeEvent(QResizeEvent* event);

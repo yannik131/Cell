@@ -19,7 +19,7 @@
      <widget class="QWidget" name="plottingWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QWidget" name="plotWidget" native="true"/>
+        <widget class="AnalysisPlot" name="plotWidget" native="true"/>
        </item>
        <item>
         <widget class="QWidget" name="plotOptionsWidget" native="true">
@@ -72,6 +72,12 @@
    <class>SimulationCanvas</class>
    <extends>QWidget</extends>
    <header>SimulationCanvas.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AnalysisPlot</class>
+   <extends>QWidget</extends>
+   <header>AnalysisPlot.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

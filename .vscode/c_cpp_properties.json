@@ -2,6 +2,7 @@
     "configurations": [
         {
             "includePath": [
+                "${workspaceFolder}/contrib/qcustomplot/",
                 "${workspaceFolder}/include/libcell/",
                 "${workspaceFolder}/include/qt-gui/",
                 "${workspaceFolder}/build_release/qt-gui_autogen/include_Release",
@@ -27,7 +28,6 @@
             "defines": [
                 "GLOG_USE_GLOG_EXPORT"
             ],
-            "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17"
         }

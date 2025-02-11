@@ -12,6 +12,7 @@ QSFMLCanvas::QSFMLCanvas(QWidget* parent, unsigned int frameTime) : QWidget(pare
 
     timer_.setInterval(frameTime);
     resize({851, 1036});
+    setSize(sf::Vector2u(851, 1036));
 }
 
 void QSFMLCanvas::resizeEvent(QResizeEvent*)

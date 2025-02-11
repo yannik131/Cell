@@ -36,12 +36,20 @@ void World::draw()
         renderWindow_.draw(particle);
 }
 
+int World::getAndResetCollisionCount()
+{
+    int tmp = collisionCount_;
+    collisionCount_ = 0;
+
+    return tmp;
+}
+
 void World::buildScene()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> distribution(0, 1);
-    std::uniform_int_distribution<int> velocityDistribution(-350, 300);
+    std::uniform_int_distribution<int> velocityDistribution(-600, 600);
 
     particles_.reserve(ParticleCount);
     std::map<int, int> counts;
@@ -76,16 +84,24 @@ void World::buildScene()
 
 void World::initializeStartPositions()
 {
-    startPositions_.reserve(625);
-    std::random_device rd;
-    std::mt19937 g(rd());
+    startPositions_.reserve(ParticleCount);
 
-    for (int i = 0; i < 25; ++i)
+    //TODO const auto& windowSize = renderWindow_.getSize();
+    const sf::Vector2u windowSize(851, 1036);
+
+    int cols = static_cast<int>(std::sqrt(ParticleCount) + 1);
+    int rows = ParticleCount / cols + 1;
+    int xpad = windowSize.x / cols;
+    int ypad = windowSize.y / rows;
+
+    for (int i = 0; i < cols; ++i)
     {
-        for (int j = 0; j < 25; ++j)
-            startPositions_.push_back(sf::Vector2f(20 + i * 20, 20 + j * 20));
+        for (int j = 0; j < rows; ++j)
+            startPositions_.push_back(sf::Vector2f(xpad + i * xpad, ypad + j * ypad));
     }
 
+    std::random_device rd;
+    std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 
@@ -207,7 +223,7 @@ void World::handleParticleCollisions(const std::set<std::pair<Particle*, Particl
         jNormal /= (1 / m1 + 1 / m2);
 
         // Impulsaustausch in der Tangentialrichtung (Reibung berücksichtigen)
-        const float friction = 0.01f; // Reibungskoeffizient
+        const float friction = 0.f; // Reibungskoeffizient
         float jTangent = -friction * velocityAlongTangent;
         jTangent /= (1 / m1 + 1 / m2);
 
@@ -225,5 +241,7 @@ void World::handleParticleCollisions(const std::set<std::pair<Particle*, Particl
 
         p1->setPosition(pos1);
         p2->setPosition(pos2);
+
+        ++collisionCount_;
     }
 }

@@ -29,7 +29,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
-find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets PrintSupport REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
@@ -45,6 +45,12 @@ target_link_libraries(libcell PRIVATE
     nanoflann::nanoflann
 )
 
+# qcustomplot
+add_library(qcustomplot ${CMAKE_SOURCE_DIR}/contrib/qcustomplot/qcustomplot.h ${CMAKE_SOURCE_DIR}/contrib/qcustomplot/qcustomplot.cpp)
+set_target_properties(qcustomplot PROPERTIES AUTOMOC ON)
+target_include_directories(qcustomplot PUBLIC ${CMAKE_SOURCE_DIR}/contrib/qcustomplot/)
+target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
+
 # the gui target
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -58,4 +64,4 @@ add_executable(qt-gui
 
 target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
 
-target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets)
+target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets qcustomplot)

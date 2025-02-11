@@ -17,6 +17,8 @@ public:
     
     void update(const sf::Time& dt);
     void draw();
+
+    int getAndResetCollisionCount();
     
 private:
     void buildScene();
@@ -32,11 +34,12 @@ private:
 private:
     const std::map<float, int> RadiusDistribution_ = {{0.5, 5}, {0.7, 10}, {0.9, 12}, {1, 15}};
     const std::map<int, sf::Color> Colors_ = {{5, sf::Color::Green}, {10, sf::Color::Red}, {12, sf::Color::Blue}, {15, sf::Color::Yellow}};
-    const int ParticleCount = 100;
+    const int ParticleCount = 50;
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Particle> particles_;
     sf::RenderWindow& renderWindow_;
     int maxRadius_;
+    int collisionCount_ = 0;
 };
 
 #endif /* WORLD_H */
