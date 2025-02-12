@@ -1,6 +1,6 @@
-#include "QSFMLCanvas.hpp"
+#include "QSFMLWidget.hpp"
 
-QSFMLCanvas::QSFMLCanvas(QWidget* parent, unsigned int frameTime) : QWidget(parent), initialized_(false)
+QSFMLWidget::QSFMLWidget(QWidget* parent) : QWidget(parent), initialized_(false)
 {
     // Setup some states to allow direct rendering into the widget
     setAttribute(Qt::WA_PaintOnScreen);
@@ -10,37 +10,26 @@ QSFMLCanvas::QSFMLCanvas(QWidget* parent, unsigned int frameTime) : QWidget(pare
     // Set strong focus to enable keyboard events to be received
     setFocusPolicy(Qt::StrongFocus);
 
-    timer_.setInterval(frameTime);
     resize({851, 1036});
     setSize(sf::Vector2u(851, 1036));
 }
 
-void QSFMLCanvas::resizeEvent(QResizeEvent*)
+void QSFMLWidget::resizeEvent(QResizeEvent*)
 {
     setSize(sf::Vector2u(QWidget::width(), QWidget::height()));
 }
 
-QPaintEngine* QSFMLCanvas::paintEngine() const
+QPaintEngine* QSFMLWidget::paintEngine() const
 {
     return 0;
 }
 
-void QSFMLCanvas::showEvent(QShowEvent*)
+void QSFMLWidget::showEvent(QShowEvent*)
 {
     if(initialized_)
         return;
 
     sf::RenderWindow::create((sf::WindowHandle) winId());
-    onInit();
-
-    connect(&timer_, SIGNAL(timeout()), this, SLOT(repaint()));
-    timer_.start();
 
     initialized_ = true;
-}
-
-void QSFMLCanvas::paintEvent(QPaintEvent*)
-{
-    onUpdate();
-    display();
 }

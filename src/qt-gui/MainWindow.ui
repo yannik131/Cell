@@ -35,10 +35,10 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QWidget" name="simulationWidget" native="true">
+     <widget class="QWidget" name="simulationOverviewWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="SimulationCanvas" name="simulationCanvas" native="true"/>
+        <widget class="SimulationWidget" name="simulationWidget" native="true"/>
        </item>
        <item>
         <widget class="QWidget" name="simulationSettingsWidget" native="true">
@@ -69,9 +69,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>SimulationCanvas</class>
+   <class>SimulationWidget</class>
    <extends>QWidget</extends>
-   <header>SimulationCanvas.hpp</header>
+   <header>SimulationWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>

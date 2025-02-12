@@ -1,15 +1,15 @@
-#ifndef NANOFLANNADAPTER_H
-#define NANOFLANNADAPTER_H
+#ifndef NANOFLANNADAPTER_HPP
+#define NANOFLANNADAPTER_HPP
 
-#include "Particle.hpp"
+#include "Disc.hpp"
 
 #include <nanoflann.hpp>
 
 struct NanoflannAdapter
 {
-    const std::vector<Particle>& elements;
+    const std::vector<Disc>& elements;
 
-    NanoflannAdapter(const std::vector<Particle>& elems)
+    NanoflannAdapter(const std::vector<Disc>& elems)
         : elements(elems)
     {
     }
@@ -22,9 +22,9 @@ struct NanoflannAdapter
     inline double kdtree_get_pt(const size_t idx, int dim) const
     {
         if (dim == 0)
-            return elements[idx].getPosition().x;
+            return elements[idx].position_.x;
         else
-            return elements[idx].getPosition().y;
+            return elements[idx].position_.y;
     }
 
     template <class BBOX> bool kdtree_get_bbox(BBOX&) const
@@ -34,4 +34,4 @@ struct NanoflannAdapter
 };
 
 
-#endif /* NANOFLANNADAPTER_H */
+#endif /* NANOFLANNADAPTER_HPP */

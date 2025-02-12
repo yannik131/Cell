@@ -1,8 +1,12 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include "FrameDTO.hpp"
+#include "Simulation.hpp"
+
 #include <QMainWindow>
 #include <QTimer>
+#include <QThread>
 
 namespace Ui 
 {
@@ -18,10 +22,14 @@ public:
 
     void updatePlot();
 
+private slots:
+    void onCollisionData(int collisions);
+
 private:
     Ui::MainWindow* ui;
-    QTimer retrieveCollisionsTimer_;
     int updateCount_ = 0;
+    QThread *simulationThread_;
+    Simulation* simulation_;
 };
 
 #endif /* MAINWINDOW_HPP */

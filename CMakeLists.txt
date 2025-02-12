@@ -29,7 +29,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
-find_package(Qt6 COMPONENTS Core Widgets PrintSupport REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
@@ -64,4 +64,4 @@ add_executable(qt-gui
 
 target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
 
-target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets qcustomplot)
+target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)

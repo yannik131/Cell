@@ -9,8 +9,7 @@
 #include <cmath>
 #include <algorithm>
 
-World::World(sf::RenderWindow& renderWindow)
-    : renderWindow_(renderWindow)
+World::World() : bounds_(sf::Vector2f(851, 1036))
 {
     initializeStartPositions();
     buildScene();
@@ -21,19 +20,13 @@ World::World(sf::RenderWindow& renderWindow)
 
 void World::update(const sf::Time& dt)
 {
-    for (auto& particle : particles_)
+    for (auto& disc : discs_)
     {
-        particle.update(dt);
-        const auto& collidingParticles = findCollidingParticles();
-        handleParticleCollisions(collidingParticles, dt);
-        handleWorldBoundCollision(particle);
+        disc.position_ += disc.velocity_ * dt.asSeconds();
+        const auto& collidingDiscs = findCollidingDiscs();
+        handleDiscCollisions(collidingDiscs, dt);
+        handleWorldBoundCollision(disc);
     }
-}
-
-void World::draw()
-{
-    for (const auto& particle : particles_)
-        renderWindow_.draw(particle);
 }
 
 int World::getAndResetCollisionCount()
@@ -44,6 +37,11 @@ int World::getAndResetCollisionCount()
     return tmp;
 }
 
+const std::vector<Disc>& World::discs() const
+{
+    return discs_;
+}
+
 void World::buildScene()
 {
     std::random_device rd;
@@ -51,10 +49,10 @@ void World::buildScene()
     std::uniform_real_distribution<float> distribution(0, 1);
     std::uniform_int_distribution<int> velocityDistribution(-600, 600);
 
-    particles_.reserve(ParticleCount);
+    discs_.reserve(DiscCount);
     std::map<int, int> counts;
 
-    for (int i = 0; i < ParticleCount; ++i)
+    for (int i = 0; i < DiscCount; ++i)
     {
         float randomNumber = distribution(gen);
 
@@ -63,12 +61,11 @@ void World::buildScene()
             if (randomNumber < probability)
             {
                 counts[radius]++;
-                Particle newParticle(radius);
-                newParticle.setPosition(startPositions_.back());
-                newParticle.velocity = sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen));
-                newParticle.setFillColor(Colors_.at(radius));
+                Disc newDisc(radius);
+                newDisc.position_ = startPositions_.back();
+                newDisc.velocity_ = sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen));
 
-                particles_.push_back(newParticle);
+                discs_.push_back(newDisc);
                 startPositions_.pop_back();
                 
                 break;
@@ -78,21 +75,18 @@ void World::buildScene()
     
     LOG(INFO) << "Radius distribution";
     for(const auto& [radius, count] : counts) {
-        LOG(INFO) << radius << ": " << count << "/" << ParticleCount << " (" << count / static_cast<float>(ParticleCount) * 100 << "%)\n";
+        LOG(INFO) << radius << ": " << count << "/" << DiscCount << " (" << count / static_cast<float>(DiscCount) * 100 << "%)\n";
     }
 }
 
 void World::initializeStartPositions()
 {
-    startPositions_.reserve(ParticleCount);
+    startPositions_.reserve(DiscCount);
 
-    //TODO const auto& windowSize = renderWindow_.getSize();
-    const sf::Vector2u windowSize(851, 1036);
-
-    int cols = static_cast<int>(std::sqrt(ParticleCount) + 1);
-    int rows = ParticleCount / cols + 1;
-    int xpad = windowSize.x / cols;
-    int ypad = windowSize.y / rows;
+    int cols = static_cast<int>(std::sqrt(DiscCount) + 1);
+    int rows = DiscCount / cols + 1;
+    int xpad = bounds_.x / cols;
+    int ypad = bounds_.y / rows;
 
     for (int i = 0; i < cols; ++i)
     {
@@ -105,98 +99,98 @@ void World::initializeStartPositions()
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 
-void World::handleWorldBoundCollision(Particle& particle)
+void World::handleWorldBoundCollision(Disc& disc)
 {
-    const float radius = particle.getRadius();
-    const auto& position = particle.getPosition();
-    const auto& worldBounds = renderWindow_.getSize();
+    //https://hermann-baum.de/bouncing-balls/
+    const auto& r = disc.radius_;
+    auto& pos = disc.position_;
+    auto& v = disc.velocity_;
 
     float dx, dy;
     
-    if (position.x < radius)
+    if (pos.x < r)
     {
-        dx = radius - position.x + 1;
-        dy = dx * particle.velocity.y / particle.velocity.x;
+        dx = r - pos.x + 1;
+        dy = dx * v.y / v.x;
         
-        particle.move({dx, dy});
-        particle.velocity.x = -particle.velocity.x;
+        pos += {dx, dy};
+        v.x = -v.x;
     }
-    else if (position.x > worldBounds.x - radius)
+    else if (pos.x > bounds_.x - r)
     {
-        dx = -(position.x + radius - worldBounds.x + 1);
-        dy = -(dx * particle.velocity.y / particle.velocity.x);
+        dx = -(pos.x + r - bounds_.x + 1);
+        dy = -(dx * v.y / v.x);
         
-        particle.move({dx, dy});
-        particle.velocity.x = -particle.velocity.x;
+        pos += {dx, dy};
+        v.x = -v.x;
     }
 
-    if (position.y < radius)
+    if (pos.y < r)
     {
-        dy = radius - position.y + 1;
-        dx = dy * particle.velocity.x / particle.velocity.y;
+        dy = r - pos.y + 1;
+        dx = dy * v.x / v.y;
         
-        particle.move({dx, dy});
-        particle.velocity.y = -particle.velocity.y;
+        pos += {dx, dy};
+        v.y = -v.y;
     }
-    else if (position.y > worldBounds.y - radius)
+    else if (pos.y > bounds_.y - r)
     {
-        dy = -(position.y + radius - worldBounds.y + 1);
-        dx = -(dy * particle.velocity.x / particle.velocity.y);
-        particle.move({dx, dy});
-        particle.velocity.y = -particle.velocity.y;
+        dy = -(pos.y + r - bounds_.y + 1);
+        dx = -(dy * v.x / v.y);
+
+        pos += {dx, dy};
+        v.y = -v.y;
     }
-    
 }
 
-std::set<std::pair<Particle*, Particle*>> World::findCollidingParticles()
+std::set<std::pair<Disc*, Disc*>> World::findCollidingDiscs()
 {
-    NanoflannAdapter adapter(particles_);
+    NanoflannAdapter adapter(discs_);
     typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>, NanoflannAdapter,
                                                 2>
         KDTree;
     KDTree kdtree(2, adapter);
 
-    std::set<std::pair<Particle*, Particle*>> collidingParticles;
+    std::set<std::pair<Disc*, Disc*>> collidingDiscs;
 
-    for (auto& particle : particles_)
+    for (auto& disc : discs_)
     {
         std::vector<nanoflann::ResultItem<uint32_t, float>> results;
-        const float maxCollisionDistance = particle.getRadius() + maxRadius_;
-        const auto& position = particle.getPosition();
+        const float maxCollisionDistance = disc.radius_ + maxRadius_;
 
-        kdtree.radiusSearch(&position.x, maxCollisionDistance * maxCollisionDistance, results);
+        kdtree.radiusSearch(&disc.position_.x, maxCollisionDistance * maxCollisionDistance, results);
 
         for (size_t i = 1; i < results.size(); ++i)
         {
-            auto& otherParticle = particles_[results[i].first];
-            const float radiusSum = particle.getRadius() + otherParticle.getRadius();
+            auto& otherDisc = discs_[results[i].first];
+            const float radiusSum = disc.radius_ + otherDisc.radius_;
 
             if (results[i].second <= radiusSum * radiusSum) {
-                auto p1 = &particle;
-                auto p2 = &otherParticle;
+                auto p1 = &disc;
+                auto p2 = &otherDisc;
                 if(p2 < p1) std::swap(p1, p2);
-                collidingParticles.insert(std::make_pair(p1, p2));
+                collidingDiscs.insert(std::make_pair(p1, p2));
                 break;
             }
         }
     }
 
-    return collidingParticles;
+    return collidingDiscs;
 }
 
-void World::handleParticleCollisions(const std::set<std::pair<Particle*, Particle*>>& collidingParticles, const sf::Time& dt)
+void World::handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs, const sf::Time& dt)
 {
     //DeepSeek-generated 
-    for (const auto& [p1, p2] : collidingParticles)
+    for (const auto& [p1, p2] : collidingDiscs)
     {
-        auto pos1 = p1->getPosition();
-        auto pos2 = p2->getPosition();
-        auto& v1 = p1->velocity;
-        auto& v2 = p2->velocity;
-        const auto& m1 = p1->mass;
-        const auto& m2 = p2->mass;
-        const auto& r1 = p1->getRadius();
-        const auto& r2 = p2->getRadius();
+        auto& pos1 = p1->position_;
+        auto& pos2 = p2->position_;
+        auto& v1 = p1->velocity_;
+        auto& v2 = p2->velocity_;
+        const auto& m1 = p1->mass_;
+        const auto& m2 = p2->mass_;
+        const auto& r1 = p1->radius_;
+        const auto& r2 = p2->radius_;
 
         // Normalenvektor der Kollision
         sf::Vector2f normal = pos2 - pos1;
@@ -238,9 +232,6 @@ void World::handleParticleCollisions(const std::set<std::pair<Particle*, Particl
         float overlap = (r1 + r2) - distance;
         pos1 -= overlap * normal / 2.0f;
         pos2 += overlap * normal / 2.0f;
-
-        p1->setPosition(pos1);
-        p2->setPosition(pos2);
 
         ++collisionCount_;
     }
