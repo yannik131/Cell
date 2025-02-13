@@ -1,8 +1,12 @@
 #include "Simulation.hpp"
 
+#include <QThread>
 #include <SFML/System/Clock.hpp>
 
-#include <glog/logging.h>
+Simulation::Simulation(QObject* parent)
+    : QObject(parent)
+{
+}
 
 void Simulation::run()
 {
@@ -11,25 +15,29 @@ void Simulation::run()
     sf::Time timeSinceLastFrame;
     sf::Time timeSinceLastCollisionUpdate;
 
-    emit sceneData(world_.discs());
-    
-    while(true) {
+    while (true)
+    {
+        if (QThread::currentThread()->isInterruptionRequested())
+            return;
+        
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
         timeSinceLastFrame += dt;
 
-        if(timeSinceLastFrame > FrameTime) {
+        if (timeSinceLastFrame > FrameTime)
+        {
             emitFrameData();
             timeSinceLastFrame = sf::Time::Zero;
         }
 
-        while(timeSinceLastUpdate > SimulationTimeStep) {
+        while (timeSinceLastUpdate > SimulationTimeStep)
+        {
             timeSinceLastUpdate -= SimulationTimeStep;
-            
+
             world_.update(SimulationTimeStep);
 
             timeSinceLastCollisionUpdate += SimulationTimeStep;
-            if(timeSinceLastCollisionUpdate >= CollisionUpdateTime)
+            if (timeSinceLastCollisionUpdate >= CollisionUpdateTime)
             {
                 int collisions = world_.getAndResetCollisionCount();
                 emit collisionData(collisions);
@@ -39,18 +47,21 @@ void Simulation::run()
     }
 }
 
+void Simulation::reset()
+{
+    world_.reset();
+    emit sceneData(world_.discs());
+    emitFrameData();
+}
+
 void Simulation::emitFrameData()
 {
     const auto& discs = world_.discs();
     FrameDTO frameDTO;
     frameDTO.discs_.reserve(discs.size());
 
-    for(int i = 0; i < discs.size(); ++i)
+    for (int i = 0; i < discs.size(); ++i)
         frameDTO.discs_.push_back(GUIDisc(i, discs[i].position_));
 
     emit frameData(frameDTO);
-}
-
-Simulation::Simulation(QObject* parent) : QObject(parent)
-{
 }

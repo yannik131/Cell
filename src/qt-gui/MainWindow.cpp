@@ -3,29 +3,79 @@
 
 #include <glog/logging.h>
 
-MainWindow::MainWindow(QWidget* parent) :
-    QMainWindow(parent), 
-    ui(new Ui::MainWindow),
-    simulationThread_(new QThread()),
-    simulation_(new Simulation())
+#include <QMessageBox>
+
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , simulationThread_(nullptr)
+    , simulation_(new Simulation())
 {
     ui->setupUi(this);
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_, &Simulation::collisionData, this, &MainWindow::onCollisionData);
+    connect(simulation_, &Simulation::collisionData, ui->plotWidget, &AnalysisPlot::addDataPoint);
+    connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
+    connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
 
-    simulation_->moveToThread(simulationThread_);
-
-    connect(simulationThread_, &QThread::started, simulation_, &Simulation::run);
-
-    simulationThread_->start();
+    //This will queue an event that will be handled as soon as the event loop is available
+    QTimer::singleShot(0, simulation_, &Simulation::reset);
 }
 
-void MainWindow::onCollisionData(int collisions)
+void MainWindow::onStartStopButtonClicked()
 {
-    if(updateCount_++ == 0)
-        return; //The first values are a little wonky
-        
-    ui->plotWidget->addDataPoint(collisions);
+    if (ui->startStopButton->text() == StartString)
+    {
+        try
+        {
+            startSimulation();
+            ui->startStopButton->setText(StopString);
+        }
+        catch (const std::runtime_error& error)
+        {
+            QMessageBox::critical(this, "Error", error.what());
+        }
+    }
+    else
+    {
+        simulationThread_->requestInterruption();
+        ui->startStopButton->setText(StartString);
+    }
+}
+
+void MainWindow::onResetButtonClicked()
+{
+    if (simulationThread_ != nullptr)
+    {
+        connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
+        simulationThread_->requestInterruption();
+        ui->startStopButton->setText(StartString);
+    }
+    else 
+        simulation_->reset();
+
+    ui->plotWidget->reset();
+}
+
+void MainWindow::startSimulation()
+{
+    if (simulationThread_ != nullptr)
+        throw std::runtime_error("Simulation can't be started: It's already running");
+
+    simulationThread_ = new QThread();
+    simulation_->moveToThread(simulationThread_);
+
+    connect(simulationThread_, &QThread::started, [&]() {
+        simulation_->run();
+        simulation_->moveToThread(QCoreApplication::instance()->thread());
+        simulationThread_->quit();
+    });
+
+    connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater, Qt::QueuedConnection);
+    connect(simulationThread_, &QThread::finished, this, [&]() { 
+        simulationThread_ = nullptr; 
+    });
+
+    simulationThread_->start();
 }

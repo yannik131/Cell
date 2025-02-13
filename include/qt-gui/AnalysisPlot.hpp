@@ -12,6 +12,7 @@ public:
     explicit AnalysisPlot(QWidget* parent);
 
     void addDataPoint(double y);
+    void reset();
 
 private:
     QVector<double> xData_;

@@ -1,5 +1,5 @@
-#ifndef SIMULATION_H
-#define SIMULATION_H
+#ifndef SIMULATION_HPP
+#define SIMULATION_HPP
 
 #include "FrameDTO.hpp"
 #include "World.hpp"
@@ -18,6 +18,7 @@ class Simulation : public QObject
 public:
     explicit Simulation(QObject* parent = nullptr);
     void run();
+    void reset();
 
 private:
     void emitFrameData();
@@ -28,10 +29,10 @@ signals:
     void sceneData(const std::vector<Disc>& discs);
 
 private:
-    const sf::Time SimulationTimeStep = sf::milliseconds(5);
-    const sf::Time FrameTime = sf::milliseconds(1000 / 40);
-    const sf::Time CollisionUpdateTime = sf::seconds(1);
+    sf::Time SimulationTimeStep = sf::milliseconds(5);
+    sf::Time FrameTime = sf::milliseconds(1000 / 40);
+    sf::Time CollisionUpdateTime = sf::seconds(1);
     World world_;
 };
 
-#endif /* SIMULATION_H */
+#endif /* SIMULATION_HPP */

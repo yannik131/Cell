@@ -20,16 +20,19 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() = default;
 
-    void updatePlot();
+    void onStartStopButtonClicked();
+    void onResetButtonClicked();
 
-private slots:
-    void onCollisionData(int collisions);
+private:
+    void startSimulation();
 
 private:
     Ui::MainWindow* ui;
-    int updateCount_ = 0;
     QThread *simulationThread_;
     Simulation* simulation_;
+
+    const QString StartString = "Start";
+    const QString StopString = "Stop";
 };
 
 #endif /* MAINWINDOW_HPP */

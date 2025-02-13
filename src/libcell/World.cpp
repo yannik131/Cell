@@ -11,8 +11,6 @@
 
 World::World() : bounds_(sf::Vector2f(851, 1036))
 {
-    initializeStartPositions();
-    buildScene();
     maxRadius_ = std::max_element(RadiusDistribution_.begin(), RadiusDistribution_.end(),
                                      [](const auto& a, const auto& b) { return a.second < b.second; })
                         ->second;
@@ -40,6 +38,15 @@ int World::getAndResetCollisionCount()
 const std::vector<Disc>& World::discs() const
 {
     return discs_;
+}
+
+void World::reset()
+{
+    discs_.clear();
+    startPositions_.clear();
+
+    initializeStartPositions();
+    buildScene();
 }
 
 void World::buildScene()
@@ -83,17 +90,13 @@ void World::initializeStartPositions()
 {
     startPositions_.reserve(DiscCount);
 
-    int cols = static_cast<int>(std::sqrt(DiscCount) + 1);
-    int rows = DiscCount / cols + 1;
-    int xpad = bounds_.x / cols;
-    int ypad = bounds_.y / rows;
+    float spacing = maxRadius_ + 1;
 
-    for (int i = 0; i < cols; ++i)
-    {
-        for (int j = 0; j < rows; ++j)
-            startPositions_.push_back(sf::Vector2f(xpad + i * xpad, ypad + j * ypad));
+    for(float x = spacing; x < bounds_.x - spacing; x += 2*spacing) {
+        for(float y = spacing; y < bounds_.y - spacing; y += 2*spacing)
+            startPositions_.push_back(sf::Vector2f(x, y));
     }
-
+    
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);

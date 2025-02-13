@@ -8,8 +8,8 @@ $ErrorActionPreference = "Stop"
 Set-Location -Path $PSScriptRoot
 Set-Location .\..\..
 
-if (-Not (Test-Path "contrib\vcpkg\")) {
-    git submodule update
+if (-Not (Test-Path "contrib\vcpkg\buildtrees\")) {
+    git submodule update --init
     .\contrib\vcpkg\bootstrap-vcpkg.bat
     .\contrib\vcpkg\vcpkg.exe install glog sfml nanoflann qtbase
 }

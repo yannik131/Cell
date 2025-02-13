@@ -28,7 +28,11 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
 void SimulationWidget::initialize(const std::vector<Disc>& discs)
 {
     const std::map<int, sf::Color> Colors = {{5, sf::Color::Green}, {10, sf::Color::Red}, {12, sf::Color::Blue}, {15, sf::Color::Yellow}};
-    circles_.reserve(discs.size());
+
+    if(circles_.empty())
+        circles_.reserve(discs.size());
+    else 
+        circles_.clear();
 
     for(const auto& disc : discs) {
         sf::CircleShape shape(disc.radius_);

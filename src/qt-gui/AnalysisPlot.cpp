@@ -30,3 +30,11 @@ void AnalysisPlot::addDataPoint(double y)
 
     replot();
 }
+
+void AnalysisPlot::reset()
+{
+    xData_.clear();
+    yData_.clear();
+    clearGraphs();
+    replot();
+}

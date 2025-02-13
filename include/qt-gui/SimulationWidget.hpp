@@ -15,6 +15,8 @@ class SimulationWidget : public QSFMLWidget
     Q_OBJECT
 public:
     SimulationWidget(QWidget* parent);
+
+public slots:
     void render(const FrameDTO& frameDTO);
     void initialize(const std::vector<Disc>& discs);
 
