@@ -16,7 +16,8 @@ public:
     void update(const sf::Time& dt);
     int getAndResetCollisionCount();
     const std::vector<Disc>& discs() const;
-    void reset(); //Has to be called first!
+    void reset(); //Has to be called before update()!
+    void setNumberOfDiscs(int numberOfDiscs);
     
 private:
     void buildScene();
@@ -27,7 +28,7 @@ private:
     
 private:
     const std::map<float, int> RadiusDistribution_ = {{0.5, 5}, {0.7, 10}, {0.9, 12}, {1, 15}};
-    const int DiscCount = 50;
+    int numberOfDiscs_ = 50;
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;

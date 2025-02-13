@@ -49,6 +49,14 @@ void World::reset()
     buildScene();
 }
 
+void World::setNumberOfDiscs(int numberOfDiscs)
+{
+    if(numberOfDiscs <= 0 || numberOfDiscs > 500)
+        throw std::runtime_error("Number of discs must be between 1 and 500");
+
+    numberOfDiscs_ = numberOfDiscs;
+}
+
 void World::buildScene()
 {
     std::random_device rd;
@@ -56,10 +64,10 @@ void World::buildScene()
     std::uniform_real_distribution<float> distribution(0, 1);
     std::uniform_int_distribution<int> velocityDistribution(-600, 600);
 
-    discs_.reserve(DiscCount);
+    discs_.reserve(numberOfDiscs_);
     std::map<int, int> counts;
 
-    for (int i = 0; i < DiscCount; ++i)
+    for (int i = 0; i < numberOfDiscs_; ++i)
     {
         float randomNumber = distribution(gen);
 
@@ -82,13 +90,13 @@ void World::buildScene()
     
     LOG(INFO) << "Radius distribution";
     for(const auto& [radius, count] : counts) {
-        LOG(INFO) << radius << ": " << count << "/" << DiscCount << " (" << count / static_cast<float>(DiscCount) * 100 << "%)\n";
+        LOG(INFO) << radius << ": " << count << "/" << numberOfDiscs_ << " (" << count / static_cast<float>(numberOfDiscs_) * 100 << "%)\n";
     }
 }
 
 void World::initializeStartPositions()
 {
-    startPositions_.reserve(DiscCount);
+    startPositions_.reserve(numberOfDiscs_);
 
     float spacing = maxRadius_ + 1;
 
@@ -96,7 +104,7 @@ void World::initializeStartPositions()
         for(float y = spacing; y < bounds_.y - spacing; y += 2*spacing)
             startPositions_.push_back(sf::Vector2f(x, y));
     }
-    
+
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);

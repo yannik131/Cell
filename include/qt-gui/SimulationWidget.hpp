@@ -4,6 +4,7 @@
 #include "QSFMLWidget.hpp"
 #include "FrameDTO.hpp"
 #include "Disc.hpp"
+#include "SimulationSettings.hpp"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics/Font.hpp>

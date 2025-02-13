@@ -4,6 +4,7 @@
 #include "Disc.hpp"
 
 #include <SFML/System/Vector2.hpp>
+#include <QtCore/QMetaType>
 
 #include <vector>
 
@@ -19,5 +20,7 @@ struct FrameDTO
 {
     std::vector<GUIDisc> discs_;
 };
+
+Q_DECLARE_METATYPE(FrameDTO);
 
 #endif /* FRAMEDTO_HPP */

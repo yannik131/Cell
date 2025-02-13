@@ -3,6 +3,7 @@
 
 #include "FrameDTO.hpp"
 #include "Simulation.hpp"
+#include "SimulationSettings.hpp"
 
 #include <QMainWindow>
 #include <QTimer>

@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 #include "ui_MainWindow.h"
+#include "SimulationSettingsWidget.hpp"
 
 #include <glog/logging.h>
 
@@ -19,6 +20,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
 
+    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::setSimulationSettings);
+
     //This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, simulation_, &Simulation::reset);
 }
@@ -30,6 +33,7 @@ void MainWindow::onStartStopButtonClicked()
         try
         {
             startSimulation();
+            ui->simulationSettingsWidget->lock();
             ui->startStopButton->setText(StopString);
         }
         catch (const std::runtime_error& error)
@@ -40,6 +44,7 @@ void MainWindow::onStartStopButtonClicked()
     else
     {
         simulationThread_->requestInterruption();
+        ui->simulationSettingsWidget->unlock();
         ui->startStopButton->setText(StartString);
     }
 }
@@ -56,6 +61,7 @@ void MainWindow::onResetButtonClicked()
         simulation_->reset();
 
     ui->plotWidget->reset();
+    ui->simulationSettingsWidget->unlock();
 }
 
 void MainWindow::startSimulation()

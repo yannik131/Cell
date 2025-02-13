@@ -24,20 +24,20 @@ void Simulation::run()
         timeSinceLastUpdate += dt;
         timeSinceLastFrame += dt;
 
-        if (timeSinceLastFrame > FrameTime)
+        if (timeSinceLastFrame > simulationSettings_.frameTime)
         {
             emitFrameData();
             timeSinceLastFrame = sf::Time::Zero;
         }
 
-        while (timeSinceLastUpdate > SimulationTimeStep)
+        while (timeSinceLastUpdate > simulationSettings_.simulationTimeStep)
         {
-            timeSinceLastUpdate -= SimulationTimeStep;
+            timeSinceLastUpdate -= simulationSettings_.simulationTimeStep;
 
-            world_.update(SimulationTimeStep);
+            world_.update(simulationSettings_.simulationTimeStep);
 
-            timeSinceLastCollisionUpdate += SimulationTimeStep;
-            if (timeSinceLastCollisionUpdate >= CollisionUpdateTime)
+            timeSinceLastCollisionUpdate += simulationSettings_.simulationTimeStep;
+            if (timeSinceLastCollisionUpdate >= simulationSettings_.collisionUpdateTime)
             {
                 int collisions = world_.getAndResetCollisionCount();
                 emit collisionData(collisions);
@@ -52,6 +52,16 @@ void Simulation::reset()
     world_.reset();
     emit sceneData(world_.discs());
     emitFrameData();
+}
+
+void Simulation::setSimulationSettings(const SimulationSettings& simulationSettings)
+{
+    bool discCountChanged = simulationSettings_.numberOfDiscs != simulationSettings.numberOfDiscs;
+    simulationSettings_ = simulationSettings;
+    if(discCountChanged) {
+        world_.setNumberOfDiscs(simulationSettings_.numberOfDiscs);
+        reset();
+    }
 }
 
 void Simulation::emitFrameData()

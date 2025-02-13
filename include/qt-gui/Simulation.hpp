@@ -3,14 +3,12 @@
 
 #include "FrameDTO.hpp"
 #include "World.hpp"
+#include "SimulationSettings.hpp"
 
 #include <QObject>
-#include <QtCore/QMetaType>
 #include <SFML/System/Time.hpp>
 
 #include <vector>
-
-Q_DECLARE_METATYPE(FrameDTO);
 
 class Simulation : public QObject 
 {
@@ -19,6 +17,9 @@ public:
     explicit Simulation(QObject* parent = nullptr);
     void run();
     void reset();
+
+public slots:
+    void setSimulationSettings(const SimulationSettings& simulationSettings);
 
 private:
     void emitFrameData();
@@ -29,9 +30,7 @@ signals:
     void sceneData(const std::vector<Disc>& discs);
 
 private:
-    sf::Time SimulationTimeStep = sf::milliseconds(5);
-    sf::Time FrameTime = sf::milliseconds(1000 / 40);
-    sf::Time CollisionUpdateTime = sf::seconds(1);
+    SimulationSettings simulationSettings_;
     World world_;
 };
 
