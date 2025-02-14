@@ -17,8 +17,11 @@ void Simulation::run()
 
     while (true)
     {
-        if (QThread::currentThread()->isInterruptionRequested())
+        if (QThread::currentThread()->isInterruptionRequested()) {
+            //Reset collision count to 0 for the next run
+            world_.getAndResetCollisionCount();
             return;
+        }
         
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
