@@ -27,7 +27,8 @@
             "jobs": 4,
             "targets": [
                 "libcell",
-                "qt-gui"
+                "qt-gui",
+                "benchmark"
             ]
         },
         {
@@ -38,7 +39,8 @@
             "jobs": 4,
             "targets": [
                 "libcell",
-                "qt-gui"
+                "qt-gui",
+                "benchmark"
             ]
         }
     ]

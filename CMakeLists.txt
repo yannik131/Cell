@@ -65,3 +65,7 @@ add_executable(qt-gui
 target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
 
 target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+
+# benchmark target
+add_executable(benchmark src/benchmark/main.cpp)
+target_link_libraries(benchmark libcell glog::glog)

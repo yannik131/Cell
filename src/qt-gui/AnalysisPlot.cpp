@@ -33,6 +33,7 @@ void AnalysisPlot::addDataPoint(double y)
 
 void AnalysisPlot::reset()
 {
+    yMax_ = 0;
     xData_.clear();
     yData_.clear();
     clearGraphs();

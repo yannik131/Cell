@@ -7,9 +7,9 @@
 
 struct NanoflannAdapter
 {
-    const std::vector<Disc>& elements;
+    std::vector<Disc>& elements;
 
-    NanoflannAdapter(const std::vector<Disc>& elems)
+    NanoflannAdapter(std::vector<Disc>& elems)
         : elements(elems)
     {
     }

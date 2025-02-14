@@ -52,7 +52,7 @@ void Simulation::run()
 
 void Simulation::reset()
 {
-    world_.reset();
+    world_.reinitialize();
     emit sceneData(world_.discs());
     emitFrameData();
 }

@@ -8,6 +8,7 @@
 #include <set>
 #include <cmath>
 #include <algorithm>
+#include <execution>
 
 World::World()
 {
@@ -40,7 +41,7 @@ const std::vector<Disc>& World::discs() const
     return discs_;
 }
 
-void World::reset()
+void World::reinitialize()
 {
     discs_.clear();
     startPositions_.clear();
@@ -167,27 +168,30 @@ void World::handleWorldBoundCollision(Disc& disc)
 
 std::set<std::pair<Disc*, Disc*>> World::findCollidingDiscs()
 {
-    NanoflannAdapter adapter(discs_);
-    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>, NanoflannAdapter,
-                                                2>
-        KDTree;
+    static NanoflannAdapter adapter(discs_);
     KDTree kdtree(2, adapter);
+    const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
+    static std::vector<nanoflann::ResultItem<uint32_t, float>> discsInRadius;
 
     for (auto& disc : discs_)
     {
-        std::vector<nanoflann::ResultItem<uint32_t, float>> results;
+        discsInRadius.clear();
         const float maxCollisionDistance = disc.radius_ + maxRadius_;
 
-        kdtree.radiusSearch(&disc.position_.x, maxCollisionDistance * maxCollisionDistance, results);
+        kdtree.radiusSearch(&disc.position_.x, maxCollisionDistance * maxCollisionDistance, discsInRadius, searchParams);
 
-        for (size_t i = 1; i < results.size(); ++i)
+        for (size_t i = 0; i < discsInRadius.size(); ++i)
         {
-            auto& otherDisc = discs_[results[i].first];
+            if(discsInRadius[i].second == 0)
+                continue;
+
+            auto& otherDisc = discs_[discsInRadius[i].first];
+            
             const float radiusSum = disc.radius_ + otherDisc.radius_;
 
-            if (results[i].second <= radiusSum * radiusSum) {
+            if (discsInRadius[i].second <= radiusSum * radiusSum) {
                 auto p1 = &disc;
                 auto p2 = &otherDisc;
                 if(p2 < p1) std::swap(p1, p2);
@@ -200,7 +204,7 @@ std::set<std::pair<Disc*, Disc*>> World::findCollidingDiscs()
     return collidingDiscs;
 }
 
-void World::handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs, const sf::Time& dt)
+void World::handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs, const sf::Time&)
 {
     //DeepSeek-generated 
     for (const auto& [p1, p2] : collidingDiscs)
