@@ -40,6 +40,7 @@ private:
     const QString StopString = "Stop";
 
     bool initialSizeSet_ = false;
+    QTimer resizeTimer_;
 };
 
 #endif /* MAINWINDOW_HPP */

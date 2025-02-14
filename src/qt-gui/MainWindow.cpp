@@ -22,6 +22,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::setSimulationSettings);
 
+    connect(&resizeTimer_, &QTimer::timeout, [&]() {
+        const auto& simulationSize = ui->simulationWidget->size();
+        simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
+        simulation_->reset();
+    });
+    resizeTimer_.setSingleShot(true);
+
     //This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, [this]() {
         const auto& simulationSize = ui->simulationWidget->size();
@@ -56,14 +63,12 @@ void MainWindow::onStartStopButtonClicked()
 void MainWindow::onResetButtonClicked()
 {
     if (simulationThread_ != nullptr)
-    {
         connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
-    }
     else 
         simulation_->reset();
 
     ui->plotWidget->reset();
-    
+
     stopSimulation();
 }
 
@@ -76,9 +81,10 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 
     QMainWindow::resizeEvent(event);
 
-    const auto& simulationSize = ui->simulationWidget->size();
-    simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
-    simulation_->reset();
+    if(resizeTimer_.isActive())
+        resizeTimer_.stop();
+
+    resizeTimer_.start(100);
 }
 
 void MainWindow::startSimulation()
@@ -111,7 +117,8 @@ void MainWindow::startSimulation()
 
 void MainWindow::stopSimulation()
 {
-    simulationThread_->requestInterruption();
+    if(simulationThread_)
+        simulationThread_->requestInterruption();
     //Revert the fixed size to enable resizing again
     setMinimumSize(QSize(0, 0));
     setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);

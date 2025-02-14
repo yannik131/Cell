@@ -51,7 +51,7 @@ void World::reset()
 
 void World::setNumberOfDiscs(int numberOfDiscs)
 {
-    if(numberOfDiscs <= 0 || numberOfDiscs > 500)
+    if(numberOfDiscs <= 0 || numberOfDiscs > 50000)
         throw std::runtime_error("Number of discs must be between 1 and 500");
 
     numberOfDiscs_ = numberOfDiscs;
@@ -239,7 +239,7 @@ void World::handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collid
         jNormal /= (1 / m1 + 1 / m2);
 
         // Impulsaustausch in der Tangentialrichtung (Reibung berücksichtigen)
-        const float friction = 0.f; // Reibungskoeffizient
+        const float friction = 0.01f; // Reibungskoeffizient
         float jTangent = -friction * velocityAlongTangent;
         jTangent /= (1 / m1 + 1 / m2);
 
