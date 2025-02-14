@@ -75,7 +75,7 @@ void World::buildScene()
     discs_.reserve(numberOfDiscs_);
     std::map<int, int> counts;
 
-    for (int i = 0; i < numberOfDiscs_; ++i)
+    for (int i = 0; i < numberOfDiscs_ && !startPositions_.empty(); ++i)
     {
         float randomNumber = distribution(gen);
 

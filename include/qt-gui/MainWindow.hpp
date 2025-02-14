@@ -29,6 +29,7 @@ protected:
 
 private:
     void startSimulation();
+    void stopSimulation();
 
 private:
     Ui::MainWindow* ui;

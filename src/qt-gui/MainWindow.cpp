@@ -41,8 +41,6 @@ void MainWindow::onStartStopButtonClicked()
         try
         {
             startSimulation();
-            ui->simulationSettingsWidget->lock();
-            ui->startStopButton->setText(StopString);
         }
         catch (const std::runtime_error& error)
         {
@@ -51,9 +49,7 @@ void MainWindow::onStartStopButtonClicked()
     }
     else
     {
-        simulationThread_->requestInterruption();
-        ui->simulationSettingsWidget->unlock();
-        ui->startStopButton->setText(StartString);
+        stopSimulation();
     }
 }
 
@@ -62,19 +58,18 @@ void MainWindow::onResetButtonClicked()
     if (simulationThread_ != nullptr)
     {
         connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
-        simulationThread_->requestInterruption();
-        ui->startStopButton->setText(StartString);
     }
     else 
         simulation_->reset();
 
     ui->plotWidget->reset();
-    ui->simulationSettingsWidget->unlock();
+    
+    stopSimulation();
 }
 
 void MainWindow::resizeEvent(QResizeEvent * event)
 {
-    if(simulationThread_ || !initialSizeSet_) {
+    if(!initialSizeSet_) {
         event->ignore();
         return;
     }
@@ -106,4 +101,21 @@ void MainWindow::startSimulation()
     });
 
     simulationThread_->start();
+    
+    // Resizing the window would change the world (haha) so we can't allow it during simulation
+    setFixedSize(size());
+
+    ui->simulationSettingsWidget->lock();
+    ui->startStopButton->setText(StopString);
+}
+
+void MainWindow::stopSimulation()
+{
+    simulationThread_->requestInterruption();
+    //Revert the fixed size to enable resizing again
+    setMinimumSize(QSize(0, 0));
+    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+    ui->simulationSettingsWidget->unlock();
+    ui->startStopButton->setText(StartString);
 }
