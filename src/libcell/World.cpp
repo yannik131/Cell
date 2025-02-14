@@ -9,7 +9,7 @@
 #include <cmath>
 #include <algorithm>
 
-World::World() : bounds_(sf::Vector2f(851, 1036))
+World::World()
 {
     maxRadius_ = std::max_element(RadiusDistribution_.begin(), RadiusDistribution_.end(),
                                      [](const auto& a, const auto& b) { return a.second < b.second; })
@@ -57,6 +57,14 @@ void World::setNumberOfDiscs(int numberOfDiscs)
     numberOfDiscs_ = numberOfDiscs;
 }
 
+void World::setBounds(const sf::Vector2f& bounds)
+{
+    if(bounds.x <= 0 || bounds.y <= 0)
+        throw std::runtime_error("Bounds must be > 0");
+
+    bounds_ = bounds;
+}
+
 void World::buildScene()
 {
     std::random_device rd;
@@ -88,14 +96,17 @@ void World::buildScene()
         }
     }
     
-    LOG(INFO) << "Radius distribution";
+    VLOG(1) << "Radius distribution";
     for(const auto& [radius, count] : counts) {
-        LOG(INFO) << radius << ": " << count << "/" << numberOfDiscs_ << " (" << count / static_cast<float>(numberOfDiscs_) * 100 << "%)\n";
+        VLOG(1) << radius << ": " << count << "/" << numberOfDiscs_ << " (" << count / static_cast<float>(numberOfDiscs_) * 100 << "%)\n";
     }
 }
 
 void World::initializeStartPositions()
 {
+    if(bounds_.x == 0 || bounds_.y == 0)
+        throw std::runtime_error("Can't initialize world: Bounds not set");
+
     startPositions_.reserve(numberOfDiscs_);
 
     float spacing = maxRadius_ + 1;

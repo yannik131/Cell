@@ -1,5 +1,7 @@
 #include "QSFMLWidget.hpp"
 
+#include <QResizeEvent>
+
 QSFMLWidget::QSFMLWidget(QWidget* parent) : QWidget(parent), initialized_(false)
 {
     // Setup some states to allow direct rendering into the widget
@@ -10,13 +12,20 @@ QSFMLWidget::QSFMLWidget(QWidget* parent) : QWidget(parent), initialized_(false)
     // Set strong focus to enable keyboard events to be received
     setFocusPolicy(Qt::StrongFocus);
 
-    resize({851, 1036});
-    setSize(sf::Vector2u(851, 1036));
+    setContentsMargins(0, 0, 0, 0);
 }
 
-void QSFMLWidget::resizeEvent(QResizeEvent*)
+void QSFMLWidget::resizeEvent(QResizeEvent* event)
 {
-    setSize(sf::Vector2u(QWidget::width(), QWidget::height()));
+    RenderWindow::setSize(sf::Vector2u(event->size().width(), event->size().height()));
+    sf::View view = RenderWindow::getDefaultView();
+    view.setSize({
+            static_cast<float>(event->size().width()),
+            static_cast<float>(event->size().height())
+    });
+    RenderWindow::setView(view);
+
+    QWidget::resizeEvent(event);
 }
 
 QPaintEngine* QSFMLWidget::paintEngine() const

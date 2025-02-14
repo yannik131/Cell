@@ -23,7 +23,15 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::setSimulationSettings);
 
     //This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, simulation_, &Simulation::reset);
+    QTimer::singleShot(0, this, [this]() {
+        const auto& simulationSize = ui->simulationWidget->size();
+
+        // I haven't figured out yet why the height returned by size() is 20px off..
+        // Maybe the RenderWindow reserves that height for the title bar? Probably OS dependent though
+        simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height() - 20));
+        simulation_->reset();
+        initialSizeSet_ = true;
+    });
 }
 
 void MainWindow::onStartStopButtonClicked()
@@ -62,6 +70,20 @@ void MainWindow::onResetButtonClicked()
 
     ui->plotWidget->reset();
     ui->simulationSettingsWidget->unlock();
+}
+
+void MainWindow::resizeEvent(QResizeEvent * event)
+{
+    if(simulationThread_ || !initialSizeSet_) {
+        event->ignore();
+        return;
+    }
+
+    QMainWindow::resizeEvent(event);
+
+    const auto& simulationSize = ui->simulationWidget->size();
+    simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
+    simulation_->reset();
 }
 
 void MainWindow::startSimulation()

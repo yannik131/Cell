@@ -2,10 +2,9 @@
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <glog/logging.h>
 
 #include <map>
-
-#include <glog/logging.h>
 
 SimulationWidget::SimulationWidget(QWidget* parent) : QSFMLWidget(parent)
 {
@@ -37,7 +36,7 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
     for(const auto& disc : discs) {
         sf::CircleShape shape(disc.radius_);
         shape.setFillColor(Colors.at(disc.radius_));
-        shape.setOrigin(sf::Vector2f(disc.radius_ / 2.f, disc.radius_ / 2.f));
+        shape.setOrigin(sf::Vector2f(disc.radius_, disc.radius_));
         shape.setPosition(disc.position_);
 
         circles_.push_back(shape);

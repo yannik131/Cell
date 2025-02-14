@@ -24,6 +24,9 @@ public:
     void onStartStopButtonClicked();
     void onResetButtonClicked();
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
     void startSimulation();
 
@@ -34,6 +37,8 @@ private:
 
     const QString StartString = "Start";
     const QString StopString = "Stop";
+
+    bool initialSizeSet_ = false;
 };
 
 #endif /* MAINWINDOW_HPP */

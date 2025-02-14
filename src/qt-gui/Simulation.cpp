@@ -57,6 +57,11 @@ void Simulation::reset()
     emitFrameData();
 }
 
+void Simulation::setWorldBounds(const sf::Vector2f& bounds)
+{
+    world_.setBounds(bounds);
+}
+
 void Simulation::setSimulationSettings(const SimulationSettings& simulationSettings)
 {
     bool discCountChanged = simulationSettings_.numberOfDiscs != simulationSettings.numberOfDiscs;

@@ -1,5 +1,5 @@
-#ifndef WORLD_H
-#define WORLD_H
+#ifndef WORLD_HPP
+#define WORLD_HPP
 
 #include "Disc.hpp"
 
@@ -18,6 +18,7 @@ public:
     const std::vector<Disc>& discs() const;
     void reset(); //Has to be called before update()!
     void setNumberOfDiscs(int numberOfDiscs);
+    void setBounds(const sf::Vector2f& bounds);
     
 private:
     void buildScene();
@@ -36,4 +37,4 @@ private:
     int collisionCount_ = 0;
 };
 
-#endif /* WORLD_H */
+#endif /* WORLD_HPP */

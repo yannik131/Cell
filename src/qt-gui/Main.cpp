@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     {
         QMessageBox::critical(
             nullptr, "Error",
-            QString("Unhandled exception occured: %1\nThis is probably a bug. Gotta shut down now :()").arg(e.what()));
+            QString("Unhandled exception occured: %1\nThis is probably a bug. Gotta shut down now :(").arg(e.what()));
     }
     catch (...)
     {

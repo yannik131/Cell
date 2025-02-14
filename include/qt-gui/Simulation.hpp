@@ -17,6 +17,7 @@ public:
     explicit Simulation(QObject* parent = nullptr);
     void run();
     void reset();
+    void setWorldBounds(const sf::Vector2f& bounds);
 
 public slots:
     void setSimulationSettings(const SimulationSettings& simulationSettings);
