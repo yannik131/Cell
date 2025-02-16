@@ -1,13 +1,11 @@
 #ifndef SIMULATIONSETTINGSWIDGET_HPP
 #define SIMULATIONSETTINGSWIDGET_HPP
 
-#include "SimulationSettings.hpp"
-
-#include <QWidget>
-#include <QSpinBox>
 #include <QList>
+#include <QSpinBox>
+#include <QWidget>
 
-class SimulationSettingsWidget : public  QWidget
+class SimulationSettingsWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -18,16 +16,16 @@ public:
 
 private:
     void onSettingsChanged();
-    SimulationSettings getSimulationSettings() const;
 
 signals:
-    void settingsChanged(const SimulationSettings& settings);
+    void settingsChanged();
 
 private:
     QSpinBox* fpsSpinBox_;
     QSpinBox* numberOfDiscsSpinBox_;
     QSpinBox* timeStepSpinBox_;
     QSpinBox* collisionUpdateSpinBox_;
+    QSpinBox* timeScaleSpinBox_;
 
     QList<QSpinBox*> spinBoxList_;
 };
