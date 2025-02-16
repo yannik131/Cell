@@ -45,7 +45,14 @@
      <widget class="QWidget" name="simulationOverviewWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="SimulationWidget" name="simulationWidget" native="true"/>
+        <widget class="SimulationWidget" name="simulationWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -217,9 +224,15 @@
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
-                 <height>200</height>
+                 <height>9999</height>
                 </size>
                </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
               </widget>
              </item>
              <item>

@@ -16,9 +16,13 @@ public:
 
     void updateDiscDistributionPreviewTableView();
 
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
 private:
     void displayGlobalSettings();
     void init();
+    void fitContentIntoTableView();
 
 private slots:
     void onSettingsChanged();

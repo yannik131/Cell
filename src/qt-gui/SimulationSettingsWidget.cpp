@@ -2,7 +2,9 @@
 #include "ColorMapping.hpp"
 #include "GlobalSettings.hpp"
 
+#include <QHeaderView>
 #include <QMessageBox>
+#include <QScrollBar>
 #include <QTimer>
 #include <SFML/System/Time.hpp>
 
@@ -47,6 +49,15 @@ void SimulationSettingsWidget::updateDiscDistributionPreviewTableView()
     }
 }
 
+void SimulationSettingsWidget::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    if (!model_ || model_->rowCount() == 0)
+        return;
+
+    fitContentIntoTableView();
+}
+
 void SimulationSettingsWidget::displayGlobalSettings()
 {
     const auto& settings = GlobalSettings::getSettings();
@@ -76,6 +87,7 @@ void SimulationSettingsWidget::init()
     timeScaleDoubleSpinBox_->setRange(SettingsLimits::MinSimulationTimeScale, SettingsLimits::MaxSimulationTimeScale);
 
     discDistributionPreviewTableView_->setModel(model_);
+    fitContentIntoTableView();
 
     updateDiscDistributionPreviewTableView();
     displayGlobalSettings();
@@ -83,11 +95,7 @@ void SimulationSettingsWidget::init()
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
     connect(fpsSpinBox_, &QSpinBox::valueChanged, this,
-            [this](int value)
-            {
-                DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setGuiFPS(value))
-                emit settingsChanged();
-            });
+            [this](int value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setGuiFPS(value)) });
 
     connect(numberOfDiscsSpinBox_, &QSpinBox::valueChanged, this,
             [this](int value)
@@ -96,26 +104,22 @@ void SimulationSettingsWidget::init()
                 emit settingsChanged();
             });
 
-    connect(timeStepSpinBox_, &QSpinBox::valueChanged, this,
-            [this](int value)
-            {
-                DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value)))
-                emit settingsChanged();
-            });
+    connect(timeStepSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
+            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
 
-    connect(collisionUpdateSpinBox_, &QSpinBox::valueChanged, this,
-            [this](int value)
-            {
-                DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setCollisionUpdateTime(sf::milliseconds(value)))
-                emit settingsChanged();
-            });
+    connect(collisionUpdateSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
+            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setCollisionUpdateTime(sf::milliseconds(value))) });
 
     connect(timeScaleDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,
-            [this](float value)
-            {
-                DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value))
-                emit settingsChanged();
-            });
+            [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });
+}
+
+void SimulationSettingsWidget::fitContentIntoTableView()
+{
+    int width = discDistributionPreviewTableView_->width();
+    discDistributionPreviewTableView_->setColumnWidth(0, width / 3);
+    discDistributionPreviewTableView_->setColumnWidth(1, width / 3);
+    discDistributionPreviewTableView_->setColumnWidth(2, width / 3);
 }
 
 void SimulationSettingsWidget::onSettingsChanged()
