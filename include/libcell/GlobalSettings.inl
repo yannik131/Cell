@@ -5,7 +5,8 @@
 #include <stdexcept>
 #include <string>
 
-template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)
+template <typename T>
+void GlobalSettings::throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)
 {
     using StringUtils::toString;
 

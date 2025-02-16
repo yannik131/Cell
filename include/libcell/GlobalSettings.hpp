@@ -12,6 +12,8 @@
 class GlobalSettings
 {
 public:
+    GlobalSettings();
+
     static GlobalSettings& get();
 
     static const Settings& getSettings();
@@ -42,6 +44,10 @@ private:
     Settings settings_;
 
     bool locked_ = false;
+
+    friend class DiscDistributionDialog;
+    friend class Simulation;
+    friend class SimulationSettingsWidget;
 };
 
 #include "GlobalSettings.inl"

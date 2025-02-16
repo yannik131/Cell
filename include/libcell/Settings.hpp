@@ -3,7 +3,6 @@
 
 #include "DiscType.hpp"
 
-#include <QtCore/QMetaType>
 #include <SFML/System/Time.hpp>
 
 #include <map>
@@ -47,35 +46,37 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_;
-
-    const sf::Time MinSimulationTimeStep = sf::milliseconds(1);
-    const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
-
-    const float MinSimulationTimeScale = 0.1f;
-    const float MaxSimulationTimeScale = 10.f;
-
-    const int MinGuiFPS = 1;
-    const int MaxGuiFPS = 60;
-
-    const sf::Time MinCollisionUpdateTime = sf::milliseconds(100);
-    const sf::Time MaxCollisionUpdateTime = sf::milliseconds(10000);
-
-    const int MinNumberOfDiscs = 1;
-    const int MaxNumberOfDiscs = 10000;
-
-    // Limits for DiscType
-
-    struct
-    {
-        const float MinRadius = 1.f;
-        const float MaxRadius = 100.f;
-
-        const float MinMass = 1.f;
-        const float MaxMass = 100.f;
-    } discTypeLimits;
+    std::map<DiscType, int> discTypeDistribution_ = {{{"A", sf::Color::Green, 5, 5}, 50},
+                                                     {{"B", sf::Color::Red, 10, 10}, 30},
+                                                     {{"C", sf::Color::Blue, 12, 12}, 10},
+                                                     {{"D", sf::Color::Yellow, 15, 15}, 10}};
 };
 
-Q_DECLARE_METATYPE(Settings);
+namespace SettingsLimits
+{
+const sf::Time MinSimulationTimeStep = sf::milliseconds(1);
+const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
+
+const float MinSimulationTimeScale = 0.1f;
+const float MaxSimulationTimeScale = 10.f;
+
+const int MinGuiFPS = 1;
+const int MaxGuiFPS = 60;
+
+const sf::Time MinCollisionUpdateTime = sf::milliseconds(100);
+const sf::Time MaxCollisionUpdateTime = sf::milliseconds(10000);
+
+const int MinNumberOfDiscs = 1;
+const int MaxNumberOfDiscs = 10000;
+} // namespace SettingsLimits
+
+namespace DiscTypeLimits
+{
+const float MinRadius = 1.f;
+const float MaxRadius = 100.f;
+
+const float MinMass = 1.f;
+const float MaxMass = 100.f;
+} // namespace DiscTypeLimits
 
 #endif /* SETTINGS_HPP */

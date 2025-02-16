@@ -4,23 +4,7 @@
 #include "DiscType.hpp"
 
 #include <QDialog>
-#include <QMap>
 #include <QStandardItemModel>
-
-template <typename KeyType, typename ValueType> QMap<ValueType, KeyType> invertMap(const QMap<KeyType, ValueType>& map)
-{
-    QMap<ValueType, KeyType> inverted;
-    for (const auto& key : map)
-        inverted[map[key]] = key;
-
-    return MapType;
-}
-
-const QMap<sf::Color, QString> ColorNameMapping{{sf::Color::White, "White"},   {sf::Color::Red, "Red"},
-                                                {sf::Color::Green, "Green"},   {sf::Color::Blue, "Blue"},
-                                                {sf::Color::Yellow, "Yellow"}, {sf::Color::Magenta, "Magenta"},
-                                                {sf::Color::Cyan, "Cyan"}};
-const QMap<QString, sf::Color> NameColorMapping = invertMap<sf::Color, QString>(ColorNameMapping);
 
 namespace Ui
 {
@@ -33,6 +17,11 @@ class DiscDistributionDialog : public QDialog
 public:
     explicit DiscDistributionDialog(QWidget* parent = nullptr);
 
+    void closeEvent(QCloseEvent* event);
+
+signals:
+    void discDistributionChanged();
+
 private slots:
     void onOK();
     void onCancel();
@@ -42,6 +31,7 @@ private slots:
 
 private:
     void validateColorMapping();
+    void addTableViewRowFromDiscType(const DiscType& discType, int percentage = 0);
 
 private:
     Ui::DiscDistributionDialog* ui;

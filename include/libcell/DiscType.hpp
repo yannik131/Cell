@@ -4,19 +4,17 @@
 #include <SFML/Graphics/Color.hpp>
 
 #include <string>
-#include <vector>
 
 struct DiscType;
 
 bool operator==(const DiscType& a, const DiscType& b);
 bool operator<(const DiscType& a, const DiscType& b);
 
-const std::vector<sf::Color> SupportedDicsColors{sf::Color::White, sf::Color::Red,    sf::Color::Green,
-                                                 sf::Color::Blue,  sf::Color::Yellow, sf::Color::Magenta,
-                                                 sf::Color::Cyan};
-
 struct DiscType
 {
+    DiscType() = default;
+    DiscType(const std::string& name, const sf::Color& color, float radius, float mass);
+
     std::string name_;
     sf::Color color_;
     float radius_;

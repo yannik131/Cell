@@ -1,22 +1,22 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include "DiscDistributionDialog.hpp"
 #include "FrameDTO.hpp"
 #include "Simulation.hpp"
-#include "SimulationSettings.hpp"
 
 #include <QMainWindow>
-#include <QTimer>
 #include <QThread>
+#include <QTimer>
 
-namespace Ui 
+namespace Ui
 {
 class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT 
+    Q_OBJECT
 public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() = default;
@@ -25,7 +25,7 @@ public:
     void onResetButtonClicked();
 
 protected:
-    void resizeEvent(QResizeEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
     void startSimulation();
@@ -33,7 +33,7 @@ private:
 
 private:
     Ui::MainWindow* ui;
-    QThread *simulationThread_;
+    QThread* simulationThread_;
     Simulation* simulation_;
 
     const QString StartString = "Start";
@@ -41,6 +41,8 @@ private:
 
     bool initialSizeSet_ = false;
     QTimer resizeTimer_;
+
+    DiscDistributionDialog* discDistributionDialog_;
 };
 
 #endif /* MAINWINDOW_HPP */

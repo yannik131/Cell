@@ -7,9 +7,9 @@
 #include <SFML/System/Time.hpp>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
-#include <memory>
 
 class World
 {
@@ -20,7 +20,6 @@ public:
     int getAndResetCollisionCount();
     const std::vector<Disc>& discs() const;
     void reinitialize(); // Has to be called before update()!
-    void setNumberOfDiscs(int numberOfDiscs);
     void setBounds(const sf::Vector2f& bounds);
 
 private:
@@ -31,8 +30,6 @@ private:
     void handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs, const sf::Time& dt);
 
 private:
-    const std::map<float, int> RadiusDistribution_ = {{0.5, 5}, {0.7, 10}, {0.9, 12}, {1, 15}};
-    int numberOfDiscs_ = 50;
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;

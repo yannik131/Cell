@@ -1,5 +1,11 @@
 #include "GlobalSettings.hpp"
 
+#include <vector>
+
+GlobalSettings::GlobalSettings()
+{
+}
+
 GlobalSettings& GlobalSettings::get()
 {
     static GlobalSettings instance;
@@ -15,7 +21,7 @@ const Settings& GlobalSettings::getSettings()
 void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 {
     throwIfLocked();
-    throwIfNotInRange(simulationTimeStep, settings_.MinSimulationTimeStep, settings_.MaxSimulationTimeStep,
+    throwIfNotInRange(simulationTimeStep, SettingsLimits::MinSimulationTimeStep, SettingsLimits::MaxSimulationTimeStep,
                       "simulation time step");
 
     settings_.simulationTimeStep_ = simulationTimeStep;
@@ -24,8 +30,8 @@ void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
 {
     throwIfLocked();
-    throwIfNotInRange(simulationTimeScale, settings_.MinSimulationTimeScale, settings_.MaxSimulationTimeScale,
-                      "simulation time scale");
+    throwIfNotInRange(simulationTimeScale, SettingsLimits::MinSimulationTimeScale,
+                      SettingsLimits::MaxSimulationTimeScale, "simulation time scale");
 
     settings_.simulationTimeScale_ = simulationTimeScale;
 }
@@ -33,7 +39,7 @@ void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
 void GlobalSettings::setGuiFPS(int guiFPS)
 {
     throwIfLocked();
-    throwIfNotInRange(guiFPS, settings_.MinGuiFPS, settings_.MaxGuiFPS, "GUI FPS");
+    throwIfNotInRange(guiFPS, SettingsLimits::MinGuiFPS, SettingsLimits::MaxGuiFPS, "GUI FPS");
 
     settings_.guiFPS_ = guiFPS;
 }
@@ -41,8 +47,8 @@ void GlobalSettings::setGuiFPS(int guiFPS)
 void GlobalSettings::setCollisionUpdateTime(const sf::Time& collisionUpdateTime)
 {
     throwIfLocked();
-    throwIfNotInRange(collisionUpdateTime, settings_.MinCollisionUpdateTime, settings_.MaxCollisionUpdateTime,
-                      "collision update time");
+    throwIfNotInRange(collisionUpdateTime, SettingsLimits::MinCollisionUpdateTime,
+                      SettingsLimits::MaxCollisionUpdateTime, "collision update time");
 
     settings_.collisionUpdateTime_ = collisionUpdateTime;
 }
@@ -50,7 +56,8 @@ void GlobalSettings::setCollisionUpdateTime(const sf::Time& collisionUpdateTime)
 void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
 {
     throwIfLocked();
-    throwIfNotInRange(numberOfDiscs, settings_.MinNumberOfDiscs, settings_.MaxNumberOfDiscs, "number of discs");
+    throwIfNotInRange(numberOfDiscs, SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs,
+                      "number of discs");
 
     settings_.numberOfDiscs_ = numberOfDiscs;
 }
@@ -60,19 +67,19 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     throwIfLocked();
 
     if (discTypeDistribution.empty())
-        throw std::runtime_error("Disc type distribution can not be empty");
+        throw std::runtime_error("Disc type distribution cannot be empty");
 
     int totalPercent = 0;
-    for (const auto& [type, percent] : settings_.discTypeDistribution_)
+    for (const auto& [type, percent] : discTypeDistribution)
     {
         if (percent <= 0)
             throw std::runtime_error("Percentage for disc type\"" + type.name_ + "\" is equal to or smaller than 0");
 
         totalPercent += percent;
 
-        throwIfNotInRange(type.mass_, settings_.discTypeLimits.MinMass, settings_.discTypeLimits.MaxMass,
+        throwIfNotInRange(type.mass_, DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass,
                           "mass for disc type \"" + type.name_ + "\"");
-        throwIfNotInRange(type.radius_, settings_.discTypeLimits.MinRadius, settings_.discTypeLimits.MaxRadius,
+        throwIfNotInRange(type.radius_, DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius,
                           "radius for disc type \"" + type.name_ + "\"");
     }
 
