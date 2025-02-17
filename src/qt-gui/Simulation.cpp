@@ -4,6 +4,8 @@
 #include <QThread>
 #include <SFML/System/Clock.hpp>
 
+#include <glog/logging.h>
+
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
@@ -18,7 +20,7 @@ void Simulation::run()
     sf::Time timeSinceLastUpdate;
     sf::Time timeSinceLastFrame;
     sf::Time timeSinceLastCollisionUpdate;
-    const sf::Time FrameTime = sf::milliseconds(1000 / settings.guiFPS_);
+    const sf::Time FrameTime = settings.guiFPS_ > 0 ? sf::milliseconds(1000 / settings.guiFPS_) : sf::seconds(1e6);
 
     while (true)
     {
@@ -36,22 +38,24 @@ void Simulation::run()
         if (timeSinceLastFrame > FrameTime)
         {
             emitFrameData();
-            timeSinceLastFrame = sf::Time::Zero;
+            timeSinceLastFrame -= FrameTime;
         }
 
-        while (timeSinceLastUpdate > settings.simulationTimeStep_)
+        if (timeSinceLastCollisionUpdate >= settings.collisionUpdateTime_)
         {
-            timeSinceLastUpdate -= settings.simulationTimeStep_;
+            int collisions = world_.getAndResetCollisionCount();
+            float collisionsPerSecond = collisions / timeSinceLastCollisionUpdate.asSeconds();
 
+            emit collisionData(static_cast<int>(std::round(collisionsPerSecond)));
+            timeSinceLastCollisionUpdate = sf::Time::Zero;
+        }
+
+        while (timeSinceLastUpdate / settings.simulationTimeScale_ > settings.simulationTimeStep_)
+        {
+            timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
             world_.update(settings.simulationTimeStep_);
 
             timeSinceLastCollisionUpdate += settings.simulationTimeStep_;
-            if (timeSinceLastCollisionUpdate >= settings.collisionUpdateTime_)
-            {
-                int collisions = world_.getAndResetCollisionCount();
-                emit collisionData(collisions);
-                timeSinceLastCollisionUpdate = sf::Time::Zero;
-            }
         }
     }
 

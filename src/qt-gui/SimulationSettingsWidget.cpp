@@ -66,16 +66,25 @@ void SimulationSettingsWidget::displayGlobalSettings()
     timeStepSpinBox_->setValue(settings.simulationTimeStep_.asMilliseconds());
     collisionUpdateSpinBox_->setValue(settings.collisionUpdateTime_.asMilliseconds());
     timeScaleDoubleSpinBox_->setValue(settings.simulationTimeScale_);
+    frictionDoubleSpinBox_->setValue(settings.frictionCoefficient);
 }
 
 void SimulationSettingsWidget::init()
 {
-    // Initialize spin boxes
+    initializeSpinBoxes();
+    displayGlobalSettings();
+    initializeTableView();
+    setCallbacks();
+}
+
+void SimulationSettingsWidget::initializeSpinBoxes()
+{
     fpsSpinBox_ = findChild<QSpinBox*>("fpsSpinBox");
     numberOfDiscsSpinBox_ = findChild<QSpinBox*>("numberOfDiscsSpinBox");
     timeStepSpinBox_ = findChild<QSpinBox*>("timeStepSpinBox");
     collisionUpdateSpinBox_ = findChild<QSpinBox*>("collisionUpdateSpinBox");
     timeScaleDoubleSpinBox_ = findChild<QDoubleSpinBox*>("timeScaleDoubleSpinBox");
+    frictionDoubleSpinBox_ = findChild<QDoubleSpinBox*>("frictionDoubleSpinBox");
     discDistributionPreviewTableView_ = findChild<QTableView*>("discDistributionPreviewTableView");
 
     fpsSpinBox_->setRange(SettingsLimits::MinGuiFPS, SettingsLimits::MaxGuiFPS);
@@ -85,13 +94,18 @@ void SimulationSettingsWidget::init()
     collisionUpdateSpinBox_->setRange(SettingsLimits::MinCollisionUpdateTime.asMilliseconds(),
                                       SettingsLimits::MaxCollisionUpdateTime.asMilliseconds());
     timeScaleDoubleSpinBox_->setRange(SettingsLimits::MinSimulationTimeScale, SettingsLimits::MaxSimulationTimeScale);
+    frictionDoubleSpinBox_->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
+}
 
+void SimulationSettingsWidget::initializeTableView()
+{
     discDistributionPreviewTableView_->setModel(model_);
     fitContentIntoTableView();
-
     updateDiscDistributionPreviewTableView();
-    displayGlobalSettings();
+}
 
+void SimulationSettingsWidget::setCallbacks()
+{
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
     connect(fpsSpinBox_, &QSpinBox::valueChanged, this,
@@ -112,6 +126,9 @@ void SimulationSettingsWidget::init()
 
     connect(timeScaleDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });
+
+    connect(frictionDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,
+            [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setFrictionCoefficient(value)) });
 }
 
 void SimulationSettingsWidget::fitContentIntoTableView()

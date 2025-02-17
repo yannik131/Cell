@@ -22,12 +22,18 @@ protected:
 private:
     void displayGlobalSettings();
     void init();
+    void initializeSpinBoxes();
+    void initializeTableView();
+    void setCallbacks();
     void fitContentIntoTableView();
 
 private slots:
     void onSettingsChanged();
 
 signals:
+    /**
+     * @brief Causes the world to reinitialize
+     */
     void settingsChanged();
 
 private:
@@ -36,6 +42,7 @@ private:
     QSpinBox* timeStepSpinBox_;
     QSpinBox* collisionUpdateSpinBox_;
     QDoubleSpinBox* timeScaleDoubleSpinBox_;
+    QDoubleSpinBox* frictionDoubleSpinBox_;
     QTableView* discDistributionPreviewTableView_;
 
     QStandardItemModel* model_;

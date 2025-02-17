@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Balls</string>
+   <string>Discs</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,1">
@@ -81,7 +81,7 @@
              <item>
               <widget class="QLabel" name="label">
                <property name="text">
-                <string>Balls</string>
+                <string>Discs</string>
                </property>
               </widget>
              </item>
@@ -110,7 +110,7 @@
              <item>
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>FPS</string>
+                <string>GUI FPS</string>
                </property>
               </widget>
              </item>
@@ -139,7 +139,8 @@
              <item>
               <widget class="QLabel" name="label_4">
                <property name="text">
-                <string>CollisionUpdate</string>
+                <string>Collision update
+interval [ms]</string>
                </property>
               </widget>
              </item>
@@ -168,7 +169,7 @@
              <item>
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>TimeStep</string>
+                <string>Timestep [ms]</string>
                </property>
               </widget>
              </item>
@@ -196,7 +197,34 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="timeScaleDoubleSpinBox"/>
+              <widget class="QDoubleSpinBox" name="timeScaleDoubleSpinBox">
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_10" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Friction</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="frictionDoubleSpinBox">
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::DefaultStepType</enum>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -221,6 +249,9 @@
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
               <widget class="QTableView" name="discDistributionPreviewTableView">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>

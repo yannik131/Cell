@@ -19,8 +19,8 @@ struct Settings
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.
      *
-     * Example: If set to 2, we will advance the simulation by 2 seconds in 1 real time second, meaning we will call the
-     * update() method of the world 2 * 1000/simulationTimeStep_ times per second
+     * Example: If set to 2, we will advance the simulation by 2 seconds in 1 real time second, meaning we will (try to)
+     * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
     float simulationTimeScale_ = 1.f;
 
@@ -44,6 +44,11 @@ struct Settings
     int numberOfDiscs_ = 50;
 
     /**
+     * @brief Global friction coefficient for all disc collisions
+     */
+    float frictionCoefficient = 0.f;
+
+    /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
     std::map<DiscType, int> discTypeDistribution_ = {{{"A", sf::Color::Green, 5, 5}, 50},
@@ -57,17 +62,20 @@ namespace SettingsLimits
 const sf::Time MinSimulationTimeStep = sf::milliseconds(1);
 const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
 
-const float MinSimulationTimeScale = 0.1f;
+const float MinSimulationTimeScale = 0.01f;
 const float MaxSimulationTimeScale = 10.f;
 
-const int MinGuiFPS = 1;
-const int MaxGuiFPS = 60;
+const int MinGuiFPS = 0;
+const int MaxGuiFPS = 200;
 
 const sf::Time MinCollisionUpdateTime = sf::milliseconds(100);
 const sf::Time MaxCollisionUpdateTime = sf::milliseconds(10000);
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
+
+const float MinFrictionCoefficient = 0.f;
+const float MaxFrictionCoefficient = 1.f;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits
@@ -76,7 +84,7 @@ const float MinRadius = 1.f;
 const float MaxRadius = 100.f;
 
 const float MinMass = 1.f;
-const float MaxMass = 100.f;
+const float MaxMass = 10000.f;
 } // namespace DiscTypeLimits
 
 #endif /* SETTINGS_HPP */

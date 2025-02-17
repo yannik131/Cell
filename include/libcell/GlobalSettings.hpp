@@ -31,6 +31,8 @@ private:
 
     void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
 
+    void setFrictionCoefficient(float frictionCoefficient);
+
     template <typename T>
     void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName);
 

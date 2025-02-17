@@ -89,6 +89,15 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     settings_.discTypeDistribution_ = discTypeDistribution;
 }
 
+void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
+{
+    throwIfLocked();
+    throwIfNotInRange(frictionCoefficient, SettingsLimits::MinFrictionCoefficient,
+                      SettingsLimits::MaxFrictionCoefficient, "friction coefficient");
+
+    settings_.frictionCoefficient = frictionCoefficient;
+}
+
 void GlobalSettings::throwIfLocked()
 {
     if (locked_)

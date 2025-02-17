@@ -7,9 +7,9 @@
 
 struct NanoflannAdapter
 {
-    std::vector<Disc>& elements;
+    const std::vector<Disc>& elements;
 
-    NanoflannAdapter(std::vector<Disc>& elems)
+    NanoflannAdapter(const std::vector<Disc>& elems)
         : elements(elems)
     {
     }
@@ -32,6 +32,5 @@ struct NanoflannAdapter
         return false;
     }
 };
-
 
 #endif /* NANOFLANNADAPTER_HPP */

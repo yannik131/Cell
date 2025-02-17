@@ -23,7 +23,11 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->setDiscDistributionPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
+    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,
+            &AnalysisPlot::reset);
     connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, simulation_, &Simulation::reset);
+    connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, ui->plotWidget,
+            &AnalysisPlot::reset);
     connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, ui->simulationSettingsWidget,
             &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
 
@@ -33,6 +37,7 @@ MainWindow::MainWindow(QWidget* parent)
                 const auto& simulationSize = ui->simulationWidget->size();
                 simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
                 simulation_->reset();
+                ui->plotWidget->reset();
             });
     resizeTimer_.setSingleShot(true);
 
