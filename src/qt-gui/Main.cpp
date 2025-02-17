@@ -1,8 +1,12 @@
-#include "MainWindow.hpp"
 #include "Logging.hpp"
+#include "MainWindow.hpp"
+#include "Settings.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QtCore/QMetaType>
+
+Q_DECLARE_METATYPE(Settings);
 
 int main(int argc, char* argv[])
 {

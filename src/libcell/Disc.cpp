@@ -1,5 +1,5 @@
 #include "Disc.hpp"
 
-Disc::Disc(float radius) : radius_(radius), mass_(radius)
+Disc::Disc(const DiscType& discType) : type_(discType)
 {
 }

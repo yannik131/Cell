@@ -3,14 +3,13 @@
 
 #include "FrameDTO.hpp"
 #include "World.hpp"
-#include "SimulationSettings.hpp"
 
 #include <QObject>
 #include <SFML/System/Time.hpp>
 
 #include <vector>
 
-class Simulation : public QObject 
+class Simulation : public QObject
 {
     Q_OBJECT
 public:
@@ -18,9 +17,6 @@ public:
     void run();
     void reset();
     void setWorldBounds(const sf::Vector2f& bounds);
-
-public slots:
-    void setSimulationSettings(const SimulationSettings& simulationSettings);
 
 private:
     void emitFrameData();
@@ -31,7 +27,6 @@ signals:
     void sceneData(const std::vector<Disc>& discs);
 
 private:
-    SimulationSettings simulationSettings_;
     World world_;
 };
 

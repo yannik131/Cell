@@ -1,7 +1,10 @@
 #include "Simulation.hpp"
+#include "GlobalSettings.hpp"
 
 #include <QThread>
 #include <SFML/System/Clock.hpp>
+
+#include <glog/logging.h>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
@@ -10,44 +13,53 @@ Simulation::Simulation(QObject* parent)
 
 void Simulation::run()
 {
+    GlobalSettings::get().lock();
+    const auto& settings = GlobalSettings::getSettings();
+
     sf::Clock clock;
     sf::Time timeSinceLastUpdate;
     sf::Time timeSinceLastFrame;
     sf::Time timeSinceLastCollisionUpdate;
+    const sf::Time FrameTime = settings.guiFPS_ > 0 ? sf::milliseconds(1000 / settings.guiFPS_) : sf::seconds(1e6);
 
     while (true)
     {
-        if (QThread::currentThread()->isInterruptionRequested()) {
-            //Reset collision count to 0 for the next run
+        if (QThread::currentThread()->isInterruptionRequested())
+        {
+            // Reset collision count to 0 for the next run
             world_.getAndResetCollisionCount();
-            return;
+            break;
         }
-        
+
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
         timeSinceLastFrame += dt;
 
-        if (timeSinceLastFrame > simulationSettings_.frameTime)
+        if (timeSinceLastFrame > FrameTime)
         {
             emitFrameData();
-            timeSinceLastFrame = sf::Time::Zero;
+            timeSinceLastFrame -= FrameTime;
         }
 
-        while (timeSinceLastUpdate > simulationSettings_.simulationTimeStep)
+        if (timeSinceLastCollisionUpdate >= settings.collisionUpdateTime_)
         {
-            timeSinceLastUpdate -= simulationSettings_.simulationTimeStep;
+            int collisions = world_.getAndResetCollisionCount();
+            float collisionsPerSecond = collisions / timeSinceLastCollisionUpdate.asSeconds();
 
-            world_.update(simulationSettings_.simulationTimeStep);
+            emit collisionData(static_cast<int>(std::round(collisionsPerSecond)));
+            timeSinceLastCollisionUpdate = sf::Time::Zero;
+        }
 
-            timeSinceLastCollisionUpdate += simulationSettings_.simulationTimeStep;
-            if (timeSinceLastCollisionUpdate >= simulationSettings_.collisionUpdateTime)
-            {
-                int collisions = world_.getAndResetCollisionCount();
-                emit collisionData(collisions);
-                timeSinceLastCollisionUpdate = sf::Time::Zero;
-            }
+        while (timeSinceLastUpdate / settings.simulationTimeScale_ > settings.simulationTimeStep_)
+        {
+            timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
+            world_.update(settings.simulationTimeStep_);
+
+            timeSinceLastCollisionUpdate += settings.simulationTimeStep_;
         }
     }
+
+    GlobalSettings::get().unlock();
 }
 
 void Simulation::reset()
@@ -60,16 +72,6 @@ void Simulation::reset()
 void Simulation::setWorldBounds(const sf::Vector2f& bounds)
 {
     world_.setBounds(bounds);
-}
-
-void Simulation::setSimulationSettings(const SimulationSettings& simulationSettings)
-{
-    bool discCountChanged = simulationSettings_.numberOfDiscs != simulationSettings.numberOfDiscs;
-    simulationSettings_ = simulationSettings;
-    if(discCountChanged) {
-        world_.setNumberOfDiscs(simulationSettings_.numberOfDiscs);
-        reset();
-    }
 }
 
 void Simulation::emitFrameData()

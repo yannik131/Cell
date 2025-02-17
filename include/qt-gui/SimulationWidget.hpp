@@ -1,15 +1,14 @@
 #ifndef SIMULATIONWIDGET_HPP
 #define SIMULATIONWIDGET_HPP
 
-#include "QSFMLWidget.hpp"
-#include "FrameDTO.hpp"
 #include "Disc.hpp"
-#include "SimulationSettings.hpp"
+#include "FrameDTO.hpp"
+#include "QSFMLWidget.hpp"
 
-#include <SFML/System/Clock.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/System/Clock.hpp>
 
 class SimulationWidget : public QSFMLWidget
 {
