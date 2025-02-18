@@ -10,3 +10,4 @@ env
 *.toc
 *.pdf
 CMakeUserPresets.json
+.DS_Store
