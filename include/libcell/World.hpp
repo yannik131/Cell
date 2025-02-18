@@ -21,10 +21,14 @@ public:
     const std::vector<Disc>& discs() const;
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
+    const std::vector<int>& getDestroyedDiscsIndices() const;
+    const std::vector<int>& getChangedDiscsIndices() const;
 
 private:
     void buildScene();
     void initializeStartPositions();
+    void findChangedDiscs();
+    void removeDestroyedDiscs();
 
 private:
     std::vector<sf::Vector2f> startPositions_;
@@ -32,6 +36,9 @@ private:
     sf::Vector2f bounds_;
     int maxRadius_;
     int collisionCount_ = 0;
+
+    std::vector<int> changedDiscsIndices_;
+    std::vector<int> destroyedDiscsIndices_;
 };
 
 #endif /* WORLD_HPP */

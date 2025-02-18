@@ -80,8 +80,12 @@ void Simulation::emitFrameData()
     FrameDTO frameDTO;
     frameDTO.discs_.reserve(discs.size());
 
-    for (int i = 0; i < discs.size(); ++i)
-        frameDTO.discs_.push_back(GUIDisc(i, discs[i].position_));
+    frameDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
+    for (int index : world_.getChangedDiscsIndices())
+        frameDTO.changedDiscsIndices_.push_back(std::make_pair(index, discs[index].type_));
+
+    for (const auto& disc : discs)
+        frameDTO.discs_.push_back(GUIDisc(disc.position_));
 
     emit frameData(frameDTO);
 }

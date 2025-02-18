@@ -18,6 +18,9 @@ World::World()
 
 void World::update(const sf::Time& dt)
 {
+    changedDiscsIndices_.clear();
+    destroyedDiscsIndices_.clear();
+
     for (auto& disc : discs_)
     {
         disc.position_ += disc.velocity_ * dt.asSeconds();
@@ -25,6 +28,9 @@ void World::update(const sf::Time& dt)
         collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs, dt);
         MathUtils::handleWorldBoundCollision(disc, bounds_);
     }
+
+    findChangedDiscs();
+    removeDestroyedDiscs();
 }
 
 int World::getAndResetCollisionCount()
@@ -61,6 +67,16 @@ void World::setBounds(const sf::Vector2f& bounds)
         throw std::runtime_error("Bounds must be > 0");
 
     bounds_ = bounds;
+}
+
+const std::vector<int>& World::getDestroyedDiscsIndices() const
+{
+    return destroyedDiscsIndices_;
+}
+
+const std::vector<int>& World::getChangedDiscsIndices() const
+{
+    return changedDiscsIndices_;
 }
 
 void World::buildScene()
@@ -136,4 +152,33 @@ void World::initializeStartPositions()
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
+}
+
+void World::findChangedDiscs()
+{
+    for (int i = 0; i < discs_.size(); ++i)
+    {
+        if (discs_[i].changed_)
+        {
+            changedDiscsIndices_.push_back(i);
+            discs_[i].changed_ = false;
+        }
+    }
+}
+
+void World::removeDestroyedDiscs()
+{
+    int currentIndex = 0;
+    for (auto iter = discs_.begin(); iter != discs_.end();)
+    {
+        if (iter->destroyed_)
+        {
+            iter = discs_.erase(iter);
+            destroyedDiscsIndices_.push_back(currentIndex);
+        }
+        else
+            ++iter;
+
+        ++currentIndex;
+    }
 }

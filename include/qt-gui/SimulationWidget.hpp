@@ -21,6 +21,11 @@ public slots:
     void initialize(const std::vector<Disc>& discs);
 
 private:
+    void removeDestroyedDiscs(const std::vector<int>& indices);
+    void changeDiscs(const std::vector<std::pair<int, DiscType>>& changedDiscsIndices);
+    sf::CircleShape circleShapeFromDisc(const Disc& disc);
+
+private:
     std::vector<sf::CircleShape> circles_;
 };
 

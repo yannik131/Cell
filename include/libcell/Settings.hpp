@@ -6,9 +6,13 @@
 #include <SFML/System/Time.hpp>
 
 #include <map>
+#include <utility>
+#include <vector>
 
 struct Settings
 {
+    Settings();
+
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
@@ -51,10 +55,21 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_ = {{{"A", sf::Color::Green, 5, 5}, 50},
-                                                     {{"B", sf::Color::Red, 10, 10}, 30},
-                                                     {{"C", sf::Color::Blue, 12, 12}, 10},
-                                                     {{"D", sf::Color::Yellow, 15, 15}, 10}};
+    std::map<DiscType, int> discTypeDistribution_;
+
+    /**
+     * @brief Contains reactions of type A + B -> C and their probabilities
+     *
+     * Example: If A + B -> C with 30% chance and A + B -> D with 20% chance, then
+     * table[{A, B}] = table[{B, A}] = {{D, 0.2}, {C, 0.5}}
+     * Accumulative probabilities sorted in ascending order are easier to work with with a random number approach
+     */
+    std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>> combinationReactionTable_;
+
+    /**
+     * @brief Contains reactions of type C -> A + B and their probabilities to occur within 1 second
+     */
+    std::map<std::vector<std::pair<DiscType, float>>, std::pair<DiscType, DiscType>> decompositionReactionTable_;
 };
 
 namespace SettingsLimits

@@ -5,12 +5,15 @@
 
 #include <SFML/System/Vector2.hpp>
 
-struct Disc {
+struct Disc
+{
     Disc(const DiscType& discType);
 
     sf::Vector2f velocity_;
     sf::Vector2f position_;
 
+    bool destroyed_ = false;
+    bool changed_ = false;
     DiscType type_;
 };
 

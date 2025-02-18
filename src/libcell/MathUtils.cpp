@@ -4,6 +4,8 @@
 
 #include "nanoflann.hpp"
 
+#include <random>
+
 namespace MathUtils
 {
 
@@ -42,7 +44,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
             {
                 Disc* p1 = &disc;
                 auto p2 = &otherDisc;
-                if (p2 < p1)
+                if (p2->type_ < p1->type_)
                     std::swap(p1, p2);
                 collidingDiscs.insert(std::make_pair(p1, p2));
                 break;
@@ -57,6 +59,11 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 {
     int collisionCount = 0;
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
+    const auto& reactionTable = GlobalSettings::getSettings().combinationReactionTable_;
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution(0, 1);
 
     // DeepSeek-generated
     for (const auto& [p1, p2] : collidingDiscs)
@@ -87,28 +94,62 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         if (velocityAlongNormal > 0)
             continue;
 
-        // Coefficient of restitution (elasticity of the collision)
-        const float e = 1.f; // Fully elastic
+        auto iter = reactionTable.find(std::make_pair(p1->type_, p2->type_));
+        bool reactionOccured = false;
+        if (iter != reactionTable.end())
+        {
+            const auto& possibleReactions = iter->second;
+            float randomNumber = distribution(gen);
+            for (const auto& [resultType, probability] : possibleReactions)
+            {
+                if (randomNumber <= probability)
+                {
+                    if (std::abs(resultType.radius_ - p1->type_.radius_) <
+                        std::abs(resultType.radius_ - p2->type_.radius_))
+                    {
+                        p1->type_ = resultType;
+                        p1->changed_ = true;
+                        p2->destroyed_ = true;
+                        v1 = (m1 * v1 + m2 * v2) / m1;
+                    }
+                    else
+                    {
+                        p2->type_ = resultType;
+                        p2->changed_ = true;
+                        p1->destroyed_ = true;
+                        v2 = (m1 * v1 + m2 * v2) / m2;
+                    }
+                    reactionOccured = true;
+                    break;
+                }
+            }
+        }
 
-        // Impulse exchange in the normal direction
-        float jNormal = -(1 + e) * velocityAlongNormal;
-        jNormal /= (1 / m1 + 1 / m2);
+        if (!reactionOccured)
+        {
+            // Coefficient of restitution (elasticity of the collision)
+            const float e = 1.f; // Fully elastic
 
-        // Impulse exchange in the tangential direction (considering friction)
-        float jTangent = -frictionCoefficient * velocityAlongTangent;
-        jTangent /= (1 / m1 + 1 / m2);
+            // Impulse exchange in the normal direction
+            float jNormal = -(1 + e) * velocityAlongNormal;
+            jNormal /= (1 / m1 + 1 / m2);
 
-        // Total impulse
-        sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
+            // Impulse exchange in the tangential direction (considering friction)
+            float jTangent = -frictionCoefficient * velocityAlongTangent;
+            jTangent /= (1 / m1 + 1 / m2);
 
-        // Apply the impulse
-        v1 -= impulse / m1;
-        v2 += impulse / m2;
+            // Total impulse
+            sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
 
-        // Correct positions to avoid overlaps
-        float overlap = (r1 + r2) - distance;
-        pos1 -= overlap * normal / 2.0f;
-        pos2 += overlap * normal / 2.0f;
+            // Apply the impulse
+            v1 -= impulse / m1;
+            v2 += impulse / m2;
+
+            // Correct positions to avoid overlaps
+            float overlap = (r1 + r2) - distance;
+            pos1 -= overlap * normal / 2.0f;
+            pos2 += overlap * normal / 2.0f;
+        }
 
         ++collisionCount;
     }
