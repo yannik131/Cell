@@ -12,5 +12,5 @@ Settings::Settings()
     discTypeDistribution_[C] = 10;
     discTypeDistribution_[D] = 10;
 
-    combinationReactionTable_[{A, B}] = {{C, 0.05}, {D, 0.15}};
+    combinationReactionTable_[{A, B}] = {{C, 0.01}, {D, 0.02}};
 }

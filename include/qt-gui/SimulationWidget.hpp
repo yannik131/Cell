@@ -19,10 +19,9 @@ public:
 public slots:
     void render(const FrameDTO& frameDTO);
     void initialize(const std::vector<Disc>& discs);
+    void removeAndChangeDiscs(const UpdateDTO& updateDTO);
 
 private:
-    void removeDestroyedDiscs(const std::vector<int>& indices);
-    void changeDiscs(const std::vector<std::pair<int, DiscType>>& changedDiscsIndices);
     sf::CircleShape circleShapeFromDisc(const Disc& disc);
 
 private:

@@ -29,8 +29,8 @@ void World::update(const sf::Time& dt)
         MathUtils::handleWorldBoundCollision(disc, bounds_);
     }
 
-    findChangedDiscs();
     removeDestroyedDiscs();
+    findChangedDiscs();
 }
 
 int World::getAndResetCollisionCount()
@@ -176,6 +176,7 @@ void World::removeDestroyedDiscs()
             iter = discs_.erase(iter);
             destroyedDiscsIndices_.push_back(currentIndex);
         }
+        // TODO also find changed discs here, no need to iterate twice
         else
             ++iter;
 

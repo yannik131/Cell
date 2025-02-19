@@ -15,6 +15,12 @@ struct Disc
     bool destroyed_ = false;
     bool changed_ = false;
     DiscType type_;
+
+    int getId() const;
+
+private:
+    static int instanceCount;
+    int id_;
 };
 
 #endif /* DISC_HPP */

@@ -8,7 +8,7 @@
 
 #include <map>
 #include <memory>
-#include <set>
+#include <unordered_map>
 #include <vector>
 
 class World
@@ -21,6 +21,10 @@ public:
     const std::vector<Disc>& discs() const;
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
+
+    /**
+     * @brief Returns indices of destroyed discs in ascending order
+     */
     const std::vector<int>& getDestroyedDiscsIndices() const;
     const std::vector<int>& getChangedDiscsIndices() const;
 

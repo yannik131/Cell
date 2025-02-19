@@ -13,13 +13,6 @@ SimulationWidget::SimulationWidget(QWidget* parent)
 
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
-    // Order matters here, changed discs refer to the old indices, so we can't remove anything yet
-    if (!frameDTO.changedDiscsIndices_.empty())
-        changeDiscs(frameDTO.changedDiscsIndices_);
-
-    if (!frameDTO.destroyedDiscsIndexes_.empty())
-        removeDestroyedDiscs(frameDTO.destroyedDiscsIndexes_);
-
     sf::RenderWindow::clear(sf::Color::Black);
 
     for (int i = 0; i < circles_.size(); ++i)
@@ -45,18 +38,14 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
         circles_.push_back(circleShapeFromDisc(disc));
 }
 
-void SimulationWidget::removeDestroyedDiscs(const std::vector<int>& indices)
+void SimulationWidget::removeAndChangeDiscs(const UpdateDTO& updateDTO)
 {
-    // TODO use unordered_set for discs, give discs id as static int instanceCount, use id as hash value
-    // TODO or maybe set and use the order for drawing?
-    for (const auto& index : indices)
-        circles_.erase(circles_.begin() + index);
-}
+    // Order matters here, changed discs refer to the new indices
+    // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
+    for (auto iter = updateDTO.destroyedDiscsIndexes_.rbegin(); iter != updateDTO.destroyedDiscsIndexes_.rend(); ++iter)
+        circles_.erase(circles_.begin() + *iter);
 
-void SimulationWidget::changeDiscs(const std::vector<std::pair<int, DiscType>>& changedDiscsIndices)
-{
-    // Position will be left unitialized
-    for (const auto& [index, discType] : changedDiscsIndices)
+    for (const auto& [index, discType] : updateDTO.changedDiscsIndices_)
         circles_[index] = circleShapeFromDisc(Disc(discType));
 }
 

@@ -18,10 +18,15 @@ struct GUIDisc
 struct FrameDTO
 {
     std::vector<GUIDisc> discs_;
+};
+
+struct UpdateDTO
+{
     std::vector<int> destroyedDiscsIndexes_;
     std::vector<std::pair<int, DiscType>> changedDiscsIndices_;
 };
 
 Q_DECLARE_METATYPE(FrameDTO);
+Q_DECLARE_METATYPE(UpdateDTO);
 
 #endif /* FRAMEDTO_HPP */

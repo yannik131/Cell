@@ -110,14 +110,14 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
                         p1->type_ = resultType;
                         p1->changed_ = true;
                         p2->destroyed_ = true;
-                        v1 = (m1 * v1 + m2 * v2) / m1;
+                        v1 = (m1 * v1 + m2 * v2) / resultType.mass_;
                     }
                     else
                     {
                         p2->type_ = resultType;
                         p2->changed_ = true;
                         p1->destroyed_ = true;
-                        v2 = (m1 * v1 + m2 * v2) / m2;
+                        v2 = (m1 * v1 + m2 * v2) / resultType.mass_;
                     }
                     reactionOccured = true;
                     break;

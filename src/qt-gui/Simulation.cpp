@@ -8,6 +8,7 @@
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
+    , worldDiscs_(world_.discs())
 {
 }
 
@@ -53,7 +54,9 @@ void Simulation::run()
         while (timeSinceLastUpdate / settings.simulationTimeScale_ > settings.simulationTimeStep_)
         {
             timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
+
             world_.update(settings.simulationTimeStep_);
+            emitUpdateData();
 
             timeSinceLastCollisionUpdate += settings.simulationTimeStep_;
         }
@@ -65,7 +68,7 @@ void Simulation::run()
 void Simulation::reset()
 {
     world_.reinitialize();
-    emit sceneData(world_.discs());
+    emit sceneData(worldDiscs_);
     emitFrameData();
 }
 
@@ -76,16 +79,25 @@ void Simulation::setWorldBounds(const sf::Vector2f& bounds)
 
 void Simulation::emitFrameData()
 {
-    const auto& discs = world_.discs();
     FrameDTO frameDTO;
-    frameDTO.discs_.reserve(discs.size());
+    frameDTO.discs_.reserve(worldDiscs_.size());
 
-    frameDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
-    for (int index : world_.getChangedDiscsIndices())
-        frameDTO.changedDiscsIndices_.push_back(std::make_pair(index, discs[index].type_));
-
-    for (const auto& disc : discs)
+    for (const auto& disc : worldDiscs_)
         frameDTO.discs_.push_back(GUIDisc(disc.position_));
 
     emit frameData(frameDTO);
+}
+
+void Simulation::emitUpdateData()
+{
+    if (world_.getChangedDiscsIndices().empty() && world_.getDestroyedDiscsIndices().empty())
+        return;
+
+    UpdateDTO updateDTO;
+    for (int index : world_.getChangedDiscsIndices())
+        updateDTO.changedDiscsIndices_.push_back(std::make_pair(index, worldDiscs_[index].type_));
+
+    updateDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
+
+    emit updateData(updateDTO);
 }
