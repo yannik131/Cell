@@ -43,28 +43,17 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
 
 void SimulationWidget::update(const UpdateDTO& updateDTO)
 {
-    VLOG(1) << "There are " << circles_.size() << " circle shapes before applying changes.";
-
     // We need to do this in the same order it happens in the simulation:
     // 1. Add new discs 2. Remove destroyed discs 3. Update changed discs
     for (const auto& disc : updateDTO.newDiscs_)
-    {
-        VLOG(1) << "Inserting new circle shape";
         circles_.push_back(circleShapeFromDisc(disc));
-    }
 
     // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
     for (auto iter = updateDTO.destroyedDiscsIndexes_.rbegin(); iter != updateDTO.destroyedDiscsIndexes_.rend(); ++iter)
-    {
-        VLOG(1) << "Removing circle shape at index " << *iter;
         circles_.erase(circles_.begin() + *iter);
-    }
 
     for (const auto& [index, discType] : updateDTO.changedDiscsIndices_)
-    {
-        VLOG(1) << "Updating circle shape at index " << index;
         circles_[index] = circleShapeFromDisc(Disc(discType));
-    }
 }
 
 sf::CircleShape SimulationWidget::circleShapeFromDisc(const Disc& disc)

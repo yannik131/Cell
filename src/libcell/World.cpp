@@ -31,12 +31,8 @@ void World::update(const sf::Time& dt)
         MathUtils::handleWorldBoundCollision(disc, bounds_);
     }
 
-    VLOG(1) << "There are currently " << discs_.size() << " discs before applying changes.";
-
     removeDestroyedDiscs();
     findChangedDiscs();
-
-    VLOG(1) << "There are now " << discs_.size() << " discs after applying changes.";
 }
 
 int World::getAndResetCollisionCount()
@@ -173,7 +169,6 @@ void World::findChangedDiscs()
         {
             changedDiscsIndices_.push_back(i);
             discs_[i].changed_ = false;
-            VLOG(1) << "Changed disc at index " << i;
         }
     }
 }
@@ -187,7 +182,6 @@ void World::removeDestroyedDiscs()
         {
             iter = discs_.erase(iter);
             destroyedDiscsIndices_.push_back(currentIndex);
-            VLOG(1) << "Erased disc at index " << currentIndex;
         }
         // TODO also find changed discs here, no need to iterate twice
         else
@@ -206,6 +200,4 @@ void World::handleDecompositionReactions()
 
     discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-
-    VLOG(1) << "Added " << newDiscs.size() << " new discs.";
 }
