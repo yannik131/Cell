@@ -4,13 +4,67 @@
 
 #include "nanoflann.hpp"
 
+#include <numeric>
 #include <random>
 
 namespace MathUtils
 {
 
+static std::random_device rd;
+static std::mt19937 gen(rd());
+static std::uniform_real_distribution<float> distribution(0, 1);
+
 typedef nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter> AdapterType;
 typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KDTree;
+
+std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
+{
+    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactionTable_;
+    const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    std::vector<Disc> newDiscs;
+
+    for (auto& disc : discs)
+    {
+        const auto& iter = decompositionReactionTable.find(disc.type_);
+        if (iter == decompositionReactionTable.end())
+            continue;
+
+        const auto& possibleReactions = iter->second;
+        float randomNumber = distribution(gen);
+        for (const auto& [resultTypePair, probability] : possibleReactions)
+        {
+            if (randomNumber > probability * simulationTimeStep)
+                continue;
+
+            // We will put both resulting discs in the same position as the old one and let the collision algorithm do
+            // the separation for us This way we also account for immediate re-formation
+
+            const float NewMass = resultTypePair.first.mass_ + resultTypePair.second.mass_;
+
+            Disc product1(resultTypePair.first);
+            product1.velocity_ =
+                sf::Vector2f{-disc.velocity_.y, disc.velocity_.x} * (resultTypePair.first.mass_ / NewMass);
+            product1.position_ = disc.position_;
+
+            Disc product2(resultTypePair.second);
+            product2.velocity_ =
+                sf::Vector2f{disc.velocity_.y, -disc.velocity_.x} * (resultTypePair.second.mass_ / NewMass);
+            product2.position_ = disc.position_;
+
+            // Collision detection skips discs with distance 0 to skip the currently viewed disc, so we have to add a
+            // little something here
+            product2.position_ += {0.01f, 0.01f};
+
+            newDiscs.push_back(std::move(product1));
+            newDiscs.push_back(std::move(product2));
+            disc.destroyed_ = true;
+
+            break;
+        }
+    }
+
+    return newDiscs;
+}
 
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
 {
@@ -23,6 +77,11 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
     for (auto& disc : discs)
     {
+        // TODO Maybe find a better way? We handle decomposition reaction before this to account for immediate
+        // re-combination
+        if (disc.destroyed_)
+            continue;
+
         discsInRadius.clear();
         const float maxCollisionDistance = disc.type_.radius_ + maxRadius;
 
@@ -43,9 +102,11 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
             if (discsInRadius[i].second <= radiusSum * radiusSum)
             {
                 Disc* p1 = &disc;
-                auto p2 = &otherDisc;
-                if (p2->type_ < p1->type_)
+                Disc* p2 = &otherDisc;
+
+                if (p2 < p1)
                     std::swap(p1, p2);
+
                 collidingDiscs.insert(std::make_pair(p1, p2));
                 break;
             }
@@ -55,15 +116,11 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
-int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs, const sf::Time& dt)
+int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
     int collisionCount = 0;
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
     const auto& reactionTable = GlobalSettings::getSettings().combinationReactionTable_;
-
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution(0, 1);
 
     // DeepSeek-generated
     for (const auto& [p1, p2] : collidingDiscs)
@@ -79,22 +136,20 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 
         // Normal vector of the collision
         sf::Vector2f normal = pos2 - pos1;
-        float distance = std::sqrt(normal.x * normal.x + normal.y * normal.y);
+        float distance = std::hypot(normal.x, normal.y);
         normal /= distance;
 
-        // Tangential vector of the collision
-        sf::Vector2f tangent(-normal.y, normal.x);
+        // Correct positions to avoid overlaps
+        float overlap = (r1 + r2) - distance;
+        pos1 -= overlap * normal / 2.0f;
+        pos2 += overlap * normal / 2.0f;
 
-        // Relative velocity
-        sf::Vector2f relativeVelocity = v2 - v1;
-        float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
-        float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
-
-        // If the particles are moving away from each other, no collision
-        if (velocityAlongNormal > 0)
+        // No overlap -> no collision
+        if (overlap <= 0)
             continue;
 
-        auto iter = reactionTable.find(std::make_pair(p1->type_, p2->type_));
+        auto iter = reactionTable.find(p2->type_ < p1->type_ ? std::make_pair(p2->type_, p1->type_)
+                                                             : std::make_pair(p1->type_, p2->type_));
         bool reactionOccured = false;
         if (iter != reactionTable.end())
         {
@@ -102,31 +157,38 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
             float randomNumber = distribution(gen);
             for (const auto& [resultType, probability] : possibleReactions)
             {
-                if (randomNumber <= probability)
+                if (randomNumber > probability)
+                    continue;
+
+                if (std::abs(resultType.radius_ - p1->type_.radius_) < std::abs(resultType.radius_ - p2->type_.radius_))
                 {
-                    if (std::abs(resultType.radius_ - p1->type_.radius_) <
-                        std::abs(resultType.radius_ - p2->type_.radius_))
-                    {
-                        p1->type_ = resultType;
-                        p1->changed_ = true;
-                        p2->destroyed_ = true;
-                        v1 = (m1 * v1 + m2 * v2) / resultType.mass_;
-                    }
-                    else
-                    {
-                        p2->type_ = resultType;
-                        p2->changed_ = true;
-                        p1->destroyed_ = true;
-                        v2 = (m1 * v1 + m2 * v2) / resultType.mass_;
-                    }
-                    reactionOccured = true;
-                    break;
+                    p1->type_ = resultType;
+                    p1->changed_ = true;
+                    p2->destroyed_ = true;
+                    v1 = (m1 * v1 + m2 * v2) / resultType.mass_;
                 }
+                else
+                {
+                    p2->type_ = resultType;
+                    p2->changed_ = true;
+                    p1->destroyed_ = true;
+                    v2 = (m1 * v1 + m2 * v2) / resultType.mass_;
+                }
+                reactionOccured = true;
+                break;
             }
         }
 
         if (!reactionOccured)
         {
+            // Tangential vector of the collision
+            sf::Vector2f tangent(-normal.y, normal.x);
+
+            // Relative velocity
+            sf::Vector2f relativeVelocity = v2 - v1;
+            float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
+            float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
+
             // Coefficient of restitution (elasticity of the collision)
             const float e = 1.f; // Fully elastic
 
@@ -144,11 +206,6 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
             // Apply the impulse
             v1 -= impulse / m1;
             v2 += impulse / m2;
-
-            // Correct positions to avoid overlaps
-            float overlap = (r1 + r2) - distance;
-            pos1 -= overlap * normal / 2.0f;
-            pos2 += overlap * normal / 2.0f;
         }
 
         ++collisionCount;

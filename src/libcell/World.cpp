@@ -24,8 +24,9 @@ void World::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.position_ += disc.velocity_ * dt.asSeconds();
+        handleDecompositionReactions();
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs, dt);
+        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs);
         MathUtils::handleWorldBoundCollision(disc, bounds_);
     }
 
@@ -77,6 +78,17 @@ const std::vector<int>& World::getDestroyedDiscsIndices() const
 const std::vector<int>& World::getChangedDiscsIndices() const
 {
     return changedDiscsIndices_;
+}
+
+std::vector<Disc> World::getNewDiscs() const
+{
+    std::vector<Disc> newDiscs;
+    newDiscs.reserve(newDiscs_.size());
+
+    for (const auto& pointer : newDiscs_)
+        newDiscs.push_back(*pointer);
+
+    return newDiscs;
 }
 
 void World::buildScene()
@@ -182,4 +194,18 @@ void World::removeDestroyedDiscs()
 
         ++currentIndex;
     }
+}
+
+void World::handleDecompositionReactions()
+{
+    newDiscs_.clear();
+    const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
+
+    if (newDiscs.empty())
+        return;
+
+    discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+
+    for (size_t i = discs_.size() - newDiscs.size(); i < discs_.size(); ++i)
+        newDiscs_.push_back(&discs_[i]);
 }

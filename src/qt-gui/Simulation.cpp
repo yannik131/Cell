@@ -90,7 +90,8 @@ void Simulation::emitFrameData()
 
 void Simulation::emitUpdateData()
 {
-    if (world_.getChangedDiscsIndices().empty() && world_.getDestroyedDiscsIndices().empty())
+    if (world_.getChangedDiscsIndices().empty() && world_.getDestroyedDiscsIndices().empty() &&
+        world_.getNewDiscs().empty())
         return;
 
     UpdateDTO updateDTO;
@@ -98,6 +99,7 @@ void Simulation::emitUpdateData()
         updateDTO.changedDiscsIndices_.push_back(std::make_pair(index, worldDiscs_[index].type_));
 
     updateDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
+    updateDTO.newDiscs_ = world_.getNewDiscs();
 
     emit updateData(updateDTO);
 }

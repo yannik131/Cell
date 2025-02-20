@@ -24,6 +24,7 @@ struct UpdateDTO
 {
     std::vector<int> destroyedDiscsIndexes_;
     std::vector<std::pair<int, DiscType>> changedDiscsIndices_;
+    std::vector<Disc> newDiscs_;
 };
 
 Q_DECLARE_METATYPE(FrameDTO);

@@ -41,6 +41,10 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
 void SimulationWidget::removeAndChangeDiscs(const UpdateDTO& updateDTO)
 {
     // Order matters here, changed discs refer to the new indices
+    // First add new discs (could be removed right after)
+    for (const auto& disc : updateDTO.newDiscs_)
+        circles_.push_back(circleShapeFromDisc(disc));
+
     // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
     for (auto iter = updateDTO.destroyedDiscsIndexes_.rbegin(); iter != updateDTO.destroyedDiscsIndexes_.rend(); ++iter)
         circles_.erase(circles_.begin() + *iter);

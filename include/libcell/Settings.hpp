@@ -63,13 +63,20 @@ struct Settings
      * Example: If A + B -> C with 30% chance and A + B -> D with 20% chance, then
      * table[{A, B}] = table[{B, A}] = {{D, 0.2}, {C, 0.5}}
      * Accumulative probabilities sorted in ascending order are easier to work with with a random number approach
+     * Types have to be ordered in ascending order as well, I don't want to save {A, B} and {B, A}
      */
     std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>> combinationReactionTable_;
 
     /**
      * @brief Contains reactions of type C -> A + B and their probabilities to occur within 1 second
+     *
+     *
+     * Example: If C -> A + B with 1% chance per second, C -> A + D with 3% chance per second and D -> A + C with 2%
+     * chance per second, then
+     * table[C] = {{{A, B}, 0.01}, {{A, D}, 0.04}}
+     * table[D] = {{{A, C}, 0.02}}
      */
-    std::map<std::vector<std::pair<DiscType, float>>, std::pair<DiscType, DiscType>> decompositionReactionTable_;
+    std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>> decompositionReactionTable_;
 };
 
 namespace SettingsLimits

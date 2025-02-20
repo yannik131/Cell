@@ -27,12 +27,14 @@ public:
      */
     const std::vector<int>& getDestroyedDiscsIndices() const;
     const std::vector<int>& getChangedDiscsIndices() const;
+    std::vector<Disc> getNewDiscs() const;
 
 private:
     void buildScene();
     void initializeStartPositions();
     void findChangedDiscs();
     void removeDestroyedDiscs();
+    void handleDecompositionReactions();
 
 private:
     std::vector<sf::Vector2f> startPositions_;
@@ -43,6 +45,7 @@ private:
 
     std::vector<int> changedDiscsIndices_;
     std::vector<int> destroyedDiscsIndices_;
+    std::vector<Disc*> newDiscs_;
 };
 
 #endif /* WORLD_HPP */

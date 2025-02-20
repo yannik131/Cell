@@ -12,5 +12,7 @@ Settings::Settings()
     discTypeDistribution_[C] = 10;
     discTypeDistribution_[D] = 10;
 
-    combinationReactionTable_[{A, B}] = {{C, 0.01}, {D, 0.02}};
+    combinationReactionTable_[{A, B}] = {{C, 0.01f}, {D, 0.02f}};
+    decompositionReactionTable_[C] = {{{A, B}, 0.01f}};
+    decompositionReactionTable_[D] = {{{A, B}, 0.02f}};
 }
