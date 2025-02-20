@@ -27,7 +27,7 @@ public:
      */
     const std::vector<int>& getDestroyedDiscsIndices() const;
     const std::vector<int>& getChangedDiscsIndices() const;
-    std::vector<Disc> getNewDiscs() const;
+    const std::vector<Disc>& getNewDiscs() const;
 
 private:
     void buildScene();
@@ -45,7 +45,7 @@ private:
 
     std::vector<int> changedDiscsIndices_;
     std::vector<int> destroyedDiscsIndices_;
-    std::vector<Disc*> newDiscs_;
+    std::vector<Disc> newDiscs_;
 };
 
 #endif /* WORLD_HPP */

@@ -20,6 +20,7 @@ void World::update(const sf::Time& dt)
 {
     changedDiscsIndices_.clear();
     destroyedDiscsIndices_.clear();
+    newDiscs_.clear();
 
     for (auto& disc : discs_)
     {
@@ -30,8 +31,12 @@ void World::update(const sf::Time& dt)
         MathUtils::handleWorldBoundCollision(disc, bounds_);
     }
 
+    VLOG(1) << "There are currently " << discs_.size() << " discs before applying changes.";
+
     removeDestroyedDiscs();
     findChangedDiscs();
+
+    VLOG(1) << "There are now " << discs_.size() << " discs after applying changes.";
 }
 
 int World::getAndResetCollisionCount()
@@ -80,15 +85,9 @@ const std::vector<int>& World::getChangedDiscsIndices() const
     return changedDiscsIndices_;
 }
 
-std::vector<Disc> World::getNewDiscs() const
+const std::vector<Disc>& World::getNewDiscs() const
 {
-    std::vector<Disc> newDiscs;
-    newDiscs.reserve(newDiscs_.size());
-
-    for (const auto& pointer : newDiscs_)
-        newDiscs.push_back(*pointer);
-
-    return newDiscs;
+    return newDiscs_;
 }
 
 void World::buildScene()
@@ -174,6 +173,7 @@ void World::findChangedDiscs()
         {
             changedDiscsIndices_.push_back(i);
             discs_[i].changed_ = false;
+            VLOG(1) << "Changed disc at index " << i;
         }
     }
 }
@@ -187,6 +187,7 @@ void World::removeDestroyedDiscs()
         {
             iter = discs_.erase(iter);
             destroyedDiscsIndices_.push_back(currentIndex);
+            VLOG(1) << "Erased disc at index " << currentIndex;
         }
         // TODO also find changed discs here, no need to iterate twice
         else
@@ -198,14 +199,13 @@ void World::removeDestroyedDiscs()
 
 void World::handleDecompositionReactions()
 {
-    newDiscs_.clear();
     const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
 
     if (newDiscs.empty())
         return;
 
     discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
 
-    for (size_t i = discs_.size() - newDiscs.size(); i < discs_.size(); ++i)
-        newDiscs_.push_back(&discs_[i]);
+    VLOG(1) << "Added " << newDiscs.size() << " new discs.";
 }

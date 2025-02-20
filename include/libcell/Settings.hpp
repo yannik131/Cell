@@ -34,7 +34,7 @@ struct Settings
      * @note Frame data transmission takes about 10us for a few hundred discs, so 30 FPS will use about 0.3ms each
      * second (time during which the simulation can't update)
      */
-    int guiFPS_ = 30;
+    int guiFPS_ = 60;
 
     /**
      * @brief How long to wait until resetting the collision count of the world and transmitting it to the gui for
