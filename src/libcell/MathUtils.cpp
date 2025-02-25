@@ -3,6 +3,7 @@
 #include "NanoflannAdapter.hpp"
 
 #include "nanoflann.hpp"
+#include <glog/logging.h>
 
 #include <numeric>
 #include <random>
@@ -37,23 +38,30 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
                 continue;
 
             // We will put both resulting discs in the same position as the old one and let the collision algorithm do
-            // the separation for us This way we also account for immediate re-formation
+            // the separation for us
+            // This way we also account for immediate re-formation
 
-            const float NewMass = resultTypePair.first.mass_ + resultTypePair.second.mass_;
+            const float MassFraction = disc.type_.mass_ / (resultTypePair.first.mass_ + resultTypePair.second.mass_);
+            const float Factor = std::sqrt(2) / 2 * MassFraction;
+            const auto& v = disc.velocity_;
+            const auto& r = disc.position_;
+            const float vAbs = std::hypot(v.x, v.y);
 
             Disc product1(resultTypePair.first);
-            product1.velocity_ =
-                sf::Vector2f{-disc.velocity_.y, disc.velocity_.x} * (resultTypePair.first.mass_ / NewMass);
-            product1.position_ = disc.position_;
+            product1.velocity_ = Factor * sf::Vector2f{v.x - v.y, v.x + v.y};
+            product1.position_ = r + product1.velocity_ / vAbs;
 
             Disc product2(resultTypePair.second);
-            product2.velocity_ =
-                sf::Vector2f{disc.velocity_.y, -disc.velocity_.x} * (resultTypePair.second.mass_ / NewMass);
-            product2.position_ = disc.position_;
+            product2.velocity_ = Factor * sf::Vector2f{v.x + v.y, v.y - v.x};
+            product2.position_ = r + product2.velocity_ / vAbs;
 
-            // Collision detection skips discs with distance 0 to skip the currently viewed disc, so we have to add a
-            // little something here
-            product2.position_ += {0.01f, 0.01f};
+            sf::Vector2f normal = product2.position_ - product1.position_;
+            float distance = std::hypot(normal.x, normal.y);
+            normal /= distance;
+
+            float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance;
+            product1.position_ -= overlap * normal / 2.0f;
+            product2.position_ += overlap * normal / 2.0f;
 
             newDiscs.push_back(std::move(product1));
             newDiscs.push_back(std::move(product2));
@@ -214,7 +222,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
     return collisionCount;
 }
 
-void handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds)
+float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)
 {
     // https://hermann-baum.de/bouncing-balls/
     const auto& r = disc.type_.radius_;
@@ -256,6 +264,15 @@ void handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds)
         pos += {dx, dy};
         v.y = -v.y;
     }
+
+    float randomNumber = distribution(gen) / 10.f;
+    if (kineticEnergyDeficiency <= 0)
+        randomNumber = -randomNumber;
+
+    float kineticEnergyBefore = disc.getKineticEnergy();
+    v *= 1 + randomNumber;
+
+    return disc.getKineticEnergy() - kineticEnergyBefore;
 }
 
 } // namespace MathUtils

@@ -34,7 +34,6 @@ private:
     void initializeStartPositions();
     void findChangedDiscs();
     void removeDestroyedDiscs();
-    void handleDecompositionReactions();
 
 private:
     std::vector<sf::Vector2f> startPositions_;
@@ -42,6 +41,8 @@ private:
     sf::Vector2f bounds_;
     int maxRadius_;
     int collisionCount_ = 0;
+    float initialKineticEnergy_;
+    float currentKineticEnergy_;
 
     std::vector<int> changedDiscsIndices_;
     std::vector<int> destroyedDiscsIndices_;

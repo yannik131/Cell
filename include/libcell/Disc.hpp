@@ -18,6 +18,9 @@ struct Disc
 
     int getId() const;
 
+    float getAbsoluteMomentum() const;
+    float getKineticEnergy() const;
+
 private:
     static int instanceCount;
     int id_;

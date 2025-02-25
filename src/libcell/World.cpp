@@ -25,14 +25,19 @@ void World::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.position_ += disc.velocity_ * dt.asSeconds();
-        handleDecompositionReactions();
+        const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
+        newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
         collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs);
-        MathUtils::handleWorldBoundCollision(disc, bounds_);
+        currentKineticEnergy_ +=
+            MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
+    discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
     removeDestroyedDiscs();
     findChangedDiscs();
+
+    LOG(INFO) << "Total: " << currentKineticEnergy_ << ", initial: " << initialKineticEnergy_;
 }
 
 int World::getAndResetCollisionCount()
@@ -112,6 +117,7 @@ void World::buildScene()
 
     std::sort(discTypes.begin(), discTypes.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
 
+    initialKineticEnergy_ = 0.f;
     for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
     {
         int randomNumber = distribution(gen);
@@ -124,6 +130,7 @@ void World::buildScene()
                 Disc newDisc(discType);
                 newDisc.position_ = startPositions_.back();
                 newDisc.velocity_ = sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen));
+                initialKineticEnergy_ += newDisc.getKineticEnergy();
 
                 discs_.push_back(newDisc);
                 startPositions_.pop_back();
@@ -132,6 +139,8 @@ void World::buildScene()
             }
         }
     }
+
+    currentKineticEnergy_ = initialKineticEnergy_;
 
     VLOG(1) << "Radius distribution";
     for (const auto& [radius, count] : counts)
@@ -175,6 +184,7 @@ void World::findChangedDiscs()
 
 void World::removeDestroyedDiscs()
 {
+    currentKineticEnergy_ = 0.f;
     int currentIndex = 0;
     for (auto iter = discs_.begin(); iter != discs_.end();)
     {
@@ -185,19 +195,11 @@ void World::removeDestroyedDiscs()
         }
         // TODO also find changed discs here, no need to iterate twice
         else
+        {
+            currentKineticEnergy_ += iter->getKineticEnergy();
             ++iter;
+        }
 
         ++currentIndex;
     }
-}
-
-void World::handleDecompositionReactions()
-{
-    const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
-
-    if (newDiscs.empty())
-        return;
-
-    discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
-    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
 }

@@ -14,5 +14,5 @@ Settings::Settings()
 
     combinationReactionTable_[{A, B}] = {{C, 0.01f}, {D, 0.02f}};
     decompositionReactionTable_[C] = {{{A, B}, 0.01f}};
-    decompositionReactionTable_[D] = {{{A, B}, 0.02f}};
+    decompositionReactionTable_[D] = {{{A, B}, 0.2f}};
 }
