@@ -6,9 +6,13 @@
 #include <SFML/System/Time.hpp>
 
 #include <map>
+#include <utility>
+#include <vector>
 
 struct Settings
 {
+    Settings();
+
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
@@ -30,7 +34,7 @@ struct Settings
      * @note Frame data transmission takes about 10us for a few hundred discs, so 30 FPS will use about 0.3ms each
      * second (time during which the simulation can't update)
      */
-    int guiFPS_ = 30;
+    int guiFPS_ = 60;
 
     /**
      * @brief How long to wait until resetting the collision count of the world and transmitting it to the gui for
@@ -51,10 +55,28 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_ = {{{"A", sf::Color::Green, 5, 5}, 50},
-                                                     {{"B", sf::Color::Red, 10, 10}, 30},
-                                                     {{"C", sf::Color::Blue, 12, 12}, 10},
-                                                     {{"D", sf::Color::Yellow, 15, 15}, 10}};
+    std::map<DiscType, int> discTypeDistribution_;
+
+    /**
+     * @brief Contains reactions of type A + B -> C and their probabilities
+     *
+     * Example: If A + B -> C with 30% chance and A + B -> D with 20% chance, then
+     * table[{A, B}] = table[{B, A}] = {{D, 0.2}, {C, 0.5}}
+     * Accumulative probabilities sorted in ascending order are easier to work with with a random number approach
+     * Types have to be ordered in ascending order as well, I don't want to save {A, B} and {B, A}
+     */
+    std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>> combinationReactionTable_;
+
+    /**
+     * @brief Contains reactions of type C -> A + B and their probabilities to occur within 1 second
+     *
+     *
+     * Example: If C -> A + B with 1% chance per second, C -> A + D with 3% chance per second and D -> A + C with 2%
+     * chance per second, then
+     * table[C] = {{{A, B}, 0.01}, {{A, D}, 0.04}}
+     * table[D] = {{{A, C}, 0.02}}
+     */
+    std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>> decompositionReactionTable_;
 };
 
 namespace SettingsLimits

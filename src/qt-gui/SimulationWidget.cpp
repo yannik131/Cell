@@ -6,16 +6,22 @@
 
 #include <map>
 
-SimulationWidget::SimulationWidget(QWidget* parent) : QSFMLWidget(parent)
+SimulationWidget::SimulationWidget(QWidget* parent)
+    : QSFMLWidget(parent)
 {
 }
 
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
+    VLOG(1) << "Rendering, received positions of " << frameDTO.discs_.size() << " discs.";
+    VLOG(1) << "Rendering, we have " << circles_.size() << " circle shapes.";
+
     sf::RenderWindow::clear(sf::Color::Black);
 
-    for(const auto& guiDisc : frameDTO.discs_) {
-        auto& circleShape = circles_[guiDisc.index_];
+    for (int i = 0; i < circles_.size(); ++i)
+    {
+        auto& circleShape = circles_[i];
+        const auto& guiDisc = frameDTO.discs_[i];
         circleShape.setPosition(guiDisc.position_);
 
         sf::RenderWindow::draw(circleShape);
@@ -26,17 +32,36 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
 
 void SimulationWidget::initialize(const std::vector<Disc>& discs)
 {
-    if(circles_.empty())
+    if (circles_.empty())
         circles_.reserve(discs.size());
-    else 
+    else
         circles_.clear();
 
-    for(const auto& disc : discs) {
-        sf::CircleShape shape(disc.type_.radius_);
-        shape.setFillColor(disc.type_.color_);
-        shape.setOrigin(sf::Vector2f(disc.type_.radius_, disc.type_.radius_));
-        shape.setPosition(disc.position_);
+    for (const auto& disc : discs)
+        circles_.push_back(circleShapeFromDisc(disc));
+}
 
-        circles_.push_back(shape);
-    }
+void SimulationWidget::update(const UpdateDTO& updateDTO)
+{
+    // We need to do this in the same order it happens in the simulation:
+    // 1. Add new discs 2. Remove destroyed discs 3. Update changed discs
+    for (const auto& disc : updateDTO.newDiscs_)
+        circles_.push_back(circleShapeFromDisc(disc));
+
+    // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
+    for (auto iter = updateDTO.destroyedDiscsIndexes_.rbegin(); iter != updateDTO.destroyedDiscsIndexes_.rend(); ++iter)
+        circles_.erase(circles_.begin() + *iter);
+
+    for (const auto& [index, discType] : updateDTO.changedDiscsIndices_)
+        circles_[index] = circleShapeFromDisc(Disc(discType));
+}
+
+sf::CircleShape SimulationWidget::circleShapeFromDisc(const Disc& disc)
+{
+    sf::CircleShape shape(disc.type_.radius_);
+    shape.setFillColor(disc.type_.color_);
+    shape.setOrigin(sf::Vector2f(disc.type_.radius_, disc.type_.radius_));
+    shape.setPosition(disc.position_);
+
+    return shape;
 }

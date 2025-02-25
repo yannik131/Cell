@@ -72,8 +72,8 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     int totalPercent = 0;
     for (const auto& [type, percent] : discTypeDistribution)
     {
-        if (percent <= 0)
-            throw std::runtime_error("Percentage for disc type\"" + type.name_ + "\" is equal to or smaller than 0");
+        if (percent < 0)
+            throw std::runtime_error("Percentage for disc type\"" + type.name_ + "\" is smaller than 0");
 
         totalPercent += percent;
 

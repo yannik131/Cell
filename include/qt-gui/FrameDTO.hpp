@@ -3,16 +3,15 @@
 
 #include "Disc.hpp"
 
-#include <SFML/System/Vector2.hpp>
 #include <QtCore/QMetaType>
+#include <SFML/System/Vector2.hpp>
 
 #include <vector>
 
-struct GUIDisc 
+struct GUIDisc
 {
-    GUIDisc(int index, const sf::Vector2f& position);
+    GUIDisc(const sf::Vector2f& position);
 
-    int index_;
     sf::Vector2f position_;
 };
 
@@ -21,6 +20,14 @@ struct FrameDTO
     std::vector<GUIDisc> discs_;
 };
 
+struct UpdateDTO
+{
+    std::vector<int> destroyedDiscsIndexes_;
+    std::vector<std::pair<int, DiscType>> changedDiscsIndices_;
+    std::vector<Disc> newDiscs_;
+};
+
 Q_DECLARE_METATYPE(FrameDTO);
+Q_DECLARE_METATYPE(UpdateDTO);
 
 #endif /* FRAMEDTO_HPP */

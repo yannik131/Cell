@@ -18,13 +18,26 @@ World::World()
 
 void World::update(const sf::Time& dt)
 {
+    changedDiscsIndices_.clear();
+    destroyedDiscsIndices_.clear();
+    newDiscs_.clear();
+
     for (auto& disc : discs_)
     {
         disc.position_ += disc.velocity_ * dt.asSeconds();
+        const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
+        newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs, dt);
-        MathUtils::handleWorldBoundCollision(disc, bounds_);
+        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs);
+        currentKineticEnergy_ +=
+            MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
+
+    discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+    removeDestroyedDiscs();
+    findChangedDiscs();
+
+    LOG(INFO) << "Total: " << currentKineticEnergy_ << ", initial: " << initialKineticEnergy_;
 }
 
 int World::getAndResetCollisionCount()
@@ -63,6 +76,21 @@ void World::setBounds(const sf::Vector2f& bounds)
     bounds_ = bounds;
 }
 
+const std::vector<int>& World::getDestroyedDiscsIndices() const
+{
+    return destroyedDiscsIndices_;
+}
+
+const std::vector<int>& World::getChangedDiscsIndices() const
+{
+    return changedDiscsIndices_;
+}
+
+const std::vector<Disc>& World::getNewDiscs() const
+{
+    return newDiscs_;
+}
+
 void World::buildScene()
 {
     std::random_device rd;
@@ -89,6 +117,7 @@ void World::buildScene()
 
     std::sort(discTypes.begin(), discTypes.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
 
+    initialKineticEnergy_ = 0.f;
     for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
     {
         int randomNumber = distribution(gen);
@@ -101,6 +130,7 @@ void World::buildScene()
                 Disc newDisc(discType);
                 newDisc.position_ = startPositions_.back();
                 newDisc.velocity_ = sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen));
+                initialKineticEnergy_ += newDisc.getKineticEnergy();
 
                 discs_.push_back(newDisc);
                 startPositions_.pop_back();
@@ -109,6 +139,8 @@ void World::buildScene()
             }
         }
     }
+
+    currentKineticEnergy_ = initialKineticEnergy_;
 
     VLOG(1) << "Radius distribution";
     for (const auto& [radius, count] : counts)
@@ -136,4 +168,38 @@ void World::initializeStartPositions()
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
+}
+
+void World::findChangedDiscs()
+{
+    for (int i = 0; i < discs_.size(); ++i)
+    {
+        if (discs_[i].changed_)
+        {
+            changedDiscsIndices_.push_back(i);
+            discs_[i].changed_ = false;
+        }
+    }
+}
+
+void World::removeDestroyedDiscs()
+{
+    currentKineticEnergy_ = 0.f;
+    int currentIndex = 0;
+    for (auto iter = discs_.begin(); iter != discs_.end();)
+    {
+        if (iter->destroyed_)
+        {
+            iter = discs_.erase(iter);
+            destroyedDiscsIndices_.push_back(currentIndex);
+        }
+        // TODO also find changed discs here, no need to iterate twice
+        else
+        {
+            currentKineticEnergy_ += iter->getKineticEnergy();
+            ++iter;
+        }
+
+        ++currentIndex;
+    }
 }

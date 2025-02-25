@@ -1,6 +1,16 @@
 #include "AnalysisPlot.hpp"
 #include "GlobalSettings.hpp"
 
+/**
+ * @todo Add plots for
+ * - velocity distribution
+ * - total absolute impulse
+ * - total impulse
+ * - total kinetic energy vs initial kinetic energy as horizontal line
+ * - particle counts
+ * - collision counts by type
+ */
+
 AnalysisPlot::AnalysisPlot(QWidget* parent)
     : QCustomPlot(parent)
 {
