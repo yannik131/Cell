@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DiscDistributionDialog</class>
- <widget class="QDialog" name="DiscDistributionDialog">
+ <class>DistributionAndReactionsDialog</class>
+ <widget class="QDialog" name="DistributionAndReactionsDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
-    <height>398</height>
+    <width>716</width>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTableView" name="discDistributionTableView"/>
+   </item>
+   <item>
+    <widget class="QTableView" name="reactionsTableView"/>
    </item>
    <item alignment="Qt::AlignHCenter">
     <widget class="QWidget" name="widget" native="true">

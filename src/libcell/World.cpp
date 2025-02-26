@@ -36,8 +36,6 @@ void World::update(const sf::Time& dt)
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
     removeDestroyedDiscs();
     findChangedDiscs();
-
-    LOG(INFO) << "Total: " << currentKineticEnergy_ << ", initial: " << initialKineticEnergy_;
 }
 
 int World::getAndResetCollisionCount()

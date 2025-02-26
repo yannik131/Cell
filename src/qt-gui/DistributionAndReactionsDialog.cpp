@@ -1,8 +1,8 @@
-#include "DiscDistributionDialog.hpp"
+#include "DistributionAndReactionsDialog.hpp"
 #include "ColorMapping.hpp"
 #include "DiscType.hpp"
 #include "GlobalSettings.hpp"
-#include "ui_DiscDistributionDialog.h"
+#include "ui_DistributionAndReactionsDialog.h"
 
 #include <QCloseEvent>
 #include <QComboBox>
@@ -16,25 +16,24 @@
 
 #include <glog/logging.h>
 
-DiscDistributionDialog::DiscDistributionDialog(QWidget* parent)
+DistributionAndReactionsDialog::DistributionAndReactionsDialog(QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::DiscDistributionDialog)
+    , ui(new Ui::DistributionAndReactionsDialog)
+    , discDistributionModel_(new QStandardItemModel(this))
+    , reactionsModel_(new QStandardItemModel(this))
 {
     ui->setupUi(this);
-    model_ = new QStandardItemModel(this);
-    model_->setColumnCount(6);
-    model_->setHeaderData(0, Qt::Horizontal, "Disc type");
-    model_->setHeaderData(1, Qt::Horizontal, "Radius [px]");
-    model_->setHeaderData(2, Qt::Horizontal, "Mass");
-    model_->setHeaderData(3, Qt::Horizontal, "Color");
-    model_->setHeaderData(4, Qt::Horizontal, "Percentage");
-    model_->setHeaderData(5, Qt::Horizontal, "Delete");
-    ui->discDistributionTableView->setModel(model_);
 
-    connect(ui->okPushButton, &QPushButton::clicked, this, &DiscDistributionDialog::onOK);
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscDistributionDialog::onCancel);
-    connect(ui->addPushButton, &QPushButton::clicked, this, &DiscDistributionDialog::onAdd);
-    connect(ui->clearPushButton, &QPushButton::clicked, this, &DiscDistributionDialog::onClear);
+    setModelHeaderData(discDistributionModel_, {"Disc type", "Radius [px]", "Mass", "Color", "Percentage", "Delete"});
+    setModelHeaderData(reactionsModel_, {"A", "+", "B", "->", "C", "+", "D"});
+
+    ui->discDistributionTableView->setModel(discDistributionModel_);
+    ui->reactionsTableView->setModel(reactionsModel_);
+
+    connect(ui->okPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onOK);
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onCancel);
+    connect(ui->addPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onAdd);
+    connect(ui->clearPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onClear);
 
     validateColorMapping();
 
@@ -42,25 +41,25 @@ DiscDistributionDialog::DiscDistributionDialog(QWidget* parent)
         addTableViewRowFromDiscType(discType, percentage);
 }
 
-void DiscDistributionDialog::closeEvent(QCloseEvent* event)
+void DistributionAndReactionsDialog::closeEvent(QCloseEvent* event)
 {
     onCancel();
     event->ignore();
 }
 
-void DiscDistributionDialog::onOK()
+void DistributionAndReactionsDialog::onOK()
 {
     std::map<DiscType, int> discTypeDistribution;
 
     // Convert the entries into DiscType objects
-    for (int row = 0; row < model_->rowCount(); ++row)
+    for (int row = 0; row < discDistributionModel_->rowCount(); ++row)
     {
         DiscType newType;
         int percentage = 0;
 
-        for (int col = 0; col < model_->columnCount(); ++col)
+        for (int col = 0; col < discDistributionModel_->columnCount(); ++col)
         {
-            QWidget* widget = ui->discDistributionTableView->indexWidget(model_->index(row, col));
+            QWidget* widget = ui->discDistributionTableView->indexWidget(discDistributionModel_->index(row, col));
 
             if (QLineEdit* lineEdit = qobject_cast<QLineEdit*>(widget))
             {
@@ -99,7 +98,7 @@ void DiscDistributionDialog::onOK()
     }
 }
 
-void DiscDistributionDialog::onCancel()
+void DistributionAndReactionsDialog::onCancel()
 {
     onClear();
     for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)
@@ -107,18 +106,18 @@ void DiscDistributionDialog::onCancel()
     hide();
 }
 
-void DiscDistributionDialog::onAdd()
+void DistributionAndReactionsDialog::onAdd()
 {
-    std::string name = "Disc" + std::to_string(model_->rowCount() + 1);
+    std::string name = "Disc" + std::to_string(discDistributionModel_->rowCount() + 1);
     addTableViewRowFromDiscType(DiscType(name, sf::Color::White, 10, 10));
 }
 
-void DiscDistributionDialog::onClear()
+void DistributionAndReactionsDialog::onClear()
 {
-    model_->removeRows(0, model_->rowCount());
+    discDistributionModel_->removeRows(0, discDistributionModel_->rowCount());
 }
 
-void DiscDistributionDialog::onDeleteDiscType()
+void DistributionAndReactionsDialog::onDeleteDiscType()
 {
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     if (!button)
@@ -126,10 +125,10 @@ void DiscDistributionDialog::onDeleteDiscType()
 
     QModelIndex index = ui->discDistributionTableView->indexAt(button->pos());
 
-    model_->removeRow(index.row());
+    discDistributionModel_->removeRow(index.row());
 }
 
-void DiscDistributionDialog::validateColorMapping()
+void DistributionAndReactionsDialog::validateColorMapping()
 {
     for (const auto& color : SupportedDiscColors)
     {
@@ -139,50 +138,58 @@ void DiscDistributionDialog::validateColorMapping()
     }
 }
 
-void DiscDistributionDialog::addTableViewRowFromDiscType(const DiscType& discType, int percentage)
+void DistributionAndReactionsDialog::addTableViewRowFromDiscType(const DiscType& discType, int percentage)
 {
-    int oldRowCount = model_->rowCount();
-    int newRowCount = model_->rowCount() + 1;
+    int oldRowCount = discDistributionModel_->rowCount();
+    int newRowCount = discDistributionModel_->rowCount() + 1;
 
     QList<QStandardItem*> items;
     for (int i = 0; i < 6; ++i)
         items.append(new QStandardItem());
-    model_->appendRow(items);
+    discDistributionModel_->appendRow(items);
 
     // Disc type name
     QLineEdit* nameLineEdit = new QLineEdit();
     nameLineEdit->setText(QString::fromStdString(discType.name_));
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 0), nameLineEdit);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 0), nameLineEdit);
 
     // Radius
     QSpinBox* radiusSpinBox = new QSpinBox();
     radiusSpinBox->setObjectName(QString("radius") + QString::number(newRowCount));
     radiusSpinBox->setValue(discType.radius_);
     radiusSpinBox->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius);
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 1), radiusSpinBox);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 1), radiusSpinBox);
 
     // Mass
     QSpinBox* massSpinBox = new QSpinBox();
     massSpinBox->setObjectName(QString("mass") + QString::number(newRowCount));
     massSpinBox->setValue(discType.mass_);
     massSpinBox->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass);
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 2), massSpinBox);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 2), massSpinBox);
 
     // Color
     QComboBox* colorComboBox = new QComboBox();
     colorComboBox->addItems(SupportedDiscColorNames);
     colorComboBox->setCurrentIndex(SupportedDiscColors.indexOf(discType.color_));
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 3), colorComboBox);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 3), colorComboBox);
 
     // Percentage
     QSpinBox* percentageSpinBox = new QSpinBox();
     percentageSpinBox->setObjectName(QString("percentage") + QString::number(newRowCount));
     percentageSpinBox->setValue(percentage);
     percentageSpinBox->setRange(0, 100);
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 4), percentageSpinBox);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 4), percentageSpinBox);
 
     // Delete
     QPushButton* deleteButton = new QPushButton("Delete");
-    connect(deleteButton, &QPushButton::clicked, this, &DiscDistributionDialog::onDeleteDiscType);
-    ui->discDistributionTableView->setIndexWidget(model_->index(oldRowCount, 5), deleteButton);
+    connect(deleteButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onDeleteDiscType);
+    ui->discDistributionTableView->setIndexWidget(discDistributionModel_->index(oldRowCount, 5), deleteButton);
+}
+
+void DistributionAndReactionsDialog::setModelHeaderData(QStandardItemModel* model, const QStringList& headers)
+{
+    model->setColumnCount(headers.size());
+
+    for (int i = 0; i < headers.size(); ++i)
+        model->setHeaderData(i, Qt::Horizontal, headers[i]);
 }

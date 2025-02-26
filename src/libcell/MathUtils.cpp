@@ -37,10 +37,6 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
             if (randomNumber > probability * simulationTimeStep)
                 continue;
 
-            // We will put both resulting discs in the same position as the old one and let the collision algorithm do
-            // the separation for us
-            // This way we also account for immediate re-formation
-
             const float MassFraction = disc.type_.mass_ / (resultTypePair.first.mass_ + resultTypePair.second.mass_);
             const float Factor = std::sqrt(2) / 2 * MassFraction;
             const auto& v = disc.velocity_;
@@ -230,6 +226,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     auto& v = disc.velocity_;
 
     float dx, dy;
+    bool collided = false;
 
     if (pos.x < r)
     {
@@ -238,6 +235,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 
         pos += {dx, dy};
         v.x = -v.x;
+        collided = true;
     }
     else if (pos.x > bounds.x - r)
     {
@@ -246,6 +244,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 
         pos += {dx, dy};
         v.x = -v.x;
+        collided = true;
     }
 
     if (pos.y < r)
@@ -255,6 +254,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 
         pos += {dx, dy};
         v.y = -v.y;
+        collided = true;
     }
     else if (pos.y > bounds.y - r)
     {
@@ -263,7 +263,11 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 
         pos += {dx, dy};
         v.y = -v.y;
+        collided = true;
     }
+
+    if (!collided)
+        return 0.f;
 
     float randomNumber = distribution(gen) / 10.f;
     if (kineticEnergyDeficiency <= 0)

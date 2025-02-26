@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#include "DiscDistributionDialog.hpp"
+#include "DistributionAndReactionsDialog.hpp"
 #include "FrameDTO.hpp"
 #include "Simulation.hpp"
 
@@ -42,7 +42,7 @@ private:
     bool initialSizeSet_ = false;
     QTimer resizeTimer_;
 
-    DiscDistributionDialog* discDistributionDialog_;
+    DistributionAndReactionsDialog* discDistributionDialog_;
 };
 
 #endif /* MAINWINDOW_HPP */

@@ -47,7 +47,7 @@ private:
 
     bool locked_ = false;
 
-    friend class DiscDistributionDialog;
+    friend class DistributionAndReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;
 };

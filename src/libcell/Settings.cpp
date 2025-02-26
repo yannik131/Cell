@@ -3,9 +3,9 @@
 Settings::Settings()
 {
     DiscType A("A", sf::Color::Green, 5, 5);
-    DiscType B("B", sf::Color::Red, 10, 10);
-    DiscType C("C", sf::Color::Blue, 12, 12);
-    DiscType D("D", sf::Color::Yellow, 15, 15);
+    DiscType B("B", sf::Color::Red, 10, 5);
+    DiscType C("C", sf::Color::Blue, 12, 5);
+    DiscType D("D", sf::Color::Yellow, 15, 5);
 
     discTypeDistribution_[A] = 50;
     discTypeDistribution_[B] = 30;
@@ -14,5 +14,5 @@ Settings::Settings()
 
     combinationReactionTable_[{A, B}] = {{C, 0.01f}, {D, 0.02f}};
     decompositionReactionTable_[C] = {{{A, B}, 0.01f}};
-    decompositionReactionTable_[D] = {{{A, B}, 0.2f}};
+    decompositionReactionTable_[D] = {{{A, B}, 0.1f}};
 }
