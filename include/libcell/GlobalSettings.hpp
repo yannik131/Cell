@@ -50,6 +50,7 @@ private:
     friend class DistributionAndReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;
+    friend void setBenchmarkSettings();
 };
 
 #include "GlobalSettings.inl"

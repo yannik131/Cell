@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
+    <width>885</width>
     <height>689</height>
    </rect>
   </property>
@@ -21,9 +21,41 @@
     <widget class="QTableView" name="discDistributionTableView"/>
    </item>
    <item>
+    <widget class="QWidget" name="widget_3" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="addTypePushButton">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Add type</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearTypesPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QTableView" name="reactionsTableView"/>
    </item>
-   <item alignment="Qt::AlignHCenter">
+   <item>
     <widget class="QWidget" name="widget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="topMargin">
@@ -33,20 +65,26 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="addPushButton">
+       <widget class="QPushButton" name="addReactionPushButton">
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="text">
-         <string>Add</string>
+         <string>Add reaction</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="clearPushButton">
+       <widget class="QPushButton" name="clearReactionsPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Clear</string>
         </property>

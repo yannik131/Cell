@@ -25,9 +25,14 @@ signals:
 private slots:
     void onOK();
     void onCancel();
-    void onAdd();
-    void onClear();
+
+    void onAddType();
+    void onClearTypes();
     void onDeleteDiscType();
+
+    void onAddReaction();
+    void onClearReactions();
+    void onDeleteReaction();
 
 private:
     void validateColorMapping();

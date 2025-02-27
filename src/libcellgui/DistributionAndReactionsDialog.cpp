@@ -24,16 +24,17 @@ DistributionAndReactionsDialog::DistributionAndReactionsDialog(QWidget* parent)
 {
     ui->setupUi(this);
 
-    setModelHeaderData(discDistributionModel_, {"Disc type", "Radius [px]", "Mass", "Color", "Percentage", "Delete"});
-    setModelHeaderData(reactionsModel_, {"A", "+", "B", "->", "C", "+", "D"});
+    setModelHeaderData(discDistributionModel_,
+                       {"Disc type", "Radius [px]", "Mass", "Color", "Frequency [%]", "Delete"});
+    setModelHeaderData(reactionsModel_, {"A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"});
 
     ui->discDistributionTableView->setModel(discDistributionModel_);
     ui->reactionsTableView->setModel(reactionsModel_);
 
     connect(ui->okPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onOK);
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onCancel);
-    connect(ui->addPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onAdd);
-    connect(ui->clearPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onClear);
+    connect(ui->addTypePushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onAddType);
+    connect(ui->clearTypesPushButton, &QPushButton::clicked, this, &DistributionAndReactionsDialog::onClearTypes);
 
     validateColorMapping();
 
@@ -100,19 +101,19 @@ void DistributionAndReactionsDialog::onOK()
 
 void DistributionAndReactionsDialog::onCancel()
 {
-    onClear();
+    onClearTypes();
     for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)
         addTableViewRowFromDiscType(discType, percentage);
     hide();
 }
 
-void DistributionAndReactionsDialog::onAdd()
+void DistributionAndReactionsDialog::onAddType()
 {
     std::string name = "Disc" + std::to_string(discDistributionModel_->rowCount() + 1);
     addTableViewRowFromDiscType(DiscType(name, sf::Color::White, 10, 10));
 }
 
-void DistributionAndReactionsDialog::onClear()
+void DistributionAndReactionsDialog::onClearTypes()
 {
     discDistributionModel_->removeRows(0, discDistributionModel_->rowCount());
 }
@@ -126,6 +127,18 @@ void DistributionAndReactionsDialog::onDeleteDiscType()
     QModelIndex index = ui->discDistributionTableView->indexAt(button->pos());
 
     discDistributionModel_->removeRow(index.row());
+}
+
+void DistributionAndReactionsDialog::onAddReaction()
+{
+}
+
+void DistributionAndReactionsDialog::onClearReactions()
+{
+}
+
+void DistributionAndReactionsDialog::onDeleteReaction()
+{
 }
 
 void DistributionAndReactionsDialog::validateColorMapping()

@@ -13,7 +13,7 @@ cd "$(dirname "$0")/../../"
 if [ ! -d "contrib/vcpkg/" ]; then
     git submodule update
     ./contrib/vcpkg/bootstrap-vcpkg.sh
-    ./contrib/vcpkg/vcpkg install glog sfml nanoflann qtbase
+    ./contrib/vcpkg/vcpkg install glog sfml nanoflann qtbase gtest
 fi
 
 # Release build

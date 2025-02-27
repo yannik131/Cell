@@ -11,7 +11,7 @@ Set-Location .\..\..
 if (-Not (Test-Path "contrib\vcpkg\buildtrees\")) {
     git submodule update --init
     .\contrib\vcpkg\bootstrap-vcpkg.bat
-    .\contrib\vcpkg\vcpkg.exe install glog sfml nanoflann qtbase
+    .\contrib\vcpkg\vcpkg.exe install glog sfml nanoflann qtbase gtest
 }
 
 # Release build

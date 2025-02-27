@@ -55,17 +55,37 @@ target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-file(GLOB QT_GUI_SRC src/qt-gui/*.cpp src/gui/*.ui include/qt-gui/*.hpp)
+file(GLOB QT_GUI_SRC src/libcellgui/*.cpp include/libcellgui/*.hpp)
 
 #the header files have to be added here as well for Q_OBJECT to work
-add_executable(qt-gui
+add_library(libcellgui
   ${QT_GUI_SRC} 
 )
 
-target_include_directories(qt-gui PUBLIC ${CMAKE_SOURCE_DIR}/include/qt-gui/)
+target_include_directories(libcellgui PUBLIC ${CMAKE_SOURCE_DIR}/include/libcellgui/)
 
-target_link_libraries(qt-gui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+target_link_libraries(libcellgui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+
+add_executable(cell-gui src/cell-gui/Main.cpp)
+target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
-add_executable(benchmark src/benchmark/main.cpp)
+add_executable(benchmark src/benchmark/Main.cpp)
 target_link_libraries(benchmark libcell glog::glog)
+
+# testing
+enable_testing()
+
+find_package(GTest REQUIRED)
+
+file(GLOB_RECURSE GUI_TEST_SRC ${PROJECT_SOURCE_DIR}/test/*.cpp)
+
+add_executable(cell-gui-test ${GUI_TEST_SRC})
+
+target_link_libraries(cell-gui-test 
+    libcellgui 
+    GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_add_tests(TARGET cell-gui-test)

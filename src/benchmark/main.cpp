@@ -1,3 +1,4 @@
+#include "GlobalSettings.hpp"
 #include "Logging.hpp"
 #include "StringUtils.hpp"
 #include "World.hpp"
@@ -6,12 +7,16 @@
 
 #include <glog/logging.h>
 
+void setBenchmarkSettings()
+{
+    GlobalSettings::get().setNumberOfDiscs(400);
+}
+
 int main(int argc, char** argv)
 {
     initLogging(argc, argv);
 
     World world;
-    world.setNumberOfDiscs(400);
     world.setBounds(sf::Vector2f(600, 600));
     world.reinitialize();
 
