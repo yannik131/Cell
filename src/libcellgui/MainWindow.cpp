@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
     , simulationThread_(nullptr)
     , simulation_(new Simulation())
-    , discDistributionDialog_(new DistributionAndReactionsDialog())
+    , discDistributionDialog_(new DiscTypesDialog())
 {
     ui->setupUi(this);
 
@@ -26,12 +26,10 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,
             &AnalysisPlot::reset);
-    connect(discDistributionDialog_, &DistributionAndReactionsDialog::discDistributionChanged, simulation_,
-            &Simulation::reset);
-    connect(discDistributionDialog_, &DistributionAndReactionsDialog::discDistributionChanged, ui->plotWidget,
-            &AnalysisPlot::reset);
-    connect(discDistributionDialog_, &DistributionAndReactionsDialog::discDistributionChanged,
-            ui->simulationSettingsWidget, &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, simulation_, &Simulation::reset);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->plotWidget, &AnalysisPlot::reset);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->simulationSettingsWidget,
+            &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
 
     connect(&resizeTimer_, &QTimer::timeout,
             [&]()

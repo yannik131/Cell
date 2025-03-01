@@ -1,10 +1,10 @@
-#include "DistributionAndReactionsModel.hpp"
+#include "DiscTypesModel.hpp"
 
 #include <gtest/gtest.h>
 
-typedef DistributionAndReactionsModel Model;
+typedef DiscTypesModel Model;
 
-TEST(DistributionAndReactionsModelTest, FrequencyAddsUpTo100)
+TEST(DiscTypesModelTest, FrequencyAddsUpTo100)
 {
     Model m;
     m.updateDiscType({.oldName = "", .newName = "A", .radius = 10, .mass = 10, .color = "Red", .frequency = 50});

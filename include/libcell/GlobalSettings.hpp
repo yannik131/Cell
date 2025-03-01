@@ -47,7 +47,7 @@ private:
 
     bool locked_ = false;
 
-    friend class DistributionAndReactionsDialog;
+    friend class DiscTypesDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;
     friend void setBenchmarkSettings();

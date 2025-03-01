@@ -8,14 +8,14 @@
 
 namespace Ui
 {
-class DistributionAndReactionsDialog;
+class DiscTypesDialog;
 };
 
-class DistributionAndReactionsDialog : public QDialog
+class DiscTypesDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit DistributionAndReactionsDialog(QWidget* parent = nullptr);
+    explicit DiscTypesDialog(QWidget* parent = nullptr);
 
     void closeEvent(QCloseEvent* event);
 
@@ -30,19 +30,14 @@ private slots:
     void onClearTypes();
     void onDeleteDiscType();
 
-    void onAddReaction();
-    void onClearReactions();
-    void onDeleteReaction();
-
 private:
     void validateColorMapping();
     void addTableViewRowFromDiscType(const DiscType& discType, int percentage = 0);
-    void setModelHeaderData(QStandardItemModel* model, const QStringList& headers);
+    std::map<DiscType, int> convertInputsToDiscTypeDistribution() const;
 
 private:
-    Ui::DistributionAndReactionsDialog* ui;
-    QStandardItemModel* discDistributionModel_;
-    QStandardItemModel* reactionsModel_;
+    Ui::DiscTypesDialog* ui;
+    QStandardItemModel* discTypesModel_;
 };
 
 #endif /* DISTRIBUTIONANDREACTIONSDIALOG_HPP */
