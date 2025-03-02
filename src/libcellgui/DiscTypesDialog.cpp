@@ -1,7 +1,6 @@
 #include "DiscTypesDialog.hpp"
 #include "ColorMapping.hpp"
 #include "DiscType.hpp"
-#include "DiscTypesModel.hpp"
 #include "GlobalSettings.hpp"
 #include "Utility.hpp"
 #include "ui_DiscTypesDialog.h"
@@ -52,9 +51,7 @@ void DiscTypesDialog::onOK()
 
     try
     {
-        DiscTypesModel discTypesModel;
-        discTypesModel.setGlobalDiscTypeDistribution GlobalSettings::get().setDiscTypeDistribution(
-            discTypeDistribution);
+        GlobalSettings::get().setDiscTypeDistribution(discTypeDistribution);
         emit discDistributionChanged();
         hide();
     }
@@ -106,11 +103,13 @@ void DiscTypesDialog::validateColorMapping()
 
 void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int percentage)
 {
+    using Utility::addSpinBoxToLastRow;
+
     int oldRowCount = discTypesModel_->rowCount();
     int newRowCount = discTypesModel_->rowCount() + 1;
 
     QList<QStandardItem*> items;
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < discTypesModel_->columnCount(); ++i)
         items.append(new QStandardItem());
     discTypesModel_->appendRow(items);
 
@@ -120,18 +119,13 @@ void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int 
     ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 0), nameLineEdit);
 
     // Radius
-    QSpinBox* radiusSpinBox = new QSpinBox();
-    radiusSpinBox->setObjectName(QString("radius") + QString::number(newRowCount));
-    radiusSpinBox->setValue(discType.radius_);
-    radiusSpinBox->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius);
-    ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 1), radiusSpinBox);
+    addSpinBoxToLastRow(discType.radius_, DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius,
+                        ui->discDistributionTableView, discTypesModel_, 1,
+                        QString("radius") + QString::number(newRowCount));
 
     // Mass
-    QSpinBox* massSpinBox = new QSpinBox();
-    massSpinBox->setObjectName(QString("mass") + QString::number(newRowCount));
-    massSpinBox->setValue(discType.mass_);
-    massSpinBox->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass);
-    ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 2), massSpinBox);
+    addSpinBoxToLastRow(discType.mass_, DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass, ui->discDistributionTableView,
+                        discTypesModel_, 2, QString("mass") + QString::number(newRowCount));
 
     // Color
     QComboBox* colorComboBox = new QComboBox();
@@ -140,11 +134,7 @@ void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int 
     ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 3), colorComboBox);
 
     // Percentage
-    QSpinBox* percentageSpinBox = new QSpinBox();
-    percentageSpinBox->setObjectName(QString("percentage") + QString::number(newRowCount));
-    percentageSpinBox->setValue(percentage);
-    percentageSpinBox->setRange(0, 100);
-    ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 4), percentageSpinBox);
+    addSpinBoxToLastRow(percentage, 0, 100, ui->discDistributionTableView, discTypesModel_, 4);
 
     // Delete
     QPushButton* deleteButton = new QPushButton("Delete");

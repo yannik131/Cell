@@ -21,7 +21,7 @@ if (-Not (Test-Path "build_release")) {
     cmake .. -DCMAKE_BUILD_TYPE=Release
     cmake --build . --config Release --parallel 4
     Set-Location ..
-    .\contrib\vcpkg\installed\x64-windows\tools\Qt6\bin\windeployqt6.exe .\build_release\Release\qt-gui.exe
+    .\contrib\vcpkg\installed\x64-windows\tools\Qt6\bin\windeployqt6.exe .\build_release\Release\cell-gui.exe
 }
 
 # Debug build
@@ -31,5 +31,5 @@ if (-Not (Test-Path "build_debug")) {
     cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     cmake --build . --config Debug --parallel 4
     Set-Location ..
-    .\contrib\vcpkg\installed\x64-windows\tools\Qt6\bin\windeployqt.debug.bat .\build_debug\Debug\qt-gui.exe
+    .\contrib\vcpkg\installed\x64-windows\tools\Qt6\bin\windeployqt.debug.bat .\build_debug\Debug\cell-gui.exe
 }

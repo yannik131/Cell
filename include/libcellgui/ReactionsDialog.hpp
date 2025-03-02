@@ -31,6 +31,12 @@ private slots:
     void onDeleteReaction();
 
 private:
+    void addTableViewRowFromCombinationReaction(const std::pair<DiscType, DiscType>& educts,
+                                                const std::vector<std::pair<DiscType, float>>& products);
+    void addTableViewRowFromDecompositionReaction(
+        const DiscType& educt, const std::vector<std::pair<std::pair<DiscType, DiscType>, float>>& products);
+
+private:
     Ui::ReactionsDialog* ui;
     QStandardItemModel* reactionsModel_;
 };
