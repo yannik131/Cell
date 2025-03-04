@@ -3,6 +3,7 @@
 
 #include "DiscTypesDialog.hpp"
 #include "FrameDTO.hpp"
+#include "ReactionsDialog.hpp"
 #include "Simulation.hpp"
 
 #include <QMainWindow>
@@ -19,7 +20,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow() = default;
 
     void onStartStopButtonClicked();
     void onResetButtonClicked();
@@ -43,6 +43,7 @@ private:
     QTimer resizeTimer_;
 
     DiscTypesDialog* discDistributionDialog_;
+    ReactionsDialog* reactionsDialog_;
 };
 
 #endif /* MAINWINDOW_HPP */

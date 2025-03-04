@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget* parent)
     , simulationThread_(nullptr)
     , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypesDialog())
+    , reactionsDialog_(new ReactionsDialog())
 {
     ui->setupUi(this);
 
@@ -21,7 +22,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_, &Simulation::collisionData, ui->plotWidget, &AnalysisPlot::addDataPoint);
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
-    connect(ui->setDiscDistributionPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
+    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
+    connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,

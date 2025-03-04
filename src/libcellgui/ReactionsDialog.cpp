@@ -68,7 +68,12 @@ void ReactionsDialog::addTableViewRowFromCombinationReaction(const std::pair<Dis
     {
         QList<QStandardItem*> items;
         for (int i = 0; i < reactionsModel_->columnCount(); ++i)
-            items.append(new QStandardItem());
+        {
+            QStandardItem* item = new QStandardItem();
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            items.append(item);
+        }
+
         reactionsModel_->appendRow(items);
 
         addComboBoxToLastRow(discTypeNames, QString::fromStdString(educts.first.name_), reactionsModel_,
@@ -79,7 +84,7 @@ void ReactionsDialog::addTableViewRowFromCombinationReaction(const std::pair<Dis
         addComboBoxToLastRow(discTypeNames, QString::fromStdString(discType.name_), reactionsModel_,
                              ui->reactionsTableView, 4);
 
-        addSpinBoxToLastRow(0, 0, 100, ui->reactionsTableView, reactionsModel_, 7);
+        addSpinBoxToLastRow<QDoubleSpinBox>(probability, 0, 100, ui->reactionsTableView, reactionsModel_, 7);
 
         QPushButton* deleteButton = new QPushButton("Delete");
         connect(deleteButton, &QPushButton::clicked, this, &ReactionsDialog::onDeleteReaction);
@@ -91,4 +96,40 @@ void ReactionsDialog::addTableViewRowFromCombinationReaction(const std::pair<Dis
 void ReactionsDialog::addTableViewRowFromDecompositionReaction(
     const DiscType& educt, const std::vector<std::pair<std::pair<DiscType, DiscType>, float>>& products)
 {
+    using Utility::addComboBoxToLastRow;
+    using Utility::addSpinBoxToLastRow;
+
+    QStringList discTypeNames;
+    for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
+        discTypeNames.push_back(QString::fromStdString(discType.name_));
+
+    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+
+    for (const auto& [product, probability] : products)
+    {
+        QList<QStandardItem*> items;
+        for (int i = 0; i < reactionsModel_->columnCount(); ++i)
+        {
+            QStandardItem* item = new QStandardItem();
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            items.append(item);
+        }
+
+        reactionsModel_->appendRow(items);
+
+        addComboBoxToLastRow(discTypeNames, QString::fromStdString(educt.name_), reactionsModel_,
+                             ui->reactionsTableView, 0);
+
+        addComboBoxToLastRow(discTypeNames, QString::fromStdString(product.first.name_), reactionsModel_,
+                             ui->reactionsTableView, 4);
+        addComboBoxToLastRow(discTypeNames, QString::fromStdString(product.second.name_), reactionsModel_,
+                             ui->reactionsTableView, 6);
+
+        addSpinBoxToLastRow<QDoubleSpinBox>(probability, 0, 100, ui->reactionsTableView, reactionsModel_, 7);
+
+        QPushButton* deleteButton = new QPushButton("Delete");
+        connect(deleteButton, &QPushButton::clicked, this, &ReactionsDialog::onDeleteReaction);
+        ui->reactionsTableView->setIndexWidget(reactionsModel_->index(reactionsModel_->rowCount() - 1, 8),
+                                               deleteButton);
+    }
 }

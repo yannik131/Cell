@@ -14,13 +14,15 @@ void setModelHeaderData(QStandardItemModel* model, const QStringList& headers)
         model->setHeaderData(i, Qt::Horizontal, headers[i]);
 }
 
-void addComboBoxToLastRow(const QStringList& options, const QString& selectedOption, QStandardItemModel* model,
-                          QTableView* tableView, int column)
+QComboBox* addComboBoxToLastRow(const QStringList& options, const QString& selectedOption, QStandardItemModel* model,
+                                QTableView* tableView, int column)
 {
     QComboBox* comboBox = new QComboBox();
     comboBox->addItems(options);
     comboBox->setCurrentIndex(options.indexOf(selectedOption));
     tableView->setIndexWidget(model->index(model->rowCount() - 1, column), comboBox);
+
+    return comboBox;
 }
 
 } // namespace Utility

@@ -276,7 +276,7 @@ interval [ms]</string>
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="setDiscDistributionPushButton">
+                 <widget class="QPushButton" name="editDiscTypesPushButton">
                   <property name="maximumSize">
                    <size>
                     <width>9999</width>
@@ -284,7 +284,14 @@ interval [ms]</string>
                    </size>
                   </property>
                   <property name="text">
-                   <string>Set disc distribution</string>
+                   <string>Edit disc types</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="editReactionsPushButton">
+                  <property name="text">
+                   <string>Edit reactions</string>
                   </property>
                  </widget>
                 </item>
