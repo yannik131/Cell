@@ -131,7 +131,8 @@ void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int 
     ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 3), colorComboBox);
 
     // Percentage
-    addSpinBoxToLastRow(percentage, 0, 100, ui->discDistributionTableView, discTypesModel_, 4);
+    addSpinBoxToLastRow(percentage, 0, 100, ui->discDistributionTableView, discTypesModel_, 4,
+                        QString("percentage") + QString::number(newRowCount));
 
     // Delete
     QPushButton* deleteButton = new QPushButton("Delete");

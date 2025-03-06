@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget* parent)
                        {
                            const auto& simulationSize = ui->simulationWidget->size();
 
-                           // I haven't figured out yet why the height returned by size() is 20px off..
+                           // TODO I haven't figured out yet why the height returned by size() is 20px off..
                            // Maybe the RenderWindow reserves that height for the title bar? Probably OS dependent
                            // though
                            simulation_->setWorldBounds(

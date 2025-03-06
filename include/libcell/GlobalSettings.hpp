@@ -18,6 +18,8 @@ public:
 
     static const Settings& getSettings();
 
+    static DiscType getDiscTypeByName(const std::string& name);
+
 private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 

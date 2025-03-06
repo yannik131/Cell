@@ -55,7 +55,7 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
             float distance = std::hypot(normal.x, normal.y);
             normal /= distance;
 
-            float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance;
+            float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance + 1;
             product1.position_ -= overlap * normal / 2.0f;
             product2.position_ += overlap * normal / 2.0f;
 
@@ -269,9 +269,14 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     if (!collided)
         return 0.f;
 
+    // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
+    // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
+    // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
+    // initialKineticEnergy - currentTotalKineticEnergy)
+    // TODO really oughta plot the total kinetic energy and start writing tests
     float randomNumber = distribution(gen) / 10.f;
     if (kineticEnergyDeficiency <= 0)
-        randomNumber = -randomNumber;
+        return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
 
     float kineticEnergyBefore = disc.getKineticEnergy();
     v *= 1 + randomNumber;

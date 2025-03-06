@@ -18,6 +18,17 @@ const Settings& GlobalSettings::getSettings()
     return get().settings_;
 }
 
+DiscType GlobalSettings::getDiscTypeByName(const std::string& name)
+{
+    for (const auto& [discType, frequency] : getSettings().discTypeDistribution_)
+    {
+        if (discType.name_ == name)
+            return discType;
+    }
+
+    throw std::runtime_error("No disc type found for name \"" + name + "\"");
+}
+
 void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 {
     throwIfLocked();
@@ -64,6 +75,7 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
 
 void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution)
 {
+    // TODO Remove all reactions that have disc types that are not contained in the new distribution
     throwIfLocked();
 
     if (discTypeDistribution.empty())
@@ -84,7 +96,8 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     }
 
     if (totalPercent != 100)
-        throw std::runtime_error("Percentages for disc type distribution doesn't add up to 100");
+        throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They adds up to " +
+                                 std::to_string(totalPercent));
 
     settings_.discTypeDistribution_ = discTypeDistribution;
 }

@@ -122,7 +122,7 @@ void World::buildScene()
 
         for (const auto& [discType, percentage] : discTypes)
         {
-            if (randomNumber < percentage)
+            if (randomNumber < percentage || percentage == 100)
             {
                 counts[discType.radius_]++;
                 Disc newDisc(discType);

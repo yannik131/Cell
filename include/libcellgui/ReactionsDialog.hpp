@@ -13,6 +13,12 @@ namespace Ui
 class ReactionsDialog;
 };
 
+enum class ReactionType
+{
+    Combination,
+    Decomposition
+};
+
 class ReactionsDialog : public QDialog
 {
     Q_OBJECT
@@ -46,6 +52,7 @@ private:
     convertInputsToCombinationReactions() const;
     std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>
     convertInputsToDecompositionReactions() const;
+    ReactionType getRowReactionType(int index) const;
 
 private:
     Ui::ReactionsDialog* ui;
