@@ -35,8 +35,7 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent)
 
     validateColorMapping();
 
-    for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)
-        addTableViewRowFromDiscType(discType, percentage);
+    resetTableViewToSettings();
 }
 
 void DiscTypesDialog::closeEvent(QCloseEvent* event)
@@ -63,9 +62,7 @@ void DiscTypesDialog::onOK()
 
 void DiscTypesDialog::onCancel()
 {
-    onClearTypes();
-    for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)
-        addTableViewRowFromDiscType(discType, percentage);
+    resetTableViewToSettings();
     hide();
 }
 
@@ -181,4 +178,11 @@ std::map<DiscType, int> DiscTypesDialog::convertInputsToDiscTypeDistribution() c
     }
 
     return discTypeDistribution;
+}
+
+void DiscTypesDialog::resetTableViewToSettings()
+{
+    onClearTypes();
+    for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)
+        addTableViewRowFromDiscType(discType, percentage);
 }

@@ -89,6 +89,34 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     settings_.discTypeDistribution_ = discTypeDistribution;
 }
 
+void GlobalSettings::setCombinationReactions(
+    const std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>& combinationReactions)
+{
+    throwIfLocked();
+
+    for (const auto& [educts, products] : combinationReactions)
+    {
+        for (const auto& [product, probability] : products)
+            throwIfNotInRange(probability, 0.f, 1.f, "probability");
+    }
+
+    settings_.combinationReactionTable_ = combinationReactions;
+}
+
+void GlobalSettings::setDecompositionReactions(
+    const std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>& decompositionReactions)
+{
+    throwIfLocked();
+
+    for (const auto& [educt, products] : decompositionReactions)
+    {
+        for (const auto& [product, probability] : products)
+            throwIfNotInRange(probability, 0.f, 1.f, "probability");
+    }
+
+    settings_.decompositionReactionTable_ = decompositionReactions;
+}
+
 void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
 {
     throwIfLocked();

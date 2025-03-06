@@ -34,6 +34,7 @@ private:
     void validateColorMapping();
     void addTableViewRowFromDiscType(const DiscType& discType, int percentage = 0);
     std::map<DiscType, int> convertInputsToDiscTypeDistribution() const;
+    void resetTableViewToSettings();
 
 private:
     Ui::DiscTypesDialog* ui;

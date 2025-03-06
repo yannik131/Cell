@@ -6,6 +6,8 @@
 #include <QDialog>
 #include <QStandardItemModel>
 
+#include <array>
+
 namespace Ui
 {
 class ReactionsDialog;
@@ -18,6 +20,7 @@ public:
     explicit ReactionsDialog(QWidget* parent = nullptr);
 
     void closeEvent(QCloseEvent* event);
+    void showEvent(QShowEvent* event);
 
 signals:
     void reactionsChanged();
@@ -26,15 +29,23 @@ private slots:
     void onOK();
     void onCancel();
 
-    void onAddReaction();
+    void onAddCombinationReaction();
+    void onAddDecompositionReaction();
     void onClearReactions();
     void onDeleteReaction();
 
 private:
-    void addTableViewRowFromCombinationReaction(const std::pair<DiscType, DiscType>& educts,
-                                                const std::vector<std::pair<DiscType, float>>& products);
-    void addTableViewRowFromDecompositionReaction(
-        const DiscType& educt, const std::vector<std::pair<std::pair<DiscType, DiscType>, float>>& products);
+    void addRowFromCombinationReaction(const std::pair<DiscType, DiscType>& educts,
+                                       const std::vector<std::pair<DiscType, float>>& products);
+    void addRowFromDecompositionReaction(const DiscType& educt,
+                                         const std::vector<std::pair<std::pair<DiscType, DiscType>, float>>& products);
+    void addReactionRow(std::array<QString, 4> selectedDiscTypes, float probability);
+    void resetTableViewToSettings();
+
+    std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>
+    convertInputsToCombinationReactions() const;
+    std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>
+    convertInputsToDecompositionReactions() const;
 
 private:
     Ui::ReactionsDialog* ui;

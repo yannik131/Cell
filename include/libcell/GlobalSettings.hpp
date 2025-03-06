@@ -31,6 +31,12 @@ private:
 
     void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
 
+    void setCombinationReactions(
+        const std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>& combinationReactions);
+
+    void setDecompositionReactions(
+        const std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>& decompositionReactions);
+
     void setFrictionCoefficient(float frictionCoefficient);
 
     template <typename T>
@@ -48,6 +54,7 @@ private:
     bool locked_ = false;
 
     friend class DiscTypesDialog;
+    friend class ReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;
     friend void setBenchmarkSettings();
