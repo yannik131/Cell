@@ -33,11 +33,9 @@ private:
 
     void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
 
-    void setCombinationReactions(
-        const std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>& combinationReactions);
+    void addReaction(const Reaction& reaction);
 
-    void setDecompositionReactions(
-        const std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>& decompositionReactions);
+    void clearReactions();
 
     void setFrictionCoefficient(float frictionCoefficient);
 
@@ -49,6 +47,8 @@ private:
     void lock();
 
     void unlock();
+
+    void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
 
 private:
     Settings settings_;

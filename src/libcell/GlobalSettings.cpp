@@ -1,5 +1,6 @@
 #include "GlobalSettings.hpp"
 
+#include <algorithm>
 #include <vector>
 
 GlobalSettings::GlobalSettings()
@@ -75,7 +76,6 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
 
 void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution)
 {
-    // TODO Remove all reactions that have disc types that are not contained in the new distribution
     throwIfLocked();
 
     if (discTypeDistribution.empty())
@@ -84,6 +84,7 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     int totalPercent = 0;
     for (const auto& [type, percent] : discTypeDistribution)
     {
+
         if (percent < 0)
             throw std::runtime_error("Percentage for disc type\"" + type.name_ + "\" is smaller than 0");
 
@@ -93,41 +94,54 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
                           "mass for disc type \"" + type.name_ + "\"");
         throwIfNotInRange(type.radius_, DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius,
                           "radius for disc type \"" + type.name_ + "\"");
+        if (type.name_.empty())
+            throw std::runtime_error("Disc type name can't be empty");
     }
 
     if (totalPercent != 100)
         throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They adds up to " +
                                  std::to_string(totalPercent));
 
+    removeDanglingReactions(discTypeDistribution);
+
     settings_.discTypeDistribution_ = discTypeDistribution;
 }
 
-void GlobalSettings::setCombinationReactions(
-    const std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>& combinationReactions)
+void GlobalSettings::addReaction(const Reaction& reaction)
 {
     throwIfLocked();
+    throwIfNotInRange(reaction.probability_, 0.f, 1.f, "reaction probability");
 
-    for (const auto& [educts, products] : combinationReactions)
+    if (isValid(reaction.educt1_) && !isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+        isValid(reaction.product2_))
     {
-        for (const auto& [product, probability] : products)
-            throwIfNotInRange(probability, 0.f, 1.f, "probability");
+        addReactionToVector(settings_.decompositionReactions_[reaction.educt1_], reaction);
     }
-
-    settings_.combinationReactionTable_ = combinationReactions;
+    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+             !isValid(reaction.product2_))
+    {
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)],
+                            reaction);
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)],
+                            reaction);
+    }
+    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+             isValid(reaction.product2_))
+    {
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)], reaction);
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)], reaction);
+    }
+    else
+    {
+        throw std::runtime_error("Invalid reaction: Neither of type A -> B + C, A + B -> C or A + B -> C + D");
+    }
 }
 
-void GlobalSettings::setDecompositionReactions(
-    const std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>& decompositionReactions)
+void GlobalSettings::clearReactions()
 {
-    throwIfLocked();
-
-    for (const auto& [educt, products] : decompositionReactions)
-    {
-        for (const auto& [product, probability] : products)
-            throwIfNotInRange(probability, 0.f, 1.f, "probability");
-    }
-
-    settings_.decompositionReactionTable_ = decompositionReactions;
+    settings_.decompositionReactions_.clear();
+    settings_.combinationReactions_.clear();
+    settings_.exchangeReactions_.clear();
 }
 
 void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
@@ -153,4 +167,47 @@ void GlobalSettings::lock()
 void GlobalSettings::unlock()
 {
     locked_ = false;
+}
+
+template <typename T> void eraseIfInEducts(T& reactionTable, const DiscType& discType)
+{
+    for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
+    {
+        if (iter->first.first == discType || iter->first.second == discType)
+            iter = reactionTable.erase(iter);
+        else
+            ++iter;
+    }
+}
+
+void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution)
+{
+    std::vector<DiscType> removedDiscTypes;
+    std::vector<DiscType> remainingDiscTypes;
+
+    for (const auto& [type, percent] : settings_.discTypeDistribution_)
+    {
+        if (newDiscTypeDistribution.find(type) == newDiscTypeDistribution.end())
+            removedDiscTypes.push_back(type);
+        else
+            remainingDiscTypes.push_back(type);
+    }
+
+    for (const auto& removedDiscType : removedDiscTypes)
+    {
+        // Step 1: Erase all reactions that have the removed disc type as an educt
+        eraseIfInEducts(settings_.decompositionReactions_, removedDiscType);
+        eraseIfInEducts(settings_.combinationReactions_, removedDiscType);
+        eraseIfInEducts(settings_.exchangeReactions_, removedDiscType);
+
+        // Step 2: Erase all reactions that have the removed disc type as a product
+        for (auto& [educt, products] : settings_.decompositionReactions_)
+            removeReactionsFromVector(products, removedDiscType);
+
+        for (auto& [educts, products] : settings_.combinationReactions_)
+            removeReactionsFromVector(products, removedDiscType);
+
+        for (auto& [educts, products] : settings_.exchangeReactions_)
+            removeReactionsFromVector(products, removedDiscType);
+    }
 }

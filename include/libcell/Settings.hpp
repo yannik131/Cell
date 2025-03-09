@@ -2,6 +2,7 @@
 #define SETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "Reaction.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -58,25 +59,21 @@ struct Settings
     std::map<DiscType, int> discTypeDistribution_;
 
     /**
-     * @brief Contains reactions of type A + B -> C and their probabilities
-     *
-     * Example: If A + B -> C with 30% chance and A + B -> D with 20% chance, then
-     * table[{A, B}] = table[{B, A}] = {{D, 0.2}, {C, 0.5}}
-     * Accumulative probabilities sorted in ascending order are easier to work with with a random number approach
-     * Types have to be ordered in ascending order as well, I don't want to save {A, B} and {B, A}
+     * @brief Maps disc types to decomposition reactions A -> B + C by educt
      */
-    std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>> combinationReactionTable_;
+    std::map<DiscType, std::vector<Reaction>> decompositionReactions_;
 
     /**
-     * @brief Contains reactions of type C -> A + B and their probabilities to occur within 1 second
-     *
-     *
-     * Example: If C -> A + B with 1% chance per second, C -> A + D with 3% chance per second and D -> A + C with 2%
-     * chance per second, then
-     * table[C] = {{{A, B}, 0.01}, {{A, D}, 0.04}}
-     * table[D] = {{{A, C}, 0.02}}
+     * @brief Maps pairs of disc types to combination reactions A + B -> C by educts. {A, B} and {B, A} map to the same
+     * reactions
      */
-    std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>> decompositionReactionTable_;
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> combinationReactions_;
+
+    /**
+     * @brief Maps pairs of disc types to exchange reactions A + B -> C + D by educts. {A, B} and {B, A} map to the same
+     * reactions
+     */
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> exchangeReactions_;
 };
 
 namespace SettingsLimits

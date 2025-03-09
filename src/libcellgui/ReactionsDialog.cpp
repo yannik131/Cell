@@ -165,17 +165,16 @@ void ReactionsDialog::resetTableViewToSettings()
 {
     onClearReactions();
 
-    for (const auto& [educts, product] : GlobalSettings::getSettings().combinationReactionTable_)
+    for (const auto& [educts, product] : GlobalSettings::getSettings().reactionTable_.getCombinationReactionsTable())
         addRowFromCombinationReaction(educts, product);
 
-    for (const auto& [educt, products] : GlobalSettings::getSettings().decompositionReactionTable_)
+    for (const auto& [educt, products] : GlobalSettings::getSettings().reactionTable_.getDecompositionReactionsTable())
         addRowFromDecompositionReaction(educt, products);
 }
 
-std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>>
-ReactionsDialog::convertInputsToCombinationReactions() const
+std::vector<CombinationReaction> ReactionsDialog::convertInputsToCombinationReactions() const
 {
-    std::map<std::pair<DiscType, DiscType>, std::vector<std::pair<DiscType, float>>> combinationReactions;
+    std::vector<CombinationReaction> combinationReactions;
 
     for (int row = 0; row < reactionsModel_->rowCount(); ++row)
     {
@@ -191,24 +190,19 @@ ReactionsDialog::convertInputsToCombinationReactions() const
         QDoubleSpinBox* spinBox =
             qobject_cast<QDoubleSpinBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 7)));
 
-        DiscType educt1 = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString());
-        DiscType educt2 = GlobalSettings::getDiscTypeByName(bComboBox->currentText().toStdString());
-        DiscType product = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString());
-        float probability = spinBox->value();
-
-        combinationReactions[std::make_pair(educt1, educt2)].push_back(std::make_pair(product, probability));
+        combinationReactions.push_back(
+            CombinationReaction{.educt1 = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString()),
+                                .educt2 = GlobalSettings::getDiscTypeByName(bComboBox->currentText().toStdString()),
+                                .product = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString()),
+                                .probability = static_cast<float>(spinBox->value())});
     }
 
     return combinationReactions;
 }
 
-std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>>
-ReactionsDialog::convertInputsToDecompositionReactions() const
+std::vector<DecompositionReaction> ReactionsDialog::convertInputsToDecompositionReactions() const
 {
-    // TODO Fix the redundancy of these 2 methods by creating a more flexible, general struct/class Reaction where you
-    // can just add educts and products as you like. Then we would only need to iterate once, adding educts/products and
-    // bam. This is ugly as fuck right now, the types are just making my eyes bleed.
-    std::map<DiscType, std::vector<std::pair<std::pair<DiscType, DiscType>, float>>> decompositionReactions;
+    std::vector<DecompositionReaction> decompositionReactions;
 
     for (int row = 0; row < reactionsModel_->rowCount(); ++row)
     {
@@ -224,12 +218,11 @@ ReactionsDialog::convertInputsToDecompositionReactions() const
         QDoubleSpinBox* spinBox =
             qobject_cast<QDoubleSpinBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 7)));
 
-        DiscType educt = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString());
-        DiscType product1 = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString());
-        DiscType product2 = GlobalSettings::getDiscTypeByName(dComboBox->currentText().toStdString());
-        float probability = spinBox->value();
-
-        decompositionReactions[educt].push_back(std::make_pair(std::make_pair(product1, product2), probability));
+        decompositionReactions.push_back(
+            {.educt = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString()),
+             .product1 = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString()),
+             .product2 = GlobalSettings::getDiscTypeByName(dComboBox->currentText().toStdString()),
+             .probability = static_cast<float>(spinBox->value())});
     }
 
     return decompositionReactions;

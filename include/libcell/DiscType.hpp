@@ -4,11 +4,15 @@
 #include <SFML/Graphics/Color.hpp>
 
 #include <string>
+#include <utility>
 
 struct DiscType;
 
 bool operator==(const DiscType& a, const DiscType& b);
 bool operator<(const DiscType& a, const DiscType& b);
+
+std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2);
+bool isValid(const DiscType& discType);
 
 struct DiscType
 {

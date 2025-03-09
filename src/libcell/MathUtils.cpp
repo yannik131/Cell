@@ -20,7 +20,7 @@ typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KD
 
 std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
 {
-    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactionTable_;
+    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactionsTable_;
     const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
     std::vector<Disc> newDiscs;
 
@@ -124,7 +124,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 {
     int collisionCount = 0;
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
-    const auto& reactionTable = GlobalSettings::getSettings().combinationReactionTable_;
+    const auto& reactionTable = GlobalSettings::getSettings().combinationReactionsTable_;
 
     // DeepSeek-generated
     for (const auto& [p1, p2] : collidingDiscs)

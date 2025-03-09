@@ -2,6 +2,7 @@
 
 Settings::Settings()
 {
+    // TODO save settings as json, load default
     DiscType A("A", sf::Color::Green, 5, 5);
     DiscType B("B", sf::Color::Red, 10, 5);
     DiscType C("C", sf::Color::Blue, 12, 5);
@@ -12,7 +13,8 @@ Settings::Settings()
     discTypeDistribution_[C] = 10;
     discTypeDistribution_[D] = 10;
 
-    combinationReactionTable_[{A, B}] = {{C, 0.01f}, {D, 0.02f}};
-    decompositionReactionTable_[C] = {{{A, B}, 0.01f}};
-    decompositionReactionTable_[D] = {{{A, B}, 0.1f}};
+    reactionTable_.setCombinationReactions({{.educt1 = A, .educt2 = B, .product = C, .probability = 0.01f},
+                                            {.educt1 = A, .educt2 = B, .product = D, .probability = 0.02f}});
+    reactionTable_.setDecompositionReactions({{.educt = C, .product1 = A, .product2 = B, .probability = 0.01f},
+                                              {.educt = D, .product1 = A, .product2 = B, .probability = 0.05f}});
 }
