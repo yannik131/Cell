@@ -1,6 +1,7 @@
 #include "Reaction.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <stdexcept>
 
 bool operator==(const Reaction& reaction1, const Reaction& reaction2)
@@ -100,4 +101,11 @@ void removeReactionsFromVector(std::vector<Reaction>& reactions, const DiscType&
 
     for (const auto& reaction : reactionsToRemove)
         removeReactionFromVector(reactions, reaction);
+}
+
+size_t ReactionHash::operator()(const Reaction& reaction) const
+{
+    static std::hash<std::string> stringHash;
+
+    return stringHash(toString(reaction));
 }

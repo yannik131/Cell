@@ -14,6 +14,11 @@ struct Reaction
     float probability_;
 };
 
+struct ReactionHash
+{
+    size_t operator()(const Reaction& reaction) const;
+};
+
 bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 std::string toString(const Reaction& reaction);
 bool contains(const Reaction& reaction, const DiscType& discType);

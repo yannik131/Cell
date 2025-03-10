@@ -20,7 +20,7 @@ typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KD
 
 std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
 {
-    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactionsTable_;
+    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
     const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
     std::vector<Disc> newDiscs;
 
@@ -32,22 +32,22 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
 
         const auto& possibleReactions = iter->second;
         float randomNumber = distribution(gen);
-        for (const auto& [resultTypePair, probability] : possibleReactions)
+        for (const auto& reaction : possibleReactions)
         {
-            if (randomNumber > probability * simulationTimeStep)
+            if (randomNumber > reaction.probability_ * simulationTimeStep)
                 continue;
 
-            const float MassFraction = disc.type_.mass_ / (resultTypePair.first.mass_ + resultTypePair.second.mass_);
+            const float MassFraction = disc.type_.mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
             const float Factor = std::sqrt(2) / 2 * MassFraction;
             const auto& v = disc.velocity_;
             const auto& r = disc.position_;
             const float vAbs = std::hypot(v.x, v.y);
 
-            Disc product1(resultTypePair.first);
+            Disc product1(reaction.product1_);
             product1.velocity_ = Factor * sf::Vector2f{v.x - v.y, v.x + v.y};
             product1.position_ = r + product1.velocity_ / vAbs;
 
-            Disc product2(resultTypePair.second);
+            Disc product2(reaction.product2_);
             product2.velocity_ = Factor * sf::Vector2f{v.x + v.y, v.y - v.x};
             product2.position_ = r + product2.velocity_ / vAbs;
 
@@ -81,8 +81,6 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
     for (auto& disc : discs)
     {
-        // TODO Maybe find a better way? We handle decomposition reaction before this to account for immediate
-        // re-combination
         if (disc.destroyed_)
             continue;
 
@@ -124,9 +122,8 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 {
     int collisionCount = 0;
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
-    const auto& reactionTable = GlobalSettings::getSettings().combinationReactionsTable_;
+    const auto& reactionTable = GlobalSettings::getSettings().combinationReactions_;
 
-    // DeepSeek-generated
     for (const auto& [p1, p2] : collidingDiscs)
     {
         auto& pos1 = p1->position_;
@@ -152,17 +149,18 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         if (overlap <= 0)
             continue;
 
-        auto iter = reactionTable.find(p2->type_ < p1->type_ ? std::make_pair(p2->type_, p1->type_)
-                                                             : std::make_pair(p1->type_, p2->type_));
+        auto iter = reactionTable.find(std::make_pair(p2->type_, p1->type_));
         bool reactionOccured = false;
         if (iter != reactionTable.end())
         {
             const auto& possibleReactions = iter->second;
             float randomNumber = distribution(gen);
-            for (const auto& [resultType, probability] : possibleReactions)
+            for (const auto& reaction : possibleReactions)
             {
-                if (randomNumber > probability)
+                if (randomNumber > reaction.probability_)
                     continue;
+
+                const auto& resultType = reaction.product1_;
 
                 if (std::abs(resultType.radius_ - p1->type_.radius_) < std::abs(resultType.radius_ - p2->type_.radius_))
                 {
@@ -273,7 +271,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
-    // TODO really oughta plot the total kinetic energy and start writing tests
+    // TODO really oughta plot the total kinetic energy and start writing tests, i think this amount is too small
     float randomNumber = distribution(gen) / 10.f;
     if (kineticEnergyDeficiency <= 0)
         return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it

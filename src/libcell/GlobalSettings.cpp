@@ -1,10 +1,28 @@
 #include "GlobalSettings.hpp"
 
 #include <algorithm>
+#include <type_traits>
 #include <vector>
 
 GlobalSettings::GlobalSettings()
 {
+
+    // TODO save settings as json, load default
+    DiscType A("A", sf::Color::Green, 5, 5);
+    DiscType B("B", sf::Color::Red, 10, 5);
+    DiscType C("C", sf::Color::Blue, 12, 5);
+    DiscType D("D", sf::Color::Yellow, 15, 5);
+
+    settings_.discTypeDistribution_[A] = 50;
+    settings_.discTypeDistribution_[B] = 30;
+    settings_.discTypeDistribution_[C] = 10;
+    settings_.discTypeDistribution_[D] = 10;
+
+    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = C, .probability_ = 0.01f});
+    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = D, .probability_ = 0.02f});
+
+    addReaction({.educt1_ = C, .product1_ = A, .product2_ = B, .probability_ = 0.01f});
+    addReaction({.educt1_ = D, .product1_ = A, .product2_ = B, .probability_ = 0.05f});
 }
 
 GlobalSettings& GlobalSettings::get()
@@ -171,43 +189,56 @@ void GlobalSettings::unlock()
 
 template <typename T> void eraseIfInEducts(T& reactionTable, const DiscType& discType)
 {
+    using KeyType = typename T::key_type;
+
     for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
     {
-        if (iter->first.first == discType || iter->first.second == discType)
-            iter = reactionTable.erase(iter);
+        bool eraseKey;
+
+        if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
+            eraseKey = iter->first.first == discType || iter->first.second == discType;
         else
-            ++iter;
+            eraseKey = iter->first == discType;
+
+        if (eraseKey)
+        {
+            iter = reactionTable.erase(iter);
+            continue;
+        }
+        ++iter;
+    }
+}
+
+template <typename T> void removeDanglingReactions(T& reactionTable, const std::vector<DiscType>& removedDiscTypes)
+{
+    for (const auto& removedDiscType : removedDiscTypes)
+    {
+        // Step 1: Erase all reactions that have the removed disc type as an educt
+        eraseIfInEducts(reactionTable, removedDiscType);
+
+        // Step 2: Erase all reactions that have the removed disc type as a product
+        for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
+        {
+            removeReactionsFromVector(iter->second, removedDiscType);
+            if (iter->second.empty())
+                iter = reactionTable.erase(iter);
+            else
+                ++iter;
+        }
     }
 }
 
 void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution)
 {
     std::vector<DiscType> removedDiscTypes;
-    std::vector<DiscType> remainingDiscTypes;
 
     for (const auto& [type, percent] : settings_.discTypeDistribution_)
     {
         if (newDiscTypeDistribution.find(type) == newDiscTypeDistribution.end())
             removedDiscTypes.push_back(type);
-        else
-            remainingDiscTypes.push_back(type);
     }
 
-    for (const auto& removedDiscType : removedDiscTypes)
-    {
-        // Step 1: Erase all reactions that have the removed disc type as an educt
-        eraseIfInEducts(settings_.decompositionReactions_, removedDiscType);
-        eraseIfInEducts(settings_.combinationReactions_, removedDiscType);
-        eraseIfInEducts(settings_.exchangeReactions_, removedDiscType);
-
-        // Step 2: Erase all reactions that have the removed disc type as a product
-        for (auto& [educt, products] : settings_.decompositionReactions_)
-            removeReactionsFromVector(products, removedDiscType);
-
-        for (auto& [educts, products] : settings_.combinationReactions_)
-            removeReactionsFromVector(products, removedDiscType);
-
-        for (auto& [educts, products] : settings_.exchangeReactions_)
-            removeReactionsFromVector(products, removedDiscType);
-    }
+    ::removeDanglingReactions(settings_.decompositionReactions_, removedDiscTypes);
+    ::removeDanglingReactions(settings_.combinationReactions_, removedDiscTypes);
+    ::removeDanglingReactions(settings_.exchangeReactions_, removedDiscTypes);
 }

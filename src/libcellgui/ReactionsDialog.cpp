@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+#include <unordered_set>
+
 ReactionsDialog::ReactionsDialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::ReactionsDialog)
@@ -22,10 +24,13 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
 
     connect(ui->okPushButton, &QPushButton::clicked, this, &ReactionsDialog::onOK);
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::onCancel);
+
     connect(ui->addCombinationReactionPushButton, &QPushButton::clicked, this,
             &ReactionsDialog::onAddCombinationReaction);
     connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked, this,
             &ReactionsDialog::onAddDecompositionReaction);
+    connect(ui->addExchangeReactionPushButton, &QPushButton::clicked, this, &ReactionsDialog::onAddExchangeReaction);
+
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, this, &ReactionsDialog::onClearReactions);
 
     resetTableViewToSettings();
@@ -49,13 +54,14 @@ void ReactionsDialog::showEvent(QShowEvent* event)
 
 void ReactionsDialog::onOK()
 {
-    const auto& combinationReactions = convertInputsToCombinationReactions();
-    const auto& decompositionReactions = convertInputsToDecompositionReactions();
+    const auto& reactions = convertInputsToReactions();
 
     try
     {
-        GlobalSettings::get().setCombinationReactions(combinationReactions);
-        GlobalSettings::get().setDecompositionReactions(decompositionReactions);
+        GlobalSettings::get().clearReactions();
+        for (const auto& reaction : reactions)
+            GlobalSettings::get().addReaction(reaction);
+
         emit reactionsChanged();
         hide();
     }
@@ -73,16 +79,22 @@ void ReactionsDialog::onCancel()
 
 void ReactionsDialog::onAddCombinationReaction()
 {
-    const QString& firstDiscTypeName =
-        QString::fromStdString(GlobalSettings::getSettings().discTypeDistribution_.begin()->first.name_);
-    addReactionRow({firstDiscTypeName, firstDiscTypeName, firstDiscTypeName, ""}, 0);
+    addRowFromReaction(
+        {.educt1_ = getDefaultDiscType(), .educt2_ = getDefaultDiscType(), .product1_ = getDefaultDiscType()});
 }
 
 void ReactionsDialog::onAddDecompositionReaction()
 {
-    const QString& firstDiscTypeName =
-        QString::fromStdString(GlobalSettings::getSettings().discTypeDistribution_.begin()->first.name_);
-    addReactionRow({firstDiscTypeName, "", firstDiscTypeName, firstDiscTypeName}, 0);
+    addRowFromReaction(
+        {.educt1_ = getDefaultDiscType(), .product1_ = getDefaultDiscType(), .product2_ = getDefaultDiscType()});
+}
+
+void ReactionsDialog::onAddExchangeReaction()
+{
+    addRowFromReaction({.educt1_ = getDefaultDiscType(),
+                        .educt2_ = getDefaultDiscType(),
+                        .product1_ = getDefaultDiscType(),
+                        .product2_ = getDefaultDiscType()});
 }
 
 void ReactionsDialog::onClearReactions()
@@ -101,33 +113,7 @@ void ReactionsDialog::onDeleteReaction()
     reactionsModel_->removeRow(index.row());
 }
 
-void ReactionsDialog::addRowFromCombinationReaction(const std::pair<DiscType, DiscType>& educts,
-                                                    const std::vector<std::pair<DiscType, float>>& products)
-{
-    for (const auto& [discType, probability] : products)
-    {
-        std::array<QString, 4> selectedDiscTypes = {QString::fromStdString(educts.first.name_),
-                                                    QString::fromStdString(educts.second.name_),
-                                                    QString::fromStdString(discType.name_), ""};
-
-        addReactionRow(selectedDiscTypes, probability);
-    }
-}
-
-void ReactionsDialog::addRowFromDecompositionReaction(
-    const DiscType& educt, const std::vector<std::pair<std::pair<DiscType, DiscType>, float>>& products)
-{
-    for (const auto& [product, probability] : products)
-    {
-        std::array<QString, 4> selectedDiscTypes = {QString::fromStdString(educt.name_), "",
-                                                    QString::fromStdString(product.first.name_),
-                                                    QString::fromStdString(product.second.name_)};
-
-        addReactionRow(selectedDiscTypes, probability);
-    }
-}
-
-void ReactionsDialog::addReactionRow(std::array<QString, 4> selectedDiscTypes, float probability)
+void ReactionsDialog::addRowFromReaction(const Reaction& reaction)
 {
     QStringList discTypeNames;
     for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
@@ -145,16 +131,18 @@ void ReactionsDialog::addReactionRow(std::array<QString, 4> selectedDiscTypes, f
 
     // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
 
-    for (int i = 0; i < selectedDiscTypes.size(); ++i)
+    std::vector<DiscType> reactionParts = {reaction.educt1_, reaction.educt2_, reaction.product1_, reaction.product2_};
+    for (int i = 0; i < reactionParts.size(); ++i)
     {
-        const auto& selectedDiscType = selectedDiscTypes[i];
-        if (selectedDiscType.isEmpty())
+        if (reactionParts[i].name_.empty())
             continue;
 
-        Utility::addComboBoxToLastRow(discTypeNames, selectedDiscType, reactionsModel_, ui->reactionsTableView, i * 2);
+        Utility::addComboBoxToLastRow(discTypeNames, QString::fromStdString(reactionParts[i].name_), reactionsModel_,
+                                      ui->reactionsTableView, i * 2);
     }
 
-    Utility::addSpinBoxToLastRow<QDoubleSpinBox>(probability, 0, 100, ui->reactionsTableView, reactionsModel_, 7);
+    Utility::addSpinBoxToLastRow<QDoubleSpinBox>(reaction.probability_, 0, 100, ui->reactionsTableView, reactionsModel_,
+                                                 7);
 
     QPushButton* deleteButton = new QPushButton("Delete");
     connect(deleteButton, &QPushButton::clicked, this, &ReactionsDialog::onDeleteReaction);
@@ -165,77 +153,57 @@ void ReactionsDialog::resetTableViewToSettings()
 {
     onClearReactions();
 
-    for (const auto& [educts, product] : GlobalSettings::getSettings().reactionTable_.getCombinationReactionsTable())
-        addRowFromCombinationReaction(educts, product);
+    const auto& settings = GlobalSettings::getSettings();
 
-    for (const auto& [educt, products] : GlobalSettings::getSettings().reactionTable_.getDecompositionReactionsTable())
-        addRowFromDecompositionReaction(educt, products);
+    // Reactions for {A, B} are duplicated in the maps with {B, A} for easier lookup
+    // Gotta ignore those duplicates here
+    std::unordered_set<Reaction, ReactionHash> reactionSet;
+
+    auto collectReactions = [&](const auto& reactionsMap)
+    {
+        for (const auto& [key, reactions] : reactionsMap)
+        {
+            for (const auto& reaction : reactions)
+                reactionSet.insert(reaction);
+        }
+    };
+
+    collectReactions(settings.decompositionReactions_);
+    collectReactions(settings.combinationReactions_);
+    collectReactions(settings.exchangeReactions_);
+
+    for (const auto& reaction : reactionSet)
+        addRowFromReaction(reaction);
 }
 
-std::vector<CombinationReaction> ReactionsDialog::convertInputsToCombinationReactions() const
+std::vector<Reaction> ReactionsDialog::convertInputsToReactions() const
 {
-    std::vector<CombinationReaction> combinationReactions;
+    std::vector<Reaction> reactions;
 
     for (int row = 0; row < reactionsModel_->rowCount(); ++row)
     {
-        if (getRowReactionType(row) != ReactionType::Combination)
-            continue;
+        Reaction reaction;
+        std::vector<DiscType*> reactionParts{&reaction.educt1_, &reaction.educt2_, &reaction.product1_,
+                                             &reaction.product2_};
 
-        QComboBox* aComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 0)));
-        QComboBox* bComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 2)));
-        QComboBox* cComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 4)));
-        QDoubleSpinBox* spinBox =
-            qobject_cast<QDoubleSpinBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 7)));
+        for (int i = 0; i < 6; ++i)
+        {
+            // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+            int widgetColumn = i * 2;
+            QWidget* widget = ui->reactionsTableView->indexWidget(reactionsModel_->index(row, widgetColumn));
 
-        combinationReactions.push_back(
-            CombinationReaction{.educt1 = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString()),
-                                .educt2 = GlobalSettings::getDiscTypeByName(bComboBox->currentText().toStdString()),
-                                .product = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString()),
-                                .probability = static_cast<float>(spinBox->value())});
+            if (!widget)
+                continue;
+
+            QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
+            *reactionParts[i] = GlobalSettings::getDiscTypeByName(comboBox->currentText().toStdString());
+        }
     }
 
-    return combinationReactions;
+    return reactions;
 }
 
-std::vector<DecompositionReaction> ReactionsDialog::convertInputsToDecompositionReactions() const
+const DiscType& ReactionsDialog::getDefaultDiscType() const
 {
-    std::vector<DecompositionReaction> decompositionReactions;
-
-    for (int row = 0; row < reactionsModel_->rowCount(); ++row)
-    {
-        if (getRowReactionType(row) != ReactionType::Decomposition)
-            continue;
-
-        QComboBox* aComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 0)));
-        QComboBox* cComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 4)));
-        QComboBox* dComboBox =
-            qobject_cast<QComboBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 6)));
-        QDoubleSpinBox* spinBox =
-            qobject_cast<QDoubleSpinBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 7)));
-
-        decompositionReactions.push_back(
-            {.educt = GlobalSettings::getDiscTypeByName(aComboBox->currentText().toStdString()),
-             .product1 = GlobalSettings::getDiscTypeByName(cComboBox->currentText().toStdString()),
-             .product2 = GlobalSettings::getDiscTypeByName(dComboBox->currentText().toStdString()),
-             .probability = static_cast<float>(spinBox->value())});
-    }
-
-    return decompositionReactions;
-}
-
-ReactionType ReactionsDialog::getRowReactionType(int index) const
-{
-    // If we have a widget in column 3 it has to be a combination reaction, decomposition reactions don't have that
-    // column
-    QWidget* widget = ui->reactionsTableView->indexWidget(reactionsModel_->index(index, 2));
-
-    if (widget)
-        return ReactionType::Combination;
-
-    return ReactionType::Decomposition;
+    return GlobalSettings::getSettings().discTypeDistribution_.begin()->first;
 }

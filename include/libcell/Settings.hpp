@@ -12,8 +12,6 @@
 
 struct Settings
 {
-    Settings();
-
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
