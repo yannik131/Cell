@@ -32,8 +32,6 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     connect(ui->addExchangeReactionPushButton, &QPushButton::clicked, this, &ReactionsDialog::onAddExchangeReaction);
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, this, &ReactionsDialog::onClearReactions);
-
-    resetTableViewToSettings();
 }
 
 void ReactionsDialog::closeEvent(QCloseEvent* event)
@@ -50,6 +48,8 @@ void ReactionsDialog::showEvent(QShowEvent* event)
                                  "No disc types available for reactions.\nCreate some disc types first.");
         event->ignore();
     }
+
+    resetTableViewToSettings();
 }
 
 void ReactionsDialog::onOK()
@@ -186,7 +186,7 @@ std::vector<Reaction> ReactionsDialog::convertInputsToReactions() const
         std::vector<DiscType*> reactionParts{&reaction.educt1_, &reaction.educt2_, &reaction.product1_,
                                              &reaction.product2_};
 
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
             int widgetColumn = i * 2;
@@ -198,6 +198,12 @@ std::vector<Reaction> ReactionsDialog::convertInputsToReactions() const
             QComboBox* comboBox = qobject_cast<QComboBox*>(widget);
             *reactionParts[i] = GlobalSettings::getDiscTypeByName(comboBox->currentText().toStdString());
         }
+
+        QDoubleSpinBox* spinBox =
+            qobject_cast<QDoubleSpinBox*>(ui->reactionsTableView->indexWidget(reactionsModel_->index(row, 7)));
+        reaction.probability_ = spinBox->value();
+
+        reactions.push_back(reaction);
     }
 
     return reactions;

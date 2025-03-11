@@ -118,11 +118,51 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
+bool handleBimolecularReaction(Disc* d1, Disc* d2)
+{
+    // TODO handle exchange reactions, they require overlap correction unlike combination reactions
+    // TODO bad function name for return value
+
+    const auto& combinationReactionTable = GlobalSettings::getSettings().combinationReactions_;
+
+    auto iter = combinationReactionTable.find(std::make_pair(p2->type_, p1->type_));
+    if (iter != combinationReactionTable.end())
+    {
+        const auto& possibleReactions = iter->second;
+        float randomNumber = distribution(gen);
+        for (const auto& reaction : possibleReactions)
+        {
+            if (randomNumber > reaction.probability_)
+                continue;
+
+            const auto& resultType = reaction.product1_;
+
+            if (std::abs(resultType.radius_ - p1->type_.radius_) < std::abs(resultType.radius_ - p2->type_.radius_))
+            {
+                p1->type_ = resultType;
+                p1->changed_ = true;
+                p2->destroyed_ = true;
+                d1->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
+            }
+            else
+            {
+                p2->type_ = resultType;
+                p2->changed_ = true;
+                p1->destroyed_ = true;
+                d2->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
     int collisionCount = 0;
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
-    const auto& reactionTable = GlobalSettings::getSettings().combinationReactions_;
 
     for (const auto& [p1, p2] : collidingDiscs)
     {
@@ -149,68 +189,37 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         if (overlap <= 0)
             continue;
 
-        auto iter = reactionTable.find(std::make_pair(p2->type_, p1->type_));
-        bool reactionOccured = false;
-        if (iter != reactionTable.end())
-        {
-            const auto& possibleReactions = iter->second;
-            float randomNumber = distribution(gen);
-            for (const auto& reaction : possibleReactions)
-            {
-                if (randomNumber > reaction.probability_)
-                    continue;
-
-                const auto& resultType = reaction.product1_;
-
-                if (std::abs(resultType.radius_ - p1->type_.radius_) < std::abs(resultType.radius_ - p2->type_.radius_))
-                {
-                    p1->type_ = resultType;
-                    p1->changed_ = true;
-                    p2->destroyed_ = true;
-                    v1 = (m1 * v1 + m2 * v2) / resultType.mass_;
-                }
-                else
-                {
-                    p2->type_ = resultType;
-                    p2->changed_ = true;
-                    p1->destroyed_ = true;
-                    v2 = (m1 * v1 + m2 * v2) / resultType.mass_;
-                }
-                reactionOccured = true;
-                break;
-            }
-        }
-
-        if (!reactionOccured)
-        {
-            // Tangential vector of the collision
-            sf::Vector2f tangent(-normal.y, normal.x);
-
-            // Relative velocity
-            sf::Vector2f relativeVelocity = v2 - v1;
-            float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
-            float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
-
-            // Coefficient of restitution (elasticity of the collision)
-            const float e = 1.f; // Fully elastic
-
-            // Impulse exchange in the normal direction
-            float jNormal = -(1 + e) * velocityAlongNormal;
-            jNormal /= (1 / m1 + 1 / m2);
-
-            // Impulse exchange in the tangential direction (considering friction)
-            float jTangent = -frictionCoefficient * velocityAlongTangent;
-            jTangent /= (1 / m1 + 1 / m2);
-
-            // Total impulse
-            sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
-
-            // Apply the impulse
-            v1 -= impulse / m1;
-            v2 += impulse / m2;
-        }
-
         ++collisionCount;
+
+        // Don't handle collision if reaction occured
+        if (handleBimolecularReaction(p1, p2))
+            continue;
+
+        // Tangential vector of the collision
+        sf::Vector2f tangent(-normal.y, normal.x);
+
+        // Relative velocity
+        sf::Vector2f relativeVelocity = v2 - v1;
+        float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
+        float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
+
+        // Coefficient of restitution (elasticity of the collision)
+        const float e = 1.f; // Fully elastic
+
+        // Impulse exchange in the normal direction
+        float jNormal = -(1 + e) * velocityAlongNormal;
+        jNormal /= (1 / m1 + 1 / m2);
+
+        // Impulse exchange in the tangential direction (considering friction)
+        float jTangent = -frictionCoefficient * velocityAlongTangent;
+        jTangent /= (1 / m1 + 1 / m2);
+
+        // Total impulse
+        sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
+
+        // Apply the impulse
+        v1 -= impulse / m1;
+        v2 += impulse / m2;
     }
 
     return collisionCount;

@@ -11,7 +11,7 @@ struct Reaction
     DiscType educt2_;
     DiscType product1_;
     DiscType product2_;
-    float probability_;
+    float probability_ = 0;
 };
 
 struct ReactionHash

@@ -117,7 +117,7 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     }
 
     if (totalPercent != 100)
-        throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They adds up to " +
+        throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They add up to " +
                                  std::to_string(totalPercent));
 
     removeDanglingReactions(discTypeDistribution);
