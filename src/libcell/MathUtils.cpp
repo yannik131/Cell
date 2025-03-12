@@ -18,60 +18,141 @@ static std::uniform_real_distribution<float> distribution(0, 1);
 typedef nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter> AdapterType;
 typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KDTree;
 
-std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
+void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
     const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
     const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+
+    const auto& iter = decompositionReactionTable.find(d1->type_);
+    if (iter == decompositionReactionTable.end())
+        return;
+
+    const auto& possibleReactions = iter->second;
+    float randomNumber = distribution(gen);
+    for (const auto& reaction : possibleReactions)
+    {
+        if (randomNumber > reaction.probability_ * simulationTimeStep)
+            continue;
+
+        const float MassFraction = d1->type_.mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
+        const float Factor = std::sqrt(2) / 2 * MassFraction;
+        const auto& v = d1->velocity_;
+        const auto& r = d1->position_;
+        const float vAbs = std::hypot(v.x, v.y);
+
+        Disc product1(reaction.product1_);
+        product1.velocity_ = Factor * sf::Vector2f{v.x - v.y, v.x + v.y};
+        product1.position_ = r + product1.velocity_ / vAbs;
+
+        Disc product2(reaction.product2_);
+        product2.velocity_ = Factor * sf::Vector2f{v.x + v.y, v.y - v.x};
+        product2.position_ = r + product2.velocity_ / vAbs;
+
+        sf::Vector2f normal = product2.position_ - product1.position_;
+        float distance = std::hypot(normal.x, normal.y);
+        normal /= distance;
+
+        float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance + 1;
+        product1.position_ -= overlap * normal / 2.0f;
+        product2.position_ += overlap * normal / 2.0f;
+
+        newDiscs.push_back(std::move(product1));
+        newDiscs.push_back(std::move(product2));
+        d1->destroyed_ = true;
+
+        return;
+    }
+
+    return;
+}
+
+bool combinationReaction(Disc* d1, Disc* d2)
+{
+    const auto& combinationReactionTable = GlobalSettings::getSettings().combinationReactions_;
+    auto iter = combinationReactionTable.find(std::make_pair(d2->type_, d1->type_));
+
+    if (iter == combinationReactionTable.end())
+        return false;
+
+    const auto& possibleReactions = iter->second;
+    float randomNumber = distribution(gen);
+    for (const auto& reaction : possibleReactions)
+    {
+        if (randomNumber > reaction.probability_)
+            continue;
+
+        const auto& resultType = reaction.product1_;
+
+        // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
+        if (std::abs(resultType.radius_ - d1->type_.radius_) < std::abs(resultType.radius_ - d2->type_.radius_))
+        {
+            d1->type_ = resultType;
+            d1->changed_ = true;
+            d2->destroyed_ = true;
+            d1->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
+        }
+        else
+        {
+            d2->type_ = resultType;
+            d2->changed_ = true;
+            d1->destroyed_ = true;
+            d2->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool exchangeReaction(Disc* d1, Disc* d2)
+{
+    // TODO Probabilities of exchange and combination reactions should together add up to 100%
+    const auto& exchangeReactionTable = GlobalSettings::getSettings().combinationReactions_;
+    auto iter = exchangeReactionTable.find(std::make_pair(d2->type_, d1->type_));
+
+    if (iter == exchangeReactionTable.end())
+        return false;
+
+    const auto& possibleReactions = iter->second;
+    float randomNumber = distribution(gen);
+    for (const auto& reaction : possibleReactions)
+    {
+        if (randomNumber > reaction.probability_)
+            continue;
+
+        // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
+        d1->velocity_ *= std::sqrt(d1->type_.mass_ / reaction.product1_.mass_);
+        d1->type_ = reaction.product1_;
+        d1->changed_ = true;
+
+        d2->velocity_ *= std::sqrt(d2->type_.mass_ / reaction.product2_.mass_);
+        d2->type_ = reaction.product2_;
+        d2->changed_ = true;
+
+        return true;
+    }
+
+    return false;
+}
+
+std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
+{
     std::vector<Disc> newDiscs;
 
     for (auto& disc : discs)
-    {
-        const auto& iter = decompositionReactionTable.find(disc.type_);
-        if (iter == decompositionReactionTable.end())
-            continue;
-
-        const auto& possibleReactions = iter->second;
-        float randomNumber = distribution(gen);
-        for (const auto& reaction : possibleReactions)
-        {
-            if (randomNumber > reaction.probability_ * simulationTimeStep)
-                continue;
-
-            const float MassFraction = disc.type_.mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
-            const float Factor = std::sqrt(2) / 2 * MassFraction;
-            const auto& v = disc.velocity_;
-            const auto& r = disc.position_;
-            const float vAbs = std::hypot(v.x, v.y);
-
-            Disc product1(reaction.product1_);
-            product1.velocity_ = Factor * sf::Vector2f{v.x - v.y, v.x + v.y};
-            product1.position_ = r + product1.velocity_ / vAbs;
-
-            Disc product2(reaction.product2_);
-            product2.velocity_ = Factor * sf::Vector2f{v.x + v.y, v.y - v.x};
-            product2.position_ = r + product2.velocity_ / vAbs;
-
-            sf::Vector2f normal = product2.position_ - product1.position_;
-            float distance = std::hypot(normal.x, normal.y);
-            normal /= distance;
-
-            float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance + 1;
-            product1.position_ -= overlap * normal / 2.0f;
-            product2.position_ += overlap * normal / 2.0f;
-
-            newDiscs.push_back(std::move(product1));
-            newDiscs.push_back(std::move(product2));
-            disc.destroyed_ = true;
-
-            break;
-        }
-    }
+        decompositionReaction(&disc, newDiscs);
 
     return newDiscs;
 }
 
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
 {
+    for (const auto& disc : discs)
+    {
+        if (disc.destroyed_)
+            break;
+    }
     NanoflannAdapter adapter(discs);
     KDTree kdtree(2, adapter);
     const nanoflann::SearchParameters searchParams(0, false);
@@ -118,47 +199,6 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
-bool handleBimolecularReaction(Disc* d1, Disc* d2)
-{
-    // TODO handle exchange reactions, they require overlap correction unlike combination reactions
-    // TODO bad function name for return value
-
-    const auto& combinationReactionTable = GlobalSettings::getSettings().combinationReactions_;
-
-    auto iter = combinationReactionTable.find(std::make_pair(p2->type_, p1->type_));
-    if (iter != combinationReactionTable.end())
-    {
-        const auto& possibleReactions = iter->second;
-        float randomNumber = distribution(gen);
-        for (const auto& reaction : possibleReactions)
-        {
-            if (randomNumber > reaction.probability_)
-                continue;
-
-            const auto& resultType = reaction.product1_;
-
-            if (std::abs(resultType.radius_ - p1->type_.radius_) < std::abs(resultType.radius_ - p2->type_.radius_))
-            {
-                p1->type_ = resultType;
-                p1->changed_ = true;
-                p2->destroyed_ = true;
-                d1->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
-            }
-            else
-            {
-                p2->type_ = resultType;
-                p2->changed_ = true;
-                p1->destroyed_ = true;
-                d2->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
-            }
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
 int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
     int collisionCount = 0;
@@ -192,7 +232,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         ++collisionCount;
 
         // Don't handle collision if reaction occured
-        if (handleBimolecularReaction(p1, p2))
+        if (combinationReaction(p1, p2))
             continue;
 
         // Tangential vector of the collision
@@ -220,6 +260,19 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         // Apply the impulse
         v1 -= impulse / m1;
         v2 += impulse / m2;
+
+        if (exchangeReaction(p1, p2))
+        {
+            // Might have overlap now if the discs increased in size
+            // TODO maybe write a class that gives these values so we don't have to copy paste code? Could take 2 discs
+            // as an argument and provide methods for overlap correction and retrieval of intermediate values like the
+            // normal and distance for further use
+            normal = pos2 - pos1;
+            distance = std::hypot(normal.x, normal.y);
+            overlap = (r1 + r2) - distance;
+            pos1 -= overlap * normal / 2.0f;
+            pos2 += overlap * normal / 2.0f;
+        }
     }
 
     return collisionCount;
@@ -280,7 +333,8 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
-    // TODO really oughta plot the total kinetic energy and start writing tests, i think this amount is too small
+    // TODO really oughta plot the total kinetic energy, total impulse and start writing tests, I think this amount is
+    // too small
     float randomNumber = distribution(gen) / 10.f;
     if (kineticEnergyDeficiency <= 0)
         return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
