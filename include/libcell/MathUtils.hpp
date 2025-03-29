@@ -15,6 +15,7 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs);
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius);
 int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency);
+float abs(const sf::Vector2f& vec);
 
 } // namespace MathUtils
 

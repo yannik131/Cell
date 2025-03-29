@@ -23,7 +23,7 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
     const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
     const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
-    const auto& iter = decompositionReactionTable.find(d1->type_);
+    const auto& iter = decompositionReactionTable.find(d1->getType());
     if (iter == decompositionReactionTable.end())
         return;
 
@@ -34,31 +34,31 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         if (randomNumber > reaction.probability_ * simulationTimeStep)
             continue;
 
-        const float MassFraction = d1->type_.mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
+        const float MassFraction = d1->getType().mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
         const float Factor = std::sqrt(2) / 2 * MassFraction;
-        const auto& v = d1->velocity_;
-        const auto& r = d1->position_;
+        const auto& v = d1->getVelocity();
+        const auto& r = d1->getPosition();
         const float vAbs = std::hypot(v.x, v.y);
 
         Disc product1(reaction.product1_);
-        product1.velocity_ = Factor * sf::Vector2f{v.x - v.y, v.x + v.y};
-        product1.position_ = r + product1.velocity_ / vAbs;
+        product1.setVelocity(Factor * sf::Vector2f{v.x - v.y, v.x + v.y});
+        product1.setPosition(r + product1.getVelocity() / vAbs);
 
         Disc product2(reaction.product2_);
-        product2.velocity_ = Factor * sf::Vector2f{v.x + v.y, v.y - v.x};
-        product2.position_ = r + product2.velocity_ / vAbs;
+        product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
+        product2.setPosition(r + product2.getVelocity() / vAbs);
 
-        sf::Vector2f normal = product2.position_ - product1.position_;
+        sf::Vector2f normal = product2.getPosition() - product1.getPosition();
         float distance = std::hypot(normal.x, normal.y);
         normal /= distance;
 
-        float overlap = (product1.type_.radius_ + product2.type_.radius_) - distance + 1;
-        product1.position_ -= overlap * normal / 2.0f;
-        product2.position_ += overlap * normal / 2.0f;
+        float overlap = (product1.getType().radius_ + product2.getType().radius_) - distance + 1;
+        product1.move(-overlap * normal / 2.0f);
+        product2.move(overlap * normal / 2.0f);
 
         newDiscs.push_back(std::move(product1));
         newDiscs.push_back(std::move(product2));
-        d1->destroyed_ = true;
+        d1->markDestroyed();
 
         return;
     }
@@ -69,7 +69,7 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 bool combinationReaction(Disc* d1, Disc* d2)
 {
     const auto& combinationReactionTable = GlobalSettings::getSettings().combinationReactions_;
-    auto iter = combinationReactionTable.find(std::make_pair(d2->type_, d1->type_));
+    auto iter = combinationReactionTable.find(std::make_pair(d2->getType(), d1->getType()));
 
     if (iter == combinationReactionTable.end())
         return false;
@@ -84,20 +84,15 @@ bool combinationReaction(Disc* d1, Disc* d2)
         const auto& resultType = reaction.product1_;
 
         // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
-        if (std::abs(resultType.radius_ - d1->type_.radius_) < std::abs(resultType.radius_ - d2->type_.radius_))
-        {
-            d1->type_ = resultType;
-            d1->changed_ = true;
-            d2->destroyed_ = true;
-            d1->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
-        }
-        else
-        {
-            d2->type_ = resultType;
-            d2->changed_ = true;
-            d1->destroyed_ = true;
-            d2->velocity_ = (d1->type_.mass_ * d1->velocity_ + d2->type_.mass_ * d2->velocity_) / resultType.mass_;
-        }
+        if (std::abs(resultType.radius_ - d1->getType().radius_) > std::abs(resultType.radius_ - d2->getType().radius_))
+            std::swap(d1, d2);
+
+        d1->setType(resultType);
+        d1->markChanged();
+        d1->setVelocity((d1->getType().mass_ * d1->getVelocity() + d2->getType().mass_ * d2->getVelocity()) /
+                        resultType.mass_);
+
+        d2->markDestroyed();
 
         return true;
     }
@@ -108,8 +103,10 @@ bool combinationReaction(Disc* d1, Disc* d2)
 bool exchangeReaction(Disc* d1, Disc* d2)
 {
     // TODO Probabilities of exchange and combination reactions should together add up to 100%
-    const auto& exchangeReactionTable = GlobalSettings::getSettings().combinationReactions_;
-    auto iter = exchangeReactionTable.find(std::make_pair(d2->type_, d1->type_));
+    const auto& settings = GlobalSettings::getSettings();
+
+    const auto& exchangeReactionTable = settings.exchangeReactions_;
+    auto iter = exchangeReactionTable.find(std::make_pair(d2->getType(), d1->getType()));
 
     if (iter == exchangeReactionTable.end())
         return false;
@@ -122,13 +119,13 @@ bool exchangeReaction(Disc* d1, Disc* d2)
             continue;
 
         // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
-        d1->velocity_ *= std::sqrt(d1->type_.mass_ / reaction.product1_.mass_);
-        d1->type_ = reaction.product1_;
-        d1->changed_ = true;
+        d1->scaleVelocity(std::sqrt(d1->getType().mass_ / reaction.product1_.mass_));
+        d1->setType(reaction.product1_);
+        d1->markChanged();
 
-        d2->velocity_ *= std::sqrt(d2->type_.mass_ / reaction.product2_.mass_);
-        d2->type_ = reaction.product2_;
-        d2->changed_ = true;
+        d2->scaleVelocity(std::sqrt(d2->getType().mass_ / reaction.product2_.mass_));
+        d2->setType(reaction.product2_);
+        d2->markChanged();
 
         return true;
     }
@@ -148,11 +145,6 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
 
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
 {
-    for (const auto& disc : discs)
-    {
-        if (disc.destroyed_)
-            break;
-    }
     NanoflannAdapter adapter(discs);
     KDTree kdtree(2, adapter);
     const nanoflann::SearchParameters searchParams(0, false);
@@ -162,15 +154,15 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
     for (auto& disc : discs)
     {
-        if (disc.destroyed_)
+        if (disc.isMarkedDestroyed())
             continue;
 
         discsInRadius.clear();
-        const float maxCollisionDistance = disc.type_.radius_ + maxRadius;
+        const float maxCollisionDistance = disc.getType().radius_ + maxRadius;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
         // constructor
-        kdtree.radiusSearch(&disc.position_.x, maxCollisionDistance * maxCollisionDistance, discsInRadius,
+        kdtree.radiusSearch(&disc.getPosition().x, maxCollisionDistance * maxCollisionDistance, discsInRadius,
                             searchParams);
 
         for (size_t i = 0; i < discsInRadius.size(); ++i)
@@ -180,7 +172,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
             auto& otherDisc = discs[discsInRadius[i].first];
 
-            const float radiusSum = disc.type_.radius_ + otherDisc.type_.radius_;
+            const float radiusSum = disc.getType().radius_ + otherDisc.getType().radius_;
 
             if (discsInRadius[i].second <= radiusSum * radiusSum)
             {
@@ -206,24 +198,16 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 
     for (const auto& [p1, p2] : collidingDiscs)
     {
-        auto& pos1 = p1->position_;
-        auto& pos2 = p2->position_;
-        auto& v1 = p1->velocity_;
-        auto& v2 = p2->velocity_;
-        const auto& m1 = p1->type_.mass_;
-        const auto& m2 = p2->type_.mass_;
-        const auto& r1 = p1->type_.radius_;
-        const auto& r2 = p2->type_.radius_;
-
         // Normal vector of the collision
-        sf::Vector2f normal = pos2 - pos1;
+        sf::Vector2f normal = p2->getPosition() - p1->getPosition();
         float distance = std::hypot(normal.x, normal.y);
         normal /= distance;
 
         // Correct positions to avoid overlaps
-        float overlap = (r1 + r2) - distance;
-        pos1 -= overlap * normal / 2.0f;
-        pos2 += overlap * normal / 2.0f;
+        float overlap = p1->getType().radius_ + p2->getType().radius_ - distance;
+
+        p1->move(-overlap * normal / 2.0f);
+        p2->move(overlap * normal / 2.0f);
 
         // No overlap -> no collision
         if (overlap <= 0)
@@ -239,13 +223,14 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         sf::Vector2f tangent(-normal.y, normal.x);
 
         // Relative velocity
-        sf::Vector2f relativeVelocity = v2 - v1;
+        sf::Vector2f relativeVelocity = p2->getVelocity() - p1->getVelocity();
         float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
         float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
 
         // Coefficient of restitution (elasticity of the collision)
         const float e = 1.f; // Fully elastic
 
+        const auto &m1 = p1->getType().mass_, m2 = p2->getType().mass_;
         // Impulse exchange in the normal direction
         float jNormal = -(1 + e) * velocityAlongNormal;
         jNormal /= (1 / m1 + 1 / m2);
@@ -258,8 +243,8 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
 
         // Apply the impulse
-        v1 -= impulse / m1;
-        v2 += impulse / m2;
+        p1->accelerate(-impulse / m1);
+        p2->accelerate(impulse / m2);
 
         if (exchangeReaction(p1, p2))
         {
@@ -267,11 +252,12 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
             // TODO maybe write a class that gives these values so we don't have to copy paste code? Could take 2 discs
             // as an argument and provide methods for overlap correction and retrieval of intermediate values like the
             // normal and distance for further use
-            normal = pos2 - pos1;
+            normal = p2->getPosition() - p1->getPosition();
             distance = std::hypot(normal.x, normal.y);
-            overlap = (r1 + r2) - distance;
-            pos1 -= overlap * normal / 2.0f;
-            pos2 += overlap * normal / 2.0f;
+            overlap = p1->getType().radius_ + p2->getType().radius_ - distance;
+
+            p1->move(-overlap * normal / 2.0f);
+            p2->move(overlap * normal / 2.0f);
         }
     }
 
@@ -281,11 +267,11 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)
 {
     // https://hermann-baum.de/bouncing-balls/
-    const auto& r = disc.type_.radius_;
-    auto& pos = disc.position_;
-    auto& v = disc.velocity_;
+    const auto& r = disc.getType().radius_;
+    const auto& pos = disc.getPosition();
+    const auto& v = disc.getVelocity();
 
-    float dx, dy;
+    float dx = 0, dy = 0;
     bool collided = false;
 
     if (pos.x < r)
@@ -293,8 +279,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         dx = r - pos.x + 1;
         dy = dx * v.y / v.x;
 
-        pos += {dx, dy};
-        v.x = -v.x;
+        disc.negateXVelocity();
         collided = true;
     }
     else if (pos.x > bounds.x - r)
@@ -302,8 +287,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         dx = -(pos.x + r - bounds.x + 1);
         dy = -(dx * v.y / v.x);
 
-        pos += {dx, dy};
-        v.x = -v.x;
+        disc.negateXVelocity();
         collided = true;
     }
 
@@ -312,8 +296,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         dy = r - pos.y + 1;
         dx = dy * v.x / v.y;
 
-        pos += {dx, dy};
-        v.y = -v.y;
+        disc.negateYVelocity();
         collided = true;
     }
     else if (pos.y > bounds.y - r)
@@ -321,13 +304,14 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         dy = -(pos.y + r - bounds.y + 1);
         dx = -(dy * v.x / v.y);
 
-        pos += {dx, dy};
-        v.y = -v.y;
+        disc.negateYVelocity();
         collided = true;
     }
 
     if (!collided)
         return 0.f;
+
+    disc.move({dx, dy});
 
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
@@ -340,9 +324,14 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
 
     float kineticEnergyBefore = disc.getKineticEnergy();
-    v *= 1 + randomNumber;
+    disc.scaleVelocity(1 + randomNumber);
 
     return disc.getKineticEnergy() - kineticEnergyBefore;
+}
+
+float abs(const sf::Vector2f& vec)
+{
+    return std::hypot(vec.x, vec.y);
 }
 
 } // namespace MathUtils

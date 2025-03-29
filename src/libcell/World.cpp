@@ -24,7 +24,7 @@ void World::update(const sf::Time& dt)
 
     for (auto& disc : discs_)
     {
-        disc.position_ += disc.velocity_ * dt.asSeconds();
+        disc.move(disc.getVelocity() * dt.asSeconds());
         const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
         newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
@@ -126,8 +126,8 @@ void World::buildScene()
             {
                 counts[discType.radius_]++;
                 Disc newDisc(discType);
-                newDisc.position_ = startPositions_.back();
-                newDisc.velocity_ = sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen));
+                newDisc.setPosition(startPositions_.back());
+                newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));
                 initialKineticEnergy_ += newDisc.getKineticEnergy();
 
                 discs_.push_back(newDisc);
@@ -172,21 +172,22 @@ void World::findChangedDiscs()
 {
     for (int i = 0; i < discs_.size(); ++i)
     {
-        if (discs_[i].changed_)
+        if (discs_[i].isMarkedChanged())
         {
             changedDiscsIndices_.push_back(i);
-            discs_[i].changed_ = false;
+            discs_[i].unmarkChanged();
         }
     }
 }
 
 void World::removeDestroyedDiscs()
 {
+    // TODO rename this function, have it iterate all discs and call various methods on each discs etc.
     currentKineticEnergy_ = 0.f;
     int currentIndex = 0;
     for (auto iter = discs_.begin(); iter != discs_.end();)
     {
-        if (iter->destroyed_)
+        if (iter->isMarkedDestroyed())
         {
             iter = discs_.erase(iter);
             destroyedDiscsIndices_.push_back(currentIndex);

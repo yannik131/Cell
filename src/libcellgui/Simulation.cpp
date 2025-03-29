@@ -83,7 +83,7 @@ void Simulation::emitFrameData()
     frameDTO.discs_.reserve(worldDiscs_.size());
 
     for (const auto& disc : worldDiscs_)
-        frameDTO.discs_.push_back(GUIDisc(disc.position_));
+        frameDTO.discs_.push_back(GUIDisc(disc.getPosition()));
 
     emit frameData(frameDTO);
 }
@@ -96,7 +96,7 @@ void Simulation::emitUpdateData()
 
     UpdateDTO updateDTO;
     for (int index : world_.getChangedDiscsIndices())
-        updateDTO.changedDiscsIndices_.push_back(std::make_pair(index, worldDiscs_[index].type_));
+        updateDTO.changedDiscsIndices_.push_back(std::make_pair(index, worldDiscs_[index].getType()));
 
     updateDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
     updateDTO.newDiscs_ = world_.getNewDiscs();

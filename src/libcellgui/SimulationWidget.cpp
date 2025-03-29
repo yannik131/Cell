@@ -58,10 +58,10 @@ void SimulationWidget::update(const UpdateDTO& updateDTO)
 
 sf::CircleShape SimulationWidget::circleShapeFromDisc(const Disc& disc)
 {
-    sf::CircleShape shape(disc.type_.radius_);
-    shape.setFillColor(disc.type_.color_);
-    shape.setOrigin(sf::Vector2f(disc.type_.radius_, disc.type_.radius_));
-    shape.setPosition(disc.position_);
+    sf::CircleShape shape(disc.getType().radius_);
+    shape.setFillColor(disc.getType().color_);
+    shape.setOrigin(sf::Vector2f(disc.getType().radius_, disc.getType().radius_));
+    shape.setPosition(disc.getPosition());
 
     return shape;
 }
