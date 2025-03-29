@@ -26,9 +26,12 @@ SpinBoxType* addSpinBoxToLastRow(double value, double min, double max, QTableVie
     if (!objectName.isEmpty())
         spinBox->setObjectName(objectName);
 
+    if constexpr (std::is_base_of<QDoubleSpinBox, SpinBoxType>::value)
+        spinBox->setDecimals(3);
+
     spinBox->setValue(value);
     spinBox->setRange(min, max);
-    spinBox->setSingleStep(0.01);
+    spinBox->setSingleStep(0.001);
     tableView->setIndexWidget(model->index(model->rowCount() - 1, column), spinBox);
 
     return spinBox;

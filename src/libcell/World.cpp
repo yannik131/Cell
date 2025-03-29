@@ -140,11 +140,11 @@ void World::buildScene()
 
     currentKineticEnergy_ = initialKineticEnergy_;
 
-    VLOG(1) << "Radius distribution";
+    DLOG(INFO) << "Radius distribution";
     for (const auto& [radius, count] : counts)
     {
-        VLOG(1) << radius << ": " << count << "/" << settings.numberOfDiscs_ << " ("
-                << count / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
+        DLOG(INFO) << radius << ": " << count << "/" << settings.numberOfDiscs_ << " ("
+                   << count / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
     }
 }
 

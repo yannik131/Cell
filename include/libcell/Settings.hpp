@@ -58,6 +58,7 @@ struct Settings
 
     /**
      * @brief Maps disc types to decomposition reactions A -> B + C by educt
+     * @todo Lookup for decomposition reactions takes up some time though, maybe unordered_map is worth consideration
      */
     std::map<DiscType, std::vector<Reaction>> decompositionReactions_;
 

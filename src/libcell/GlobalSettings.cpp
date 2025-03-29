@@ -18,11 +18,11 @@ GlobalSettings::GlobalSettings()
     settings_.discTypeDistribution_[C] = 10;
     settings_.discTypeDistribution_[D] = 10;
 
-    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = C, .probability_ = 0.01f});
-    // addReaction({.educt1_ = A, .educt2_ = B, .product1_ = D, .probability_ = 0.02f});
+    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = C, .probability_ = 0.001f});
+    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = D, .probability_ = 0.002f});
 
-    // addReaction({.educt1_ = C, .product1_ = A, .product2_ = B, .probability_ = 0.01f});
-    // addReaction({.educt1_ = D, .product1_ = A, .product2_ = B, .probability_ = 0.05f});
+    addReaction({.educt1_ = C, .product1_ = A, .product2_ = B, .probability_ = 0.001f});
+    addReaction({.educt1_ = D, .product1_ = A, .product2_ = B, .probability_ = 0.005f});
 }
 
 GlobalSettings& GlobalSettings::get()

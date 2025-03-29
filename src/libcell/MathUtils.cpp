@@ -11,60 +11,8 @@
 namespace MathUtils
 {
 
-static std::random_device rd;
-static std::mt19937 gen(rd());
-static std::uniform_real_distribution<float> distribution(0, 1);
-
 typedef nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter> AdapterType;
 typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KDTree;
-
-void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
-{
-    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
-    const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
-
-    const auto& iter = decompositionReactionTable.find(d1->getType());
-    if (iter == decompositionReactionTable.end())
-        return;
-
-    const auto& possibleReactions = iter->second;
-    float randomNumber = distribution(gen);
-    for (const auto& reaction : possibleReactions)
-    {
-        if (randomNumber > reaction.probability_ * simulationTimeStep)
-            continue;
-
-        const float MassFraction = d1->getType().mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
-        const float Factor = std::sqrt(2) / 2 * MassFraction;
-        const auto& v = d1->getVelocity();
-        const auto& r = d1->getPosition();
-        const float vAbs = std::hypot(v.x, v.y);
-
-        Disc product1(reaction.product1_);
-        product1.setVelocity(Factor * sf::Vector2f{v.x - v.y, v.x + v.y});
-        product1.setPosition(r + product1.getVelocity() / vAbs);
-
-        Disc product2(reaction.product2_);
-        product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
-        product2.setPosition(r + product2.getVelocity() / vAbs);
-
-        sf::Vector2f normal = product2.getPosition() - product1.getPosition();
-        float distance = std::hypot(normal.x, normal.y);
-        normal /= distance;
-
-        float overlap = (product1.getType().radius_ + product2.getType().radius_) - distance + 1;
-        product1.move(-overlap * normal / 2.0f);
-        product2.move(overlap * normal / 2.0f);
-
-        newDiscs.push_back(std::move(product1));
-        newDiscs.push_back(std::move(product2));
-        d1->markDestroyed();
-
-        return;
-    }
-
-    return;
-}
 
 bool combinationReaction(Disc* d1, Disc* d2)
 {
@@ -75,7 +23,7 @@ bool combinationReaction(Disc* d1, Disc* d2)
         return false;
 
     const auto& possibleReactions = iter->second;
-    float randomNumber = distribution(gen);
+    float randomNumber = getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
         if (randomNumber > reaction.probability_)
@@ -112,12 +60,14 @@ bool exchangeReaction(Disc* d1, Disc* d2)
         return false;
 
     const auto& possibleReactions = iter->second;
-    float randomNumber = distribution(gen);
+    float randomNumber = getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
         if (randomNumber > reaction.probability_)
             continue;
 
+        // TODO This looks wrong: Write down the math for all reaction types in latex with nice graphics
+        // Edit: It's not wrong, but latex is still a good idea.
         // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
         d1->scaleVelocity(std::sqrt(d1->getType().mass_ / reaction.product1_.mass_));
         d1->setType(reaction.product1_);
@@ -131,6 +81,48 @@ bool exchangeReaction(Disc* d1, Disc* d2)
     }
 
     return false;
+}
+
+void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
+{
+    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
+    const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+
+    const auto& iter = decompositionReactionTable.find(d1->getType());
+    if (iter == decompositionReactionTable.end())
+        return;
+
+    const auto& possibleReactions = iter->second;
+    float randomNumber = getRandomFloat();
+    for (const auto& reaction : possibleReactions)
+    {
+        if (randomNumber > reaction.probability_ * simulationTimeStep)
+            continue;
+
+        const float MassFraction = d1->getType().mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
+        const float Factor = std::sqrt(2) / 2 * MassFraction;
+        const auto& v = d1->getVelocity();
+        const auto& r = d1->getPosition();
+        const float vAbs = abs(v);
+
+        Disc product1(reaction.product1_);
+        product1.setVelocity(Factor * sf::Vector2f{v.x - v.y, v.x + v.y});
+        product1.setPosition(r + product1.getVelocity() / vAbs);
+
+        Disc product2(reaction.product2_);
+        product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
+        product2.setPosition(r + product2.getVelocity() / vAbs);
+
+        correctOverlap(product1, product2);
+
+        newDiscs.push_back(std::move(product1));
+        newDiscs.push_back(std::move(product2));
+        d1->markDestroyed();
+
+        return;
+    }
+
+    return;
 }
 
 std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
@@ -198,16 +190,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
 
     for (const auto& [p1, p2] : collidingDiscs)
     {
-        // Normal vector of the collision
-        sf::Vector2f normal = p2->getPosition() - p1->getPosition();
-        float distance = std::hypot(normal.x, normal.y);
-        normal /= distance;
-
-        // Correct positions to avoid overlaps
-        float overlap = p1->getType().radius_ + p2->getType().radius_ - distance;
-
-        p1->move(-overlap * normal / 2.0f);
-        p2->move(overlap * normal / 2.0f);
+        const auto& [normal, distance, overlap] = correctOverlap(*p1, *p2);
 
         // No overlap -> no collision
         if (overlap <= 0)
@@ -247,18 +230,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         p2->accelerate(impulse / m2);
 
         if (exchangeReaction(p1, p2))
-        {
-            // Might have overlap now if the discs increased in size
-            // TODO maybe write a class that gives these values so we don't have to copy paste code? Could take 2 discs
-            // as an argument and provide methods for overlap correction and retrieval of intermediate values like the
-            // normal and distance for further use
-            normal = p2->getPosition() - p1->getPosition();
-            distance = std::hypot(normal.x, normal.y);
-            overlap = p1->getType().radius_ + p2->getType().radius_ - distance;
-
-            p1->move(-overlap * normal / 2.0f);
-            p2->move(overlap * normal / 2.0f);
-        }
+            correctOverlap(*p1, *p2);
     }
 
     return collisionCount;
@@ -319,12 +291,12 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // initialKineticEnergy - currentTotalKineticEnergy)
     // TODO really oughta plot the total kinetic energy, total impulse and start writing tests, I think this amount is
     // too small
-    float randomNumber = distribution(gen) / 10.f;
+    float randomNumber = getRandomFloat() / 10.f;
     if (kineticEnergyDeficiency <= 0)
         return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
 
     float kineticEnergyBefore = disc.getKineticEnergy();
-    disc.scaleVelocity(1 + randomNumber);
+    disc.scaleVelocity(1.f + randomNumber);
 
     return disc.getKineticEnergy() - kineticEnergyBefore;
 }
@@ -332,6 +304,31 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 float abs(const sf::Vector2f& vec)
 {
     return std::hypot(vec.x, vec.y);
+}
+
+std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
+{
+    const sf::Vector2f& diff = d2.getPosition() - d1.getPosition();
+    float distance = abs(diff);
+    const sf::Vector2f& normal = diff / distance;
+    float overlap = d1.getType().radius_ + d2.getType().radius_ - distance;
+
+    if (overlap > 0)
+    {
+        d1.move(-overlap * normal / 2.0f);
+        d2.move(overlap * normal / 2.0f);
+    }
+
+    return {normal, distance, overlap};
+}
+
+float getRandomFloat()
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_real_distribution<float> distribution(0, 1);
+
+    return distribution(gen);
 }
 
 } // namespace MathUtils

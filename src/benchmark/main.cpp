@@ -15,9 +15,10 @@ void setBenchmarkSettings()
 int main(int argc, char** argv)
 {
     initLogging(argc, argv);
+    setBenchmarkSettings();
 
     World world;
-    world.setBounds(sf::Vector2f(600, 600));
+    world.setBounds(sf::Vector2f(1000, 1000));
     world.reinitialize();
 
     LOG(INFO) << "Starting benchmark";
