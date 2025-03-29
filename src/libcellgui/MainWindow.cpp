@@ -11,24 +11,26 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
     , simulationThread_(nullptr)
     , simulation_(new Simulation())
-    , discDistributionDialog_(new DiscDistributionDialog())
+    , discDistributionDialog_(new DiscTypesDialog())
+    , reactionsDialog_(new ReactionsDialog())
 {
     ui->setupUi(this);
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
+    connect(simulation_, &Simulation::updateData, ui->simulationWidget, &SimulationWidget::update);
     connect(simulation_, &Simulation::collisionData, ui->plotWidget, &AnalysisPlot::addDataPoint);
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
-    connect(ui->setDiscDistributionPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
+    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
+    connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,
             &AnalysisPlot::reset);
-    connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, simulation_, &Simulation::reset);
-    connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, ui->plotWidget,
-            &AnalysisPlot::reset);
-    connect(discDistributionDialog_, &DiscDistributionDialog::discDistributionChanged, ui->simulationSettingsWidget,
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, simulation_, &Simulation::reset);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->plotWidget, &AnalysisPlot::reset);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->simulationSettingsWidget,
             &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
 
     connect(&resizeTimer_, &QTimer::timeout,
@@ -47,7 +49,7 @@ MainWindow::MainWindow(QWidget* parent)
                        {
                            const auto& simulationSize = ui->simulationWidget->size();
 
-                           // I haven't figured out yet why the height returned by size() is 20px off..
+                           // TODO I haven't figured out yet why the height returned by size() is 20px off..
                            // Maybe the RenderWindow reserves that height for the title bar? Probably OS dependent
                            // though
                            simulation_->setWorldBounds(

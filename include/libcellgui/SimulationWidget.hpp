@@ -19,6 +19,10 @@ public:
 public slots:
     void render(const FrameDTO& frameDTO);
     void initialize(const std::vector<Disc>& discs);
+    void update(const UpdateDTO& updateDTO);
+
+private:
+    sf::CircleShape circleShapeFromDisc(const Disc& disc);
 
 private:
     std::vector<sf::CircleShape> circles_;

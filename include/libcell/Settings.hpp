@@ -2,10 +2,13 @@
 #define SETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "Reaction.hpp"
 
 #include <SFML/System/Time.hpp>
 
 #include <map>
+#include <utility>
+#include <vector>
 
 struct Settings
 {
@@ -30,7 +33,7 @@ struct Settings
      * @note Frame data transmission takes about 10us for a few hundred discs, so 30 FPS will use about 0.3ms each
      * second (time during which the simulation can't update)
      */
-    int guiFPS_ = 30;
+    int guiFPS_ = 60;
 
     /**
      * @brief How long to wait until resetting the collision count of the world and transmitting it to the gui for
@@ -51,10 +54,25 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_ = {{{"A", sf::Color::Green, 5, 5}, 50},
-                                                     {{"B", sf::Color::Red, 10, 10}, 30},
-                                                     {{"C", sf::Color::Blue, 12, 12}, 10},
-                                                     {{"D", sf::Color::Yellow, 15, 15}, 10}};
+    std::map<DiscType, int> discTypeDistribution_;
+
+    /**
+     * @brief Maps disc types to decomposition reactions A -> B + C by educt
+     * @todo Lookup for decomposition reactions takes up some time though, maybe unordered_map is worth consideration
+     */
+    std::map<DiscType, std::vector<Reaction>> decompositionReactions_;
+
+    /**
+     * @brief Maps pairs of disc types to combination reactions A + B -> C by educts. {A, B} and {B, A} map to the same
+     * reactions
+     */
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> combinationReactions_;
+
+    /**
+     * @brief Maps pairs of disc types to exchange reactions A + B -> C + D by educts. {A, B} and {B, A} map to the same
+     * reactions
+     */
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> exchangeReactions_;
 };
 
 namespace SettingsLimits

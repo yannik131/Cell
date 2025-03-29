@@ -18,6 +18,8 @@ public:
 
     static const Settings& getSettings();
 
+    static DiscType getDiscTypeByName(const std::string& name);
+
 private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 
@@ -31,6 +33,10 @@ private:
 
     void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
 
+    void addReaction(const Reaction& reaction);
+
+    void clearReactions();
+
     void setFrictionCoefficient(float frictionCoefficient);
 
     template <typename T>
@@ -42,14 +48,18 @@ private:
 
     void unlock();
 
+    void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
+
 private:
     Settings settings_;
 
     bool locked_ = false;
 
-    friend class DiscDistributionDialog;
+    friend class DiscTypesDialog;
+    friend class ReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;
+    friend void setBenchmarkSettings();
 };
 
 #include "GlobalSettings.inl"

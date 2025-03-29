@@ -1,8 +1,9 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#include "DiscDistributionDialog.hpp"
+#include "DiscTypesDialog.hpp"
 #include "FrameDTO.hpp"
+#include "ReactionsDialog.hpp"
 #include "Simulation.hpp"
 
 #include <QMainWindow>
@@ -19,7 +20,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget* parent = nullptr);
-    ~MainWindow() = default;
 
     void onStartStopButtonClicked();
     void onResetButtonClicked();
@@ -42,7 +42,8 @@ private:
     bool initialSizeSet_ = false;
     QTimer resizeTimer_;
 
-    DiscDistributionDialog* discDistributionDialog_;
+    DiscTypesDialog* discDistributionDialog_;
+    ReactionsDialog* reactionsDialog_;
 };
 
 #endif /* MAINWINDOW_HPP */

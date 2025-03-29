@@ -54,8 +54,6 @@ void SimulationSettingsWidget::resizeEvent(QResizeEvent* event)
     QWidget::resizeEvent(event);
     if (!model_ || model_->rowCount() == 0)
         return;
-
-    fitContentIntoTableView();
 }
 
 void SimulationSettingsWidget::displayGlobalSettings()
@@ -100,7 +98,9 @@ void SimulationSettingsWidget::initializeSpinBoxes()
 void SimulationSettingsWidget::initializeTableView()
 {
     discDistributionPreviewTableView_->setModel(model_);
-    fitContentIntoTableView();
+    // Disable editing of the table, but keep scrollbar active
+    discDistributionPreviewTableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    discDistributionPreviewTableView_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     updateDiscDistributionPreviewTableView();
 }
 
@@ -129,14 +129,6 @@ void SimulationSettingsWidget::setCallbacks()
 
     connect(frictionDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setFrictionCoefficient(value)) });
-}
-
-void SimulationSettingsWidget::fitContentIntoTableView()
-{
-    int width = discDistributionPreviewTableView_->width();
-    discDistributionPreviewTableView_->setColumnWidth(0, width / 3);
-    discDistributionPreviewTableView_->setColumnWidth(1, width / 3);
-    discDistributionPreviewTableView_->setColumnWidth(2, width / 3);
 }
 
 void SimulationSettingsWidget::onSettingsChanged()

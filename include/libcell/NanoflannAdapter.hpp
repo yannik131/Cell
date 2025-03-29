@@ -22,9 +22,9 @@ struct NanoflannAdapter
     inline double kdtree_get_pt(const size_t idx, int dim) const
     {
         if (dim == 0)
-            return elements[idx].position_.x;
+            return elements[idx].getPosition().x;
         else
-            return elements[idx].position_.y;
+            return elements[idx].getPosition().y;
     }
 
     template <class BBOX> bool kdtree_get_bbox(BBOX&) const

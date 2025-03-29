@@ -4,8 +4,8 @@
             "includePath": [
                 "${workspaceFolder}/contrib/qcustomplot/",
                 "${workspaceFolder}/include/libcell/",
-                "${workspaceFolder}/include/qt-gui/",
-                "${workspaceFolder}/build_release/qt-gui_autogen/include_Release",
+                "${workspaceFolder}/include/libcellgui/",
+                "${workspaceFolder}/build_debug/libcellgui_autogen/include_Debug",
                 "${workspaceFolder}/contrib/vcpkg/installed/x64-windows/include/Qt6/",
                 "${workspaceFolder}/contrib/vcpkg/installed/x64-windows/include/Qt6/QtConcurrent",
                 "${workspaceFolder}/contrib/vcpkg/installed/x64-windows/include/Qt6/QtCore",
