@@ -250,7 +250,7 @@ interval [ms]</string>
              <item>
               <widget class="QTableView" name="discDistributionPreviewTableView">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="maximumSize">
                 <size>

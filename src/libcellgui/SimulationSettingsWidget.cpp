@@ -100,6 +100,8 @@ void SimulationSettingsWidget::initializeSpinBoxes()
 void SimulationSettingsWidget::initializeTableView()
 {
     discDistributionPreviewTableView_->setModel(model_);
+    // Disable editing of the table, but keep scrollbar active
+    discDistributionPreviewTableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     fitContentIntoTableView();
     updateDiscDistributionPreviewTableView();
 }
