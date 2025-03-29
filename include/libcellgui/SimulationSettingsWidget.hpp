@@ -25,7 +25,6 @@ private:
     void initializeSpinBoxes();
     void initializeTableView();
     void setCallbacks();
-    void fitContentIntoTableView();
 
 private slots:
     void onSettingsChanged();
