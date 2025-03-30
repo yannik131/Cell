@@ -10,8 +10,6 @@
 
 struct GUIDisc
 {
-    GUIDisc(const sf::Vector2f& position);
-
     sf::Vector2f position_;
 };
 
@@ -22,8 +20,8 @@ struct FrameDTO
 
 struct UpdateDTO
 {
-    std::vector<int> destroyedDiscsIndexes_;
-    std::vector<std::pair<int, DiscType>> changedDiscsIndices_;
+    std::vector<int> destroyedDiscIndices_;
+    std::vector<std::pair<int, DiscType>> changedDiscIndices_;
     std::vector<Disc> newDiscs_;
 };
 

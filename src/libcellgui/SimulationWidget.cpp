@@ -49,10 +49,10 @@ void SimulationWidget::update(const UpdateDTO& updateDTO)
         circles_.push_back(circleShapeFromDisc(disc));
 
     // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
-    for (auto iter = updateDTO.destroyedDiscsIndexes_.rbegin(); iter != updateDTO.destroyedDiscsIndexes_.rend(); ++iter)
+    for (auto iter = updateDTO.destroyedDiscIndices_.rbegin(); iter != updateDTO.destroyedDiscIndices_.rend(); ++iter)
         circles_.erase(circles_.begin() + *iter);
 
-    for (const auto& [index, discType] : updateDTO.changedDiscsIndices_)
+    for (const auto& [index, discType] : updateDTO.changedDiscIndices_)
         circles_[index] = circleShapeFromDisc(Disc(discType));
 }
 

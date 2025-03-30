@@ -9,6 +9,11 @@
  * - total kinetic energy vs initial kinetic energy as horizontal line
  * - particle counts
  * - collision counts by type
+ *
+ * Benchmarks for transmissions on my machine give values of < 10us (5us for 400 bytes, 8us for 4kB) for up to 40kB of
+ * data, so transmitting velocities additionally to position will not be time critical since a simulation time
+ * step takes several ms to calculate (several 100x slower than transmission of data)
+ * In fact, increasing the amount of transmitted data to about 3kB yielded the lowest transmission time (2.5us)
  */
 
 AnalysisPlot::AnalysisPlot(QWidget* parent)

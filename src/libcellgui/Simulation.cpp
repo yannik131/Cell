@@ -96,9 +96,9 @@ void Simulation::emitUpdateData()
 
     UpdateDTO updateDTO;
     for (int index : world_.getChangedDiscsIndices())
-        updateDTO.changedDiscsIndices_.push_back(std::make_pair(index, worldDiscs_[index].getType()));
+        updateDTO.changedDiscIndices_.push_back(std::make_pair(index, worldDiscs_[index].getType()));
 
-    updateDTO.destroyedDiscsIndexes_ = world_.getDestroyedDiscsIndices();
+    updateDTO.destroyedDiscIndices_ = world_.getDestroyedDiscsIndices();
     updateDTO.newDiscs_ = world_.getNewDiscs();
 
     emit updateData(updateDTO);

@@ -44,7 +44,7 @@ private:
     float initialKineticEnergy_;
     float currentKineticEnergy_;
 
-    std::vector<int> changedDiscsIndices_;
+    std::vector<int> changedDiscIndices_;
     std::vector<int> destroyedDiscsIndices_;
     std::vector<Disc> newDiscs_;
 };

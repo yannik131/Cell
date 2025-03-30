@@ -18,7 +18,7 @@ World::World()
 
 void World::update(const sf::Time& dt)
 {
-    changedDiscsIndices_.clear();
+    changedDiscIndices_.clear();
     destroyedDiscsIndices_.clear();
     newDiscs_.clear();
 
@@ -81,7 +81,7 @@ const std::vector<int>& World::getDestroyedDiscsIndices() const
 
 const std::vector<int>& World::getChangedDiscsIndices() const
 {
-    return changedDiscsIndices_;
+    return changedDiscIndices_;
 }
 
 const std::vector<Disc>& World::getNewDiscs() const
@@ -174,7 +174,7 @@ void World::findChangedDiscs()
     {
         if (discs_[i].isMarkedChanged())
         {
-            changedDiscsIndices_.push_back(i);
+            changedDiscIndices_.push_back(i);
             discs_[i].unmarkChanged();
         }
     }
