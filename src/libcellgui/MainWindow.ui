@@ -16,10 +16,10 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,1">
     <item row="0" column="1">
-     <widget class="QWidget" name="plottingWidget" native="true">
+     <widget class="PlotOverviewWidget" name="plotOverviewWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="AnalysisPlot" name="plotWidget" native="true">
+        <widget class="AnalysisPlotWidgetWidget" name="analysisPlotWidget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -38,7 +38,7 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <widget class="QGroupBox" name="groupBox">
+           <widget class="QGroupBox" name="plotTypeGroupBox">
             <property name="title">
              <string>Plot type</string>
             </property>
@@ -82,7 +82,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox_2">
+           <widget class="QGroupBox" name="typeSelectionGroupBox">
             <property name="title">
              <string>Shown types</string>
             </property>
@@ -435,15 +435,21 @@ interval [ms]</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>AnalysisPlot</class>
+   <class>AnalysisPlotWidgetWidget</class>
    <extends>QWidget</extends>
-   <header>AnalysisPlot.hpp</header>
+   <header>AnalysisPlotWidgetWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SimulationSettingsWidget</class>
    <extends>QWidget</extends>
    <header>SimulationSettingsWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlotOverviewWidget</class>
+   <extends>QWidget</extends>
+   <header>PlotOverviewWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

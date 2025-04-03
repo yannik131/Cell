@@ -1,25 +1,9 @@
-#include "AnalysisPlot.hpp"
+#include "AnalysisPlotWidget.hpp"
 #include "GlobalSettings.hpp"
 
 #include <algorithm>
 
-/**
- * @todo Add plots for
- * - velocity distribution
- * - total absolute impulse
- * - total impulse
- * - total kinetic energy vs initial kinetic energy as horizontal line
- * - particle counts
- * - collision counts by type
- *
- * Benchmarks for transmissions on my machine give values of < 10us (5us for 400 bytes, 8us for 4kB) for up to 40kB of
- * data, so transmitting velocities additionally to position will not be time critical since a simulation time
- * step takes several ms to calculate (several 100x slower than transmission of data)
- * In fact, increasing the amount of transmitted data to about 3kB yielded the lowest transmission time (2.5us) and
- * transmitting a single byte always took > 4us
- */
-
-AnalysisPlot::AnalysisPlot(QWidget* parent)
+AnalysisPlotWidget::AnalysisPlotWidget(QWidget* parent)
     : QCustomPlot(parent)
 {
     setInteraction(QCP::iRangeDrag, true); // Allow dragging the plot by left click-hold
@@ -31,9 +15,11 @@ AnalysisPlot::AnalysisPlot(QWidget* parent)
 
     xAxis->setLabel("t [s]");
     yAxis->setLabel("N");
+
+    connect(plotDataModel_, &PlotDataModel::plotData, this, &AnalysisPlotWidget::plot);
 }
 
-void AnalysisPlot::reset()
+void AnalysisPlotWidget::reset()
 {
     yMax_ = 0;
     xData_.clear();
@@ -42,7 +28,7 @@ void AnalysisPlot::reset()
     replot();
 }
 
-void AnalysisPlot::plot(const PlotData& plotData)
+void AnalysisPlotWidget::plot(const PlotData& plotData)
 {
     clearGraphs();
     if (plotData.collisionCounts_.empty())
@@ -58,8 +44,13 @@ void AnalysisPlot::plot(const PlotData& plotData)
     graph->setPen(QPen(QColor(31, 119, 180)));
     graph->setData(x, plotData.collisionCounts_, true);
 
-    yAxis->setRange(0, yMax_);
+    yAxis->setRange(0, yMax);
     xAxis->setRange(0, x.back());
 
     replot();
+}
+
+PlotDataModel* AnalysisPlotWidget::plotDataModel() const
+{
+    return plotDataModel_;
 }

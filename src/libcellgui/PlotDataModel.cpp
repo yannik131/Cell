@@ -7,6 +7,15 @@ PlotDataModel::PlotDataModel(QObject* parent)
     frameDTOs_.reserve(1000);
 }
 
+void PlotDataModel::setCurrentPlotCategory(const PlotCategory& plotCategory)
+{
+    if (plotCategory == currentPlotCategory_)
+        return;
+
+    currentPlotCategory_ = plotCategory;
+    emitPlotData();
+}
+
 void PlotDataModel::receiveFrameDTO(const FrameDTO& frameDTO)
 {
     frameDTOs_.push_back(frameDTO);
@@ -24,16 +33,21 @@ void PlotDataModel::emitPlotData()
     PlotData plotData{.currentPlotCategory_ = currentPlotCategory_};
     sf::Time timeInDataPoint = sf::Time::Zero;
 
-    plotData.collisionCounts_.push_back(0);
-    for (const auto& frameDTO : frameDTOs_)
+    if (currentPlotCategory_ == PlotCategory::TotalCollisionCount)
     {
-        timeInDataPoint += sf::microseconds(frameDTO.simulationTimeStepUs);
-        if (timeInDataPoint >= GlobalSettings::getSettings().plotTimeInterval_)
+        plotData.collisionCounts_.push_back(0);
+        for (const auto& frameDTO : frameDTOs_)
         {
-            timeInDataPoint -= GlobalSettings::getSettings().plotTimeInterval_;
-            plotData.collisionCounts_.push_back(0);
+            timeInDataPoint += sf::microseconds(frameDTO.simulationTimeStepUs);
+            if (timeInDataPoint >= GlobalSettings::getSettings().plotTimeInterval_)
+            {
+                timeInDataPoint -= GlobalSettings::getSettings().plotTimeInterval_;
+                plotData.collisionCounts_.push_back(0);
+            }
+            plotData.collisionCounts_.back() += frameDTO.collisionCount_;
         }
-        plotData.collisionCounts_.back() += frameDTO.collisionCount_;
+
+        plotData.collisionCounts_.pop_back();
     }
 
     emit PlotDataModel::plotData(plotData);

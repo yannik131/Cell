@@ -61,7 +61,6 @@ void World::reinitialize()
 
     discs_.clear();
     startPositions_.clear();
-    elapsedTime_ = sf::Time::Zero;
 
     initializeStartPositions();
     buildScene();

@@ -19,17 +19,19 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_, &Simulation::collisionData, ui->plotWidget, &AnalysisPlot::addDataPoint);
+    connect(simulation, &Simulation::frameData, ui->analysisPlotWidget->plotDataModel(), &PlotDataModel::receiveFrameDTO);
+
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
     connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
-    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,
-            &AnalysisPlot::reset);
+    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->analysisPlotWidget,
+            &AnalysisPlotWidget::reset);
     connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, simulation_, &Simulation::reset);
-    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->plotWidget, &AnalysisPlot::reset);
+    connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->analysisPlotWidget,
+            &AnalysisPlotWidget::reset);
     connect(discDistributionDialog_, &DiscTypesDialog::discDistributionChanged, ui->simulationSettingsWidget,
             &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
 
@@ -39,7 +41,7 @@ MainWindow::MainWindow(QWidget* parent)
                 const auto& simulationSize = ui->simulationWidget->size();
                 simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
                 simulation_->reset();
-                ui->plotWidget->reset();
+                ui->analysisPlotWidget->reset();
             });
     resizeTimer_.setSingleShot(true);
 
@@ -85,7 +87,7 @@ void MainWindow::onResetButtonClicked()
     else
         simulation_->reset();
 
-    ui->plotWidget->reset();
+    ui->analysisPlotWidget->reset();
 
     stopSimulation();
 }

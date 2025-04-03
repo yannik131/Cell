@@ -15,6 +15,9 @@ class PlotDataModel : public QObject
 public:
     PlotDataModel(QObject* parent = nullptr);
 
+    void setCurrentPlotCategory(const PlotCategory& plotCategory);
+
+public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
 
 signals:
