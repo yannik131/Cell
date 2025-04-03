@@ -213,7 +213,7 @@ interval [ms]</string>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="collisionUpdateSpinBox">
+              <widget class="QSpinBox" name="plotTimeIntervalSpinBox">
                <property name="minimum">
                 <number>100</number>
                </property>

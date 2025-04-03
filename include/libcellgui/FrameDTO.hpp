@@ -8,24 +8,13 @@
 
 #include <vector>
 
-struct GUIDisc
-{
-    sf::Vector2f position_;
-};
-
 struct FrameDTO
 {
-    std::vector<GUIDisc> discs_;
-};
-
-struct UpdateDTO
-{
-    std::vector<int> destroyedDiscIndices_;
-    std::vector<std::pair<int, DiscType>> changedDiscIndices_;
-    std::vector<Disc> newDiscs_;
+    std::vector<Disc> discs_;
+    int collisionCount_;
+    long long simulationTimeStepUs;
 };
 
 Q_DECLARE_METATYPE(FrameDTO);
-Q_DECLARE_METATYPE(UpdateDTO);
 
 #endif /* FRAMEDTO_HPP */

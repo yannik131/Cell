@@ -1,6 +1,8 @@
 #ifndef ANALYSIS_PLOT_HPP
 #define ANALYSIS_PLOT_HPP
 
+#include "PlotData.hpp"
+
 #include "qcustomplot.h"
 
 #include <QWidget>
@@ -13,6 +15,9 @@ public:
 
     void addDataPoint(double y);
     void reset();
+
+public:
+    void plot(const PlotData& plotData);
 
 private:
     QVector<double> xData_;

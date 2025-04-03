@@ -13,12 +13,12 @@ MainWindow::MainWindow(QWidget* parent)
     , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypesDialog())
     , reactionsDialog_(new ReactionsDialog())
+    , plotDataModel_(new PlotDataModel())
 {
     ui->setupUi(this);
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_, &Simulation::updateData, ui->simulationWidget, &SimulationWidget::update);
     connect(simulation_, &Simulation::collisionData, ui->plotWidget, &AnalysisPlot::addDataPoint);
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);

@@ -20,13 +20,10 @@ public:
 
 private:
     void emitFrameData();
-    void emitUpdateData();
 
 signals:
     void frameData(const FrameDTO& data);
-    void collisionData(int collisions);
     void sceneData(const std::vector<Disc>& discs);
-    void updateData(const UpdateDTO& updateDTO);
 
 private:
     World world_;

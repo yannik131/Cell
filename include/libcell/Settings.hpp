@@ -36,13 +36,12 @@ struct Settings
     int guiFPS_ = 60;
 
     /**
-     * @brief How long to wait until resetting the collision count of the world and transmitting it to the gui for
-     * plotting
+     * @brief How long to wait between plots
      */
-    sf::Time collisionUpdateTime_ = sf::milliseconds(1000);
+    sf::Time plotTimeInterval_ = sf::milliseconds(1000);
 
     /**
-     * @brief Total number of discs at the start of the simulation
+     * @brief Total number of discs in the simulation
      */
     int numberOfDiscs_ = 50;
 
@@ -86,8 +85,8 @@ const float MaxSimulationTimeScale = 10.f;
 const int MinGuiFPS = 0;
 const int MaxGuiFPS = 200;
 
-const sf::Time MinCollisionUpdateTime = sf::milliseconds(100);
-const sf::Time MaxCollisionUpdateTime = sf::milliseconds(10000);
+const sf::Time MinPlotTimeInterval = sf::milliseconds(100);
+const sf::Time MaxPlotTimeInterval = sf::milliseconds(10000);
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;

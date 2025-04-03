@@ -19,46 +19,24 @@ void Simulation::run()
 
     sf::Clock clock;
     sf::Time timeSinceLastUpdate;
-    sf::Time timeSinceLastFrame;
-    sf::Time timeSinceLastCollisionUpdate;
-    const sf::Time FrameTime = settings.guiFPS_ > 0 ? sf::milliseconds(1000 / settings.guiFPS_) : sf::seconds(1e6);
 
     while (true)
     {
         if (QThread::currentThread()->isInterruptionRequested())
         {
-            // Reset collision count to 0 for the next run
-            world_.getAndResetCollisionCount();
+            world_.getAndResetCollisionCount(); // Reset collision count to 0 for the next run
             break;
         }
 
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
-        timeSinceLastFrame += dt;
-
-        if (timeSinceLastFrame > FrameTime)
-        {
-            emitFrameData();
-            timeSinceLastFrame -= FrameTime;
-        }
-
-        if (timeSinceLastCollisionUpdate >= settings.collisionUpdateTime_)
-        {
-            int collisions = world_.getAndResetCollisionCount();
-            float collisionsPerSecond = collisions / timeSinceLastCollisionUpdate.asSeconds();
-
-            emit collisionData(static_cast<int>(std::round(collisionsPerSecond)));
-            timeSinceLastCollisionUpdate = sf::Time::Zero;
-        }
 
         while (timeSinceLastUpdate / settings.simulationTimeScale_ > settings.simulationTimeStep_)
         {
             timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
 
             world_.update(settings.simulationTimeStep_);
-            emitUpdateData();
-
-            timeSinceLastCollisionUpdate += settings.simulationTimeStep_;
+            emitFrameData();
         }
     }
 
@@ -79,27 +57,11 @@ void Simulation::setWorldBounds(const sf::Vector2f& bounds)
 
 void Simulation::emitFrameData()
 {
-    FrameDTO frameDTO;
-    frameDTO.discs_.reserve(worldDiscs_.size());
-
-    for (const auto& disc : worldDiscs_)
-        frameDTO.discs_.push_back(GUIDisc(disc.getPosition()));
+    // Benchmarks have shown that a single emit of 1B takes about as long as one of 40kB (5-10us, several 100x slower
+    // than calculating a simulation step)
+    FrameDTO frameDTO{.discs_ = worldDiscs_,
+                      .collisionCount_ = world_.getAndResetCollisionCount(),
+                      .simulationTimeStepUs = GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 
     emit frameData(frameDTO);
-}
-
-void Simulation::emitUpdateData()
-{
-    if (world_.getChangedDiscsIndices().empty() && world_.getDestroyedDiscsIndices().empty() &&
-        world_.getNewDiscs().empty())
-        return;
-
-    UpdateDTO updateDTO;
-    for (int index : world_.getChangedDiscsIndices())
-        updateDTO.changedDiscIndices_.push_back(std::make_pair(index, worldDiscs_[index].getType()));
-
-    updateDTO.destroyedDiscIndices_ = world_.getDestroyedDiscsIndices();
-    updateDTO.newDiscs_ = world_.getNewDiscs();
-
-    emit updateData(updateDTO);
 }

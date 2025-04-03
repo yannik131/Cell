@@ -3,6 +3,7 @@
 
 #include "DiscTypesDialog.hpp"
 #include "FrameDTO.hpp"
+#include "PlotDataModel.hpp"
 #include "ReactionsDialog.hpp"
 #include "Simulation.hpp"
 
@@ -44,6 +45,8 @@ private:
 
     DiscTypesDialog* discDistributionDialog_;
     ReactionsDialog* reactionsDialog_;
+
+    PlotDataModel* plotDataModel_;
 };
 
 #endif /* MAINWINDOW_HPP */

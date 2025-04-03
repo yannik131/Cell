@@ -39,7 +39,7 @@ private:
     QSpinBox* fpsSpinBox_;
     QSpinBox* numberOfDiscsSpinBox_;
     QSpinBox* timeStepSpinBox_;
-    QSpinBox* collisionUpdateSpinBox_;
+    QSpinBox* plotTimeIntervalSpinBox_;
     QDoubleSpinBox* timeScaleDoubleSpinBox_;
     QDoubleSpinBox* frictionDoubleSpinBox_;
     QTableView* discDistributionPreviewTableView_;

@@ -11,49 +11,22 @@ SimulationWidget::SimulationWidget(QWidget* parent)
 {
 }
 
+void SimulationWidget::initialize(const std::vector<Disc>& discs)
+{
+    render({.discs_ = discs});
+}
+
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
-    VLOG(1) << "Rendering, received positions of " << frameDTO.discs_.size() << " discs.";
-    VLOG(1) << "Rendering, we have " << circles_.size() << " circle shapes.";
-
     sf::RenderWindow::clear(sf::Color::Black);
 
-    for (int i = 0; i < circles_.size(); ++i)
+    for (const auto& disc : frameDTO.discs_)
     {
-        auto& circleShape = circles_[i];
-        const auto& guiDisc = frameDTO.discs_[i];
-        circleShape.setPosition(guiDisc.position_);
-
+        sf::CircleShape circleShape = circleShapeFromDisc(disc);
         sf::RenderWindow::draw(circleShape);
     }
 
     sf::RenderWindow::display();
-}
-
-void SimulationWidget::initialize(const std::vector<Disc>& discs)
-{
-    if (circles_.empty())
-        circles_.reserve(discs.size());
-    else
-        circles_.clear();
-
-    for (const auto& disc : discs)
-        circles_.push_back(circleShapeFromDisc(disc));
-}
-
-void SimulationWidget::update(const UpdateDTO& updateDTO)
-{
-    // We need to do this in the same order it happens in the simulation:
-    // 1. Add new discs 2. Remove destroyed discs 3. Update changed discs
-    for (const auto& disc : updateDTO.newDiscs_)
-        circles_.push_back(circleShapeFromDisc(disc));
-
-    // TODO Maybe copy with move(circles[i]) and skip destroyed elements?
-    for (auto iter = updateDTO.destroyedDiscIndices_.rbegin(); iter != updateDTO.destroyedDiscIndices_.rend(); ++iter)
-        circles_.erase(circles_.begin() + *iter);
-
-    for (const auto& [index, discType] : updateDTO.changedDiscIndices_)
-        circles_[index] = circleShapeFromDisc(Disc(discType));
 }
 
 sf::CircleShape SimulationWidget::circleShapeFromDisc(const Disc& disc)

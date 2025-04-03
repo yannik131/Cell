@@ -22,13 +22,6 @@ public:
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
 
-    /**
-     * @brief Returns indices of destroyed discs in ascending order
-     */
-    const std::vector<int>& getDestroyedDiscsIndices() const;
-    const std::vector<int>& getChangedDiscsIndices() const;
-    const std::vector<Disc>& getNewDiscs() const;
-
 private:
     void buildScene();
     void initializeStartPositions();

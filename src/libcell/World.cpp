@@ -61,6 +61,7 @@ void World::reinitialize()
 
     discs_.clear();
     startPositions_.clear();
+    elapsedTime_ = sf::Time::Zero;
 
     initializeStartPositions();
     buildScene();
@@ -72,21 +73,6 @@ void World::setBounds(const sf::Vector2f& bounds)
         throw std::runtime_error("Bounds must be > 0");
 
     bounds_ = bounds;
-}
-
-const std::vector<int>& World::getDestroyedDiscsIndices() const
-{
-    return destroyedDiscsIndices_;
-}
-
-const std::vector<int>& World::getChangedDiscsIndices() const
-{
-    return changedDiscIndices_;
-}
-
-const std::vector<Disc>& World::getNewDiscs() const
-{
-    return newDiscs_;
 }
 
 void World::buildScene()

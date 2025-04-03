@@ -62,7 +62,7 @@ void SimulationSettingsWidget::displayGlobalSettings()
     fpsSpinBox_->setValue(settings.guiFPS_);
     numberOfDiscsSpinBox_->setValue(settings.numberOfDiscs_);
     timeStepSpinBox_->setValue(settings.simulationTimeStep_.asMilliseconds());
-    collisionUpdateSpinBox_->setValue(settings.collisionUpdateTime_.asMilliseconds());
+    plotTimeIntervalSpinBox_->setValue(settings.plotTimeInterval_.asMilliseconds());
     timeScaleDoubleSpinBox_->setValue(settings.simulationTimeScale_);
     frictionDoubleSpinBox_->setValue(settings.frictionCoefficient);
 }
@@ -80,7 +80,7 @@ void SimulationSettingsWidget::initializeSpinBoxes()
     fpsSpinBox_ = findChild<QSpinBox*>("fpsSpinBox");
     numberOfDiscsSpinBox_ = findChild<QSpinBox*>("numberOfDiscsSpinBox");
     timeStepSpinBox_ = findChild<QSpinBox*>("timeStepSpinBox");
-    collisionUpdateSpinBox_ = findChild<QSpinBox*>("collisionUpdateSpinBox");
+    plotTimeIntervalSpinBox_ = findChild<QSpinBox*>("plotTimeIntervalSpinBox");
     timeScaleDoubleSpinBox_ = findChild<QDoubleSpinBox*>("timeScaleDoubleSpinBox");
     frictionDoubleSpinBox_ = findChild<QDoubleSpinBox*>("frictionDoubleSpinBox");
     discDistributionPreviewTableView_ = findChild<QTableView*>("discDistributionPreviewTableView");
@@ -89,8 +89,8 @@ void SimulationSettingsWidget::initializeSpinBoxes()
     numberOfDiscsSpinBox_->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
     timeStepSpinBox_->setRange(SettingsLimits::MinSimulationTimeStep.asMilliseconds(),
                                SettingsLimits::MaxSimulationTimeStep.asMilliseconds());
-    collisionUpdateSpinBox_->setRange(SettingsLimits::MinCollisionUpdateTime.asMilliseconds(),
-                                      SettingsLimits::MaxCollisionUpdateTime.asMilliseconds());
+    plotTimeIntervalSpinBox_->setRange(SettingsLimits::MinPlotTimeInterval.asMilliseconds(),
+                                       SettingsLimits::MaxPlotTimeInterval.asMilliseconds());
     timeScaleDoubleSpinBox_->setRange(SettingsLimits::MinSimulationTimeScale, SettingsLimits::MaxSimulationTimeScale);
     frictionDoubleSpinBox_->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
 }
@@ -121,7 +121,7 @@ void SimulationSettingsWidget::setCallbacks()
     connect(timeStepSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
             { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
 
-    connect(collisionUpdateSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
+    connect(plotTimeIntervalSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
             { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setCollisionUpdateTime(sf::milliseconds(value))) });
 
     connect(timeScaleDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,

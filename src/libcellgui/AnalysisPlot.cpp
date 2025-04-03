@@ -1,6 +1,8 @@
 #include "AnalysisPlot.hpp"
 #include "GlobalSettings.hpp"
 
+#include <algorithm>
+
 /**
  * @todo Add plots for
  * - velocity distribution
@@ -13,7 +15,8 @@
  * Benchmarks for transmissions on my machine give values of < 10us (5us for 400 bytes, 8us for 4kB) for up to 40kB of
  * data, so transmitting velocities additionally to position will not be time critical since a simulation time
  * step takes several ms to calculate (several 100x slower than transmission of data)
- * In fact, increasing the amount of transmitted data to about 3kB yielded the lowest transmission time (2.5us)
+ * In fact, increasing the amount of transmitted data to about 3kB yielded the lowest transmission time (2.5us) and
+ * transmitting a single byte always took > 4us
  */
 
 AnalysisPlot::AnalysisPlot(QWidget* parent)
@@ -30,32 +33,33 @@ AnalysisPlot::AnalysisPlot(QWidget* parent)
     yAxis->setLabel("N");
 }
 
-void AnalysisPlot::addDataPoint(double y)
-{
-    const auto& settings = GlobalSettings::getSettings();
-    if (y > yMax_)
-        yMax_ = y;
-
-    xData_.append(xData_.empty() ? 0 : xData_.back() + settings.collisionUpdateTime_.asSeconds());
-    yData_.append(y);
-
-    clearGraphs();
-
-    QCPGraph* graph = addGraph();
-    graph->setPen(QPen(QColor(31, 119, 180)));
-    graph->setData(xData_, yData_, true);
-
-    yAxis->setRange(0, yMax_);
-    xAxis->setRange(0, xData_.back());
-
-    replot();
-}
-
 void AnalysisPlot::reset()
 {
     yMax_ = 0;
     xData_.clear();
     yData_.clear();
     clearGraphs();
+    replot();
+}
+
+void AnalysisPlot::plot(const PlotData& plotData)
+{
+    clearGraphs();
+    if (plotData.collisionCounts_.empty())
+        return;
+
+    QVector<double> x;
+    for (int i = 0; i < plotData.collisionCounts_.size(); ++i)
+        x.push_back(i * GlobalSettings::getSettings().plotTimeInterval_.asSeconds());
+
+    int yMax = *std::max_element(plotData.collisionCounts_.begin(), plotData.collisionCounts_.end());
+
+    QCPGraph* graph = addGraph();
+    graph->setPen(QPen(QColor(31, 119, 180)));
+    graph->setData(x, plotData.collisionCounts_, true);
+
+    yAxis->setRange(0, yMax_);
+    xAxis->setRange(0, x.back());
+
     replot();
 }
