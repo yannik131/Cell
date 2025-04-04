@@ -16,10 +16,10 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,1">
     <item row="0" column="1">
-     <widget class="PlotOverviewWidget" name="plotOverviewWidget" native="true">
+     <widget class="PlotAreaWidget" name="plotOverviewWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="AnalysisPlotWidgetWidget" name="analysisPlotWidget" native="true">
+        <widget class="AnalysisPlotWidget" name="analysisPlotWidget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -435,9 +435,9 @@ interval [ms]</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>AnalysisPlotWidgetWidget</class>
+   <class>AnalysisPlotWidget</class>
    <extends>QWidget</extends>
-   <header>AnalysisPlotWidgetWidget.hpp</header>
+   <header>AnalysisPlotWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -447,9 +447,9 @@ interval [ms]</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlotOverviewWidget</class>
+   <class>PlotAreaWidget</class>
    <extends>QWidget</extends>
-   <header>PlotOverviewWidget.hpp</header>
+   <header>PlotAreaWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

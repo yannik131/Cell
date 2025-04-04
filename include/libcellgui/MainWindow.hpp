@@ -4,6 +4,7 @@
 #include "DiscTypesDialog.hpp"
 #include "FrameDTO.hpp"
 #include "PlotDataModel.hpp"
+#include "PlotDataSelectionDialog.hpp"
 #include "ReactionsDialog.hpp"
 #include "Simulation.hpp"
 
@@ -45,6 +46,7 @@ private:
 
     DiscTypesDialog* discDistributionDialog_;
     ReactionsDialog* reactionsDialog_;
+    PlotDataSelectionDialog* plotDataSelectionDialog_;
 
     PlotDataModel* plotDataModel_;
 };

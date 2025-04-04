@@ -13,18 +13,25 @@ MainWindow::MainWindow(QWidget* parent)
     , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypesDialog())
     , reactionsDialog_(new ReactionsDialog())
+    , plotDataSelectionDialog_(new PlotDataSelectionDialog())
     , plotDataModel_(new PlotDataModel())
 {
     ui->setupUi(this);
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation, &Simulation::frameData, ui->analysisPlotWidget->plotDataModel(), &PlotDataModel::receiveFrameDTO);
+    connect(simulation_, &Simulation::frameData, plotDataModel_, &PlotDataModel::receiveFrameDTO);
+    connect(plotDataModel_, &PlotDataModel::plotData, ui->analysisPlotWidget, &AnalysisPlotWidget::plot);
 
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
     connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
+    connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged, plotDataModel_,
+            &PlotDataModel::setCurrentPlotCategory);
+    connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, plotDataSelectionDialog_, &QDialog::show);
+    connect(plotDataSelectionDialog_, &PlotDataSelectionDialog::selectedDiscTypeNames, plotDataModel_,
+            &PlotDataModel::receiveSelectedDiscTypeNames);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->analysisPlotWidget,
@@ -50,12 +57,7 @@ MainWindow::MainWindow(QWidget* parent)
                        [this]()
                        {
                            const auto& simulationSize = ui->simulationWidget->size();
-
-                           // TODO I haven't figured out yet why the height returned by size() is 20px off..
-                           // Maybe the RenderWindow reserves that height for the title bar? Probably OS dependent
-                           // though
-                           simulation_->setWorldBounds(
-                               sf::Vector2f(simulationSize.width(), simulationSize.height() - 20));
+                           simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
                            simulation_->reset();
                            initialSizeSet_ = true;
                        });

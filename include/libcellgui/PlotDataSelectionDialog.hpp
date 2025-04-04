@@ -17,12 +17,14 @@ class PlotDataSelectionDialog : public QDialog
 public:
     explicit PlotDataSelectionDialog(QWidget* parent = nullptr);
 
-    /**
-     * @brief Displays the window names in both widgets and selects them all
-     */
-    void setAndSelectDiscTypes(const QStringList& discTypes);
+signals:
+    void selectedDiscTypeNames(const QStringList& discTypeNames);
 
-    QStringList getSelectedDiscTypeNames() const;
+private slots:
+    void emitSelectedDiscTypes();
+
+private:
+    void setAndSelectDiscTypes(const QStringList& discTypes);
 
 private:
     Ui::PlotDataSelectionDialog* ui;

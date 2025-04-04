@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QString>
 
-enum class PlotCategory
+enum PlotCategory
 {
     TotalCollisionCount,
     TotalAbsoluteImpulse,

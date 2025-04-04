@@ -16,21 +16,51 @@ AnalysisPlotWidget::AnalysisPlotWidget(QWidget* parent)
     xAxis->setLabel("t [s]");
     yAxis->setLabel("N");
 
-    connect(plotDataModel_, &PlotDataModel::plotData, this, &AnalysisPlotWidget::plot);
+    addLayer("legend layer");
+    legend->setLayer("legend layer");
+    legend->setVisible(true);
+
+    // Put legend in right center
+    axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom | Qt::AlignRight);
+
+    // These are the default colors for matplotlib. I like them.
+    colors_ << QColor(31, 119, 180) << QColor(255, 127, 14) << QColor(44, 160, 44) << QColor(214, 39, 40)
+            << QColor(148, 103, 189) << QColor(140, 86, 75) << QColor(227, 119, 194) << QColor(127, 127, 127)
+            << QColor(188, 189, 34) << QColor(23, 190, 207);
 }
 
 void AnalysisPlotWidget::reset()
 {
+    xMin_ = 0;
+    xMax_ = 0;
+    yMin_ = 0;
     yMax_ = 0;
-    xData_.clear();
-    yData_.clear();
+
     clearGraphs();
     replot();
 }
 
 void AnalysisPlotWidget::plot(const PlotData& plotData)
 {
-    clearGraphs();
+    reset();
+
+    switch (plotData.currentPlotCategory_)
+    {
+    case PlotCategory::TotalCollisionCount: plotCollisionCount(plotData); break;
+    case PlotCategory::TypeCounts: plotDiscTypeCounts(plotData); break;
+    }
+
+    yAxis->setRange(yMin_, yMax_);
+    xAxis->setRange(xMin_, xMax_);
+
+    for (int i = 0; i < legend->itemCount(); ++i)
+        legend->item(i)->setLayer("legend layer");
+
+    replot();
+}
+
+void AnalysisPlotWidget::plotCollisionCount(const PlotData& plotData)
+{
     if (plotData.collisionCounts_.empty())
         return;
 
@@ -38,19 +68,50 @@ void AnalysisPlotWidget::plot(const PlotData& plotData)
     for (int i = 0; i < plotData.collisionCounts_.size(); ++i)
         x.push_back(i * GlobalSettings::getSettings().plotTimeInterval_.asSeconds());
 
-    int yMax = *std::max_element(plotData.collisionCounts_.begin(), plotData.collisionCounts_.end());
+    xMin_ = 0;
+    xMax_ = x.back();
+
+    yMin_ = 0;
+    yMax_ = *std::max_element(plotData.collisionCounts_.begin(), plotData.collisionCounts_.end());
 
     QCPGraph* graph = addGraph();
     graph->setPen(QPen(QColor(31, 119, 180)));
     graph->setData(x, plotData.collisionCounts_, true);
-
-    yAxis->setRange(0, yMax);
-    xAxis->setRange(0, x.back());
-
-    replot();
 }
 
-PlotDataModel* AnalysisPlotWidget::plotDataModel() const
+void AnalysisPlotWidget::plotDiscTypeCounts(const PlotData& plotData)
 {
-    return plotDataModel_;
+    if (plotData.discTypeCounts_.empty())
+        return;
+
+    QVector<double> x;
+    for (int i = 0; i < plotData.discTypeCounts_.size(); ++i)
+        x.push_back(i * GlobalSettings::getSettings().plotTimeInterval_.asSeconds());
+
+    xMin_ = 0;
+    xMax_ = x.back();
+
+    yMin_ = 0;
+
+    QMap<DiscType, QCPGraph*> graphs;
+
+    for (auto iter = plotData.discTypeCounts_.first().begin(); iter != plotData.discTypeCounts_.first().end(); ++iter)
+    {
+        int index = std::distance(plotData.discTypeCounts_.first().begin(), iter);
+        QCPGraph* graph = addGraph();
+
+        graph->setName(QString::fromStdString(iter.key().name_));
+        graph->setPen(QPen(colors_[index]));
+        graphs[iter.key()] = graph;
+    }
+
+    for (int i = 0; i < plotData.discTypeCounts_.size(); ++i)
+    {
+        for (auto iter = plotData.discTypeCounts_[i].begin(); iter != plotData.discTypeCounts_[i].end(); ++iter)
+        {
+            graphs[iter.key()]->addData(x[i], iter.value());
+            if (iter.value() > yMax_)
+                yMax_ = iter.value();
+        }
+    }
 }

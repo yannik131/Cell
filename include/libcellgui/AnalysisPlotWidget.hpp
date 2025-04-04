@@ -5,6 +5,7 @@
 
 #include "qcustomplot.h"
 
+#include <QColor>
 #include <QWidget>
 
 class AnalysisPlotWidget : public QCustomPlot
@@ -17,17 +18,21 @@ public:
 
 public:
     void plot(const PlotData& plotData);
-    PlotDataModel* plotDataModel() const;
 
 private:
-    QVector<double> xData_;
-    QVector<double> yData_;
+    void plotCollisionCount(const PlotData& plotData);
+    void plotDiscTypeCounts(const PlotData& plotData);
+
+private:
     QCPTextElement* plotTitle_;
 
     double yMin_ = 0;
     double yMax_ = 0;
 
-    PlotDataModel* plotDataModel_;
+    double xMin_ = 0;
+    double xMax_ = 0;
+
+    QVector<QColor> colors_;
 };
 
 #endif
