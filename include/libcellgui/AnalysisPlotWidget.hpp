@@ -1,7 +1,7 @@
 #ifndef ANALYSIS_PLOT_WIDGET_HPP
 #define ANALYSIS_PLOT_WIDGET_HPP
 
-#include "PlotDataModel.hpp"
+#include "PlotModel.hpp"
 
 #include "qcustomplot.h"
 
@@ -15,9 +15,8 @@ public:
     explicit AnalysisPlotWidget(QWidget* parent);
 
     void reset();
-
-public:
     void plot(const PlotData& plotData);
+    void setModel(PlotModel* plotModel);
 
 private:
     void plotCollisionCount(const PlotData& plotData);

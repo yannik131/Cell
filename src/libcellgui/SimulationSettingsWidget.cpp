@@ -49,6 +49,11 @@ void SimulationSettingsWidget::updateDiscDistributionPreviewTableView()
     }
 }
 
+void SimulationSettingsWidget::setPlotModel(PlotModel* plotModel)
+{
+    connect(this, &SimulationSettingsWidget::plotIntervalChanged, plotModel, &PlotModel::onPlotIntervalChanged);
+}
+
 void SimulationSettingsWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
@@ -122,7 +127,7 @@ void SimulationSettingsWidget::setCallbacks()
             { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
 
     connect(plotTimeIntervalSpinBox_, &QSpinBox::valueChanged, this, [this](int value)
-            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setCollisionUpdateTime(sf::milliseconds(value))) });
+            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setPlotTimeInterval(sf::milliseconds(value))) });
 
     connect(timeScaleDoubleSpinBox_, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });

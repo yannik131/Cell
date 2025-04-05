@@ -14,10 +14,20 @@
    <string>Discs</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,1">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,2">
+    <item row="0" column="0">
+     <widget class="SimulationWidget" name="simulationWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>50</width>
+        <height>50</height>
+       </size>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="1">
-     <widget class="PlotAreaWidget" name="plotOverviewWidget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1">
        <item>
         <widget class="AnalysisPlotWidget" name="analysisPlotWidget" native="true">
          <property name="sizePolicy">
@@ -29,389 +39,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="plotOptionsWidget" native="true">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>100</height>
-          </size>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QGroupBox" name="plotTypeGroupBox">
-            <property name="title">
-             <string>Plot type</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QComboBox" name="plotTypeComboBox">
-               <property name="maximumSize">
-                <size>
-                 <width>150</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Collisions</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Kinetic energy</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Momentum</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Velocity</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Count</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="typeSelectionGroupBox">
-            <property name="title">
-             <string>Shown types</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QPushButton" name="selectDiscTypesPushButton">
-               <property name="maximumSize">
-                <size>
-                 <width>150</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Select disc types</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+        <widget class="PlotControlWidget" name="plotControlWidget" native="true"/>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="simulationOverviewWidget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="SimulationWidget" name="simulationWidget" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>50</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="0" column="2" alignment="Qt::AlignTop">
-     <widget class="QWidget" name="widget_9" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="SimulationSettingsWidget" name="simulationSettingsWidget" native="true">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>500</height>
-          </size>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QWidget" name="widget" native="true">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>50</height>
-             </size>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Discs</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="numberOfDiscsSpinBox">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>5000</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_5" native="true">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>50</height>
-             </size>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>GUI FPS</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="fpsSpinBox">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_6" native="true">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>50</height>
-             </size>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>Collision update
-interval [ms]</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="plotTimeIntervalSpinBox">
-               <property name="minimum">
-                <number>100</number>
-               </property>
-               <property name="maximum">
-                <number>10000</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_3" native="true">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>999</height>
-             </size>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>Timestep [ms]</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="timeStepSpinBox">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_4" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Timescale</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="timeScaleDoubleSpinBox">
-               <property name="singleStep">
-                <double>0.010000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="widget_10" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Friction</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="frictionDoubleSpinBox">
-               <property name="singleStep">
-                <double>0.010000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::DefaultStepType</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignHCenter">
-           <widget class="QWidget" name="widget_7" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QTableView" name="discDistributionPreviewTableView">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>9999</height>
-                </size>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <attribute name="verticalHeaderVisible">
-                <bool>false</bool>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="widget_8" native="true">
-               <layout class="QVBoxLayout" name="verticalLayout_4">
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <widget class="QPushButton" name="editDiscTypesPushButton">
-                  <property name="maximumSize">
-                   <size>
-                    <width>9999</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Edit disc types</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="editReactionsPushButton">
-                  <property name="text">
-                   <string>Edit reactions</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="widget_2" native="true">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>50</height>
-          </size>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QPushButton" name="startStopButton">
-            <property name="maximumSize">
-             <size>
-              <width>75</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Start</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="resetButton">
-            <property name="maximumSize">
-             <size>
-              <width>75</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Reset</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+    <item row="0" column="2">
+     <widget class="SimulationControlWidget" name="simulationControlWidget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -441,15 +75,15 @@ interval [ms]</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SimulationSettingsWidget</class>
+   <class>PlotControlWidget</class>
    <extends>QWidget</extends>
-   <header>SimulationSettingsWidget.hpp</header>
+   <header>PlotControlWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlotAreaWidget</class>
+   <class>SimulationControlWidget</class>
    <extends>QWidget</extends>
-   <header>PlotAreaWidget.hpp</header>
+   <header>SimulationControlWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

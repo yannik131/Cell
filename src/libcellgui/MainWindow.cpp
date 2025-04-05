@@ -14,24 +14,23 @@ MainWindow::MainWindow(QWidget* parent)
     , discDistributionDialog_(new DiscTypesDialog())
     , reactionsDialog_(new ReactionsDialog())
     , plotDataSelectionDialog_(new PlotDataSelectionDialog())
-    , plotDataModel_(new PlotDataModel())
+    , plotModel_(new PlotModel())
 {
     ui->setupUi(this);
 
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_, &Simulation::frameData, plotDataModel_, &PlotDataModel::receiveFrameDTO);
-    connect(plotDataModel_, &PlotDataModel::plotData, ui->analysisPlotWidget, &AnalysisPlotWidget::plot);
+    connect(simulation_, &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
 
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
+    connect(ui->resetButton, &QPushButton::clicked, plotModel_, &PlotModel::reset);
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
     connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
-    connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged, plotDataModel_,
-            &PlotDataModel::setCurrentPlotCategory);
+    connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged, plotModel_, &PlotModel::setCurrentPlotCategory);
     connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, plotDataSelectionDialog_, &QDialog::show);
-    connect(plotDataSelectionDialog_, &PlotDataSelectionDialog::selectedDiscTypeNames, plotDataModel_,
-            &PlotDataModel::receiveSelectedDiscTypeNames);
+    connect(plotDataSelectionDialog_, &PlotDataSelectionDialog::selectedDiscTypeNames, plotModel_,
+            &PlotModel::receiveSelectedDiscTypeNames);
 
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
     connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->analysisPlotWidget,

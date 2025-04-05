@@ -59,6 +59,12 @@ void AnalysisPlotWidget::plot(const PlotData& plotData)
     replot();
 }
 
+void AnalysisPlotWidget::setModel(PlotModel* plotModel)
+{
+    connect(plotModel, &PlotModel::plotDataPoint, this, &AnalysisPlotWidget::plotDataPoint);
+    connect(plotModel, &PlotModel::fullPlot, this, &AnalysisPlotWidget::fullPlot);
+}
+
 void AnalysisPlotWidget::plotCollisionCount(const PlotData& plotData)
 {
     if (plotData.collisionCounts_.empty())
@@ -81,11 +87,11 @@ void AnalysisPlotWidget::plotCollisionCount(const PlotData& plotData)
 
 void AnalysisPlotWidget::plotDiscTypeCounts(const PlotData& plotData)
 {
-    if (plotData.discTypeCounts_.empty())
+    if (plotData.discTypeCount_.empty())
         return;
 
     QVector<double> x;
-    for (int i = 0; i < plotData.discTypeCounts_.size(); ++i)
+    for (int i = 0; i < plotData.discTypeCount_.size(); ++i)
         x.push_back(i * GlobalSettings::getSettings().plotTimeInterval_.asSeconds());
 
     xMin_ = 0;
@@ -95,9 +101,9 @@ void AnalysisPlotWidget::plotDiscTypeCounts(const PlotData& plotData)
 
     QMap<DiscType, QCPGraph*> graphs;
 
-    for (auto iter = plotData.discTypeCounts_.first().begin(); iter != plotData.discTypeCounts_.first().end(); ++iter)
+    for (auto iter = plotData.discTypeCount_.first().begin(); iter != plotData.discTypeCount_.first().end(); ++iter)
     {
-        int index = std::distance(plotData.discTypeCounts_.first().begin(), iter);
+        int index = std::distance(plotData.discTypeCount_.first().begin(), iter);
         QCPGraph* graph = addGraph();
 
         graph->setName(QString::fromStdString(iter.key().name_));
@@ -105,9 +111,9 @@ void AnalysisPlotWidget::plotDiscTypeCounts(const PlotData& plotData)
         graphs[iter.key()] = graph;
     }
 
-    for (int i = 0; i < plotData.discTypeCounts_.size(); ++i)
+    for (int i = 0; i < plotData.discTypeCount_.size(); ++i)
     {
-        for (auto iter = plotData.discTypeCounts_[i].begin(); iter != plotData.discTypeCounts_[i].end(); ++iter)
+        for (auto iter = plotData.discTypeCount_[i].begin(); iter != plotData.discTypeCount_[i].end(); ++iter)
         {
             graphs[iter.key()]->addData(x[i], iter.value());
             if (iter.value() > yMax_)

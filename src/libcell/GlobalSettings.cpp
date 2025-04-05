@@ -74,13 +74,13 @@ void GlobalSettings::setGuiFPS(int guiFPS)
     settings_.guiFPS_ = guiFPS;
 }
 
-void GlobalSettings::setCollisionUpdateTime(const sf::Time& collisionUpdateTime)
+void GlobalSettings::setPlotTimeInterval(const sf::Time& plotTimeInterval)
 {
     throwIfLocked();
-    throwIfNotInRange(collisionUpdateTime, SettingsLimits::MinPlotTimeInterval, SettingsLimits::MaxPlotTimeInterval,
+    throwIfNotInRange(plotTimeInterval, SettingsLimits::MinPlotTimeInterval, SettingsLimits::MaxPlotTimeInterval,
                       "collision update time");
 
-    settings_.plotTimeInterval_ = collisionUpdateTime;
+    settings_.plotTimeInterval_ = plotTimeInterval;
 }
 
 void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)

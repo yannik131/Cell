@@ -1,6 +1,8 @@
 #ifndef SIMULATIONSETTINGSWIDGET_HPP
 #define SIMULATIONSETTINGSWIDGET_HPP
 
+#include "PlotModel.hpp"
+
 #include <QDoubleSpinBox>
 #include <QList>
 #include <QSpinBox>
@@ -15,6 +17,7 @@ public:
     SimulationSettingsWidget(QWidget* parent = nullptr);
 
     void updateDiscDistributionPreviewTableView();
+    void setPlotModel(PlotModel* plotModel);
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -45,6 +48,7 @@ private:
     QTableView* discDistributionPreviewTableView_;
 
     QStandardItemModel* model_;
+    PlotModel* plotModel_;
 };
 
 #endif /* SIMULATIONSETTINGSWIDGET_HPP */

@@ -27,7 +27,7 @@ private:
 
     void setGuiFPS(int guiFPS);
 
-    void setCollisionUpdateTime(const sf::Time& collisionUpdateTime);
+    void setPlotTimeInterval(const sf::Time& plotTimeInterval);
 
     void setNumberOfDiscs(int numberOfDiscs);
 
