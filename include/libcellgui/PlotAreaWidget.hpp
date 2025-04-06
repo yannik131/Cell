@@ -1,8 +1,8 @@
 #ifndef PLOTOVERVIEWWIDGET_HPP
 #define PLOTOVERVIEWWIDGET_HPP
 
-#include "AnalysisPlotWidget.hpp"
 #include "PlotDataSelectionDialog.hpp"
+#include "PlotWidget.hpp"
 
 #include <QComboBox>
 #include <QPushButton>

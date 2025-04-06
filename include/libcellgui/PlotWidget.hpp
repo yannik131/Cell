@@ -1,5 +1,5 @@
-#ifndef ANALYSIS_PLOT_WIDGET_HPP
-#define ANALYSIS_PLOT_WIDGET_HPP
+#ifndef PLOT_WIDGET_HPP
+#define PLOT_WIDGET_HPP
 
 #include "PlotModel.hpp"
 
@@ -8,19 +8,17 @@
 #include <QColor>
 #include <QWidget>
 
-class AnalysisPlotWidget : public QCustomPlot
+class PlotWidget : public QCustomPlot
 {
     Q_OBJECT
 public:
-    explicit AnalysisPlotWidget(QWidget* parent);
+    explicit PlotWidget(QWidget* parent);
 
-    void reset();
-    void plot(const PlotData& plotData);
     void setModel(PlotModel* plotModel);
 
 private:
-    void plotCollisionCount(const PlotData& plotData);
-    void plotDiscTypeCounts(const PlotData& plotData);
+    void clear();
+    void addDataPoint(const PlotData& plotData);
 
 private:
     QCPTextElement* plotTitle_;

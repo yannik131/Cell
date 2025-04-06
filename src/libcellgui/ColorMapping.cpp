@@ -1,4 +1,5 @@
 #include "ColorMapping.hpp"
+#include "Utility.hpp"
 
 namespace sf
 {
@@ -12,7 +13,7 @@ const QMap<sf::Color, QString> ColorNameMapping = {{sf::Color::White, "White"}, 
                                                    {sf::Color::Green, "Green"},   {sf::Color::Blue, "Blue"},
                                                    {sf::Color::Yellow, "Yellow"}, {sf::Color::Magenta, "Magenta"},
                                                    {sf::Color::Cyan, "Cyan"}};
-const QMap<QString, sf::Color> NameColorMapping = invertMap(ColorNameMapping);
+const QMap<QString, sf::Color> NameColorMapping = Utility::invertMap(ColorNameMapping);
 
 const QList<sf::Color> SupportedDiscColors = ColorNameMapping.keys();
 const QStringList SupportedDiscColorNames = ColorNameMapping.values();

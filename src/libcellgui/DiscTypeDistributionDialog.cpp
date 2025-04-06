@@ -1,9 +1,9 @@
-#include "DiscTypesDialog.hpp"
+#include "DiscTypeDistributionDialog.hpp"
 #include "ColorMapping.hpp"
 #include "DiscType.hpp"
 #include "GlobalSettings.hpp"
 #include "Utility.hpp"
-#include "ui_DiscTypesDialog.h"
+#include "ui_DiscTypeDistributionDialog.h"
 
 #include <QCloseEvent>
 #include <QComboBox>
@@ -16,9 +16,9 @@
 
 #include <map>
 
-DiscTypesDialog::DiscTypesDialog(QWidget* parent)
+DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::DiscTypesDialog)
+    , ui(new Ui::DiscTypeDistributionDialog)
     , discTypesModel_(new QStandardItemModel(this))
 {
     ui->setupUi(this);
@@ -28,23 +28,23 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent)
 
     ui->discDistributionTableView->setModel(discTypesModel_);
 
-    connect(ui->okPushButton, &QPushButton::clicked, this, &DiscTypesDialog::onOK);
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypesDialog::onCancel);
-    connect(ui->addTypePushButton, &QPushButton::clicked, this, &DiscTypesDialog::onAddType);
-    connect(ui->clearTypesPushButton, &QPushButton::clicked, this, &DiscTypesDialog::onClearTypes);
+    connect(ui->okPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onOK);
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onCancel);
+    connect(ui->addTypePushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onAddType);
+    connect(ui->clearTypesPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onClearTypes);
 
     validateColorMapping();
 
     resetTableViewToSettings();
 }
 
-void DiscTypesDialog::closeEvent(QCloseEvent* event)
+void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
 {
     onCancel();
     event->ignore();
 }
 
-void DiscTypesDialog::onOK()
+void DiscTypeDistributionDialog::onOK()
 {
     const auto& discTypeDistribution = convertInputsToDiscTypeDistribution();
 
@@ -60,24 +60,24 @@ void DiscTypesDialog::onOK()
     }
 }
 
-void DiscTypesDialog::onCancel()
+void DiscTypeDistributionDialog::onCancel()
 {
     resetTableViewToSettings();
     hide();
 }
 
-void DiscTypesDialog::onAddType()
+void DiscTypeDistributionDialog::onAddType()
 {
     std::string name = "Disc" + std::to_string(discTypesModel_->rowCount() + 1);
     addTableViewRowFromDiscType(DiscType(name, sf::Color::White, 10, 10));
 }
 
-void DiscTypesDialog::onClearTypes()
+void DiscTypeDistributionDialog::onClearTypes()
 {
     discTypesModel_->removeRows(0, discTypesModel_->rowCount());
 }
 
-void DiscTypesDialog::onDeleteDiscType()
+void DiscTypeDistributionDialog::onDeleteDiscType()
 {
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     if (!button)
@@ -88,7 +88,7 @@ void DiscTypesDialog::onDeleteDiscType()
     discTypesModel_->removeRow(index.row());
 }
 
-void DiscTypesDialog::validateColorMapping()
+void DiscTypeDistributionDialog::validateColorMapping()
 {
     for (const auto& color : SupportedDiscColors)
     {
@@ -98,7 +98,7 @@ void DiscTypesDialog::validateColorMapping()
     }
 }
 
-void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int percentage)
+void DiscTypeDistributionDialog::addTableViewRowFromDiscType(const DiscType& discType, int percentage)
 {
     using Utility::addSpinBoxToLastRow;
 
@@ -136,11 +136,11 @@ void DiscTypesDialog::addTableViewRowFromDiscType(const DiscType& discType, int 
 
     // Delete
     QPushButton* deleteButton = new QPushButton("Delete");
-    connect(deleteButton, &QPushButton::clicked, this, &DiscTypesDialog::onDeleteDiscType);
+    connect(deleteButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onDeleteDiscType);
     ui->discDistributionTableView->setIndexWidget(discTypesModel_->index(oldRowCount, 5), deleteButton);
 }
 
-std::map<DiscType, int> DiscTypesDialog::convertInputsToDiscTypeDistribution() const
+std::map<DiscType, int> DiscTypeDistributionDialog::convertInputsToDiscTypeDistribution() const
 {
     std::map<DiscType, int> discTypeDistribution;
 
@@ -181,7 +181,7 @@ std::map<DiscType, int> DiscTypesDialog::convertInputsToDiscTypeDistribution() c
     return discTypeDistribution;
 }
 
-void DiscTypesDialog::resetTableViewToSettings()
+void DiscTypeDistributionDialog::resetTableViewToSettings()
 {
     onClearTypes();
     for (const auto& [discType, percentage] : GlobalSettings::getSettings().discTypeDistribution_)

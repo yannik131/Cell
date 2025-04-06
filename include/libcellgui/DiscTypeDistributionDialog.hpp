@@ -2,22 +2,24 @@
 #define DISTRIBUTIONANDREACTIONSDIALOG_HPP
 
 #include "DiscType.hpp"
+#include "DiscTypeDistributionTableModel.hpp"
 
 #include <QDialog>
 #include <QStandardItemModel>
 
 namespace Ui
 {
-class DiscTypesDialog;
+class DiscTypeDistributionDialog;
 };
 
-class DiscTypesDialog : public QDialog
+class DiscTypeDistributionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit DiscTypesDialog(QWidget* parent = nullptr);
+    explicit DiscTypeDistributionDialog(QWidget* parent = nullptr);
 
     void closeEvent(QCloseEvent* event);
+    void setModel(DiscTypeDistributionTableModel* discTypeDistributionTableModel);
 
 signals:
     void discDistributionChanged();
@@ -37,7 +39,7 @@ private:
     void resetTableViewToSettings();
 
 private:
-    Ui::DiscTypesDialog* ui;
+    Ui::DiscTypeDistributionDialog* ui;
     QStandardItemModel* discTypesModel_;
 };
 

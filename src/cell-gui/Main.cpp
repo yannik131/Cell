@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QtCore/QMetaType>
 
+// TODO Remove and check if it did smth
 Q_DECLARE_METATYPE(Settings);
 
 int main(int argc, char* argv[])
@@ -20,12 +21,16 @@ int main(int argc, char* argv[])
 
         return app.exec();
     }
-
-    catch (const std::exception& e)
+    catch (const std::bad_alloc& exception)
     {
-        QMessageBox::critical(
-            nullptr, "Error",
-            QString("Unhandled exception occured: %1\nThis is probably a bug. Gotta shut down now :(").arg(e.what()));
+        QMessageBox::critical(nullptr, "Error",
+                              QString("Ran out of RAM!\nError description: %1").arg(exception.what()));
+    }
+    catch (const std::exception& exception)
+    {
+        QMessageBox::critical(nullptr, "Error",
+                              QString("Unhandled exception occured: %1\nThis is probably a bug. Gotta shut down now :(")
+                                  .arg(exception.what()));
     }
     catch (...)
     {

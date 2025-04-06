@@ -51,7 +51,7 @@ void SimulationSettingsWidget::updateDiscDistributionPreviewTableView()
 
 void SimulationSettingsWidget::setPlotModel(PlotModel* plotModel)
 {
-    connect(this, &SimulationSettingsWidget::plotIntervalChanged, plotModel, &PlotModel::onPlotIntervalChanged);
+    connect(this, &SimulationSettingsWidget::plotTimeIntervalChanged, plotModel, &PlotModel::onPlotIntervalChanged);
 }
 
 void SimulationSettingsWidget::resizeEvent(QResizeEvent* event)

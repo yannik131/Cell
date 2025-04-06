@@ -55,7 +55,7 @@ private:
 
     bool locked_ = false;
 
-    friend class DiscTypesDialog;
+    friend class DiscTypeDistributionDialog;
     friend class ReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;

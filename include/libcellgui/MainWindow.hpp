@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#include "DiscTypesDialog.hpp"
+#include "DiscTypeDistributionDialog.hpp"
 #include "FrameDTO.hpp"
 #include "PlotDataSelectionDialog.hpp"
 #include "PlotModel.hpp"
@@ -44,7 +44,7 @@ private:
     bool initialSizeSet_ = false;
     QTimer resizeTimer_;
 
-    DiscTypesDialog* discDistributionDialog_;
+    DiscTypeDistributionDialog* discDistributionDialog_;
     ReactionsDialog* reactionsDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 

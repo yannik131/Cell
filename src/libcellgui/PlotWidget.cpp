@@ -1,9 +1,9 @@
-#include "AnalysisPlotWidget.hpp"
 #include "GlobalSettings.hpp"
+#include "PlotWidget.hpp"
 
 #include <algorithm>
 
-AnalysisPlotWidget::AnalysisPlotWidget(QWidget* parent)
+PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
 {
     setInteraction(QCP::iRangeDrag, true); // Allow dragging the plot by left click-hold
@@ -20,7 +20,7 @@ AnalysisPlotWidget::AnalysisPlotWidget(QWidget* parent)
     legend->setLayer("legend layer");
     legend->setVisible(true);
 
-    // Put legend in right center
+    // Place the legend
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom | Qt::AlignRight);
 
     // These are the default colors for matplotlib. I like them.
@@ -29,7 +29,7 @@ AnalysisPlotWidget::AnalysisPlotWidget(QWidget* parent)
             << QColor(188, 189, 34) << QColor(23, 190, 207);
 }
 
-void AnalysisPlotWidget::reset()
+void PlotWidget::reset()
 {
     xMin_ = 0;
     xMax_ = 0;
@@ -40,7 +40,7 @@ void AnalysisPlotWidget::reset()
     replot();
 }
 
-void AnalysisPlotWidget::plot(const PlotData& plotData)
+void PlotWidget::plot(const PlotData& plotData)
 {
     reset();
 
@@ -59,13 +59,13 @@ void AnalysisPlotWidget::plot(const PlotData& plotData)
     replot();
 }
 
-void AnalysisPlotWidget::setModel(PlotModel* plotModel)
+void PlotWidget::setModel(PlotModel* plotModel)
 {
-    connect(plotModel, &PlotModel::plotDataPoint, this, &AnalysisPlotWidget::plotDataPoint);
-    connect(plotModel, &PlotModel::fullPlot, this, &AnalysisPlotWidget::fullPlot);
+    connect(plotModel, &PlotModel::plotDataPoint, this, &PlotWidget::plotDataPoint);
+    connect(plotModel, &PlotModel::fullPlot, this, &PlotWidget::fullPlot);
 }
 
-void AnalysisPlotWidget::plotCollisionCount(const PlotData& plotData)
+void PlotWidget::plotCollisionCount(const PlotData& plotData)
 {
     if (plotData.collisionCounts_.empty())
         return;
@@ -85,7 +85,7 @@ void AnalysisPlotWidget::plotCollisionCount(const PlotData& plotData)
     graph->setData(x, plotData.collisionCounts_, true);
 }
 
-void AnalysisPlotWidget::plotDiscTypeCounts(const PlotData& plotData)
+void PlotWidget::plotDiscTypeCounts(const PlotData& plotData)
 {
     if (plotData.discTypeCount_.empty())
         return;

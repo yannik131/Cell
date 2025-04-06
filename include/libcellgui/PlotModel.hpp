@@ -9,7 +9,10 @@
 
 #include <SFML/System/Time.hpp>
 
-struct Frame
+/**
+ * @brief Struct containing information from a FrameDTO relevant for the plot
+ */
+struct DataPoint
 {
     long long elapsedTimeUs_ = 0;
     int collisionCount_ = 0;
@@ -41,31 +44,53 @@ public:
 public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
     void receiveSelectedDiscTypeNames(const QStringList& selectedDiscTypeNames);
-    void plotIntervalChanged();
+    void plotTimeIntervalChanged(const sf::Time& plotTimeInterval);
 
 signals:
-    void plotDataPoint(const Frame& plotData, const PlotCategory& currentPlotCategory);
-    void fullPlot(const QVector<Frame>& plotData, const PlotCategory& currentPlotCategory);
+    void dataPointAdded(const DataPoint& dataPoint, const PlotCategory& currentPlotCategory);
+    void newPlotCreated(const QVector<DataPoint>& dataPoints, const PlotCategory& currentPlotCategory);
 
 private:
     /**
      * @brief Emits the newest data point to be added to the plot
      */
-    void emitPoint();
+    void emitDataPoint();
 
     /**
      * @brief Emits data for the full plot with all data points
      */
-    void emitFullPlot();
+    void emitPlot();
 
 private:
+    /**
+     * @brief Maps all DiscTypes to whether or not they're selected for the current plot
+     */
     QMap<DiscType, bool> activeDiscTypesMap_;
-    QVector<Frame> framesToAverage_;
-    QVector<Frame> frames_;
-    QVector<Frame> averagedFrames_;
+
+    /**
+     * @brief Recently received DataPoints where sum of DataPoint::elapsedTimeUs_ < plotTimeInterval_
+     */
+    QVector<DataPoint> dataPointsToAverage_;
+
+    /**
+     * @brief All data points received from the simulation
+     */
+    QVector<DataPoint> dataPoints_;
+
+    /**
+     * @brief Currently selected plot category in the UI
+     */
     PlotCategory currentPlotCategory_;
+
+    /**
+     * @brief Accumulated time of the received FrameDTOs since the last data point was emitted
+     */
     sf::Time elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
-    const sf::Time& plotInterval_;
+
+    /**
+     * @brief Copy of Settings::plotTimeInterval_
+     */
+    sf::Time plotTimeInterval_;
 };
 
 #endif /* PLOTMODEL_HPP */

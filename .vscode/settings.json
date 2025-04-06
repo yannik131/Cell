@@ -117,7 +117,8 @@
         "string_view": "cpp",
         "rope": "cpp",
         "slist": "cpp",
-        "execution": "cpp"
+        "execution": "cpp",
+        "*.moc": "cpp"
     },
     "terminal.integrated.shellArgs.windows": [
         "-noexit",

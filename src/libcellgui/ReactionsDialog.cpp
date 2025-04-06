@@ -15,7 +15,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     , ui(new Ui::ReactionsDialog)
     , reactionsModel_(new QStandardItemModel(this))
 {
-    // TODO Create base class for the 2 similar dialogs (DiscTypesDialog and this one)
+    // TODO Create base class for the 2 similar dialogs (DiscTypeDistributionDialog and this one)
 
     ui->setupUi(this);
 

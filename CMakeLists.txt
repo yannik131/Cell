@@ -89,3 +89,6 @@ target_link_libraries(cell-gui-test
 
 include(GoogleTest)
 gtest_add_tests(TARGET cell-gui-test)
+
+add_executable(models_test src/models_test/Main.cpp)
+target_link_libraries(models_test Qt6::Core Qt6::Widgets)
