@@ -127,6 +127,26 @@ public:
         return 4;
     }
 
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const
+    {
+        if (role != Qt::DisplayRole)
+            return QVariant();
+
+        if (orientation == Qt::Horizontal)
+        {
+            switch (section)
+            {
+            case 0: return "Disc Type Name";
+            case 1: return "Radius";
+            case 2: return "Mass";
+            case 3: return "Class";
+            default: return QVariant();
+            }
+        }
+
+        return QVariant();
+    }
+
     QVariant data(const QModelIndex& index, int role) const override
     {
         if (index.row() >= rows_.size())

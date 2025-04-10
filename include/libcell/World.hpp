@@ -37,6 +37,7 @@ private:
     float initialKineticEnergy_;
     float currentKineticEnergy_;
 
+    // TODO Remove changed discs (we're emitting everything now)
     std::vector<int> changedDiscIndices_;
     std::vector<int> destroyedDiscsIndices_;
     std::vector<Disc> newDiscs_;

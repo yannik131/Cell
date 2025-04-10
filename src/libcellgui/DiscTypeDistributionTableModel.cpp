@@ -1,9 +1,11 @@
 #include "DiscTypeDistributionTableModel.hpp"
 #include "ColorMapping.hpp"
+#include "GlobalSettings.hpp"
 
 DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
+    loadSettings();
 }
 
 int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const
@@ -14,6 +16,28 @@ int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const
 int DiscTypeDistributionTableModel::columnCount(const QModelIndex& parent) const
 {
     return 6;
+}
+
+QVariant DiscTypeDistributionTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+        case 0: return "Disc Type Name";
+        case 1: return "Radius";
+        case 2: return "Mass";
+        case 3: return "Color";
+        case 4: return "Frequency";
+        case 5: return "Delete";
+        default: return QVariant();
+        }
+    }
+
+    return QVariant();
 }
 
 QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role) const
@@ -76,5 +100,31 @@ void DiscTypeDistributionTableModel::removeRow(int row)
 
     beginRemoveRows(QModelIndex(), row, row);
     rows_.erase(rows_.begin() + row);
+    endRemoveRows();
+}
+
+void DiscTypeDistributionTableModel::loadSettings()
+{
+    clearRows();
+
+    beginInsertRows(QModelIndex(), 0, 0);
+    for (const auto& pair : GlobalSettings::getSettings().discTypeDistribution_)
+        rows_.push_back(pair);
+    endInsertRows();
+}
+
+void DiscTypeDistributionTableModel::saveSettings()
+{
+    std::map<DiscType, int> result(rows_.begin(), rows_.end());
+    GlobalSettings::get().setDiscTypeDistribution(std::move(result));
+}
+
+void DiscTypeDistributionTableModel::clearRows()
+{
+    if (rows_.empty())
+        return;
+
+    beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
+    rows_.clear();
     endRemoveRows();
 }

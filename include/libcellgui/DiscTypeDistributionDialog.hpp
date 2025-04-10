@@ -18,29 +18,15 @@ class DiscTypeDistributionDialog : public QDialog
 public:
     explicit DiscTypeDistributionDialog(QWidget* parent = nullptr);
 
+    // Only called when the user closes the dialog manually without clicking a custom button
     void closeEvent(QCloseEvent* event);
     void setModel(DiscTypeDistributionTableModel* discTypeDistributionTableModel);
 
 signals:
-    void discDistributionChanged();
-
-private slots:
-    void onOK();
-    void onCancel();
-
-    void onAddType();
-    void onClearTypes();
-    void onDeleteDiscType();
-
-private:
-    void validateColorMapping();
-    void addTableViewRowFromDiscType(const DiscType& discType, int percentage = 0);
-    std::map<DiscType, int> convertInputsToDiscTypeDistribution() const;
-    void resetTableViewToSettings();
+    void dialogClosed();
 
 private:
     Ui::DiscTypeDistributionDialog* ui;
-    QStandardItemModel* discTypesModel_;
 };
 
 #endif /* DISTRIBUTIONANDREACTIONSDIALOG_HPP */

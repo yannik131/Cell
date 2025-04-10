@@ -5,6 +5,7 @@
 
 class DiscTypeDistributionTableView : public QTableView
 {
-}
+    Q_OBJECT
+};
 
 #endif /* DISCTYPEDISTRIBUTIONTABLEVIEW_HPP */
