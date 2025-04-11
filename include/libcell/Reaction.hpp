@@ -5,6 +5,9 @@
 
 #include <vector>
 
+// TODO turn into a class so that only valid reactions can be created/updated, type can't change and is nested type
+// remove validation in global settings later
+// use type to set isEditable flags in the reactionsModel
 struct Reaction
 {
     DiscType educt1_;
@@ -13,6 +16,16 @@ struct Reaction
     DiscType product2_;
     float probability_ = 0;
 };
+
+enum ReactionType
+{
+    Decomposition,
+    Combination,
+    Exchange,
+    Invalid
+};
+
+ReactionType inferReactionType(const Reaction& reaction);
 
 struct ReactionHash
 {

@@ -15,29 +15,18 @@ int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const
 
 int DiscTypeDistributionTableModel::columnCount(const QModelIndex& parent) const
 {
+    // Disc type name, radius, mass, color, frequency, delete button
     return 6;
 }
 
 QVariant DiscTypeDistributionTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role != Qt::DisplayRole)
-        return QVariant();
+    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
+        return {};
 
-    if (orientation == Qt::Horizontal)
-    {
-        switch (section)
-        {
-        case 0: return "Disc Type Name";
-        case 1: return "Radius";
-        case 2: return "Mass";
-        case 3: return "Color";
-        case 4: return "Frequency";
-        case 5: return "Delete";
-        default: return QVariant();
-        }
-    }
+    static const QStringList Headers{"Disc Type Name", "Radius", "Mass", "Color", "Frequency", "Delete"};
 
-    return QVariant();
+    return Headers[section];
 }
 
 QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role) const

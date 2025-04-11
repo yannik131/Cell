@@ -130,27 +130,22 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     throwIfLocked();
     throwIfNotInRange(reaction.probability_, 0.f, 1.f, "reaction probability");
 
-    if (isValid(reaction.educt1_) && !isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-        isValid(reaction.product2_))
+    switch (inferReactionType(reaction))
     {
+    case Decomposition:
         addReactionToVector(settings_.decompositionReactions_[reaction.educt1_], reaction);
-    }
-    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-             !isValid(reaction.product2_))
-    {
+        break;
+    case Exchange:
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)],
                             reaction);
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)],
                             reaction);
-    }
-    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-             isValid(reaction.product2_))
-    {
+        break;
+    case Combination:
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)], reaction);
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)], reaction);
-    }
-    else
-    {
+        break;
+    default:
         throw std::runtime_error("Invalid reaction: Neither of type A -> B + C, A + B -> C or A + B -> C + D");
     }
 }

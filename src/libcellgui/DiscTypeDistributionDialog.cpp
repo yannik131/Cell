@@ -8,11 +8,6 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     , ui(new Ui::DiscTypeDistributionDialog)
 {
     ui->setupUi(this);
-
-    connect(ui->okPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onOK);
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onCancel);
-    connect(ui->addTypePushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onAddType);
-    connect(ui->clearTypesPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::onClearTypes);
 }
 
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)

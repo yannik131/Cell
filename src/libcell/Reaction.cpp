@@ -4,6 +4,27 @@
 #include <functional>
 #include <stdexcept>
 
+ReactionType inferReactionType(const Reaction& reaction)
+{
+    if (isValid(reaction.educt1_) && !isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+        isValid(reaction.product2_))
+    {
+        return ReactionType::Decomposition;
+    }
+    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+             !isValid(reaction.product2_))
+    {
+        return ReactionType::Combination;
+    }
+    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
+             isValid(reaction.product2_))
+    {
+        return ReactionType::Exchange;
+    }
+
+    return ReactionType::Invalid;
+}
+
 bool operator==(const Reaction& reaction1, const Reaction& reaction2)
 {
     return makeOrderedPair(reaction1.educt1_, reaction1.educt2_) ==
