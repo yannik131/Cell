@@ -18,11 +18,11 @@ GlobalSettings::GlobalSettings()
     settings_.discTypeDistribution_[C] = 10;
     settings_.discTypeDistribution_[D] = 10;
 
-    addReaction({getEduct1() = A, .educt2_ = B, .product1_ = C, .probability_ = 0.001f});
-    addReaction({getEduct1() = A, .educt2_ = B, .product1_ = D, .probability_ = 0.002f});
+    addReaction(Reaction{A, B, C, std::nullopt, 1e-3f});
+    addReaction(Reaction{A, B, D, std::nullopt, 2e-3f});
 
-    addReaction({getEduct1() = C, .product1_ = A, .product2_ = B, .probability_ = 0.001f});
-    addReaction({getEduct1() = D, .product1_ = A, .product2_ = B, .probability_ = 0.005f});
+    addReaction(Reaction{C, std::nullopt, A, B, 1e-3f});
+    addReaction(Reaction{D, std::nullopt, A, B, 5e-3f});
 }
 
 GlobalSettings& GlobalSettings::get()
@@ -41,7 +41,7 @@ DiscType GlobalSettings::getDiscTypeByName(const std::string& name)
 {
     for (const auto& [discType, frequency] : getSettings().discTypeDistribution_)
     {
-        if (discType.name_ == name)
+        if (discType.getName() == name)
             return discType;
     }
 
@@ -101,20 +101,7 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
 
     int totalPercent = 0;
     for (const auto& [type, percent] : discTypeDistribution)
-    {
-
-        if (percent < 0)
-            throw std::runtime_error("Percentage for disc type\"" + type.name_ + "\" is smaller than 0");
-
         totalPercent += percent;
-
-        throwIfNotInRange(type.mass_, DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass,
-                          "mass for disc type \"" + type.name_ + "\"");
-        throwIfNotInRange(type.radius_, DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius,
-                          "radius for disc type \"" + type.name_ + "\"");
-        if (type.name_.empty())
-            throw std::runtime_error("Disc type name can't be empty");
-    }
 
     if (totalPercent != 100)
         throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They add up to " +
@@ -128,27 +115,24 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
 void GlobalSettings::addReaction(const Reaction& reaction)
 {
     throwIfLocked();
-    throwIfNotInRange(reaction.probability_, 0.f, 1.f, "reaction probability");
 
-    switch (inferReactionType(reaction))
+    switch (reaction.getType())
     {
-    case Decomposition:
-        addReactionToVector(settings_.decompositionReactions_[reactiongetEduct1()], reaction);
+    case Reaction::Type::Decomposition:
+        addReactionToVector(settings_.decompositionReactions_[reaction.getEduct1()], reaction);
         break;
-    case Exchange:
-        addReactionToVector(settings_.combinationReactions_[std::make_pair(reactiongetEduct1(), reaction.educt2_)],
+    case Reaction::Type::Exchange:
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
-        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt2_, reactiongetEduct1())],
-                            reaction);
-        break;
-    case Combination:
-        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reactiongetEduct1(), reaction.educt2_)],
-                            reaction);
-        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt2_, reactiongetEduct1())],
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],
                             reaction);
         break;
-    default:
-        throw std::runtime_error("Invalid reaction: Neither of type A -> B + C, A + B -> C or A + B -> C + D");
+    case Reaction::Type::Combination:
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
+                            reaction);
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],
+                            reaction);
+        break;
     }
 }
 

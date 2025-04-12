@@ -3,7 +3,6 @@
 
 #include "FrameDTO.hpp"
 #include "PlotCategories.hpp"
-#include "PlotData.hpp"
 
 #include <QObject>
 

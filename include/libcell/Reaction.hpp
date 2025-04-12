@@ -21,7 +21,7 @@ public:
 
 public:
     Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
-             const std::optional<DiscType>& product2, const Type& type);
+             const std::optional<DiscType>& product2, float probability);
 
     const DiscType& getEduct1() const;
     void setEduct1(const DiscType& educt1);

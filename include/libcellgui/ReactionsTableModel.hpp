@@ -22,6 +22,9 @@ public:
     void saveSettings();
     void clearRows();
 
+signals:
+    void reactionsChanged();
+
 private:
     std::vector<Reaction> rows_;
 };

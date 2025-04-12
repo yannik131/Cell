@@ -4,6 +4,7 @@
 #include <unordered_set>
 
 ReactionsTableModel::ReactionsTableModel(QObject* parent)
+    : QAbstractTableModel(parent)
 {
 }
 

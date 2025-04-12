@@ -107,29 +107,27 @@ size_t ReactionHash::operator()(const Reaction& reaction) const
     return stringHash(toString(reaction));
 }
 
+Reaction::Type inferType(const std::optional<DiscType>& educt2, const std::optional<DiscType>& product2)
+{
+    if (educt2.has_value() && !product2.has_value())
+        return Reaction::Type::Combination;
+    else if (!educt2.has_value() && product2.has_value())
+        return Reaction::Type::Decomposition;
+    else if (educt2.has_value() && product2.has_value())
+        return Reaction::Type::Exchange;
+    else
+        throw std::runtime_error("Invalid number of educts or products");
+}
+
 Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
-                   const std::optional<DiscType>& product2, const Type& type)
+                   const std::optional<DiscType>& product2, float probability)
     : educt1_(educt1)
     , educt2_(educt2)
     , product1_(product1)
     , product2_(product2)
-    , type_(type)
+    , type_(inferType(educt2, product2))
 {
-    switch (type_)
-    {
-    case Decomposition:
-        if (educt2_.has_value() || !product2.has_value())
-            throw std::runtime_error("Decomposition reactions can't have educt2 but require product2");
-        break;
-    case Combination:
-        if (!educt2_.has_value() || product2_.has_value())
-            throw std::runtime_error("Combination reactions require educt2 but can't have product2");
-        break;
-    case Exchange:
-        if (!educt2_.has_value() || !product2_.has_value())
-            throw std::runtime_error("Exchange reactions require both educt2 and product2");
-        break;
-    }
+    setProbability(probability);
 }
 
 const DiscType& Reaction::getEduct1() const
@@ -158,7 +156,7 @@ bool Reaction::hasEduct2() const
 void Reaction::setEduct2(const DiscType& educt2)
 {
     if (type_ == Decomposition)
-        throw std::runtime_error("Can't set educt2: Decomposition reactions have no educt2")
+        throw std::runtime_error("Can't set educt2: Decomposition reactions have no educt2");
 }
 
 const DiscType& Reaction::getProduct1() const

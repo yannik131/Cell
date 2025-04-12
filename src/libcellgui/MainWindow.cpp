@@ -10,11 +10,14 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulationThread_(nullptr)
-    , simulation_(new Simulation())
-    , discDistributionDialog_(new DiscTypeDistributionDialog())
-    , reactionsDialog_(new ReactionsDialog())
-    , plotDataSelectionDialog_(new PlotDataSelectionDialog())
-    , plotModel_(new PlotModel())
+    , simulation_(new Simulation(this))
+    , discDistributionDialog_(new DiscTypeDistributionDialog(this))
+    , reactionsDialog_(new ReactionsDialog(this))
+    , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
+    , plotModel_(new PlotModel(this))
+    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this))
+    , discDistributionPreviewTableModel_(new DiscDistributionPreviewTableModel(this))
+    , reactionsTableModel_(new ReactionsTableModel(this))
 {
     ui->setupUi(this);
 
@@ -92,6 +95,11 @@ void MainWindow::onResetButtonClicked()
     ui->plotWidget->reset();
 
     stopSimulation();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)

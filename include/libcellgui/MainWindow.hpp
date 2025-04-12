@@ -1,11 +1,14 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include "DiscDistributionPreviewTableModel.hpp"
 #include "DiscTypeDistributionDialog.hpp"
+#include "DiscTypeDistributionTableModel.hpp"
 #include "FrameDTO.hpp"
 #include "PlotDataSelectionDialog.hpp"
 #include "PlotModel.hpp"
 #include "ReactionsDialog.hpp"
+#include "ReactionsTableModel.hpp"
 #include "Simulation.hpp"
 
 #include <QMainWindow>
@@ -25,6 +28,8 @@ public:
 
     void onStartStopButtonClicked();
     void onResetButtonClicked();
+
+    ~MainWindow();
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -49,6 +54,9 @@ private:
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 
     PlotModel* plotModel_;
+    DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
+    DiscDistributionPreviewTableModel* discDistributionPreviewTableModel_;
+    ReactionsTableModel* reactionsTableModel_;
 };
 
 #endif /* MAINWINDOW_HPP */

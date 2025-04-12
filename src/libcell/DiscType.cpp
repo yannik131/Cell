@@ -4,12 +4,12 @@
 
 bool operator==(const DiscType& a, const DiscType& b)
 {
-    return a.name_ == b.name_;
+    return a.getName() == b.getName();
 }
 
 bool operator<(const DiscType& a, const DiscType& b)
 {
-    return a.name_ < b.name_;
+    return a.getName() < b.getName();
 }
 
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2)
@@ -32,7 +32,7 @@ const std::string& DiscType::getName() const
 
 void DiscType::setName(const std::string& name)
 {
-    if(name.empty())
+    if (name.empty())
         throw std::runtime_error("Disc type name cannot be empty");
 
     name_ = name;
@@ -45,9 +45,9 @@ const sf::Color& DiscType::getColor() const
 
 void DiscType::setColor(const sf::Color& color)
 {
-    if(color == sf::Color())
+    if (color == sf::Color())
         throw std::runtime_error("Disc type must have a valid color");
-    
+
     color_ = color;
 }
 
@@ -58,7 +58,7 @@ float DiscType::getRadius() const
 
 void DiscType::setRadius(float radius)
 {
-    if(radius_ <= 0)
+    if (radius_ <= 0)
         throw std::runtime_error("Disc type radius must be positive");
 
     radius_ = radius;
@@ -71,7 +71,7 @@ float DiscType::getMass() const
 
 void DiscType::setMass(float mass)
 {
-    if(mass_ <= 0)
+    if (mass_ <= 0)
         throw std::runtime_error("Disc type mass must be positive");
 
     mass_ = mass;

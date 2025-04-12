@@ -1,4 +1,7 @@
 #include "DiscTypeDistributionDialog.hpp"
+#include "ButtonDelegate.hpp"
+#include "ComboBoxDelegate.hpp"
+#include "SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
 #include <QCloseEvent>
@@ -8,6 +11,16 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     , ui(new Ui::DiscTypeDistributionDialog)
 {
     ui->setupUi(this);
+
+    ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
+    ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
+    SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
+
+    ui->discDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
 }
 
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
