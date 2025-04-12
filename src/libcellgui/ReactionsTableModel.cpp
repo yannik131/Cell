@@ -1,6 +1,8 @@
 #include "ReactionsTableModel.hpp"
 #include "GlobalSettings.hpp"
 
+#include <unordered_set>
+
 ReactionsTableModel::ReactionsTableModel(QObject* parent)
 {
 }
@@ -36,15 +38,19 @@ QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
     switch (index.column())
     {
     case 0:
-        return QString::fromStdString(reaction.educt1_.name_);
+        return QString::fromStdString(reaction.getEduct1().getName());
     case 2:
-        return QString::fromStdString(reaction.educt2_.name_);
+        if (reaction.hasEduct2())
+            return QString::fromStdString(reaction.getEduct2().getName());
+        return {};
     case 4:
-        return QString::fromStdString(reaction.product1_.name_);
+        return QString::fromStdString(reaction.getProduct1().getName());
     case 6:
-        return QString::fromStdString(reaction.product2_.name_);
+        if (reaction.hasProduct2())
+            return QString::fromStdString(reaction.getProduct2().getName());
+        return {};
     case 7:
-        return reaction.probability_;
+        return reaction.getProbability();
     case 8:
         return "Delete";
     default:
@@ -57,23 +63,24 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= rows_.size() || role != Qt::EditRole)
         return false;
 
+    const auto& discType = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
     auto& reaction = rows_[index.row()];
     switch (index.column())
     {
     case 0:
-        reaction.educt1_ = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
+        reaction.setEduct1(discType);
         break;
     case 2:
-        reaction.educt2_ = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
+        reaction.setEduct2(discType);
         break;
     case 4:
-        reaction.product1_ = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
+        reaction.setProduct1(discType);
         break;
     case 6:
-        reaction.product2_ = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
+        reaction.setProduct2(discType);
         break;
     case 7:
-        reaction.probability_ = value.toFloat();
+        reaction.setProbability(value.toFloat());
         break;
     default:
         return false;
@@ -90,7 +97,7 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
     if (index.row() >= rowCount() || index.column() >= columnCount())
         return {};
 
-    auto defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    const auto defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
     static const QVector<bool> decompositionFlags{true, false, false, false, true, false, true, true, true};
@@ -98,30 +105,89 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
     static const QVector<bool> exchangeFlags{true, false, true, false, true, false, true, true, true};
 
     const auto& reaction = rows_.at(index.row());
-    const auto& reactionType = inferReactionType switch (inferReactionType(reaction))
+    switch (reaction.getType())
     {
-    case Decomposition:
-        if (decompositionFlags[index.column()])
-            defaultFlags |=
+    case Reaction::Type::Combination:
+        if (!combinationFlags[index.column()])
+            return defaultFlags;
+        break;
+    case Reaction::Type::Decomposition:
+        if (!decompositionFlags[index.column()])
+            return defaultFlags;
+        break;
+    case Reaction::Type::Exchange:
+        if (!exchangeFlags[index.column()])
+            return defaultFlags;
+        break;
     }
+
+    return defaultFlags | Qt::ItemIsEditable;
 }
 
 void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
 {
+    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    rows_.push_back(reaction);
+    endInsertRows();
 }
 
 void ReactionsTableModel::removeRow(int row)
 {
+    if (row < 0 || row >= rows_.size())
+        return;
+
+    beginRemoveRows(QModelIndex(), row, row);
+    rows_.erase(rows_.begin() + row);
+    endRemoveRows();
 }
 
 void ReactionsTableModel::loadSettings()
 {
+    clearRows();
+
+    beginInsertRows(QModelIndex(), 0, 0);
+
+    const auto& settings = GlobalSettings::getSettings();
+
+    // Reactions for {A, B} are duplicated in the maps with {B, A} for easier lookup
+    // Gotta ignore those duplicates here
+    std::unordered_set<Reaction, ReactionHash> reactionSet;
+
+    auto collectReactions = [&](const auto& reactionsMap)
+    {
+        for (const auto& [key, reactions] : reactionsMap)
+        {
+            for (const auto& reaction : reactions)
+                reactionSet.insert(reaction);
+        }
+    };
+
+    collectReactions(settings.decompositionReactions_);
+    collectReactions(settings.combinationReactions_);
+    collectReactions(settings.exchangeReactions_);
+
+    for (const auto& reaction : reactionSet)
+        rows_.push_back(reaction);
+
+    endInsertRows();
 }
 
 void ReactionsTableModel::saveSettings()
 {
+    GlobalSettings::get().clearReactions();
+    for (const auto& reaction : rows_)
+        GlobalSettings::get().addReaction(reaction);
+
+    emit reactionsChanged();
 }
 
 void ReactionsTableModel::clearRows()
 {
+    // TODO duplicate of DiscTypeDistributionTableModel::clearRows
+    if (rows_.empty())
+        return;
+
+    beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
+    rows_.clear();
+    endRemoveRows();
 }

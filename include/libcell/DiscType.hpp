@@ -9,12 +9,28 @@
 /**
  * @brief Struct containing the defining properties of a disc
  */
-struct DiscType
+class DiscType
 {
+public:
+    DiscType(const std::string& name, const sf::Color& color, float radius, float mass);
+
+    const std::string& getName() const;
+    void setName(const std::string& name);
+
+    const sf::Color& getColor() const;
+    void setColor(const sf::Color& color);
+
+    float getRadius() const;
+    void setRadius(float radius);
+
+    float getMass() const;
+    void setMass(float mass);
+
+private:
     std::string name_;
     sf::Color color_;
-    float radius_;
-    float mass_;
+    float radius_ = 0;
+    float mass_ = 0;
 };
 
 /**
@@ -31,10 +47,5 @@ bool operator<(const DiscType& a, const DiscType& b);
  * @brief Sorts the types by name in the pair
  */
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2);
-
-/**
- * @brief Checks if the values make sense (used for checking user defined disc types)
- */
-bool isValid(const DiscType& discType);
 
 #endif /* DISCTYPE_HPP */

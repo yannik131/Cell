@@ -4,55 +4,31 @@
 #include <functional>
 #include <stdexcept>
 
-ReactionType inferReactionType(const Reaction& reaction)
-{
-    if (isValid(reaction.educt1_) && !isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-        isValid(reaction.product2_))
-    {
-        return ReactionType::Decomposition;
-    }
-    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-             !isValid(reaction.product2_))
-    {
-        return ReactionType::Combination;
-    }
-    else if (isValid(reaction.educt1_) && isValid(reaction.educt2_) && isValid(reaction.product1_) &&
-             isValid(reaction.product2_))
-    {
-        return ReactionType::Exchange;
-    }
-
-    return ReactionType::Invalid;
-}
-
 bool operator==(const Reaction& reaction1, const Reaction& reaction2)
 {
-    return makeOrderedPair(reaction1.educt1_, reaction1.educt2_) ==
-               makeOrderedPair(reaction2.educt1_, reaction2.educt2_) &&
-           makeOrderedPair(reaction1.product1_, reaction1.product2_) ==
-               makeOrderedPair(reaction2.product1_, reaction2.product2_) &&
-           reaction1.probability_ == reaction2.probability_;
+    return toString(reaction1) == toString(reaction2);
 }
 
 std::string toString(const Reaction& reaction)
 {
-    std::string result = reaction.educt1_.name_;
+    std::string result = reaction.getEduct1().getName();
 
-    if (!reaction.educt2_.name_.empty())
-        result += " + " + reaction.educt2_.name_;
+    if (reaction.hasEduct2())
+        result += " + " + reaction.getEduct2().getName();
 
-    result += " -> " + reaction.product1_.name_;
+    result += " -> " + reaction.getProduct1().getName();
 
-    if (!reaction.product2_.name_.empty())
-        result += " + " + reaction.product2_.name_;
+    if (reaction.hasProduct2())
+        result += " + " + reaction.getProduct2().getName();
 
     return result;
 }
 
 bool contains(const Reaction& reaction, const DiscType& discType)
 {
-    return reaction.educt1_ == discType || reaction.educt2_ == discType || reaction.product1_ == discType ||
-           reaction.product2_ == discType;
+    return reaction.getEduct1() == discType || reaction.getProduct1() == discType ||
+           (reaction.hasEduct2() && reaction.getEduct2() == discType) ||
+           (reaction.hasProduct2() && reaction.getProduct2() == discType);
 }
 
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
@@ -66,19 +42,19 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
     if (std::find(reactions.begin(), reactions.end(), reaction) != reactions.end())
         throw std::runtime_error("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
 
-    float totalProbability = reactions.front().probability_;
+    float totalProbability = reactions.front().getProbability();
 
     for (int i = 0; i < reactions.size() - 1; ++i)
-        totalProbability += reactions[i + 1].probability_ - reactions[i].probability_;
+        totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
 
-    if (reaction.probability_ + totalProbability > 1.f)
+    if (reaction.getProbability() + totalProbability > 1.f)
         throw std::runtime_error("Can't add reaction to vector: Accumulative probability > 1");
 
-    reaction.probability_ += totalProbability;
+    reaction.setProbability(reaction.getProbability() + totalProbability);
     reactions.push_back(reaction);
 
     std::sort(reactions.begin(), reactions.end(), [](const auto& reaction1, const auto& reaction2)
-              { return reaction1.probability_ < reaction2.probability_; });
+              { return reaction1.getProbability() < reaction2.getProbability(); });
 }
 
 void removeReactionFromVector(std::vector<Reaction>& reactions, Reaction reaction)
@@ -89,16 +65,16 @@ void removeReactionFromVector(std::vector<Reaction>& reactions, Reaction reactio
         if (*iter == reaction)
         {
             if (iter == reactions.begin())
-                subtrahend = iter->probability_;
+                subtrahend = iter->getProbability();
             else
-                subtrahend = iter->probability_ - (iter - 1)->probability_;
+                subtrahend = iter->getProbability() - (iter - 1)->getProbability();
 
             iter = reactions.erase(iter);
             continue;
         }
 
         if (subtrahend != 0)
-            iter->probability_ -= subtrahend;
+            iter->setProbability(iter->getProbability() - subtrahend);
 
         ++iter;
     }
@@ -129,4 +105,107 @@ size_t ReactionHash::operator()(const Reaction& reaction) const
     static std::hash<std::string> stringHash;
 
     return stringHash(toString(reaction));
+}
+
+Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
+                   const std::optional<DiscType>& product2, const Type& type)
+    : educt1_(educt1)
+    , educt2_(educt2)
+    , product1_(product1)
+    , product2_(product2)
+    , type_(type)
+{
+    switch (type_)
+    {
+    case Decomposition:
+        if (educt2_.has_value() || !product2.has_value())
+            throw std::runtime_error("Decomposition reactions can't have educt2 but require product2");
+        break;
+    case Combination:
+        if (!educt2_.has_value() || product2_.has_value())
+            throw std::runtime_error("Combination reactions require educt2 but can't have product2");
+        break;
+    case Exchange:
+        if (!educt2_.has_value() || !product2_.has_value())
+            throw std::runtime_error("Exchange reactions require both educt2 and product2");
+        break;
+    }
+}
+
+const DiscType& Reaction::getEduct1() const
+{
+    return educt1_;
+}
+
+void Reaction::setEduct1(const DiscType& educt1)
+{
+    educt1_ = educt1;
+}
+
+const DiscType& Reaction::getEduct2() const
+{
+    if (type_ == Decomposition)
+        throw std::runtime_error("Can't get educt2: Decomposition reactions have no educt2");
+
+    return *educt2_;
+}
+
+bool Reaction::hasEduct2() const
+{
+    return type_ != Decomposition;
+}
+
+void Reaction::setEduct2(const DiscType& educt2)
+{
+    if (type_ == Decomposition)
+        throw std::runtime_error("Can't set educt2: Decomposition reactions have no educt2")
+}
+
+const DiscType& Reaction::getProduct1() const
+{
+    return product1_;
+}
+
+void Reaction::setProduct1(const DiscType& product1)
+{
+    product1_ = product1;
+}
+
+const DiscType& Reaction::getProduct2() const
+{
+    if (type_ == Combination)
+        throw std::runtime_error("Can't get product2: Combination reactions have no product2");
+
+    return *product2_;
+}
+
+bool Reaction::hasProduct2() const
+{
+    return type_ != Combination;
+}
+
+void Reaction::setProduct2(const DiscType& product2)
+{
+    if (type_ == Combination)
+        throw std::runtime_error("Can't set product2: Combination reactions have no product2");
+
+    product2_ = product2;
+}
+
+float Reaction::getProbability() const
+{
+    return probability_;
+}
+
+void Reaction::setProbability(float probability)
+{
+    if (probability < 0 || probability > 1)
+        throw std::runtime_error("Probability must be between 0 and 1");
+
+    probability_ = probability;
+}
+
+const Reaction::Type& Reaction::getType() const
+{
+    return type_;
 }

@@ -18,11 +18,11 @@ GlobalSettings::GlobalSettings()
     settings_.discTypeDistribution_[C] = 10;
     settings_.discTypeDistribution_[D] = 10;
 
-    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = C, .probability_ = 0.001f});
-    addReaction({.educt1_ = A, .educt2_ = B, .product1_ = D, .probability_ = 0.002f});
+    addReaction({getEduct1() = A, .educt2_ = B, .product1_ = C, .probability_ = 0.001f});
+    addReaction({getEduct1() = A, .educt2_ = B, .product1_ = D, .probability_ = 0.002f});
 
-    addReaction({.educt1_ = C, .product1_ = A, .product2_ = B, .probability_ = 0.001f});
-    addReaction({.educt1_ = D, .product1_ = A, .product2_ = B, .probability_ = 0.005f});
+    addReaction({getEduct1() = C, .product1_ = A, .product2_ = B, .probability_ = 0.001f});
+    addReaction({getEduct1() = D, .product1_ = A, .product2_ = B, .probability_ = 0.005f});
 }
 
 GlobalSettings& GlobalSettings::get()
@@ -133,17 +133,19 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     switch (inferReactionType(reaction))
     {
     case Decomposition:
-        addReactionToVector(settings_.decompositionReactions_[reaction.educt1_], reaction);
+        addReactionToVector(settings_.decompositionReactions_[reactiongetEduct1()], reaction);
         break;
     case Exchange:
-        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)],
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reactiongetEduct1(), reaction.educt2_)],
                             reaction);
-        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)],
+        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.educt2_, reactiongetEduct1())],
                             reaction);
         break;
     case Combination:
-        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt1_, reaction.educt2_)], reaction);
-        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt2_, reaction.educt1_)], reaction);
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reactiongetEduct1(), reaction.educt2_)],
+                            reaction);
+        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.educt2_, reactiongetEduct1())],
+                            reaction);
         break;
     default:
         throw std::runtime_error("Invalid reaction: Neither of type A -> B + C, A + B -> C or A + B -> C + D");

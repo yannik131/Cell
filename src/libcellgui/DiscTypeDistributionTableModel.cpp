@@ -38,13 +38,20 @@ QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role
 
     switch (index.column())
     {
-    case 0: return QString::fromStdString(discType.name_);
-    case 1: return discType.radius_;
-    case 2: return discType.mass_;
-    case 3: return ColorNameMapping[discType.color_];
-    case 4: return frequency;
-    case 5: return "Delete";
-    default: return {};
+    case 0:
+        return QString::fromStdString(discType.getName());
+    case 1:
+        return discType.getRadius();
+    case 2:
+        return discType.getMass();
+    case 3:
+        return ColorNameMapping[discType.getColor()];
+    case 4:
+        return frequency;
+    case 5:
+        return "Delete";
+    default:
+        return {};
     }
 }
 
@@ -56,12 +63,23 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
     auto& [discType, frequency] = rows_[index.row()];
     switch (index.column())
     {
-    case 0: discType.name_ = value.toString().toStdString(); break;
-    case 1: discType.radius_ = value.toInt(); break;
-    case 2: discType.mass_ = value.toInt(); break;
-    case 3: discType.color_ = NameColorMapping[value.toString()]; break;
-    case 4: frequency = value.toInt(); break;
-    default: return false;
+    case 0:
+        discType.setName(value.toString().toStdString());
+        break;
+    case 1:
+        discType.setRadius(value.toInt());
+        break;
+    case 2:
+        discType.setMass(value.toInt());
+        break;
+    case 3:
+        discType.setColor(NameColorMapping[value.toString()]);
+        break;
+    case 4:
+        frequency = value.toInt();
+        break;
+    default:
+        return false;
     }
 
     if (index.column() < 5)

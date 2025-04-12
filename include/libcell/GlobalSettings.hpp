@@ -56,6 +56,7 @@ private:
     bool locked_ = false;
 
     friend class DiscTypeDistributionTableModel;
+    friend class ReactionsTableModel;
     friend class ReactionsDialog;
     friend class Simulation;
     friend class SimulationSettingsWidget;

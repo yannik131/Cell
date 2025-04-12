@@ -80,21 +80,19 @@ void ReactionsDialog::onCancel()
 void ReactionsDialog::onAddCombinationReaction()
 {
     addRowFromReaction(
-        {.educt1_ = getDefaultDiscType(), .educt2_ = getDefaultDiscType(), .product1_ = getDefaultDiscType()});
+        {getEduct1() = getDefaultDiscType(), .educt2_ = getDefaultDiscType(), .product1_ = getDefaultDiscType()});
 }
 
 void ReactionsDialog::onAddDecompositionReaction()
 {
     addRowFromReaction(
-        {.educt1_ = getDefaultDiscType(), .product1_ = getDefaultDiscType(), .product2_ = getDefaultDiscType()});
+        {getEduct1() = getDefaultDiscType(), .product1_ = getDefaultDiscType(), .product2_ = getDefaultDiscType()});
 }
 
 void ReactionsDialog::onAddExchangeReaction()
 {
-    addRowFromReaction({.educt1_ = getDefaultDiscType(),
-                        .educt2_ = getDefaultDiscType(),
-                        .product1_ = getDefaultDiscType(),
-                        .product2_ = getDefaultDiscType()});
+    addRowFromReaction({getEduct1() = getDefaultDiscType(), .educt2_ = getDefaultDiscType(),
+                        .product1_ = getDefaultDiscType(), .product2_ = getDefaultDiscType()});
 }
 
 void ReactionsDialog::onClearReactions()
@@ -131,7 +129,8 @@ void ReactionsDialog::addRowFromReaction(const Reaction& reaction)
 
     // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
 
-    std::vector<DiscType> reactionParts = {reaction.educt1_, reaction.educt2_, reaction.product1_, reaction.product2_};
+    std::vector<DiscType> reactionParts = {reactiongetEduct1(), reaction.educt2_, reaction.product1_,
+                                           reaction.product2_};
     for (int i = 0; i < reactionParts.size(); ++i)
     {
         if (reactionParts[i].name_.empty())
@@ -183,7 +182,7 @@ std::vector<Reaction> ReactionsDialog::convertInputsToReactions() const
     for (int row = 0; row < reactionsModel_->rowCount(); ++row)
     {
         Reaction reaction;
-        std::vector<DiscType*> reactionParts{&reaction.educt1_, &reaction.educt2_, &reaction.product1_,
+        std::vector<DiscType*> reactionParts{&reactiongetEduct1(), &reaction.educt2_, &reaction.product1_,
                                              &reaction.product2_};
 
         for (int i = 0; i < 4; ++i)
