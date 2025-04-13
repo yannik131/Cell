@@ -1,28 +1,29 @@
 #include "Utility.hpp"
+#include "GlobalSettings.hpp"
 
-#include <QComboBox>
-#include <QTableView>
+#include <stdexcept>
 
 namespace Utility
 {
 
-void setModelHeaderData(QStandardItemModel* model, const QStringList& headers)
+void setComboBoxItemsToDiscTypeNames(ComboBoxDelegate* comboBoxDelegate)
 {
-    model->setColumnCount(headers.size());
+    QStringList discTypeNames;
+    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+        discTypeNames.push_back(QString::fromStdString(discType.getName()));
 
-    for (int i = 0; i < headers.size(); ++i)
-        model->setHeaderData(i, Qt::Horizontal, headers[i]);
+    comboBoxDelegate->setAvailableItems(std::move(discTypeNames));
 }
 
-QComboBox* addComboBoxToLastRow(const QStringList& options, const QString& selectedOption, QStandardItemModel* model,
-                                QTableView* tableView, int column)
+DiscType getDiscTypeByName(const QString& name)
 {
-    QComboBox* comboBox = new QComboBox();
-    comboBox->addItems(options);
-    comboBox->setCurrentIndex(options.indexOf(selectedOption));
-    tableView->setIndexWidget(model->index(model->rowCount() - 1, column), comboBox);
+    for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
+    {
+        if (discType.getName() == name)
+            return discType;
+    }
 
-    return comboBox;
+    throw std::runtime_error("No disc type found for name \"" + name + "\"");
 }
 
 } // namespace Utility

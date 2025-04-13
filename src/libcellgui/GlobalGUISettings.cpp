@@ -1,5 +1,6 @@
 #include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
+#include "Utility.hpp"
 
 GlobalGUISettings& GlobalGUISettings::get()
 {
@@ -62,7 +63,7 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
 
     QVector<DiscType> activeDiscTypes;
     for (const auto& selectedDiscTypeName : selectedDiscTypeNames)
-        activeDiscTypes.push_back(GlobalSettings::getDiscTypeByName(selectedDiscTypeName.toStdString()));
+        activeDiscTypes.push_back(Utility::getDiscTypeByName(selectedDiscTypeName));
 
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
     {

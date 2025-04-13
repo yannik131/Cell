@@ -1,5 +1,5 @@
 #include "ReactionsTableModel.hpp"
-#include "GlobalSimulationSettings.hpp"
+#include "GlobalSettings.hpp"
 
 #include <unordered_set>
 
@@ -64,7 +64,7 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= rows_.size() || role != Qt::EditRole)
         return false;
 
-    const auto& discType = GlobalSettings::getDiscTypeByName(value.toString().toStdString());
+    const auto& discType = Utility::getDiscTypeByName(value.toString().toStdString());
     auto& reaction = rows_[index.row()];
     switch (index.column())
     {
@@ -134,7 +134,7 @@ void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
 
 void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 {
-    const auto& discTypeDistribution = GlobalSimulationSettings::getSettings().discTypeDistribution_;
+    const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
         throw std::runtime_error("Can't add reaction: There are no available disc types defined");
 

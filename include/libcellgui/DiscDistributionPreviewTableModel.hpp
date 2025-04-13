@@ -4,6 +4,7 @@
 #include "DiscType.hpp"
 
 #include <QAbstractTableModel>
+#include <QVector>
 
 class DiscDistributionPreviewTableModel : public QAbstractTableModel
 {
@@ -19,7 +20,7 @@ public:
     void loadSettings();
 
 private:
-    std::vector<std::pair<DiscType, int>> distribution_;
+    QVector<std::pair<DiscType, int>> distribution_;
 };
 
 #endif /* DISCDISTRIBUTIONPREVIEWTABLEMODEL_HPP */

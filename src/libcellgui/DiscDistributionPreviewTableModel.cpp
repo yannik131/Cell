@@ -8,12 +8,12 @@ DiscDistributionPreviewTableModel::DiscDistributionPreviewTableModel(QObject* pa
     loadSettings();
 }
 
-int DiscDistributionPreviewTableModel::rowCount(const QModelIndex& parent) const
+int DiscDistributionPreviewTableModel::rowCount(const QModelIndex&) const
 {
     return distribution_.size();
 }
 
-int DiscDistributionPreviewTableModel::columnCount(const QModelIndex& parent) const
+int DiscDistributionPreviewTableModel::columnCount(const QModelIndex&) const
 {
     return 3;
 }
@@ -39,7 +39,7 @@ QVariant DiscDistributionPreviewTableModel::data(const QModelIndex& index, int r
     case 0:
         return QString::fromStdString(discType.getName());
     case 1:
-        return ColorNameMapping[discType.getColor()];
+        return getColorNameMapping()[discType.getColor()];
     case 2:
         return frequency;
     default:
@@ -47,7 +47,7 @@ QVariant DiscDistributionPreviewTableModel::data(const QModelIndex& index, int r
     }
 }
 
-Qt::ItemFlags DiscDistributionPreviewTableModel::flags(const QModelIndex& index) const
+Qt::ItemFlags DiscDistributionPreviewTableModel::flags(const QModelIndex&) const
 {
     return Qt::ItemIsSelectable;
 }

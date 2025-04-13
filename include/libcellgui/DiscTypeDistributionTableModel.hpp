@@ -4,6 +4,7 @@
 #include "DiscType.hpp"
 
 #include <QAbstractTableModel>
+#include <Qvector>
 
 class DiscTypeDistributionTableModel : public QAbstractTableModel
 {
@@ -24,7 +25,7 @@ public:
     void clearRows();
 
 private:
-    std::vector<std::pair<DiscType, int>> rows_;
+    QVector<std::pair<DiscType, int>> rows_;
 };
 
 #endif /* DISCTYPEDISTRIBUTIONTABLEMODEL_HPP */

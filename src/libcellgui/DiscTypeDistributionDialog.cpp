@@ -34,7 +34,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
             [this]()
             {
                 discTypeDistributionTableModel_->addRowFromDiscType(
-                    DiscType{"NewType", SupportedDiscColors.front(), 0, 0});
+                    DiscType{"NewType", getSupportedDiscColors().front(), 0, 0});
             });
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
@@ -44,6 +44,9 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
     ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
     SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
+
+    comboBoxDelegate->setAvailableItems(getSupportedDiscColorNames());
+
     ui->discTypeDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
@@ -51,7 +54,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     ui->discTypeDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
 }
 
-void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
+void DiscTypeDistributionDialog::closeEvent(QCloseEvent*)
 {
     emit dialogClosed();
 }

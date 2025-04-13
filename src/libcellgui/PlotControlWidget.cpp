@@ -15,4 +15,6 @@ PlotControlWidget::PlotControlWidget(QObject* parent)
     ui->plotTypeComboBox->clear();
     ui->plotTypeComboBox->addItems(SupportedPlotCategoryNames);
     comboBox->setCurrentIndex(options.indexOf(selectedOption));
+
+    connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, [this]() { emit selectDiscTypesClicked(); });
 }

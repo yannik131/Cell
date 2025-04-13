@@ -27,6 +27,8 @@ class PlotModel : public QObject
 public:
     PlotModel(QObject* parent = nullptr);
 
+    void clear();
+
 public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
 

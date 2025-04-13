@@ -1,3 +1,5 @@
+#include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "Logging.hpp"
 #include "MainWindow.hpp"
 #include "Settings.hpp"
@@ -13,6 +15,8 @@ int main(int argc, char* argv[])
 {
     initLogging(argc, argv);
     QApplication app(argc, argv);
+
+    GlobalSettings::setCallback(GlobalSettingsFunctor::get());
 
     try
     {

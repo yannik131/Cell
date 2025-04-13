@@ -59,6 +59,17 @@ PlotModel::PlotModel(QObject* parent)
     // With a simulation time step of 5ms, we get 200 data points each second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*200
     dataPoints_.reserve(60000);
+
+    connect(&GlobalGUISettings::get(), &GlobalGUISettings::plotResetRequired, this, &PlotModel::emitPlot);
+}
+
+void PlotModel::clear()
+{
+    dataPointsToAverage_.clear();
+    dataPoints_.clear();
+    elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
+
+    emitPlot();
 }
 
 void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)

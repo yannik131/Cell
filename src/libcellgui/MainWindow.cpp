@@ -1,10 +1,22 @@
 #include "MainWindow.hpp"
-#include "SimulationSettingsWidget.hpp"
 #include "ui_MainWindow.h"
 
 #include <glog/logging.h>
 
 #include <QMessageBox>
+
+#define SAFE_EXECUTE(function, msg)                                                                                    \
+    [this]()                                                                                                           \
+    {                                                                                                                  \
+        try                                                                                                            \
+        {                                                                                                              \
+            function();                                                                                                \
+        }                                                                                                              \
+        catch (const std::exception& e)                                                                                \
+        {                                                                                                              \
+            QMessageBox::critical(this, "Error", msg + QString(e.what()));                                             \
+        }                                                                                                              \
+    }
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -15,9 +27,6 @@ MainWindow::MainWindow(QWidget* parent)
     , reactionsDialog_(new ReactionsDialog(this))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
     , plotModel_(new PlotModel(this))
-    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this))
-    , discDistributionPreviewTableModel_(new DiscDistributionPreviewTableModel(this))
-    , reactionsTableModel_(new ReactionsTableModel(this))
 {
     ui->setupUi(this);
 
@@ -25,13 +34,25 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_, &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
 
-    connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::onStartStopButtonClicked);
-    connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::onResetButtonClicked);
-    connect(ui->resetButton, &QPushButton::clicked, plotModel_, &PlotModel::reset);
-    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, discDistributionDialog_, &QDialog::show);
-    connect(ui->editReactionsPushButton, &QPushButton::clicked, reactionsDialog_, &QDialog::show);
-    connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged, plotModel_, &PlotModel::setCurrentPlotCategory);
-    connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, plotDataSelectionDialog_, &QDialog::show);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
+            SAFE_EXECUTE(startSimulation, "Error starting the simulation: "));
+    connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStopClicked, this,
+            &MainWindow::stopSimulation);
+
+    connect(ui->simulationControlWidget, &SimulationControlWidget::simulationResetClicked, this,
+            &MainWindow::resetSimulation);
+
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscTypesClicked, discDistributionDialog_,
+            &QDialog::show);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editReactionsClicked, reactionsDialog_,
+            &QDialog::show);
+
+    ui->plotWidget->setModel(plotModel_);
+
+    connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
+            &QDialog::show);
+
+    // TODO
     connect(plotDataSelectionDialog_, &PlotDataSelectionDialog::selectedDiscTypeNames, plotModel_,
             &PlotModel::receiveSelectedDiscTypeNames);
 
@@ -66,33 +87,14 @@ MainWindow::MainWindow(QWidget* parent)
                        });
 }
 
-void MainWindow::onStartStopButtonClicked()
-{
-    if (ui->startStopButton->text() == StartString)
-    {
-        try
-        {
-            startSimulation();
-        }
-        catch (const std::runtime_error& error)
-        {
-            QMessageBox::critical(this, "Error", error.what());
-        }
-    }
-    else
-    {
-        stopSimulation();
-    }
-}
-
-void MainWindow::onResetButtonClicked()
+void MainWindow::resetSimulation()
 {
     if (simulationThread_ != nullptr)
         connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
     else
         simulation_->reset();
 
-    ui->plotWidget->reset();
+    plotModel_->clear();
 
     stopSimulation();
 }
@@ -141,9 +143,6 @@ void MainWindow::startSimulation()
 
     // Resizing the window would change the world (haha) so we can't allow it during simulation
     setFixedSize(size());
-
-    ui->simulationSettingsWidget->setEnabled(false);
-    ui->startStopButton->setText(StopString);
 }
 
 void MainWindow::stopSimulation()
@@ -153,7 +152,4 @@ void MainWindow::stopSimulation()
     // Revert the fixed size to enable resizing again
     setMinimumSize(QSize(0, 0));
     setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-
-    ui->simulationSettingsWidget->setEnabled(true);
-    ui->startStopButton->setText(StartString);
 }

@@ -118,7 +118,8 @@
         "rope": "cpp",
         "slist": "cpp",
         "execution": "cpp",
-        "*.moc": "cpp"
+        "*.moc": "cpp",
+        "qstyleditemdelegate": "cpp"
     },
     "terminal.integrated.shellArgs.windows": [
         "-noexit",

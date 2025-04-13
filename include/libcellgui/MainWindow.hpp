@@ -37,6 +37,7 @@ protected:
 private:
     void startSimulation();
     void stopSimulation();
+    void resetSimulation();
 
 private:
     Ui::MainWindow* ui;
@@ -54,9 +55,6 @@ private:
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 
     PlotModel* plotModel_;
-    DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
-    DiscDistributionPreviewTableModel* discDistributionPreviewTableModel_;
-    ReactionsTableModel* reactionsTableModel_;
 };
 
 #endif /* MAINWINDOW_HPP */

@@ -1,5 +1,5 @@
-#include "GlobalSettings.hpp"
 #include "PlotWidget.hpp"
+#include "GlobalSettings.hpp"
 
 #include <algorithm>
 
@@ -46,8 +46,12 @@ void PlotWidget::plot(const PlotData& plotData)
 
     switch (plotData.currentPlotCategory_)
     {
-    case PlotCategory::TotalCollisionCount: plotCollisionCount(plotData); break;
-    case PlotCategory::TypeCounts: plotDiscTypeCounts(plotData); break;
+    case PlotCategory::TotalCollisionCount:
+        plotCollisionCount(plotData);
+        break;
+    case PlotCategory::TypeCounts:
+        plotDiscTypeCounts(plotData);
+        break;
     }
 
     yAxis->setRange(yMin_, yMax_);

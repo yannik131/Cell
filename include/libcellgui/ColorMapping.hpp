@@ -10,10 +10,12 @@ namespace sf
 bool operator<(const sf::Color& a, const sf::Color& b);
 } // namespace sf
 
-extern const QMap<sf::Color, QString> ColorNameMapping;
-extern const QMap<QString, sf::Color> NameColorMapping;
+const QMap<sf::Color, QString>& getColorNameMapping();
 
-extern const QList<sf::Color> SupportedDiscColors;
-extern const QStringList SupportedDiscColorNames;
+const QMap<QString, sf::Color>& getNameColorMapping();
+
+const QList<sf::Color>& getSupportedDiscColors();
+
+const QStringList& getSupportedDiscColorNames();
 
 #endif /* COLORMAPPING_HPP */

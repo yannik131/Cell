@@ -1,4 +1,5 @@
 #include "SimulationControlWidget.hpp"
+#include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
 #include "ui_SimulationControlWidget.h"
 
@@ -28,12 +29,12 @@ SimulationControlWidget::SimulationControlWidget(QObject* parent)
 
 void SimulationControlWidget::setRanges()
 {
-    ui->fpsSpinBox->setRange(SettingsLimits::MinGuiFPS, SettingsLimits::MaxGuiFPS);
+    ui->fpsSpinBox->setRange(GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS);
     ui->numberOfDiscsSpinBox->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(SettingsLimits::MinSimulationTimeStep.asMilliseconds(),
                                   SettingsLimits::MaxSimulationTimeStep.asMilliseconds());
-    ui->plotTimeIntervalSpinBox->setRange(SettingsLimits::MinPlotTimeInterval.asMilliseconds(),
-                                          SettingsLimits::MaxPlotTimeInterval.asMilliseconds());
+    ui->plotTimeIntervalSpinBox->setRange(GUISettingsLimits::MinPlotTimeInterval.asMilliseconds(),
+                                          GUISettingsLimits::MaxPlotTimeInterval.asMilliseconds());
     ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
                                          SettingsLimits::MaxSimulationTimeScale);
     ui->frictionDoubleSpinBox->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
@@ -41,11 +42,13 @@ void SimulationControlWidget::setRanges()
 
 void SimulationControlWidget::displayGlobalSettings()
 {
+    const auto& guiSettings = GlobalGUISettings::getGUISettings();
+    ui->fpsSpinBox->setValue(guiSettings.guiFPS_);
+    ui->plotTimeIntervalSpinBox->setValue(guiSettings.plotTimeInterval_.asMilliseconds());
+
     const auto& settings = GlobalSettings::getSettings();
-    ui->fpsSpinBox->setValue(settings.guiFPS_);
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
     ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMilliseconds());
-    ui->plotTimeIntervalSpinBox->setValue(settings.plotTimeInterval_.asMilliseconds());
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
     ui->frictionDoubleSpinBox->setValue(settings.frictionCoefficient);
 }
@@ -55,7 +58,10 @@ void SimulationControlWidget::setCallbacks()
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
     connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
-            [this](int value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setGuiFPS(value)) });
+            [this](int value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalGUISettings::get().setGuiFPS(value)) });
+
+    connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged, this, [this](int value)
+            { DISPLAY_EXCEPTION_AND_RETURN(GlobalGUISettings::get().setPlotTimeInterval(sf::milliseconds(value))) });
 
     connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
             [this](int value)
@@ -67,12 +73,41 @@ void SimulationControlWidget::setCallbacks()
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this, [this](int value)
             { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
 
-    connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setPlotTimeInterval(sf::milliseconds(value))) });
-
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });
 
     connect(ui->frictionDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setFrictionCoefficient(value)) });
+
+    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
+    connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });
+
+    connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
+    connect(ui->resetButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+}
+
+void SimulationControlWidget::toggleStartStopButtonState()
+{
+    if (simulationStarted_)
+    {
+        emit simulationStopClicked();
+        ui->startStopButton->setText("Start");
+        simulationStarted_ = false;
+    }
+    else
+    {
+        emit simulationStartClicked();
+        ui->startStopButton->setText("Stop");
+        simulationStarted_ = true;
+    }
+
+    ui->simulationSettingsWidget->setEnabled(!simulationStarted_);
+}
+
+void SimulationControlWidget::reset()
+{
+    emit simulationResetted();
+    ui->startStopButton->setText("Start");
+    simulationStarted_ = false;
+    ui->simulationSettingsWidget->setEnabled(true);
 }

@@ -4,6 +4,11 @@
 #include <type_traits>
 #include <vector>
 
+void GlobalSettings::setCallback(const std::function<void(const SettingID& settingID)>& functor)
+{
+    GlobalSettings::get().callback_ = functor;
+}
+
 GlobalSettings::GlobalSettings()
 {
     // TODO save settings as json, load default
@@ -36,21 +41,6 @@ const Settings& GlobalSettings::getSettings()
     return get().settings_;
 }
 
-DiscType GlobalSettings::getDiscTypeByName(const std::string& name)
-{
-    for (const auto& [discType, frequency] : getSettings().discTypeDistribution_)
-    {
-        if (discType.getName() == name)
-            return discType;
-    }
-
-    throw std::runtime_error("No disc type found for name \"" + name + "\"");
-}
-
-void GlobalSettings::afterSettingsChanged(const SettingID&)
-{
-}
-
 void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 {
     throwIfLocked();
@@ -59,7 +49,7 @@ void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 
     settings_.simulationTimeStep_ = simulationTimeStep;
 
-    afterSettingsChanged(SettingID::SimulationTimeStep);
+    useCallback(SettingID::SimulationTimeStep);
 }
 
 void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
@@ -70,7 +60,7 @@ void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
 
     settings_.simulationTimeScale_ = simulationTimeScale;
 
-    afterSettingsChanged(SettingID::SimulationTimeScale);
+    useCallback(SettingID::SimulationTimeScale);
 }
 
 void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
@@ -81,7 +71,7 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
 
     settings_.numberOfDiscs_ = numberOfDiscs;
 
-    afterSettingsChanged(SettingID::NumberOfDiscs);
+    useCallback(SettingID::NumberOfDiscs);
 }
 
 void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution)
@@ -103,7 +93,7 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
 
     settings_.discTypeDistribution_ = discTypeDistribution;
 
-    afterSettingsChanged(SettingID::DiscTypeDistribution);
+    useCallback(SettingID::DiscTypeDistribution);
 }
 
 void GlobalSettings::addReaction(const Reaction& reaction)
@@ -129,7 +119,7 @@ void GlobalSettings::addReaction(const Reaction& reaction)
         break;
     }
 
-    afterSettingsChanged(SettingID::Reactions);
+    useCallback(SettingID::Reactions);
 }
 
 void GlobalSettings::clearReactions()
@@ -138,7 +128,7 @@ void GlobalSettings::clearReactions()
     settings_.combinationReactions_.clear();
     settings_.exchangeReactions_.clear();
 
-    afterSettingsChanged(SettingID::Reactions);
+    useCallback(SettingID::Reactions);
 }
 
 void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
@@ -149,7 +139,7 @@ void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
 
     settings_.frictionCoefficient = frictionCoefficient;
 
-    afterSettingsChanged(SettingID::FrictionCoefficient);
+    useCallback(SettingID::FrictionCoefficient);
 }
 
 void GlobalSettings::throwIfLocked()
@@ -222,4 +212,10 @@ void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newD
     ::removeDanglingReactions(settings_.decompositionReactions_, removedDiscTypes);
     ::removeDanglingReactions(settings_.combinationReactions_, removedDiscTypes);
     ::removeDanglingReactions(settings_.exchangeReactions_, removedDiscTypes);
+}
+
+void GlobalSettings::useCallback(const SettingID& settingID)
+{
+    if (callback_)
+        callback_(settingID);
 }

@@ -15,6 +15,7 @@ public:
 
 signals:
     void plotSettingsChanged();
+    void selectDiscTypesClicked();
 
 private:
     Ui::PlotControlWidget* ui;

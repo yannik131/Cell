@@ -8,12 +8,12 @@ DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent)
     loadSettings();
 }
 
-int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const
+int DiscTypeDistributionTableModel::rowCount(const QModelIndex&) const
 {
-    return rows_.size();
+    return static_cast<int>(rows_.size());
 }
 
-int DiscTypeDistributionTableModel::columnCount(const QModelIndex& parent) const
+int DiscTypeDistributionTableModel::columnCount(const QModelIndex&) const
 {
     // Disc type name, radius, mass, color, frequency, delete button
     return 6;
@@ -45,7 +45,7 @@ QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role
     case 2:
         return discType.getMass();
     case 3:
-        return ColorNameMapping[discType.getColor()];
+        return getColorNameMapping()[discType.getColor()];
     case 4:
         return frequency;
     case 5:
@@ -73,7 +73,7 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
         discType.setMass(value.toInt());
         break;
     case 3:
-        discType.setColor(NameColorMapping[value.toString()]);
+        discType.setColor(getNameColorMapping()[value.toString()]);
         break;
     case 4:
         frequency = value.toInt();
@@ -88,7 +88,7 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
     return true;
 }
 
-Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex& index) const
+Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
 {
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }

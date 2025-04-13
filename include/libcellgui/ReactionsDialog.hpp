@@ -24,7 +24,6 @@ public:
 private:
     void requestEmptyRowFromModel(const Reaction::Type& type);
     void cancel();
-    void updateComboBoxDelegateItems();
 
 private slots:
     void onOK();

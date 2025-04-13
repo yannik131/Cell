@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="DiscTypeDistributionTableView" name="discTypeDistributionTableView"/>
+    <widget class="QTableView" name="discTypeDistributionTableView"/>
    </item>
    <item>
     <widget class="QWidget" name="widget_3" native="true">
@@ -77,13 +77,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>DiscTypeDistributionTableView</class>
-   <extends>QTableView</extends>
-   <header>DiscTypeDistributionTableView.hpp</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

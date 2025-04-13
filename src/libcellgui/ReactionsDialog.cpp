@@ -1,7 +1,7 @@
 #include "ReactionsDialog.hpp"
 #include "ButtonDelegate.hpp"
 #include "ComboBoxDelegate.hpp"
-#include "GlobalSimulationSettings.hpp"
+#include "GlobalSettings.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "Utility.hpp"
 #include "ui_ReactionsDialog.h"
@@ -39,8 +39,8 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
-    connect(&GlobalSimulationSettings::get(), &GlobalSimulationSettings::discTypeDistributionChanged, this,
-            &ReactionsDialog::updateComboBoxDelegateItems);
+    connect(&GlobalSettings::get(), &GlobalSettings::discTypeDistributionChanged,
+            [this]() { Utility::setComboBoxItemsToDiscTypeNames(comboBoxDelegate_); });
 
     ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
     comboBoxDelegate_ = new ComboBoxDelegate(this);
@@ -76,13 +76,4 @@ void ReactionsDialog::cancel()
 {
     reactionsTableModel_->loadSettings();
     hide();
-}
-
-void ReactionsDialog::updateComboBoxDelegateItems()
-{
-    QStringList discTypeNames;
-    for (const auto& [discType, _] : GlobalSimulationSettings::getSettings().discTypeDistribution_)
-        discTypeNames.push_back(QString::fromStdString(discType.getName()));
-
-    comboBoxDelegate_->setAvailableItems(std::move(discTypeNames));
 }

@@ -31,6 +31,8 @@ private:
 
 private:
     GUISettings guiSettings_;
+
+    friend class SimulationControlWidget;
 };
 
 #endif /* GLOBALGUISETTINGS_HPP */

@@ -9,7 +9,7 @@ ButtonDelegate::ButtonDelegate(QObject* parent)
 {
 }
 
-void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex&) const
 {
     QStyleOptionButton buttonOption;
     buttonOption.rect = option.rect;
@@ -20,9 +20,9 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 }
 
 bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
-                                 const QModelIndex& index)
+                                 const QModelIndex&)
 {
-    QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+    auto* mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
     if (event->type() == QEvent::MouseButtonRelease && mouseEvent->button() == Qt::LeftButton &&
         option.rect.contains(mouseEvent->pos()))

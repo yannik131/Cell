@@ -6,6 +6,7 @@
 
 #include <SFML/System/Time.hpp>
 
+#include <functional>
 #include <map>
 #include <string>
 
@@ -22,18 +23,15 @@ enum SettingID
 class GlobalSettings
 {
 public:
-    static DiscType getDiscTypeByName(const std::string& name);
+    static GlobalSettings& get();
 
-    virtual ~GlobalSettings() = default;
+    static const Settings& getSettings();
 
-protected:
-    GlobalSettings();
-    virtual void afterSettingsChanged(const SettingID& settingID);
-
-protected:
-    Settings settings_;
+    static void setCallback(const std::function<void(const SettingID& settingID)>& functor);
 
 private:
+    GlobalSettings();
+
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 
     void setSimulationTimeScale(float simulationTimeScale);
@@ -56,8 +54,13 @@ private:
 
     void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
 
+    void useCallback(const SettingID& settingID);
+
 private:
+    Settings settings_;
+
     bool locked_ = false;
+    std::function<void(const SettingID& settingID)> callback_;
 
     friend class DiscTypeDistributionTableModel;
     friend class ReactionsTableModel;
