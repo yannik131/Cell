@@ -12,8 +12,6 @@
 class GlobalSettings
 {
 public:
-    GlobalSettings();
-
     static GlobalSettings& get();
 
     static const Settings& getSettings();
@@ -21,13 +19,11 @@ public:
     static DiscType getDiscTypeByName(const std::string& name);
 
 private:
+    GlobalSettings();
+
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 
     void setSimulationTimeScale(float simulationTimeScale);
-
-    void setGuiFPS(int guiFPS);
-
-    void setPlotTimeInterval(const sf::Time& plotTimeInterval);
 
     void setNumberOfDiscs(int numberOfDiscs);
 
@@ -38,9 +34,6 @@ private:
     void clearReactions();
 
     void setFrictionCoefficient(float frictionCoefficient);
-
-    template <typename T>
-    void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName);
 
     void throwIfLocked();
 
@@ -62,6 +55,8 @@ private:
     friend class SimulationSettingsWidget;
     friend void setBenchmarkSettings();
 };
+
+template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName);
 
 #include "GlobalSettings.inl"
 

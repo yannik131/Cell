@@ -18,7 +18,7 @@ public:
 
 private:
     void clear();
-    void addDataPoint(const PlotData& plotData);
+    void addDataPoint(const DataPoint& plotData);
 
 private:
     QCPTextElement* plotTitle_;

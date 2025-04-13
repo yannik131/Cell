@@ -28,19 +28,6 @@ struct Settings
     float simulationTimeScale_ = 1.f;
 
     /**
-     * @brief How many times per second the simulation sends frame data to the gui for updating the visual
-     * representation of the simulation
-     * @note Frame data transmission takes about 10us for a few hundred discs, so 30 FPS will use about 0.3ms each
-     * second (time during which the simulation can't update)
-     */
-    int guiFPS_ = 60;
-
-    /**
-     * @brief How long to wait between plots
-     */
-    sf::Time plotTimeInterval_ = sf::milliseconds(1000);
-
-    /**
      * @brief Total number of discs in the simulation
      */
     int numberOfDiscs_ = 50;
@@ -81,12 +68,6 @@ const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
 
 const float MinSimulationTimeScale = 0.01f;
 const float MaxSimulationTimeScale = 10.f;
-
-const int MinGuiFPS = 0;
-const int MaxGuiFPS = 200;
-
-const sf::Time MinPlotTimeInterval = sf::milliseconds(100);
-const sf::Time MaxPlotTimeInterval = sf::milliseconds(10000);
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;

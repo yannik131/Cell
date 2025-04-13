@@ -9,27 +9,10 @@
 DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::DiscTypeDistributionDialog)
+    , discTypeDistributionTableModel(new DiscTypeDistributionTableModel(this))
 {
     ui->setupUi(this);
 
-    ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
-    ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
-    SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
-
-    ui->discDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
-}
-
-void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
-{
-    emit dialogClosed();
-}
-
-void DiscTypeDistributionDialog::setModel(DiscTypeDistributionTableModel* discTypeDistributionTableModel)
-{
     connect(ui->okPushButton, &QPushButton::clicked, discTypeDistributionTableModel,
             [this, = ]()
             {
@@ -55,4 +38,19 @@ void DiscTypeDistributionDialog::setModel(DiscTypeDistributionTableModel* discTy
             &DiscTypeDistributionTableModel::clearRows);
     connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel,
             &DiscTypeDistributionTableModel::loadSettings);
+
+    ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
+    ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
+    SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
+
+    ui->discDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
+    ui->discDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
+}
+
+void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
+{
+    emit dialogClosed();
 }

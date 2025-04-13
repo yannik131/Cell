@@ -15,9 +15,9 @@ struct DataPoint
 {
     long long elapsedTimeUs_ = 0;
     int collisionCount_ = 0;
-    QMap<DiscType, double> totalMomentum_ = 0;
-    QMap<DiscType, double> totalKineticEnergy_ = 0;
-    QMap<DiscType, int> discTypeCount_;
+    QMap<DiscType, double> totalMomentumMap_;
+    QMap<DiscType, double> totalKineticEnergyMap_;
+    QMap<DiscType, int> discTypeCountMap_;
 };
 
 template <typename T> QMap<DiscType, T> operator+=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
@@ -62,11 +62,6 @@ private:
 
 private:
     /**
-     * @brief Maps all DiscTypes to whether or not they're selected for the current plot
-     */
-    QMap<DiscType, bool> activeDiscTypesMap_;
-
-    /**
      * @brief Recently received DataPoints where sum of DataPoint::elapsedTimeUs_ < plotTimeInterval_
      */
     QVector<DataPoint> dataPointsToAverage_;
@@ -77,19 +72,9 @@ private:
     QVector<DataPoint> dataPoints_;
 
     /**
-     * @brief Currently selected plot category in the UI
-     */
-    PlotCategory currentPlotCategory_;
-
-    /**
      * @brief Accumulated time of the received FrameDTOs since the last data point was emitted
      */
     sf::Time elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
-
-    /**
-     * @brief Copy of Settings::plotTimeInterval_
-     */
-    sf::Time plotTimeInterval_;
 };
 
 #endif /* PLOTMODEL_HPP */

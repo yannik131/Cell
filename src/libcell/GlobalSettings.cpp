@@ -6,7 +6,6 @@
 
 GlobalSettings::GlobalSettings()
 {
-
     // TODO save settings as json, load default
     DiscType A("A", sf::Color::Green, 5, 5);
     DiscType B("B", sf::Color::Red, 10, 5);
@@ -64,23 +63,6 @@ void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
                       SettingsLimits::MaxSimulationTimeScale, "simulation time scale");
 
     settings_.simulationTimeScale_ = simulationTimeScale;
-}
-
-void GlobalSettings::setGuiFPS(int guiFPS)
-{
-    throwIfLocked();
-    throwIfNotInRange(guiFPS, SettingsLimits::MinGuiFPS, SettingsLimits::MaxGuiFPS, "GUI FPS");
-
-    settings_.guiFPS_ = guiFPS;
-}
-
-void GlobalSettings::setPlotTimeInterval(const sf::Time& plotTimeInterval)
-{
-    throwIfLocked();
-    throwIfNotInRange(plotTimeInterval, SettingsLimits::MinPlotTimeInterval, SettingsLimits::MaxPlotTimeInterval,
-                      "collision update time");
-
-    settings_.plotTimeInterval_ = plotTimeInterval;
 }
 
 void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
