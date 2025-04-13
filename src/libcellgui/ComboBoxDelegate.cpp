@@ -2,7 +2,7 @@
 
 #include <QComboBox>
 
-ComboBoxDelegate::ComboBoxDelegate(QObject* parent = nullptr)
+ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }

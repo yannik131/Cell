@@ -47,6 +47,10 @@ DiscType GlobalSettings::getDiscTypeByName(const std::string& name)
     throw std::runtime_error("No disc type found for name \"" + name + "\"");
 }
 
+void GlobalSettings::afterSettingsChanged(const SettingID&)
+{
+}
+
 void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
 {
     throwIfLocked();
@@ -54,6 +58,8 @@ void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
                       "simulation time step");
 
     settings_.simulationTimeStep_ = simulationTimeStep;
+
+    afterSettingsChanged(SettingID::SimulationTimeStep);
 }
 
 void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
@@ -63,6 +69,8 @@ void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
                       SettingsLimits::MaxSimulationTimeScale, "simulation time scale");
 
     settings_.simulationTimeScale_ = simulationTimeScale;
+
+    afterSettingsChanged(SettingID::SimulationTimeScale);
 }
 
 void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
@@ -72,6 +80,8 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
                       "number of discs");
 
     settings_.numberOfDiscs_ = numberOfDiscs;
+
+    afterSettingsChanged(SettingID::NumberOfDiscs);
 }
 
 void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution)
@@ -92,6 +102,8 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
     removeDanglingReactions(discTypeDistribution);
 
     settings_.discTypeDistribution_ = discTypeDistribution;
+
+    afterSettingsChanged(SettingID::DiscTypeDistribution);
 }
 
 void GlobalSettings::addReaction(const Reaction& reaction)
@@ -116,6 +128,8 @@ void GlobalSettings::addReaction(const Reaction& reaction)
                             reaction);
         break;
     }
+
+    afterSettingsChanged(SettingID::Reactions);
 }
 
 void GlobalSettings::clearReactions()
@@ -123,6 +137,8 @@ void GlobalSettings::clearReactions()
     settings_.decompositionReactions_.clear();
     settings_.combinationReactions_.clear();
     settings_.exchangeReactions_.clear();
+
+    afterSettingsChanged(SettingID::Reactions);
 }
 
 void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
@@ -132,6 +148,8 @@ void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
                       SettingsLimits::MaxFrictionCoefficient, "friction coefficient");
 
     settings_.frictionCoefficient = frictionCoefficient;
+
+    afterSettingsChanged(SettingID::FrictionCoefficient);
 }
 
 void GlobalSettings::throwIfLocked()

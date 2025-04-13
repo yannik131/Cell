@@ -2,6 +2,7 @@
 #define PLOTMODEL_HPP
 
 #include "FrameDTO.hpp"
+#include "GlobalGUISettings.hpp"
 #include "PlotCategories.hpp"
 
 #include <QObject>
@@ -20,40 +21,24 @@ struct DataPoint
     QMap<DiscType, int> discTypeCountMap_;
 };
 
-template <typename T> QMap<DiscType, T> operator+=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
-{
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter.value() += b[iter.key()];
-}
-
-template <typename T> QMap<DiscType, T> operator/=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
-{
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter.value() /= b[iter.key()];
-}
-
 class PlotModel : public QObject
 {
     Q_OBJECT
 public:
     PlotModel(QObject* parent = nullptr);
 
-    void setCurrentPlotCategory(const QString& plotCategoryName);
-
 public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
-    void receiveSelectedDiscTypeNames(const QStringList& selectedDiscTypeNames);
-    void plotTimeIntervalChanged(const sf::Time& plotTimeInterval);
 
 signals:
-    void dataPointAdded(const DataPoint& dataPoint, const PlotCategory& currentPlotCategory);
-    void newPlotCreated(const QVector<DataPoint>& dataPoints, const PlotCategory& currentPlotCategory);
+    void dataPointAdded(const DataPoint& dataPoint);
+    void newPlotCreated(const QVector<DataPoint>& dataPoints);
 
 private:
     /**
      * @brief Emits the newest data point to be added to the plot
      */
-    void emitDataPoint();
+    void emitDataPoint(DataPoint& averagedDataPoint);
 
     /**
      * @brief Emits data for the full plot with all data points
@@ -75,6 +60,11 @@ private:
      * @brief Accumulated time of the received FrameDTOs since the last data point was emitted
      */
     sf::Time elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
+
+    /**
+     * @brief Alias for frequently accessed setting
+     */
+    const sf::Time& PlotTimeInterval = GlobalGUISettings::getGUISettings().plotTimeInterval_;
 };
 
 #endif /* PLOTMODEL_HPP */

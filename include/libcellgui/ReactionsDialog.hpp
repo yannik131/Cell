@@ -1,13 +1,11 @@
 #ifndef REACTIONSDIALOG_HPP
 #define REACTIONSDIALOG_HPP
 
+#include "ComboBoxDelegate.hpp"
 #include "DiscType.hpp"
-#include "Reaction.hpp"
+#include "ReactionsTableModel.hpp"
 
 #include <QDialog>
-#include <QStandardItemModel>
-
-#include <array>
 
 namespace Ui
 {
@@ -23,28 +21,19 @@ public:
     void closeEvent(QCloseEvent* event);
     void showEvent(QShowEvent* event);
 
-signals:
-    void reactionsChanged();
+private:
+    void requestEmptyRowFromModel(const Reaction::Type& type);
+    void cancel();
+    void updateComboBoxDelegateItems();
 
 private slots:
     void onOK();
     void onCancel();
 
-    void onAddCombinationReaction();
-    void onAddDecompositionReaction();
-    void onAddExchangeReaction();
-    void onClearReactions();
-    void onDeleteReaction();
-
-private:
-    void addRowFromReaction(const Reaction& reaction);
-    std::vector<Reaction> convertInputsToReactions() const;
-    const DiscType& getDefaultDiscType() const;
-    void resetTableViewToSettings();
-
 private:
     Ui::ReactionsDialog* ui;
-    QStandardItemModel* reactionsModel_;
+    ReactionsTableModel* reactionsTableModel_;
+    ComboBoxDelegate* comboBoxDelegate_;
 };
 
 #endif /* REACTIONSDIALOG_HPP */

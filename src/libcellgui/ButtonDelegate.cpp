@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <QStyleOptionButton>
 
-ButtonDelegate::ButtonDelegate(QObject* parent = nullptr)
+ButtonDelegate::ButtonDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }

@@ -55,9 +55,10 @@ void World::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
 
-    maxRadius_ = std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
-                                  [](const auto& a, const auto& b) { return a.first.radius_ < b.first.radius_; })
-                     ->first.radius_;
+    maxRadius_ =
+        std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
+                         [](const auto& a, const auto& b) { return a.first.getRadius() < b.first.getRadius(); })
+            ->first.getRadius();
 
     discs_.clear();
     startPositions_.clear();
@@ -109,7 +110,7 @@ void World::buildScene()
         {
             if (randomNumber < percentage || percentage == 100)
             {
-                counts[discType.radius_]++;
+                counts[discType.getRadius()]++;
                 Disc newDisc(discType);
                 newDisc.setPosition(startPositions_.back());
                 newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));

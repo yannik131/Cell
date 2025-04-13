@@ -2,7 +2,7 @@
 
 #include <QSpinBox>
 
-SpinBoxDelegate::SpinBoxDelegate(QObject* parent = nullptr)
+SpinBoxDelegate::SpinBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
 }

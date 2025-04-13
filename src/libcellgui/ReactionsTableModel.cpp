@@ -1,5 +1,5 @@
 #include "ReactionsTableModel.hpp"
-#include "GlobalSettings.hpp"
+#include "GlobalSimulationSettings.hpp"
 
 #include <unordered_set>
 
@@ -130,6 +130,28 @@ void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
     beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
     rows_.push_back(reaction);
     endInsertRows();
+}
+
+void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
+{
+    const auto& discTypeDistribution = GlobalSimulationSettings::getSettings().discTypeDistribution_;
+    if (discTypeDistribution.empty())
+        throw std::runtime_error("Can't add reaction: There are no available disc types defined");
+
+    const auto& defaultDiscType = discTypeDistribution.begin()->first;
+
+    switch (type)
+    {
+    case Reaction::Type::Combination:
+        addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
+        break;
+    case Reaction::Type::Decomposition:
+        addRowFromReaction(Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.f});
+        break;
+    case Reaction::Type::Exchange:
+        addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.f});
+        break;
+    }
 }
 
 void ReactionsTableModel::removeRow(int row)

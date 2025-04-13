@@ -1,7 +1,17 @@
 #include "PlotModel.hpp"
-#include "GlobalSettings.hpp"
+#include "GlobalGUISettings.hpp"
 
-#include <QDebug>
+template <typename T> QMap<DiscType, T> operator+=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
+{
+    for (auto iter = a.begin(); iter != a.end(); ++iter)
+        iter.value() += b[iter.key()];
+}
+
+template <typename T, typename DivisorType> QMap<DiscType, T> operator/=(QMap<DiscType, T>& a, const DivisorType& b)
+{
+    for (auto iter = a.begin(); iter != a.end(); ++iter)
+        iter.value() /= b;
+}
 
 /**
  * @brief Calculates the average of a list of data points
@@ -12,15 +22,15 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
     for (const auto& dataPoint : dataPoints)
     {
         average.collisionCount_ += dataPoint.collisionCount_;
-        average.totalKineticEnergy_ += dataPoint.totalKineticEnergy_;
-        average.totalMomentum_ += dataPoint.totalMomentum_;
-        average.discTypeCount_ += dataPoint.discTypeCount_;
+        average.totalKineticEnergyMap_ += dataPoint.totalKineticEnergyMap_;
+        average.totalMomentumMap_ += dataPoint.totalMomentumMap_;
+        average.discTypeCountMap_ += dataPoint.discTypeCountMap_;
     }
 
     average.collisionCount_ /= dataPoints.size();
-    average.totalKineticEnergy_ /= dataPoints.size();
-    average.totalMomentum_ /= dataPoints.size();
-    average.discTypeCount_ /= dataPoint.size();
+    average.totalKineticEnergyMap_ /= dataPoints.size();
+    average.totalMomentumMap_ /= dataPoints.size();
+    average.discTypeCountMap_ /= dataPoints.size();
 
     return average;
 }
@@ -28,63 +38,27 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
 /**
  * @brief Removes inactive disc types from all maps in the given data point
  */
-void removeInactiveDiscTypes(DataPoint& dataPoint, const QMap<DiscType, bool> activeDiscTypesMap)
+void removeInactiveDiscTypes(DataPoint& dataPoint)
 {
+    const auto& activeDiscTypesMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
+
     for (auto iter = activeDiscTypesMap.begin(); iter != activeDiscTypesMap.end(); ++iter)
     {
         if (!iter.value())
         {
-            dataPoint.totalKineticEnergy_.remove(iter.key());
-            dataPoint.totalMomentum_.remove(iter.key());
-            dataPoint.discTypeCount_.remove(iter.key());
+            dataPoint.totalKineticEnergyMap_.remove(iter.key());
+            dataPoint.totalMomentumMap_.remove(iter.key());
+            dataPoint.discTypeCountMap_.remove(iter.key());
         }
     }
 }
 
 PlotModel::PlotModel(QObject* parent)
     : QObject(parent)
-    , currentPlotCategory_(SupportedPlotCategories.first())
-    , plotTimeInterval_(GlobalSettings::getSettings().plotTimeInterval_)
 {
     // With a simulation time step of 5ms, we get 200 data points each second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*200
-    plotDataPoints_.reserve(60000);
-    currentPlotCategory_ = SupportedPlotCategories.first();
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
-        activeDiscTypes_.push_back(discType);
-}
-
-void PlotModel::setCurrentPlotCategory(const QString& plotCategoryName)
-{
-    const auto& plotCategory = NamePlotCategoryMapping[plotCategoryName];
-    if (plotCategory == currentPlotCategory_)
-        return;
-
-    currentPlotCategory_ = plotCategory;
-    emitPlot();
-}
-
-void PlotModel::receiveSelectedDiscTypeNames(const QStringList& selectedDiscTypeNames)
-{
-    activeDiscTypesMap_.clear();
-
-    QVector<DiscType> activeDiscTypes;
-    for (const auto& selectedDiscTypeName : selectedDiscTypeNames)
-        activeDiscTypes.push_back(GlobalSettings::getDiscTypeByName(selectedDiscTypeName.toStdString()));
-
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
-    {
-        auto iter = std::find(activeDiscTypes.begin(), activeDiscTypes.end(), discType);
-        activeDiscTypesMap_[discType] = iter != activeDiscTypes.end();
-    }
-
-    emitPlot();
-}
-
-void PlotModel::plotTimeIntervalChanged(const sf::Time& plotTimeInterval)
-{
-    plotTimeInterval_ = plotTimeInterval;
-    emitPlot();
+    dataPoints_.reserve(60000);
 }
 
 void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
@@ -95,30 +69,30 @@ void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
 
     for (const auto& disc : frameDTO.discs_)
     {
-        ++dataPoint.discTypeCount_[disc.getType()];
-        dataPoint.totalKineticEnergy_[disc.getType()] += disc.getKineticEnergy();
-        dataPoint.totalMomentum_[disc.getType()] += disc.getAbsoluteMomentum();
+        ++dataPoint.discTypeCountMap_[disc.getType()];
+        dataPoint.totalKineticEnergyMap_[disc.getType()] += disc.getKineticEnergy();
+        dataPoint.totalMomentumMap_[disc.getType()] += disc.getAbsoluteMomentum();
     }
 
     dataPointsToAverage_.push_back(dataPoint);
 
     elapsedWorldTimeSinceLastPlot_ += sf::microseconds(frameDTO.simulationTimeStepUs);
-    if (elapsedWorldTimeSinceLastPlot_ >= plotTimeInterval_)
+    if (elapsedWorldTimeSinceLastPlot_ >= PlotTimeInterval)
     {
         const auto& averagedDataPoint = averageDataPoints(dataPointsToAverage_);
         dataPoints_.append(std::move(dataPointsToAverage_));
         dataPointsToAverage_.clear();
-        elapsedWorldTimeSinceLastPlot_ -= plotTimeInterval_;
+        elapsedWorldTimeSinceLastPlot_ -= PlotTimeInterval;
 
-        emitDataPoint(averagedDataPoint, currentPlotCategory_);
+        emitDataPoint(averagedDataPoint);
     }
 }
 
-void PlotModel::emitDataPoint(DataPoint averagedDataPoint)
+void PlotModel::emitDataPoint(DataPoint& averagedDataPoint)
 {
     removeInactiveDiscTypes(averagedDataPoint);
 
-    emit dataPointAdded(averagedDataPoint, currentPlotCategory_);
+    emit dataPointAdded(averagedDataPoint);
 }
 
 void PlotModel::emitPlot()
@@ -132,15 +106,15 @@ void PlotModel::emitPlot()
         dataPointsToAverage.push_back(dataPoint);
 
         elapsedTime += sf::microseconds(dataPoint.elapsedTimeUs_);
-        if (elapsedTime >= plotTimeInterval_)
+        if (elapsedTime >= PlotTimeInterval)
         {
             DataPoint averagedDataPoint = averageDataPoints(dataPointsToAverage_);
             removeInactiveDiscTypes(averagedDataPoint);
             fullPlotData.append(averagedDataPoint);
             dataPointsToAverage_.clear();
-            elapsedTime -= plotTimeInterval_;
+            elapsedTime -= PlotTimeInterval;
         }
     }
 
-    emit newPlotCreated(fullPlotData, currentPlotCategory_);
+    emit newPlotCreated(fullPlotData);
 }

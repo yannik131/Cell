@@ -3,12 +3,17 @@
 
 #include "GUISettings.hpp"
 
-class GlobalGUISettings
+#include <QObject>
+
+class GlobalGUISettings : public QObject
 {
 public:
     static GlobalGUISettings& get();
 
     static const GUISettings& getGUISettings();
+
+signals:
+    void plotResetRequired();
 
 private:
     GlobalGUISettings();
@@ -22,6 +27,7 @@ private:
     void setCurrentPlotCategory(const PlotCategory& plotCategory);
 
     void setDiscTypesPlotMap(const QMap<DiscType, bool>& discTypesPlotMap);
+    void setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames);
 
 private:
     GUISettings guiSettings_;

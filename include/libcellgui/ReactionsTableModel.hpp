@@ -17,6 +17,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     void addRowFromReaction(const Reaction& reaction);
+    void addEmptyRow(const Reaction::Type& type);
     void removeRow(int row);
     void loadSettings();
     void saveSettings();

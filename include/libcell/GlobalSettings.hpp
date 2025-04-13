@@ -9,18 +9,31 @@
 #include <map>
 #include <string>
 
+enum SettingID
+{
+    SimulationTimeStep = 1 << 0,
+    SimulationTimeScale = 1 << 1,
+    NumberOfDiscs = 1 << 2,
+    DiscTypeDistribution = 1 << 3,
+    Reactions = 1 << 4,
+    FrictionCoefficient = 1 << 5,
+};
+
 class GlobalSettings
 {
 public:
-    static GlobalSettings& get();
-
-    static const Settings& getSettings();
-
     static DiscType getDiscTypeByName(const std::string& name);
 
-private:
-    GlobalSettings();
+    virtual ~GlobalSettings() = default;
 
+protected:
+    GlobalSettings();
+    virtual void afterSettingsChanged(const SettingID& settingID);
+
+protected:
+    Settings settings_;
+
+private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 
     void setSimulationTimeScale(float simulationTimeScale);
@@ -44,8 +57,6 @@ private:
     void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
 
 private:
-    Settings settings_;
-
     bool locked_ = false;
 
     friend class DiscTypeDistributionTableModel;

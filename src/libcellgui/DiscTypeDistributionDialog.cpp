@@ -1,24 +1,26 @@
 #include "DiscTypeDistributionDialog.hpp"
 #include "ButtonDelegate.hpp"
+#include "ColorMapping.hpp"
 #include "ComboBoxDelegate.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
 #include <QCloseEvent>
+#include <QMessageBox>
 
 DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::DiscTypeDistributionDialog)
-    , discTypeDistributionTableModel(new DiscTypeDistributionTableModel(this))
+    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this))
 {
     ui->setupUi(this);
 
-    connect(ui->okPushButton, &QPushButton::clicked, discTypeDistributionTableModel,
-            [this, = ]()
+    connect(ui->okPushButton, &QPushButton::clicked,
+            [this]()
             {
                 try
                 {
-                    discTypeDistributionTableModel->saveSettings();
+                    discTypeDistributionTableModel_->saveSettings();
                     hide();
                 }
                 catch (const std::runtime_error& error)
@@ -26,28 +28,27 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
                     QMessageBox::critical(this, "Error", "Couldn't save disc distribution: " + QString(error.what()));
                 }
             });
-    connect(ui->cancelPushButton, &QPushButton::clicked, discTypeDistributionTableModel,
+    connect(ui->cancelPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::loadSettings);
-    connect(ui->addTypePushButton, &QPushButton::clicked, discTypeDistributionTableModel,
-            [=]()
+    connect(ui->addTypePushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
+            [this]()
             {
-                discTypeDistributionTableModel->addRowFromDiscType(
-                    DiscType{.color_ = ColorNameMapping.keys().front(), .mass_ = 0, .name_ = "", .radius_ = 0});
+                discTypeDistributionTableModel_->addRowFromDiscType(
+                    DiscType{"NewType", SupportedDiscColors.front(), 0, 0});
             });
-    connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel,
+    connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
-    connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel,
+    connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::loadSettings);
 
     ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
     ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
     SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
-
-    ui->discDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
-    ui->discDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
 }
 
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent* event)
