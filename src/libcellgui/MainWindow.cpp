@@ -1,4 +1,5 @@
 #include "MainWindow.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
 #include <glog/logging.h>
@@ -33,6 +34,10 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_, &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, simulation_,
+            &Simulation::reset);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, plotModel_,
+            &PlotModel::clear);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
             SAFE_EXECUTE(startSimulation, "Error starting the simulation: "));
@@ -51,20 +56,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
-
-    // TODO
-    connect(plotDataSelectionDialog_, &PlotDataSelectionDialog::selectedDiscTypeNames, plotModel_,
-            &PlotModel::receiveSelectedDiscTypeNames);
-
-    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, simulation_, &Simulation::reset);
-    connect(ui->simulationSettingsWidget, &SimulationSettingsWidget::settingsChanged, ui->plotWidget,
-            &PlotWidget::reset);
-    connect(discDistributionDialog_, &DiscTypeDistributionDialog::discDistributionChanged, simulation_,
-            &Simulation::reset);
-    connect(discDistributionDialog_, &DiscTypeDistributionDialog::discDistributionChanged, ui->plotWidget,
-            &PlotWidget::reset);
-    connect(discDistributionDialog_, &DiscTypeDistributionDialog::discDistributionChanged, ui->simulationSettingsWidget,
-            &SimulationSettingsWidget::updateDiscDistributionPreviewTableView);
 
     connect(&resizeTimer_, &QTimer::timeout,
             [&]()

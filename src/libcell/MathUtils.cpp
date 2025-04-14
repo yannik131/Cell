@@ -185,9 +185,10 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
-int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
+std::map<DiscType, int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
-    int collisionCount = 0;
+    std::map<DiscType, int> collisionCounts;
+
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
 
     for (const auto& [p1, p2] : collidingDiscs)
@@ -198,7 +199,8 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         if (overlap <= 0)
             continue;
 
-        ++collisionCount;
+        ++collisionCounts[p1->getType()];
+        ++collisionCounts[p2->getType()];
 
         // Don't handle collision if reaction occured
         if (combinationReaction(p1, p2))
@@ -235,7 +237,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
             correctOverlap(*p1, *p2);
     }
 
-    return collisionCount;
+    return collisionCounts;
 }
 
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)

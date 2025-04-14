@@ -1,56 +1,45 @@
 #include "PlotModel.hpp"
 #include "GlobalGUISettings.hpp"
+#include "Utility.hpp"
 
-template <typename T> QMap<DiscType, T> operator+=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
+const QMap<DiscType, double>& getActiveMap(const DataPoint& dataPoint)
 {
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter.value() += b[iter.key()];
-}
-
-template <typename T, typename DivisorType> QMap<DiscType, T> operator/=(QMap<DiscType, T>& a, const DivisorType& b)
-{
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter.value() /= b;
+    switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
+    {
+    case PlotCategory::TotalAbsoluteImpulse:
+        return dataPoint.totalMomentumMap_;
+    case PlotCategory::TotalCollisionCount:
+        return dataPoint.collisionCounts_;
+    case PlotCategory::TotalKineticEnergy:
+        return dataPoint.totalKineticEnergyMap_;
+    case PlotCategory::TypeCounts:
+        return dataPoint.discTypeCountMap_;
+    default:
+        throw std::runtime_error("TODO");
+    }
 }
 
 /**
  * @brief Calculates the average of a list of data points
+ * @todo maybe use a map<PlotCategory, map<DiscType, double>> to avoid duplication?
  */
 DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
 {
     DataPoint average;
     for (const auto& dataPoint : dataPoints)
     {
-        average.collisionCount_ += dataPoint.collisionCount_;
+        average.collisionCounts_ += dataPoint.collisionCounts_;
         average.totalKineticEnergyMap_ += dataPoint.totalKineticEnergyMap_;
         average.totalMomentumMap_ += dataPoint.totalMomentumMap_;
         average.discTypeCountMap_ += dataPoint.discTypeCountMap_;
     }
 
-    average.collisionCount_ /= dataPoints.size();
+    average.collisionCounts_ /= dataPoints.size();
     average.totalKineticEnergyMap_ /= dataPoints.size();
     average.totalMomentumMap_ /= dataPoints.size();
     average.discTypeCountMap_ /= dataPoints.size();
 
     return average;
-}
-
-/**
- * @brief Removes inactive disc types from all maps in the given data point
- */
-void removeInactiveDiscTypes(DataPoint& dataPoint)
-{
-    const auto& activeDiscTypesMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
-
-    for (auto iter = activeDiscTypesMap.begin(); iter != activeDiscTypesMap.end(); ++iter)
-    {
-        if (!iter.value())
-        {
-            dataPoint.totalKineticEnergyMap_.remove(iter.key());
-            dataPoint.totalMomentumMap_.remove(iter.key());
-            dataPoint.discTypeCountMap_.remove(iter.key());
-        }
-    }
 }
 
 PlotModel::PlotModel(QObject* parent)
@@ -75,7 +64,7 @@ void PlotModel::clear()
 void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
-    dataPoint.collisionCount_ = frameDTO.collisionCount_;
+    dataPoint.collisionCounts_ = Utility::convertToQMap<DiscType, double, int>(frameDTO.collisionCounts_);
     dataPoint.elapsedTimeUs_ = frameDTO.simulationTimeStepUs;
 
     for (const auto& disc : frameDTO.discs_)
@@ -90,7 +79,7 @@ void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
     elapsedWorldTimeSinceLastPlot_ += sf::microseconds(frameDTO.simulationTimeStepUs);
     if (elapsedWorldTimeSinceLastPlot_ >= PlotTimeInterval)
     {
-        const auto& averagedDataPoint = averageDataPoints(dataPointsToAverage_);
+        auto averagedDataPoint = averageDataPoints(dataPointsToAverage_);
         dataPoints_.append(std::move(dataPointsToAverage_));
         dataPointsToAverage_.clear();
         elapsedWorldTimeSinceLastPlot_ -= PlotTimeInterval;
@@ -101,14 +90,13 @@ void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
 
 void PlotModel::emitDataPoint(DataPoint& averagedDataPoint)
 {
-    removeInactiveDiscTypes(averagedDataPoint);
-
-    emit dataPointAdded(averagedDataPoint);
+    // https://stackoverflow.com/questions/8455887/stack-object-qt-signal-and-parameter-as-reference
+    emit dataPointAdded(getActiveMap(averagedDataPoint));
 }
 
 void PlotModel::emitPlot()
 {
-    QVector<DataPoint> fullPlotData;
+    QVector<QMap<DiscType, double>> fullPlotData;
     QVector<DataPoint> dataPointsToAverage;
     sf::Time elapsedTime = sf::Time::Zero;
 
@@ -120,8 +108,7 @@ void PlotModel::emitPlot()
         if (elapsedTime >= PlotTimeInterval)
         {
             DataPoint averagedDataPoint = averageDataPoints(dataPointsToAverage_);
-            removeInactiveDiscTypes(averagedDataPoint);
-            fullPlotData.append(averagedDataPoint);
+            fullPlotData.append(getActiveMap(averagedDataPoint));
             dataPointsToAverage_.clear();
             elapsedTime -= PlotTimeInterval;
         }

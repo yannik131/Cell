@@ -5,6 +5,7 @@
 
 #include <SFML/System/Time.hpp>
 
+#include <map>
 #include <set>
 #include <vector>
 
@@ -23,7 +24,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
  * appropriate functions to handle combination and exchange reactions
  */
-int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
+std::map<DiscType, int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 
 /**
  * @brief Lets the discs in the passed vector decompose according to the schemes A -> B + C defined in the settings with

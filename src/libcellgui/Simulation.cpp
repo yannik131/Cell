@@ -60,7 +60,7 @@ void Simulation::emitFrameData()
     // Benchmarks have shown that a single emit of 1B takes about as long as one of 40kB (5-10us, several 100x slower
     // than calculating a simulation step)
     FrameDTO frameDTO{.discs_ = worldDiscs_,
-                      .collisionCount_ = world_.getAndResetCollisionCount(),
+                      .collisionCounts_ = world_.getAndResetCollisionCount(),
                       .simulationTimeStepUs = GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 
     emit frameData(frameDTO);

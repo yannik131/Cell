@@ -23,7 +23,7 @@ DiscType getDiscTypeByName(const QString& name)
             return discType;
     }
 
-    throw std::runtime_error("No disc type found for name \"" + name + "\"");
+    throw std::runtime_error(("No disc type found for name \"" + name + "\"").toStdString());
 }
 
 } // namespace Utility

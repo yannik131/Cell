@@ -16,9 +16,16 @@ World::World()
 {
 }
 
+template <typename T> std::map<DiscType, T> operator+=(std::map<DiscType, T>& a, const std::map<DiscType, T>& b)
+{
+    for (auto iter = a.begin(); iter != a.end(); ++iter)
+        iter->second += b.at(iter->first);
+
+    return a;
+}
+
 void World::update(const sf::Time& dt)
 {
-    changedDiscIndices_.clear();
     destroyedDiscsIndices_.clear();
     newDiscs_.clear();
 
@@ -28,7 +35,7 @@ void World::update(const sf::Time& dt)
         const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
         newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs);
+        collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
         currentKineticEnergy_ +=
             MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
@@ -38,10 +45,10 @@ void World::update(const sf::Time& dt)
     findChangedDiscs();
 }
 
-int World::getAndResetCollisionCount()
+std::map<DiscType, int> World::getAndResetCollisionCount()
 {
-    int tmp = collisionCount_;
-    collisionCount_ = 0;
+    auto tmp = std::move(collisionCounts_);
+    collisionCounts_.clear();
 
     return tmp;
 }
@@ -159,10 +166,7 @@ void World::findChangedDiscs()
     for (int i = 0; i < discs_.size(); ++i)
     {
         if (discs_[i].isMarkedChanged())
-        {
-            changedDiscIndices_.push_back(i);
             discs_[i].unmarkChanged();
-        }
     }
 }
 

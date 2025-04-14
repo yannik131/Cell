@@ -10,8 +10,9 @@ class PlotControlWidget;
 
 class PlotControlWidget : public QWidget
 {
+    Q_OBJECT
 public:
-    PlotControlWidget(QObject* parent = nullptr);
+    PlotControlWidget(QWidget* parent = nullptr);
 
 signals:
     void plotSettingsChanged();

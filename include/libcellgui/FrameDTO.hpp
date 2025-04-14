@@ -6,12 +6,13 @@
 #include <QtCore/QMetaType>
 #include <SFML/System/Vector2.hpp>
 
+#include <map>
 #include <vector>
 
 struct FrameDTO
 {
     std::vector<Disc> discs_;
-    int collisionCount_;
+    std::map<DiscType, int> collisionCounts_;
     long long simulationTimeStepUs;
 };
 

@@ -7,6 +7,7 @@
 
 class QSFMLWidget : public QWidget, public sf::RenderWindow
 {
+    Q_OBJECT
 public:
     QSFMLWidget(QWidget* parent);
 

@@ -1,6 +1,7 @@
 #include "SimulationControlWidget.hpp"
 #include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "ui_SimulationControlWidget.h"
 
 #define DISPLAY_EXCEPTION_AND_RETURN(statement)                                                                        \
@@ -15,12 +16,14 @@
         return;                                                                                                        \
     }
 
-SimulationControlWidget::SimulationControlWidget(QObject* parent)
+SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::SimulationControlWidget(this))
     , discDistributionPreviewTableModel_(new DiscDistributionPreviewTableModel(this))
 {
     discDistributionPreviewTableModel_->loadSettings();
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
+            discDistributionPreviewTableModel_, &DiscDistributionPreviewTableModel::loadSettings);
 
     setRanges();
     displayGlobalSettings();

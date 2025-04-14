@@ -8,6 +8,7 @@
 
 class DiscDistributionPreviewTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
 public:
     DiscDistributionPreviewTableModel(QObject* parent = nullptr);
 

@@ -7,6 +7,7 @@
 
 class GlobalGUISettings : public QObject
 {
+    Q_OBJECT
 public:
     static GlobalGUISettings& get();
 
@@ -33,6 +34,7 @@ private:
     GUISettings guiSettings_;
 
     friend class SimulationControlWidget;
+    friend class PlotDataSelectionDialog;
 };
 
 #endif /* GLOBALGUISETTINGS_HPP */

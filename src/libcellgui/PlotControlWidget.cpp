@@ -3,9 +3,9 @@
 #include "PlotCategories.hpp"
 #include "ui_PlotControlWidget.h"
 
-PlotControlWidget::PlotControlWidget(QObject* parent)
+PlotControlWidget::PlotControlWidget(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::PlotControlWidget(this))
+    , ui(new Ui::PlotControlWidget)
 {
     ui->plotTimeIntervalSpinBox->setRange(GUISettingsLimits::MinPlotTimeInterval,
                                           GUISettingsLimits::MaxPlotTimeInterval);

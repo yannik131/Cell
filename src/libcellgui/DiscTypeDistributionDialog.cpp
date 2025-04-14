@@ -2,6 +2,7 @@
 #include "ButtonDelegate.hpp"
 #include "ColorMapping.hpp"
 #include "ComboBoxDelegate.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
@@ -40,6 +41,8 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
             &DiscTypeDistributionTableModel::clearRows);
     connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::loadSettings);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
+            discTypeDistributionTableModel_, &DiscTypeDistributionTableModel::loadSettings);
 
     ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
     ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);

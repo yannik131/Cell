@@ -12,8 +12,9 @@ class SimulationControlWidget;
 
 class SimulationControlWidget : public QWidget
 {
+    Q_OBJECT
 public:
-    SimulationControlWidget(QObject* parent = nullptr);
+    SimulationControlWidget(QWidget* parent = nullptr);
 
 signals:
     void simulationStartClicked();

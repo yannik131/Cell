@@ -7,6 +7,7 @@
 
 class ReactionsTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
 public:
     explicit ReactionsTableModel(QObject* parent = nullptr);
 

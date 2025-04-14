@@ -17,14 +17,9 @@ class PlotDataSelectionDialog : public QDialog
 public:
     explicit PlotDataSelectionDialog(QWidget* parent = nullptr);
 
-signals:
-    void selectedDiscTypeNames(const QStringList& discTypeNames);
-
-private slots:
-    void emitSelectedDiscTypes();
-
 private:
-    void setAndSelectDiscTypes(const QStringList& discTypes);
+    void saveSettings();
+    void loadSettings();
 
 private:
     Ui::PlotDataSelectionDialog* ui;

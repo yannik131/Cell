@@ -1,10 +1,9 @@
 #include "PlotDataSelectionDialog.hpp"
+#include "GlobalGUISettings.hpp"
+#include "GlobalSettings.hpp"
 #include "MultiSelectListWidget.hpp"
 #include "PlotCategories.hpp"
 #include "ui_PlotDataSelectionDialog.h"
-
-#include <algorithm>
-#include <regex>
 
 PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
     : QDialog(parent)
@@ -17,24 +16,24 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
     connect(ui->selectAllButton, &QPushButton::clicked, ui->selectedDiscTypesListWidget, &QListWidget::selectAll);
 
     connect(ui->doneButton, &QPushButton::clicked, this, &QDialog::accept);
-    connect(ui->doneButton, &QPushButton::clicked, this, &PlotDataSelectionDialog::emitSelectedDiscTypes);
+    connect(ui->doneButton, &QPushButton::clicked, this, &PlotDataSelectionDialog::saveSettings);
 
-    setAndSelectDiscTypes(SupportedPlotCategoryNames);
+    loadSettings();
 }
 
-void PlotDataSelectionDialog::emitSelectedDiscTypes()
+void PlotDataSelectionDialog::saveSettings()
 {
     const auto& selectedDiscTypeNames = ui->selectedDiscTypesListWidget->getSelectedNames();
 
-    emit PlotDataSelectionDialog::selectedDiscTypeNames(selectedDiscTypeNames);
+    GlobalGUISettings::get().setDiscTypesPlotMap(selectedDiscTypeNames);
 }
 
-void PlotDataSelectionDialog::setAndSelectDiscTypes(const QStringList& discTypes)
+void PlotDataSelectionDialog::loadSettings()
 {
     ui->selectedDiscTypesListWidget->clear();
 
-    for (const auto& discType : discTypes)
-        ui->selectedDiscTypesListWidget->addItem(discType);
+    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+        ui->selectedDiscTypesListWidget->addItem(QString::fromStdString(discType.getName()));
 
     ui->selectedDiscTypesListWidget->selectAll();
 }

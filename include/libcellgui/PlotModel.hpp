@@ -15,10 +15,10 @@
 struct DataPoint
 {
     long long elapsedTimeUs_ = 0;
-    int collisionCount_ = 0;
+    QMap<DiscType, double> collisionCounts_;
     QMap<DiscType, double> totalMomentumMap_;
     QMap<DiscType, double> totalKineticEnergyMap_;
-    QMap<DiscType, int> discTypeCountMap_;
+    QMap<DiscType, double> discTypeCountMap_;
 };
 
 class PlotModel : public QObject
@@ -33,8 +33,8 @@ public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
 
 signals:
-    void dataPointAdded(const DataPoint& dataPoint);
-    void newPlotCreated(const QVector<DataPoint>& dataPoints);
+    void dataPointAdded(const QMap<DiscType, double>& dataPoint);
+    void newPlotCreated(const QVector<QMap<DiscType, double>>& dataPoints);
 
 private:
     /**
