@@ -55,6 +55,7 @@ void PlotWidget::reset()
         QCPGraph* graph = addGraph();
         graph->setPen(colors_[graphs_.size() % colors_.size()]);
         graph->setName(QString::fromStdString(iter.key().getName()));
+        graphs_[iter.key()] = graph;
     }
 
     for (int i = 0; i < legend->itemCount(); ++i)

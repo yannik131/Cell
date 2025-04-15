@@ -105,13 +105,13 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     case Reaction::Type::Decomposition:
         addReactionToVector(settings_.decompositionReactions_[reaction.getEduct1()], reaction);
         break;
-    case Reaction::Type::Exchange:
+    case Reaction::Type::Combination:
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],
                             reaction);
         break;
-    case Reaction::Type::Combination:
+    case Reaction::Type::Exchange:
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],

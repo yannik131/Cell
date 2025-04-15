@@ -55,6 +55,8 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     ui->discTypeDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
+
+    ui->discTypeDistributionTableView->setModel(discTypeDistributionTableModel_);
 }
 
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent*)

@@ -19,15 +19,10 @@ public:
     explicit ReactionsDialog(QWidget* parent = nullptr);
 
     void closeEvent(QCloseEvent* event);
-    void showEvent(QShowEvent* event);
 
 private:
     void requestEmptyRowFromModel(const Reaction::Type& type);
     void cancel();
-
-private slots:
-    void onOK();
-    void onCancel();
 
 private:
     Ui::ReactionsDialog* ui;

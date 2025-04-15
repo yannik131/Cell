@@ -1,5 +1,6 @@
 #include "ReactionsTableModel.hpp"
 #include "GlobalSettings.hpp"
+#include "Utility.hpp"
 
 #include <unordered_set>
 
@@ -8,12 +9,12 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent)
 {
 }
 
-int ReactionsTableModel::rowCount(const QModelIndex& parent) const
+int ReactionsTableModel::rowCount(const QModelIndex&) const
 {
-    return rows_.size();
+    return static_cast<int>(rows_.size());
 }
 
-int ReactionsTableModel::columnCount(const QModelIndex& parent) const
+int ReactionsTableModel::columnCount(const QModelIndex&) const
 {
     // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
     return 9;
@@ -64,7 +65,7 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= rows_.size() || role != Qt::EditRole)
         return false;
 
-    const auto& discType = Utility::getDiscTypeByName(value.toString().toStdString());
+    const auto& discType = Utility::getDiscTypeByName(value.toString());
     auto& reaction = rows_[index.row()];
     switch (index.column())
     {

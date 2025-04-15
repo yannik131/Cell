@@ -16,7 +16,8 @@ int main(int argc, char* argv[])
     initLogging(argc, argv);
     QApplication app(argc, argv);
 
-    GlobalSettings::setCallback(GlobalSettingsFunctor::get());
+    auto& functor = GlobalSettingsFunctor::get();
+    GlobalSettings::setCallback([&functor](const SettingID& settingID) { functor(settingID); });
 
     try
     {

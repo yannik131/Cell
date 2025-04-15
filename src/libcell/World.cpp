@@ -18,8 +18,8 @@ World::World()
 
 template <typename T> std::map<DiscType, T> operator+=(std::map<DiscType, T>& a, const std::map<DiscType, T>& b)
 {
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter->second += b.at(iter->first);
+    for (const auto& [key, value] : b)
+        a[key] += value;
 
     return a;
 }

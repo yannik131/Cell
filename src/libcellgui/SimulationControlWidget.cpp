@@ -4,6 +4,8 @@
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_SimulationControlWidget.h"
 
+#include <QMessageBox>
+
 #define DISPLAY_EXCEPTION_AND_RETURN(statement)                                                                        \
     try                                                                                                                \
     {                                                                                                                  \
@@ -18,9 +20,11 @@
 
 SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::SimulationControlWidget(this))
+    , ui(new Ui::SimulationControlWidget)
     , discDistributionPreviewTableModel_(new DiscDistributionPreviewTableModel(this))
 {
+    ui->setupUi(this);
+
     discDistributionPreviewTableModel_->loadSettings();
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
             discDistributionPreviewTableModel_, &DiscDistributionPreviewTableModel::loadSettings);
@@ -36,8 +40,6 @@ void SimulationControlWidget::setRanges()
     ui->numberOfDiscsSpinBox->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(SettingsLimits::MinSimulationTimeStep.asMilliseconds(),
                                   SettingsLimits::MaxSimulationTimeStep.asMilliseconds());
-    ui->plotTimeIntervalSpinBox->setRange(GUISettingsLimits::MinPlotTimeInterval.asMilliseconds(),
-                                          GUISettingsLimits::MaxPlotTimeInterval.asMilliseconds());
     ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
                                          SettingsLimits::MaxSimulationTimeScale);
     ui->frictionDoubleSpinBox->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
@@ -47,7 +49,6 @@ void SimulationControlWidget::displayGlobalSettings()
 {
     const auto& guiSettings = GlobalGUISettings::getGUISettings();
     ui->fpsSpinBox->setValue(guiSettings.guiFPS_);
-    ui->plotTimeIntervalSpinBox->setValue(guiSettings.plotTimeInterval_.asMilliseconds());
 
     const auto& settings = GlobalSettings::getSettings();
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
@@ -63,14 +64,11 @@ void SimulationControlWidget::setCallbacks()
     connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
             [this](int value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalGUISettings::get().setGuiFPS(value)) });
 
-    connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { DISPLAY_EXCEPTION_AND_RETURN(GlobalGUISettings::get().setPlotTimeInterval(sf::milliseconds(value))) });
-
     connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
             [this](int value)
             {
                 DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setNumberOfDiscs(value))
-                emit settingsChanged();
+                emit simulationResetTriggered();
             });
 
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this, [this](int value)
@@ -109,7 +107,7 @@ void SimulationControlWidget::toggleStartStopButtonState()
 
 void SimulationControlWidget::reset()
 {
-    emit simulationResetted();
+    emit simulationResetTriggered();
     ui->startStopButton->setText("Start");
     simulationStarted_ = false;
     ui->simulationSettingsWidget->setEnabled(true);

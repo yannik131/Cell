@@ -2,6 +2,7 @@
 #include "ButtonDelegate.hpp"
 #include "ComboBoxDelegate.hpp"
 #include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "Utility.hpp"
 #include "ui_ReactionsDialog.h"
@@ -39,7 +40,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
-    connect(&GlobalSettings::get(), &GlobalSettings::discTypeDistributionChanged,
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
             [this]() { Utility::setComboBoxItemsToDiscTypeNames(comboBoxDelegate_); });
 
     ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
@@ -52,6 +53,8 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     ui->reactionsTableView->setItemDelegateForColumn(6, comboBoxDelegate_);
     ui->reactionsTableView->setItemDelegateForColumn(7, spinBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(8, buttonDelegate);
+
+    ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
 void ReactionsDialog::closeEvent(QCloseEvent* event)

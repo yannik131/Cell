@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStopClicked, this,
             &MainWindow::stopSimulation);
 
-    connect(ui->simulationControlWidget, &SimulationControlWidget::simulationResetClicked, this,
+    connect(ui->simulationControlWidget, &SimulationControlWidget::simulationResetTriggered, this,
             &MainWindow::resetSimulation);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscTypesClicked, discDistributionDialog_,

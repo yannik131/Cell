@@ -34,6 +34,7 @@ private:
     GUISettings guiSettings_;
 
     friend class SimulationControlWidget;
+    friend class PlotControlWidget;
     friend class PlotDataSelectionDialog;
 };
 

@@ -6,8 +6,8 @@
 
 template <typename T> QMap<DiscType, T>& operator+=(QMap<DiscType, T>& a, const QMap<DiscType, T>& b)
 {
-    for (auto iter = a.begin(); iter != a.end(); ++iter)
-        iter.value() += b[iter.key()];
+    for (auto iter = b.begin(); iter != b.end(); ++iter)
+        a[iter.key()] += iter.value();
 
     return a;
 }

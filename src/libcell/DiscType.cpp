@@ -58,7 +58,7 @@ float DiscType::getRadius() const
 
 void DiscType::setRadius(float radius)
 {
-    if (radius_ <= 0)
+    if (radius <= 0)
         throw std::runtime_error("Disc type radius must be positive");
 
     radius_ = radius;
@@ -71,7 +71,7 @@ float DiscType::getMass() const
 
 void DiscType::setMass(float mass)
 {
-    if (mass_ <= 0)
+    if (mass <= 0)
         throw std::runtime_error("Disc type mass must be positive");
 
     mass_ = mass;

@@ -19,7 +19,7 @@ public:
 signals:
     void simulationStartClicked();
     void simulationStopClicked();
-    void simulationResetClicked();
+    void simulationResetTriggered();
     void editDiscTypesClicked();
     void editReactionsClicked();
 
