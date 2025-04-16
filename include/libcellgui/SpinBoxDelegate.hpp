@@ -1,6 +1,7 @@
 #ifndef SPINBOXDELEGATE_HPP
 #define SPINBOXDELEGATE_HPP
 
+#include <QSpinBox>
 #include <QStyledItemDelegate>
 
 class SpinBoxDelegate : public QStyledItemDelegate
@@ -14,6 +15,15 @@ public:
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+
+signals:
+    void editorCreated(QSpinBox* spinBox) const;
+};
+
+class DoubleSpinBoxDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+    // TODO
 };
 
 #endif /* SPINBOXDELEGATE_HPP */

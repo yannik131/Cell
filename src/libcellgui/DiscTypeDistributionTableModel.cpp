@@ -2,6 +2,8 @@
 #include "ColorMapping.hpp"
 #include "GlobalSettings.hpp"
 
+#include <set>
+
 DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
@@ -100,6 +102,13 @@ void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType
     endInsertRows();
 }
 
+void DiscTypeDistributionTableModel::addEmptyRow()
+{
+    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 1});
+    endInsertRows();
+}
+
 void DiscTypeDistributionTableModel::removeRow(int row)
 {
     if (row < 0 || row >= rows_.size())
@@ -114,14 +123,24 @@ void DiscTypeDistributionTableModel::loadSettings()
 {
     clearRows();
 
-    beginInsertRows(QModelIndex(), 0, 0);
-    for (const auto& pair : GlobalSettings::getSettings().discTypeDistribution_)
+    const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
+    beginInsertRows(QModelIndex(), 0, discTypeDistribution.size() - 1);
+    for (const auto& pair : discTypeDistribution)
         rows_.push_back(pair);
     endInsertRows();
 }
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
+    std::set<DiscType> uniqueDiscTypes;
+    for (const auto& pair : rows_)
+    {
+        if (uniqueDiscTypes.contains(pair.first))
+            throw std::runtime_error("Duplicate disc type: " + pair.first.getName());
+
+        uniqueDiscTypes.insert(pair.first);
+    }
+
     std::map<DiscType, int> result(rows_.begin(), rows_.end());
     GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }

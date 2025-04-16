@@ -29,14 +29,9 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
                     QMessageBox::critical(this, "Error", "Couldn't save disc distribution: " + QString(error.what()));
                 }
             });
-    connect(ui->cancelPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
-            &DiscTypeDistributionTableModel::loadSettings);
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypeDistributionDialog::cancel);
     connect(ui->addTypePushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
-            [this]()
-            {
-                discTypeDistributionTableModel_->addRowFromDiscType(
-                    DiscType{"NewType", getSupportedDiscColors().front(), 0, 0});
-            });
+            &DiscTypeDistributionTableModel::addEmptyRow);
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
     connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel_,
@@ -44,17 +39,28 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
             discTypeDistributionTableModel_, &DiscTypeDistributionTableModel::loadSettings);
 
-    ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
-    ComboBoxDelegate* comboBoxDelegate = new ComboBoxDelegate(this);
-    SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
+    ComboBoxDelegate* colorComboBoxDelegate = new ComboBoxDelegate(this);
+    SpinBoxDelegate* radiusSpinBoxDelegate = new SpinBoxDelegate(this);
+    SpinBoxDelegate* massSpinBoxDelegate = new SpinBoxDelegate(this);
+    SpinBoxDelegate* frequencySpinBoxDelegate = new SpinBoxDelegate(this);
+    ButtonDelegate* deleteButtonDelegate = new ButtonDelegate(this);
 
-    comboBoxDelegate->setAvailableItems(getSupportedDiscColorNames());
+    connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
+            [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
+    connect(radiusSpinBoxDelegate, &SpinBoxDelegate::editorCreated,
+            [](QSpinBox* spinBox) { spinBox->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius); });
+    connect(massSpinBoxDelegate, &SpinBoxDelegate::editorCreated,
+            [](QSpinBox* spinBox) { spinBox->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
+    connect(frequencySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
+            [](QSpinBox* spinBox) { spinBox->setRange(0, 100); });
+    connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, discTypeDistributionTableModel_,
+            &DiscTypeDistributionTableModel::removeRow);
 
-    ui->discTypeDistributionTableView->setItemDelegateForColumn(1, spinBoxDelegate);
-    ui->discTypeDistributionTableView->setItemDelegateForColumn(2, spinBoxDelegate);
-    ui->discTypeDistributionTableView->setItemDelegateForColumn(3, comboBoxDelegate);
-    ui->discTypeDistributionTableView->setItemDelegateForColumn(4, spinBoxDelegate);
-    ui->discTypeDistributionTableView->setItemDelegateForColumn(5, buttonDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(4, frequencySpinBoxDelegate);
+    ui->discTypeDistributionTableView->setItemDelegateForColumn(5, deleteButtonDelegate);
 
     ui->discTypeDistributionTableView->setModel(discTypeDistributionTableModel_);
 }
@@ -62,4 +68,10 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent*)
 {
     emit dialogClosed();
+}
+
+void DiscTypeDistributionDialog::cancel()
+{
+    discTypeDistributionTableModel_->loadSettings();
+    hide();
 }

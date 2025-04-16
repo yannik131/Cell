@@ -136,11 +136,16 @@ public:
         {
             switch (section)
             {
-            case 0: return "Disc Type Name";
-            case 1: return "Radius";
-            case 2: return "Mass";
-            case 3: return "Class";
-            default: return QVariant();
+            case 0:
+                return "Disc Type Name";
+            case 1:
+                return "Radius";
+            case 2:
+                return "Mass";
+            case 3:
+                return "Class";
+            default:
+                return QVariant();
             }
         }
 
@@ -157,10 +162,14 @@ public:
             const RowData& row = rows_.at(index.row());
             switch (index.column())
             {
-            case 0: return row.spinBoxValue;
-            case 1: return row.spinBoxValue;
-            case 2: return row.comboBoxValue;
-            case 3: return "Delete";
+            case 0:
+                return row.spinBoxValue;
+            case 1:
+                return row.spinBoxValue;
+            case 2:
+                return row.comboBoxValue;
+            case 3:
+                return "Delete";
             }
         }
 

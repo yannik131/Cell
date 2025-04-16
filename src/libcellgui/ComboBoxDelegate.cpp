@@ -1,6 +1,6 @@
 #include "ComboBoxDelegate.hpp"
-
-#include <QComboBox>
+#include "GlobalSettingsFunctor.hpp"
+#include "Utility.hpp"
 
 ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
@@ -10,7 +10,8 @@ ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
 QWidget* ComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(availableItems_);
+    emit editorCreated(editor);
+
     return editor;
 }
 
@@ -29,7 +30,23 @@ void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
-void ComboBoxDelegate::setAvailableItems(const QStringList& availableItems)
+DiscTypeComboBoxDelegate::ComboBoxDelegate(QObject* parent)
+    : ComboBoxDelegate(parent)
 {
-    availableItems_ = availableItems;
+}
+
+QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
+{
+    auto* editor = new QComboBox(parent);
+    editor->addItems(Utility::getDiscTypeNames());
+    emit editorCreated(editor);
+
+    connect(&GlobalSettingsFunctor::get(), GlobalSettingsFunctor::discTypeDistributionChanged,
+            [=]()
+            {
+                editor->clear();
+                editor->addItems(Utility::getDiscTypeNames());
+            });
+
+    return editor;
 }

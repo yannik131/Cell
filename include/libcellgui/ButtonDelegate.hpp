@@ -15,7 +15,7 @@ public:
                      const QModelIndex& index) override;
 
 signals:
-    void deleteRow(const QModelIndex& index) const;
+    void deleteRow(int row) const;
 };
 
 #endif /* BUTTONDELEGATE_HPP */

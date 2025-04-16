@@ -1,7 +1,5 @@
 #include "SpinBoxDelegate.hpp"
 
-#include <QSpinBox>
-
 SpinBoxDelegate::SpinBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
 {
@@ -10,6 +8,8 @@ SpinBoxDelegate::SpinBoxDelegate(QObject* parent)
 QWidget* SpinBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QSpinBox(parent);
+    emit editorCreated(editor);
+
     return editor;
 }
 

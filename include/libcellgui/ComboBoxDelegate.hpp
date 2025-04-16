@@ -1,6 +1,7 @@
 #ifndef COMBOBOXDELEGATE_HPP
 #define COMBOBOXDELEGATE_HPP
 
+#include <QComboBox>
 #include <QStyledItemDelegate>
 
 class ComboBoxDelegate : public QStyledItemDelegate
@@ -15,10 +16,16 @@ public:
 
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 
-    void setAvailableItems(const QStringList& availableItems);
+signals:
+    void editorCreated(QComboBox* comboBox) const;
+};
 
-private:
-    QStringList availableItems_;
+class DiscTypeComboBoxDelegate : public ComboBoxDelegate
+{
+    Q_OBJECT
+public:
+    ComboBoxDelegate(QObject* parent = nullptr);
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override;
 };
 
 #endif /* COMBOBOXDELEGATE_HPP */

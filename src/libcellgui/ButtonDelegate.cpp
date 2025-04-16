@@ -20,13 +20,13 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 }
 
 bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
-                                 const QModelIndex&)
+                                 const QModelIndex& index)
 {
     auto* mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
     if (event->type() == QEvent::MouseButtonRelease && mouseEvent->button() == Qt::LeftButton &&
         option.rect.contains(mouseEvent->pos()))
-        emit deleteRow(index);
+        emit deleteRow(index.row());
 
     return true;
 }

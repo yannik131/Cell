@@ -27,7 +27,6 @@ private:
 private:
     Ui::ReactionsDialog* ui;
     ReactionsTableModel* reactionsTableModel_;
-    ComboBoxDelegate* comboBoxDelegate_;
 };
 
 #endif /* REACTIONSDIALOG_HPP */

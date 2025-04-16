@@ -19,6 +19,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     void addRowFromDiscType(const DiscType& discType);
+    void addEmptyRow();
     void removeRow(int row);
     void loadSettings();
     void saveSettings();

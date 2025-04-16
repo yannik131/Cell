@@ -44,9 +44,8 @@ template <typename T1, typename T2, typename T3 = T2> QMap<T1, T2> convertToQMap
     return qMap;
 }
 
-void setComboBoxItemsToDiscTypeNames(ComboBoxDelegate* comboBoxDelegate);
-
 DiscType getDiscTypeByName(const QString& name);
+QStringList getDiscTypeNames();
 
 }; // namespace Utility
 

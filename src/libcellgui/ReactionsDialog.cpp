@@ -40,19 +40,19 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
-            [this]() { Utility::setComboBoxItemsToDiscTypeNames(comboBoxDelegate_); });
 
-    ButtonDelegate* buttonDelegate = new ButtonDelegate(this);
-    comboBoxDelegate_ = new ComboBoxDelegate(this);
-    SpinBoxDelegate* spinBoxDelegate = new SpinBoxDelegate(this);
+    ButtonDelegate* deleteButtonDelegate = new ButtonDelegate(this);
+    ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
+    SpinBoxDelegate* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
-    ui->reactionsTableView->setItemDelegateForColumn(0, comboBoxDelegate_);
-    ui->reactionsTableView->setItemDelegateForColumn(2, comboBoxDelegate_);
-    ui->reactionsTableView->setItemDelegateForColumn(4, comboBoxDelegate_);
-    ui->reactionsTableView->setItemDelegateForColumn(6, comboBoxDelegate_);
+    connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, reactionsTableModel_, &ReactionsTableModel::removeRow);
+
+    ui->reactionsTableView->setItemDelegateForColumn(0, discTypeComboBoxDelegate);
+    ui->reactionsTableView->setItemDelegateForColumn(2, discTypeComboBoxDelegate);
+    ui->reactionsTableView->setItemDelegateForColumn(4, discTypeComboBoxDelegate);
+    ui->reactionsTableView->setItemDelegateForColumn(6, discTypeComboBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(7, spinBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(8, buttonDelegate);
+    ui->reactionsTableView->setItemDelegateForColumn(8, deleteButtonDelegate);
 
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
