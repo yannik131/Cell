@@ -124,6 +124,9 @@ void DiscTypeDistributionTableModel::loadSettings()
     clearRows();
 
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
+    if (discTypeDistribution.empty())
+        return;
+
     beginInsertRows(QModelIndex(), 0, discTypeDistribution.size() - 1);
     for (const auto& pair : discTypeDistribution)
         rows_.push_back(pair);

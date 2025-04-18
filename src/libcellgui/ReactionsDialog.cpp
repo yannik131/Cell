@@ -41,17 +41,26 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
+    using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
+
     ButtonDelegate* deleteButtonDelegate = new ButtonDelegate(this);
     ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
     SpinBoxDelegate* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
     connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, reactionsTableModel_, &ReactionsTableModel::removeRow);
+    connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
+            [](QWidget* spinBox)
+            {
+                qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
+                qobject_cast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
+                qobject_cast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
+            });
 
     ui->reactionsTableView->setItemDelegateForColumn(0, discTypeComboBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(2, discTypeComboBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(4, discTypeComboBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(6, discTypeComboBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(7, spinBoxDelegate);
+    ui->reactionsTableView->setItemDelegateForColumn(7, probabilitySpinBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(8, deleteButtonDelegate);
 
     ui->reactionsTableView->setModel(reactionsTableModel_);

@@ -24,7 +24,7 @@ class DiscTypeComboBoxDelegate : public ComboBoxDelegate
 {
     Q_OBJECT
 public:
-    ComboBoxDelegate(QObject* parent = nullptr);
+    DiscTypeComboBoxDelegate(QObject* parent = nullptr);
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override;
 };
 

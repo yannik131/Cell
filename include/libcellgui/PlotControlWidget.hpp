@@ -1,6 +1,8 @@
 #ifndef PLOTCONTROLWIDGET_HPP
 #define PLOTCONTROLWIDGET_HPP
 
+#include "PlotModel.hpp"
+
 #include <QWidget>
 
 namespace Ui

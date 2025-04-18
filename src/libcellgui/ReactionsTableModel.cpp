@@ -2,11 +2,13 @@
 #include "GlobalSettings.hpp"
 #include "Utility.hpp"
 
+#include <optional>
 #include <unordered_set>
 
 ReactionsTableModel::ReactionsTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
+    loadSettings();
 }
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const
@@ -65,21 +67,25 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= rows_.size() || role != Qt::EditRole)
         return false;
 
-    const auto& discType = Utility::getDiscTypeByName(value.toString());
+    std::optional<DiscType> discType;
+    if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
+        discType = Utility::getDiscTypeByName(value.toString());
+
     auto& reaction = rows_[index.row()];
+
     switch (index.column())
     {
     case 0:
-        reaction.setEduct1(discType);
+        reaction.setEduct1(*discType);
         break;
     case 2:
-        reaction.setEduct2(discType);
+        reaction.setEduct2(*discType);
         break;
     case 4:
-        reaction.setProduct1(discType);
+        reaction.setProduct1(*discType);
         break;
     case 6:
-        reaction.setProduct2(discType);
+        reaction.setProduct2(*discType);
         break;
     case 7:
         reaction.setProbability(value.toFloat());
@@ -169,8 +175,6 @@ void ReactionsTableModel::loadSettings()
 {
     clearRows();
 
-    beginInsertRows(QModelIndex(), 0, 0);
-
     const auto& settings = GlobalSettings::getSettings();
 
     // Reactions for {A, B} are duplicated in the maps with {B, A} for easier lookup
@@ -189,6 +193,11 @@ void ReactionsTableModel::loadSettings()
     collectReactions(settings.decompositionReactions_);
     collectReactions(settings.combinationReactions_);
     collectReactions(settings.exchangeReactions_);
+
+    if (reactionSet.empty())
+        return;
+
+    beginInsertRows(QModelIndex(), 0, reactionSet.size() - 1);
 
     for (const auto& reaction : reactionSet)
         rows_.push_back(reaction);

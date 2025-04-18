@@ -108,14 +108,16 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     case Reaction::Type::Combination:
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
-        addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],
-                            reaction);
+        if (reaction.getEduct1() != reaction.getEduct2())
+            addReactionToVector(
+                settings_.combinationReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
         break;
     case Reaction::Type::Exchange:
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
-        addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())],
-                            reaction);
+        if (reaction.getEduct1() != reaction.getEduct2())
+            addReactionToVector(
+                settings_.exchangeReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
         break;
     }
 

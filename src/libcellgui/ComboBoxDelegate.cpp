@@ -30,7 +30,7 @@ void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
-DiscTypeComboBoxDelegate::ComboBoxDelegate(QObject* parent)
+DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent)
     : ComboBoxDelegate(parent)
 {
 }
@@ -41,7 +41,7 @@ QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOpt
     editor->addItems(Utility::getDiscTypeNames());
     emit editorCreated(editor);
 
-    connect(&GlobalSettingsFunctor::get(), GlobalSettingsFunctor::discTypeDistributionChanged,
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
             [=]()
             {
                 editor->clear();

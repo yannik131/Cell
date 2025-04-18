@@ -76,18 +76,27 @@ void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint)
 
     auto size = graphs_.first()->dataCount();
     auto timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asMilliseconds();
+    double sum = 0.0;
 
     for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
     {
+        // Skip disabled disc types
+        if (!graphs_.contains(iter.key()))
+            continue;
+
         xMax_ = timeStep * size;
         graphs_[iter.key()]->addData(xMax_, iter.value());
 
         yMin_ = std::min(yMin_, iter.value());
         yMax_ = std::max(yMax_, iter.value());
+
+        sum += iter.value();
     }
 
     yAxis->setRange(yMin_, yMax_);
     xAxis->setRange(xMin_, xMax_);
+
+    plotTitle_->setText("Sum: " + QString::number(sum));
 
     replot();
 }
