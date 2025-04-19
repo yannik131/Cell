@@ -62,6 +62,8 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     ui->reactionsTableView->setItemDelegateForColumn(6, discTypeComboBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(7, probabilitySpinBoxDelegate);
     ui->reactionsTableView->setItemDelegateForColumn(8, deleteButtonDelegate);
+    ui->reactionsTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
+                                            QAbstractItemView::EditTrigger::SelectedClicked);
 
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }

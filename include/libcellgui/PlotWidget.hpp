@@ -15,7 +15,7 @@ public:
     explicit PlotWidget(QWidget* parent);
 
     void setModel(PlotModel* plotModel);
-    void addDataPoint(const QMap<DiscType, double>& dataPoint);
+    void addDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot = true);
     void replacePlot(const QVector<QMap<DiscType, double>>& dataPoints);
     void reset();
 

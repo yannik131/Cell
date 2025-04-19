@@ -1,5 +1,6 @@
 #include "PlotModel.hpp"
 #include "GlobalGUISettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "Utility.hpp"
 
 const QMap<DiscType, double>& getActiveMap(const DataPoint& dataPoint)
@@ -50,6 +51,7 @@ PlotModel::PlotModel(QObject* parent)
     dataPoints_.reserve(60000);
 
     connect(&GlobalGUISettings::get(), &GlobalGUISettings::plotResetRequired, this, &PlotModel::emitPlot);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, this, &PlotModel::clear);
 }
 
 void PlotModel::clear()
@@ -107,9 +109,9 @@ void PlotModel::emitPlot()
         elapsedTime += sf::microseconds(dataPoint.elapsedTimeUs_);
         if (elapsedTime >= PlotTimeInterval)
         {
-            DataPoint averagedDataPoint = averageDataPoints(dataPointsToAverage_);
+            DataPoint averagedDataPoint = averageDataPoints(dataPointsToAverage);
             fullPlotData.append(getActiveMap(averagedDataPoint));
-            dataPointsToAverage_.clear();
+            dataPointsToAverage.clear();
             elapsedTime -= PlotTimeInterval;
         }
     }

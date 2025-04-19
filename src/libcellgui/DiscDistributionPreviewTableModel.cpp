@@ -1,11 +1,15 @@
 #include "DiscDistributionPreviewTableModel.hpp"
 #include "ColorMapping.hpp"
 #include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 
 DiscDistributionPreviewTableModel::DiscDistributionPreviewTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
     loadSettings();
+
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
+            &DiscDistributionPreviewTableModel::loadSettings);
 }
 
 int DiscDistributionPreviewTableModel::rowCount(const QModelIndex&) const

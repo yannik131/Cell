@@ -157,6 +157,8 @@ void Reaction::setEduct2(const DiscType& educt2)
 {
     if (type_ == Decomposition)
         throw std::runtime_error("Can't set educt2: Decomposition reactions have no educt2");
+
+    educt2_ = educt2;
 }
 
 const DiscType& Reaction::getProduct1() const

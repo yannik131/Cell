@@ -25,9 +25,7 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
 {
     ui->setupUi(this);
 
-    discDistributionPreviewTableModel_->loadSettings();
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
-            discDistributionPreviewTableModel_, &DiscDistributionPreviewTableModel::loadSettings);
+    ui->discDistributionPreviewTableView->setModel(discDistributionPreviewTableModel_);
 
     setRanges();
     displayGlobalSettings();

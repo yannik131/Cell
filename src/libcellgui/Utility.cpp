@@ -26,4 +26,9 @@ QStringList getDiscTypeNames()
     return discTypeNames;
 }
 
+QColor sfColorToQColor(const sf::Color& sfColor)
+{
+    return QColor(sfColor.r, sfColor.g, sfColor.b, sfColor.a);
+}
+
 } // namespace Utility

@@ -47,6 +47,8 @@ template <typename T1, typename T2, typename T3 = T2> QMap<T1, T2> convertToQMap
 DiscType getDiscTypeByName(const QString& name);
 QStringList getDiscTypeNames();
 
+QColor sfColorToQColor(const sf::Color& sfColor);
+
 }; // namespace Utility
 
 #endif /* UTILITY_HPP */

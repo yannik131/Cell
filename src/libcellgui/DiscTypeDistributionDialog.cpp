@@ -63,6 +63,8 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     ui->discTypeDistributionTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(4, frequencySpinBoxDelegate);
     ui->discTypeDistributionTableView->setItemDelegateForColumn(5, deleteButtonDelegate);
+    ui->discTypeDistributionTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
+                                                       QAbstractItemView::EditTrigger::SelectedClicked);
 
     ui->discTypeDistributionTableView->setModel(discTypeDistributionTableModel_);
 }
