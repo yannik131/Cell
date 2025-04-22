@@ -14,7 +14,7 @@ public:
     void operator()(const SettingID& settingID);
 
 signals:
-    void simulationResetRequired();
+    void numberOfDiscsChanged();
     void discTypeDistributionChanged();
 
 private:

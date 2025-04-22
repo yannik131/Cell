@@ -1,5 +1,5 @@
-#ifndef DISTRIBUTIONANDREACTIONSDIALOG_HPP
-#define DISTRIBUTIONANDREACTIONSDIALOG_HPP
+#ifndef DISCTYPEDISTRIBUTIONDIALOG_HPP
+#define DISCTYPEDISTRIBUTIONDIALOG_HPP
 
 #include "DiscType.hpp"
 #include "DiscTypeDistributionTableModel.hpp"
@@ -31,4 +31,4 @@ private:
     DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
 };
 
-#endif /* DISTRIBUTIONANDREACTIONSDIALOG_HPP */
+#endif /* DISCTYPEDISTRIBUTIONDIALOG_HPP */

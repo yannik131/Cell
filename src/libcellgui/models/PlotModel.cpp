@@ -51,7 +51,9 @@ PlotModel::PlotModel(QObject* parent)
     dataPoints_.reserve(60000);
 
     connect(&GlobalGUISettings::get(), &GlobalGUISettings::plotResetRequired, this, &PlotModel::emitPlot);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, this, &PlotModel::clear);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, this, &PlotModel::clear);
+    // Updating the disc type distribution will cause the GlobalGUISettings to emit plotResetRequired, so no need to
+    // connect to it here
 }
 
 void PlotModel::clear()

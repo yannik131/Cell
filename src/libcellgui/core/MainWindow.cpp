@@ -34,10 +34,10 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
     connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_, &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, simulation_,
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_,
             &Simulation::reset);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationResetRequired, plotModel_,
-            &PlotModel::clear);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_,
+            &Simulation::reset);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
             SAFE_EXECUTE(startSimulation, "Error starting the simulation: "));

@@ -1,5 +1,6 @@
 #include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "Utility.hpp"
 
 GlobalGUISettings& GlobalGUISettings::get()
@@ -17,6 +18,9 @@ const GUISettings& GlobalGUISettings::getGUISettings()
 GlobalGUISettings::GlobalGUISettings()
 {
     loadDefaultDiscTypesPlotMap();
+
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
+            &GlobalGUISettings::updateDiscTypesPlotMap);
 }
 
 void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
@@ -72,4 +76,18 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
     }
 
     emit plotResetRequired();
+}
+
+void GlobalGUISettings::updateDiscTypesPlotMap()
+{
+    QMap<DiscType, bool> updatedDiscTypesPlotMap;
+    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    {
+        if (guiSettings_.discTypesPlotMap_.contains(discType))
+            updatedDiscTypesPlotMap[discType] = guiSettings_.discTypesPlotMap_[discType];
+        else
+            updatedDiscTypesPlotMap[discType] = true;
+    }
+
+    setDiscTypesPlotMap(updatedDiscTypesPlotMap);
 }

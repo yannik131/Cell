@@ -2,14 +2,16 @@
 
 #include <stdexcept>
 
+int DiscType::instanceCount = 0;
+
 bool operator==(const DiscType& a, const DiscType& b)
 {
-    return a.getName() == b.getName();
+    return a.getId() == b.getId();
 }
 
 bool operator<(const DiscType& a, const DiscType& b)
 {
-    return a.getName() < b.getName();
+    return a.getId() < b.getId();
 }
 
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2)
@@ -18,11 +20,32 @@ std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType
 }
 
 DiscType::DiscType(const std::string& name, const sf::Color& color, float radius, float mass)
+    : id_(instanceCount++)
 {
     setName(name);
     setColor(color);
     setRadius(radius);
     setMass(mass);
+}
+
+DiscType::DiscType(const DiscType& other)
+    : name_(other.name_)
+    , color_(other.color_)
+    , radius_(other.radius_)
+    , mass_(other.mass_)
+    , id_(other.id_)
+{
+}
+
+DiscType& DiscType::operator=(const DiscType& other)
+{
+    name_ = other.name_;
+    color_ = other.color_;
+    radius_ = other.radius_;
+    mass_ = other.mass_;
+    id_ = other.id_;
+
+    return *this;
 }
 
 const std::string& DiscType::getName() const
@@ -75,4 +98,9 @@ void DiscType::setMass(float mass)
         throw std::runtime_error("Disc type mass must be positive");
 
     mass_ = mass;
+}
+
+int DiscType::getId() const
+{
+    return id_;
 }

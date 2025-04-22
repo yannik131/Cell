@@ -135,11 +135,13 @@ void DiscTypeDistributionTableModel::loadSettings()
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    std::set<DiscType> uniqueDiscTypes;
+    auto compare = [](const DiscType& a, const DiscType& b) { return a.getName() < b.getName(); };
+    std::set<DiscType, decltype(compare)> uniqueDiscTypes(compare);
+
     for (const auto& pair : rows_)
     {
         if (uniqueDiscTypes.contains(pair.first))
-            throw std::runtime_error("Duplicate disc type: " + pair.first.getName());
+            throw std::runtime_error("Duplicate disc type name found: " + pair.first.getName());
 
         uniqueDiscTypes.insert(pair.first);
     }

@@ -3,11 +3,13 @@
 
 #include "DiscType.hpp"
 #include "Settings.hpp"
+#include "StringUtils.hpp"
 
 #include <SFML/System/Time.hpp>
 
 #include <functional>
 #include <map>
+#include <stdexcept>
 #include <string>
 
 enum SettingID
@@ -54,6 +56,8 @@ private:
 
     void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
 
+    void updateDiscTypesInReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
+
     void useCallback(const SettingID& settingID);
 
 private:
@@ -69,8 +73,13 @@ private:
     friend void setBenchmarkSettings();
 };
 
-template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName);
+template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)
+{
+    using StringUtils::toString;
 
-#include "GlobalSettings.inl"
+    if (value < min || value > max)
+        throw std::runtime_error("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
+                                 "\" and \"" + toString(max) + "\", but is \"" + toString(value) + "\"");
+}
 
 #endif /* GLOBALSETTINGS_HPP */

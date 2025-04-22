@@ -9,8 +9,8 @@ GlobalSettingsFunctor& GlobalSettingsFunctor::get()
 
 void GlobalSettingsFunctor::operator()(const SettingID& settingID)
 {
-    if (settingID & (SettingID::DiscTypeDistribution | SettingID::NumberOfDiscs))
-        emit simulationResetRequired();
+    if (settingID & SettingID::NumberOfDiscs)
+        emit numberOfDiscsChanged();
 
     if (settingID & SettingID::DiscTypeDistribution)
         emit discTypeDistributionChanged();

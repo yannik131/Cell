@@ -1,6 +1,7 @@
 #include "GlobalSettings.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <type_traits>
 #include <vector>
 
@@ -90,6 +91,7 @@ void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& disc
                                  std::to_string(totalPercent));
 
     removeDanglingReactions(discTypeDistribution);
+    updateDiscTypesInReactions(discTypeDistribution);
 
     settings_.discTypeDistribution_ = discTypeDistribution;
 
@@ -214,6 +216,118 @@ void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newD
     ::removeDanglingReactions(settings_.decompositionReactions_, removedDiscTypes);
     ::removeDanglingReactions(settings_.combinationReactions_, removedDiscTypes);
     ::removeDanglingReactions(settings_.exchangeReactions_, removedDiscTypes);
+}
+
+template <typename T>
+void updateDiscTypesInReactions(T& reactionTable, const std::map<DiscType, int>& newDiscTypeDistribution)
+{
+    const auto& updateReactions = [&newDiscTypeDistribution](std::vector<Reaction>& reactions)
+    {
+        for (auto& reaction : reactions)
+        {
+            // If we find a disc type that has the same id as an updated one in any of the educts/products, we'll update
+            // the respective educt/product
+            std::vector<std::function<DiscType()>> getters{
+                std::bind(&Reaction::getEduct1, &reaction), std::bind(&Reaction::getEduct2, &reaction),
+                std::bind(&Reaction::getProduct1, &reaction), std::bind(&Reaction::getProduct2, &reaction)};
+
+            std::vector<std::function<void(const DiscType&)>> setters{
+                std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1),
+                std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1),
+                std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1),
+                std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1),
+            };
+
+            if (!reaction.hasProduct2())
+            {
+                getters.erase(getters.begin() + 3);
+                setters.erase(setters.begin() + 3);
+            }
+
+            if (!reaction.hasEduct2())
+            {
+                getters.erase(getters.begin() + 1);
+                setters.erase(setters.begin() + 1);
+            }
+
+            for (int i = 0; i < getters.size(); ++i)
+            {
+                const auto iter = newDiscTypeDistribution.find(getters[i]());
+                if (iter != newDiscTypeDistribution.end())
+                    setters[i](iter->first);
+            }
+        }
+    };
+
+    // Step 1: Update disc types in all reactions
+    for (auto& [educts, reactions] : reactionTable)
+        updateReactions(reactions);
+
+    // Step 2: Update disc types in educts (keys)
+    using KeyType = typename T::key_type;
+
+    for (const auto& [discType, _] : newDiscTypeDistribution)
+    {
+        if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
+        {
+            // Combination or Exchange reaction: Find where the disc type matches
+            std::vector<std::pair<DiscType, DiscType>> firstEductMatches, secondEductMatches, bothEductMatches;
+            for (auto& [educts, reactions] : reactionTable)
+            {
+                if (educts.first == discType && educts.second == discType)
+                    bothEductMatches.push_back(educts);
+                else if (educts.first == discType)
+                    firstEductMatches.push_back(educts);
+                else if (educts.second == discType)
+                    secondEductMatches.push_back(educts);
+            }
+
+            // Both educts match -> Need to update both
+            for (const auto& educts : bothEductMatches)
+            {
+                auto iter = reactionTable.find(educts);
+                auto reactions = iter->second;
+                reactionTable.erase(iter);
+                reactionTable[std::make_pair(discType, discType)] = reactions;
+            }
+
+            // First educt matches: Need to update first
+            for (const auto& educts : firstEductMatches)
+            {
+                auto iter = reactionTable.find(educts);
+                auto reactions = iter->second;
+                reactionTable.erase(iter);
+                reactionTable[std::make_pair(discType, educts.second)] = reactions;
+            }
+
+            // Second educt matches: Need to update second
+            for (const auto& educts : secondEductMatches)
+            {
+                auto iter = reactionTable.find(educts);
+                auto reactions = iter->second;
+                reactionTable.erase(iter);
+                reactionTable[std::make_pair(educts.first, discType)] = reactions;
+            }
+        }
+        else
+        {
+            // Decomposition reaction: Just replace the educt with the new disc type if they have the same id
+            auto iter = reactionTable.find(discType);
+            if (iter != reactionTable.end())
+            {
+                auto reactions = iter->second;
+                reactionTable.erase(iter);
+                reactionTable[discType] = reactions;
+            }
+        }
+    }
+}
+
+void GlobalSettings::updateDiscTypesInReactions(const std::map<DiscType, int>& newDiscTypeDistribution)
+{
+    ::updateDiscTypesInReactions(settings_.decompositionReactions_, newDiscTypeDistribution);
+    ::updateDiscTypesInReactions(settings_.combinationReactions_, newDiscTypeDistribution);
+    ::updateDiscTypesInReactions(settings_.exchangeReactions_, newDiscTypeDistribution);
 }
 
 void GlobalSettings::useCallback(const SettingID& settingID)
