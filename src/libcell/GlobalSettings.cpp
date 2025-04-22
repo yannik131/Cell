@@ -221,40 +221,33 @@ void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newD
 template <typename T>
 void updateDiscTypesInReactions(T& reactionTable, const std::map<DiscType, int>& newDiscTypeDistribution)
 {
-    const auto& updateReactions = [&newDiscTypeDistribution](std::vector<Reaction>& reactions)
+    auto updateReactions = [&newDiscTypeDistribution](std::vector<Reaction>& reactions)
     {
         for (auto& reaction : reactions)
         {
             // If we find a disc type that has the same id as an updated one in any of the educts/products, we'll update
             // the respective educt/product
-            std::vector<std::function<DiscType()>> getters{
-                std::bind(&Reaction::getEduct1, &reaction), std::bind(&Reaction::getEduct2, &reaction),
-                std::bind(&Reaction::getProduct1, &reaction), std::bind(&Reaction::getProduct2, &reaction)};
-
-            std::vector<std::function<void(const DiscType&)>> setters{
-                std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1),
-                std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1),
-                std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1),
-                std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1),
-            };
+            std::vector<std::pair<std::function<DiscType()>, std::function<void(const DiscType&)>>> gettersSetters{
+                {std::bind(&Reaction::getEduct1, &reaction),
+                 std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1)},
+                {std::bind(&Reaction::getEduct2, &reaction),
+                 std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1)},
+                {std::bind(&Reaction::getProduct1, &reaction),
+                 std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1)},
+                {std::bind(&Reaction::getProduct2, &reaction),
+                 std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1)}};
 
             if (!reaction.hasProduct2())
-            {
-                getters.erase(getters.begin() + 3);
-                setters.erase(setters.begin() + 3);
-            }
+                gettersSetters.erase(gettersSetters.begin() + 3);
 
             if (!reaction.hasEduct2())
-            {
-                getters.erase(getters.begin() + 1);
-                setters.erase(setters.begin() + 1);
-            }
+                gettersSetters.erase(gettersSetters.begin() + 1);
 
-            for (int i = 0; i < getters.size(); ++i)
+            for (auto& [getter, setter] : gettersSetters)
             {
-                const auto iter = newDiscTypeDistribution.find(getters[i]());
+                auto iter = newDiscTypeDistribution.find(getter());
                 if (iter != newDiscTypeDistribution.end())
-                    setters[i](iter->first);
+                    setter(iter->first);
             }
         }
     };
@@ -271,42 +264,24 @@ void updateDiscTypesInReactions(T& reactionTable, const std::map<DiscType, int>&
         if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
         {
             // Combination or Exchange reaction: Find where the disc type matches
-            std::vector<std::pair<DiscType, DiscType>> firstEductMatches, secondEductMatches, bothEductMatches;
+            std::vector<std::pair<DiscType, DiscType>> matches;
             for (auto& [educts, reactions] : reactionTable)
             {
-                if (educts.first == discType && educts.second == discType)
-                    bothEductMatches.push_back(educts);
-                else if (educts.first == discType)
-                    firstEductMatches.push_back(educts);
-                else if (educts.second == discType)
-                    secondEductMatches.push_back(educts);
+                if (educts.first == discType || educts.second == discType)
+                    matches.emplace_back(educts);
             }
 
-            // Both educts match -> Need to update both
-            for (const auto& educts : bothEductMatches)
+            for (const auto& educts : matches)
             {
                 auto iter = reactionTable.find(educts);
-                auto reactions = iter->second;
-                reactionTable.erase(iter);
-                reactionTable[std::make_pair(discType, discType)] = reactions;
-            }
-
-            // First educt matches: Need to update first
-            for (const auto& educts : firstEductMatches)
-            {
-                auto iter = reactionTable.find(educts);
-                auto reactions = iter->second;
-                reactionTable.erase(iter);
-                reactionTable[std::make_pair(discType, educts.second)] = reactions;
-            }
-
-            // Second educt matches: Need to update second
-            for (const auto& educts : secondEductMatches)
-            {
-                auto iter = reactionTable.find(educts);
-                auto reactions = iter->second;
-                reactionTable.erase(iter);
-                reactionTable[std::make_pair(educts.first, discType)] = reactions;
+                if (iter != reactionTable.end())
+                {
+                    auto reactions = iter->second;
+                    reactionTable.erase(iter);
+                    auto updatedEducts = std::make_pair(educts.first == discType ? discType : educts.first,
+                                                        educts.second == discType ? discType : educts.second);
+                    reactionTable[updatedEducts] = reactions;
+                }
             }
         }
         else
