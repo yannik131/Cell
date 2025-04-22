@@ -43,6 +43,7 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
     return average;
 }
 
+// TODO Bug: Run simulation, then set frequency of some discs to 0, reset, plot window is not resetted correctly
 PlotModel::PlotModel(QObject* parent)
     : QObject(parent)
 {

@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulationThread_(nullptr)
-    , simulation_(new Simulation(this))
+    , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypeDistributionDialog(this))
     , reactionsDialog_(new ReactionsDialog(this))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
@@ -93,6 +93,7 @@ void MainWindow::resetSimulation()
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete simulation_;
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)

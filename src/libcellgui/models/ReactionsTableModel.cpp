@@ -1,5 +1,6 @@
 #include "ReactionsTableModel.hpp"
 #include "GlobalSettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
 #include "Utility.hpp"
 
 #include <optional>
@@ -9,6 +10,9 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
     loadSettings();
+
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
+            &ReactionsTableModel::loadSettings);
 }
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const
