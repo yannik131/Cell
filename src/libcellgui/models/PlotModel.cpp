@@ -15,6 +15,8 @@ const QMap<DiscType, double>& getActiveMap(const DataPoint& dataPoint)
         return dataPoint.totalKineticEnergyMap_;
     case PlotCategory::TypeCounts:
         return dataPoint.discTypeCountMap_;
+    default:
+        throw std::runtime_error("Unknown plot category selected");
     }
 }
 

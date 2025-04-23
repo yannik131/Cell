@@ -2,10 +2,10 @@
 #include "ColorMapping.hpp"
 #include "Utility.hpp"
 
-const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TotalCollisionCount, "Collision count"},
+const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TypeCounts, "Type counts"},
+                                                          {PlotCategory::TotalCollisionCount, "Collision count"},
                                                           {PlotCategory::TotalAbsoluteImpulse, "Impulse"},
-                                                          {PlotCategory::TotalKineticEnergy, "Kinetic energy"},
-                                                          {PlotCategory::TypeCounts, "Type counts"}};
+                                                          {PlotCategory::TotalKineticEnergy, "Kinetic energy"}};
 
 const QMap<QString, PlotCategory> NamePlotCategoryMapping = Utility::invertMap(PlotCategoryNameMapping);
 

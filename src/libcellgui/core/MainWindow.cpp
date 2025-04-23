@@ -57,23 +57,14 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
 
-    connect(&resizeTimer_, &QTimer::timeout,
-            [&]()
-            {
-                const auto& simulationSize = ui->simulationWidget->size();
-                simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
-                simulation_->reset();
-                ui->plotWidget->reset();
-            });
+    connect(&resizeTimer_, &QTimer::timeout, this, &MainWindow::setSimulationWidgetSize);
     resizeTimer_.setSingleShot(true);
 
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this,
                        [this]()
                        {
-                           const auto& simulationSize = ui->simulationWidget->size();
-                           simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
-                           simulation_->reset();
+                           setSimulationWidgetSize();
                            initialSizeSet_ = true;
                        });
 }
@@ -88,6 +79,14 @@ void MainWindow::resetSimulation()
     plotModel_->clear();
 
     stopSimulation();
+}
+
+void MainWindow::setSimulationWidgetSize()
+{
+    const auto& simulationSize = ui->simulationWidget->size();
+    simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
+    simulation_->reset();
+    plotModel_->clear();
 }
 
 MainWindow::~MainWindow()

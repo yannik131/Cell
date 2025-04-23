@@ -26,7 +26,7 @@ struct GUISettings
     /**
      * @brief Type of plot in the PlotWidget
      */
-    PlotCategory currentPlotCategory_ = PlotCategory::TotalCollisionCount;
+    PlotCategory currentPlotCategory_ = PlotCategory::TypeCounts;
 
     /**
      * @brief Maps all DiscTypes to whether or not they're selected for the current plot

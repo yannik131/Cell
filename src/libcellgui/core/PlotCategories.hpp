@@ -6,10 +6,10 @@
 
 enum PlotCategory
 {
+    TypeCounts,
     TotalCollisionCount,
     TotalAbsoluteImpulse,
-    TotalKineticEnergy,
-    TypeCounts
+    TotalKineticEnergy
 };
 
 extern const QMap<PlotCategory, QString> PlotCategoryNameMapping;

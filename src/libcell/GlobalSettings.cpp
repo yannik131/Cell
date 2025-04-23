@@ -16,7 +16,7 @@ GlobalSettings::GlobalSettings()
     DiscType A("A", sf::Color::Green, 5, 5);
     DiscType B("B", sf::Color::Red, 10, 5);
     DiscType C("C", sf::Color::Blue, 12, 5);
-    DiscType D("D", sf::Color::Yellow, 15, 5);
+    DiscType D("D", sf::Color::Magenta, 15, 5);
 
     settings_.discTypeDistribution_[A] = 50;
     settings_.discTypeDistribution_[B] = 30;

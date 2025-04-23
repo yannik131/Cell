@@ -35,6 +35,7 @@ private:
     void startSimulation();
     void stopSimulation();
     void resetSimulation();
+    void setSimulationWidgetSize();
 
 private:
     Ui::MainWindow* ui;

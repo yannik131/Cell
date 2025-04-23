@@ -30,7 +30,7 @@ struct Settings
     /**
      * @brief Total number of discs in the simulation
      */
-    int numberOfDiscs_ = 50;
+    int numberOfDiscs_ = 100;
 
     /**
      * @brief Global friction coefficient for all disc collisions
