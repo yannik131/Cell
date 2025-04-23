@@ -25,6 +25,7 @@ private:
 
 private:
     std::vector<sf::CircleShape> circles_;
+    sf::Clock clock_;
 };
 
 #endif /* SIMULATIONWIDGET_HPP */

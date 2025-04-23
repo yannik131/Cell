@@ -1,4 +1,5 @@
 #include "SimulationWidget.hpp"
+#include "GlobalGUISettings.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -18,6 +19,11 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
 
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
+    if (clock_.getElapsedTime() < sf::seconds(1.f / GlobalGUISettings::getGUISettings().guiFPS_))
+        return;
+
+    clock_.restart();
+
     sf::RenderWindow::clear(sf::Color::Black);
 
     for (const auto& disc : frameDTO.discs_)

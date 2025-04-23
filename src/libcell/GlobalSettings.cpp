@@ -18,16 +18,15 @@ GlobalSettings::GlobalSettings()
     DiscType C("C", sf::Color::Blue, 12, 5);
     DiscType D("D", sf::Color::Magenta, 15, 5);
 
-    settings_.discTypeDistribution_[A] = 50;
-    settings_.discTypeDistribution_[B] = 30;
-    settings_.discTypeDistribution_[C] = 10;
-    settings_.discTypeDistribution_[D] = 10;
+    settings_.discTypeDistribution_[A] = 100;
+    settings_.discTypeDistribution_[B] = 0;
+    settings_.discTypeDistribution_[C] = 0;
+    settings_.discTypeDistribution_[D] = 0;
 
-    addReaction(Reaction{A, B, C, std::nullopt, 1e-3f});
-    addReaction(Reaction{A, B, D, std::nullopt, 2e-3f});
-
-    addReaction(Reaction{C, std::nullopt, A, B, 1e-3f});
-    addReaction(Reaction{D, std::nullopt, A, B, 5e-3f});
+    addReaction(Reaction{A, std::nullopt, B, C, 1e-3f});
+    addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
+    addReaction(Reaction{D, std::nullopt, A, B, 1e-3f});
+    addReaction(Reaction{B, A, C, std::nullopt, 1e-2f});
 }
 
 GlobalSettings& GlobalSettings::get()

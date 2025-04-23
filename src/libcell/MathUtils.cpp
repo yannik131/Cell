@@ -293,11 +293,10 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
-    // TODO really oughta plot the total kinetic energy, total impulse and start writing tests, I think this amount is
-    // too small
-    float randomNumber = getRandomFloat() / 10.f;
+    float randomNumber = getRandomFloat() / 2.f;
     if (kineticEnergyDeficiency <= 0)
-        return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
+        randomNumber = -randomNumber; // TODO This is a hack until the physics are correctly implemented - no reaction
+                                      // should "give" kinetic energy, they need activation energy that they use
 
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);

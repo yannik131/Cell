@@ -6,9 +6,6 @@
 #include <optional>
 #include <vector>
 
-// TODO turn into a class so that only valid reactions can be created/updated, type can't change and is nested type
-// remove validation in global settings later
-// use type to set isEditable flags in the reactionsModel
 class Reaction
 {
 public:

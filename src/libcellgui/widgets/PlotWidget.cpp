@@ -25,7 +25,7 @@ PlotWidget::PlotWidget(QWidget* parent)
     legend->setVisible(true);
 
     // Place the legend
-    axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom | Qt::AlignRight);
+    axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignCenter);
 
     // These are the default colors for matplotlib. I like them.
     colors_ << QColor(31, 119, 180) << QColor(255, 127, 14) << QColor(44, 160, 44) << QColor(214, 39, 40)

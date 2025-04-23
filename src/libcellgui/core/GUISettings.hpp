@@ -11,7 +11,7 @@ struct GUISettings
     /**
      * @brief How many times a second the simulation in the SimulationWidget is redrawn
      */
-    int guiFPS_ = 60;
+    int guiFPS_ = 120;
 
     /**
      * @brief If enabled, only plot the total sum of all values
