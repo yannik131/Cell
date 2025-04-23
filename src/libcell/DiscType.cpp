@@ -2,14 +2,16 @@
 
 #include <stdexcept>
 
+int DiscType::instanceCount = 0;
+
 bool operator==(const DiscType& a, const DiscType& b)
 {
-    return a.name_ == b.name_;
+    return a.getId() == b.getId();
 }
 
 bool operator<(const DiscType& a, const DiscType& b)
 {
-    return a.name_ < b.name_;
+    return a.getId() < b.getId();
 }
 
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2)
@@ -17,7 +19,88 @@ std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType
     return d2 < d1 ? std::make_pair(d2, d1) : std::make_pair(d1, d2);
 }
 
-bool isValid(const DiscType& discType)
+DiscType::DiscType(const std::string& name, const sf::Color& color, float radius, float mass)
+    : id_(instanceCount++)
 {
-    return !discType.name_.empty() && discType.color_ != sf::Color() && discType.mass_ >= 0 && discType.radius_ >= 0;
+    setName(name);
+    setColor(color);
+    setRadius(radius);
+    setMass(mass);
+}
+
+DiscType::DiscType(const DiscType& other)
+    : name_(other.name_)
+    , color_(other.color_)
+    , radius_(other.radius_)
+    , mass_(other.mass_)
+    , id_(other.id_)
+{
+}
+
+DiscType& DiscType::operator=(const DiscType& other)
+{
+    name_ = other.name_;
+    color_ = other.color_;
+    radius_ = other.radius_;
+    mass_ = other.mass_;
+    id_ = other.id_;
+
+    return *this;
+}
+
+const std::string& DiscType::getName() const
+{
+    return name_;
+}
+
+void DiscType::setName(const std::string& name)
+{
+    if (name.empty())
+        throw std::runtime_error("Disc type name cannot be empty");
+
+    name_ = name;
+}
+
+const sf::Color& DiscType::getColor() const
+{
+    return color_;
+}
+
+void DiscType::setColor(const sf::Color& color)
+{
+    if (color == sf::Color())
+        throw std::runtime_error("Disc type must have a valid color");
+
+    color_ = color;
+}
+
+float DiscType::getRadius() const
+{
+    return radius_;
+}
+
+void DiscType::setRadius(float radius)
+{
+    if (radius <= 0)
+        throw std::runtime_error("Disc type radius must be positive");
+
+    radius_ = radius;
+}
+
+float DiscType::getMass() const
+{
+    return mass_;
+}
+
+void DiscType::setMass(float mass)
+{
+    if (mass <= 0)
+        throw std::runtime_error("Disc type mass must be positive");
+
+    mass_ = mass;
+}
+
+int DiscType::getId() const
+{
+    return id_;
 }

@@ -26,19 +26,20 @@ bool combinationReaction(Disc* d1, Disc* d2)
     float randomNumber = getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > reaction.probability_)
+        if (randomNumber > reaction.getProbability())
             continue;
 
-        const auto& resultType = reaction.product1_;
+        const auto& resultType = reaction.getProduct1();
 
         // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
-        if (std::abs(resultType.radius_ - d1->getType().radius_) > std::abs(resultType.radius_ - d2->getType().radius_))
+        if (std::abs(resultType.getRadius() - d1->getType().getRadius()) >
+            std::abs(resultType.getRadius() - d2->getType().getRadius()))
             std::swap(d1, d2);
 
         d1->setType(resultType);
         d1->markChanged();
-        d1->setVelocity((d1->getType().mass_ * d1->getVelocity() + d2->getType().mass_ * d2->getVelocity()) /
-                        resultType.mass_);
+        d1->setVelocity((d1->getType().getMass() * d1->getVelocity() + d2->getType().getMass() * d2->getVelocity()) /
+                        resultType.getMass());
 
         d2->markDestroyed();
 
@@ -63,18 +64,18 @@ bool exchangeReaction(Disc* d1, Disc* d2)
     float randomNumber = getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > reaction.probability_)
+        if (randomNumber > reaction.getProbability())
             continue;
 
         // TODO This looks wrong: Write down the math for all reaction types in latex with nice graphics
         // Edit: It's not wrong, but latex is still a good idea.
         // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
-        d1->scaleVelocity(std::sqrt(d1->getType().mass_ / reaction.product1_.mass_));
-        d1->setType(reaction.product1_);
+        d1->scaleVelocity(std::sqrt(d1->getType().getMass() / reaction.getProduct1().getMass()));
+        d1->setType(reaction.getProduct1());
         d1->markChanged();
 
-        d2->scaleVelocity(std::sqrt(d2->getType().mass_ / reaction.product2_.mass_));
-        d2->setType(reaction.product2_);
+        d2->scaleVelocity(std::sqrt(d2->getType().getMass() / reaction.getProduct2().getMass()));
+        d2->setType(reaction.getProduct2());
         d2->markChanged();
 
         return true;
@@ -96,20 +97,21 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
     float randomNumber = getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > reaction.probability_ * simulationTimeStep)
+        if (randomNumber > reaction.getProbability() * simulationTimeStep)
             continue;
 
-        const float MassFraction = d1->getType().mass_ / (reaction.product1_.mass_ + reaction.product2_.mass_);
+        const float MassFraction =
+            d1->getType().getMass() / (reaction.getProduct1().getMass() + reaction.getProduct2().getMass());
         const float Factor = std::sqrt(2) / 2 * MassFraction;
         const auto& v = d1->getVelocity();
         const auto& r = d1->getPosition();
         const float vAbs = abs(v);
 
-        Disc product1(reaction.product1_);
+        Disc product1(reaction.getProduct1());
         product1.setVelocity(Factor * sf::Vector2f{v.x - v.y, v.x + v.y});
         product1.setPosition(r + product1.getVelocity() / vAbs);
 
-        Disc product2(reaction.product2_);
+        Disc product2(reaction.getProduct2());
         product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
         product2.setPosition(r + product2.getVelocity() / vAbs);
 
@@ -150,7 +152,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
             continue;
 
         discsInRadius.clear();
-        const float maxCollisionDistance = disc.getType().radius_ + maxRadius;
+        const float maxCollisionDistance = disc.getType().getRadius() + maxRadius;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
         // constructor
@@ -164,7 +166,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
             auto& otherDisc = discs[discsInRadius[i].first];
 
-            const float radiusSum = disc.getType().radius_ + otherDisc.getType().radius_;
+            const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
 
             if (discsInRadius[i].second <= radiusSum * radiusSum)
             {
@@ -183,9 +185,10 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
-int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
+std::map<DiscType, int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
-    int collisionCount = 0;
+    std::map<DiscType, int> collisionCounts;
+
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
 
     for (const auto& [p1, p2] : collidingDiscs)
@@ -196,7 +199,8 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         if (overlap <= 0)
             continue;
 
-        ++collisionCount;
+        ++collisionCounts[p1->getType()];
+        ++collisionCounts[p2->getType()];
 
         // Don't handle collision if reaction occured
         if (combinationReaction(p1, p2))
@@ -213,7 +217,7 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
         // Coefficient of restitution (elasticity of the collision)
         const float e = 1.f; // Fully elastic
 
-        const auto &m1 = p1->getType().mass_, m2 = p2->getType().mass_;
+        const auto &m1 = p1->getType().getMass(), m2 = p2->getType().getMass();
         // Impulse exchange in the normal direction
         float jNormal = -(1 + e) * velocityAlongNormal;
         jNormal /= (1 / m1 + 1 / m2);
@@ -233,13 +237,13 @@ int handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs
             correctOverlap(*p1, *p2);
     }
 
-    return collisionCount;
+    return collisionCounts;
 }
 
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)
 {
     // https://hermann-baum.de/bouncing-balls/
-    const auto& r = disc.getType().radius_;
+    const auto& r = disc.getType().getRadius();
     const auto& pos = disc.getPosition();
     const auto& v = disc.getVelocity();
 
@@ -289,11 +293,10 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
-    // TODO really oughta plot the total kinetic energy, total impulse and start writing tests, I think this amount is
-    // too small
-    float randomNumber = getRandomFloat() / 10.f;
+    float randomNumber = getRandomFloat() / 2.f;
     if (kineticEnergyDeficiency <= 0)
-        return 0.f; // If we have more than we had at the start, we just wait for the inelastic collisions to drain it
+        randomNumber = -randomNumber; // TODO This is a hack until the physics are correctly implemented - no reaction
+                                      // should "give" kinetic energy, they need activation energy that they use
 
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
@@ -311,7 +314,7 @@ std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
     const sf::Vector2f& diff = d2.getPosition() - d1.getPosition();
     float distance = abs(diff);
     const sf::Vector2f& normal = diff / distance;
-    float overlap = d1.getType().radius_ + d2.getType().radius_ - distance;
+    float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
 
     if (overlap > 0)
     {

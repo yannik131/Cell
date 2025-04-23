@@ -107,10 +107,10 @@ int Disc::getId() const
 
 float Disc::getAbsoluteMomentum() const
 {
-    return type_.mass_ * std::hypot(velocity_.x, velocity_.y);
+    return type_.getMass() * std::hypot(velocity_.x, velocity_.y);
 }
 
 float Disc::getKineticEnergy() const
 {
-    return 0.5f * type_.mass_ * velocity_.x * velocity_.x + velocity_.y * velocity_.y;
+    return 0.5f * type_.getMass() * velocity_.x * velocity_.x + velocity_.y * velocity_.y;
 }

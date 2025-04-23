@@ -16,9 +16,16 @@ World::World()
 {
 }
 
+template <typename T> std::map<DiscType, T> operator+=(std::map<DiscType, T>& a, const std::map<DiscType, T>& b)
+{
+    for (const auto& [key, value] : b)
+        a[key] += value;
+
+    return a;
+}
+
 void World::update(const sf::Time& dt)
 {
-    changedDiscsIndices_.clear();
     destroyedDiscsIndices_.clear();
     newDiscs_.clear();
 
@@ -28,7 +35,7 @@ void World::update(const sf::Time& dt)
         const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
         newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
         const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCount_ += MathUtils::handleDiscCollisions(collidingDiscs);
+        collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
         currentKineticEnergy_ +=
             MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
@@ -38,10 +45,10 @@ void World::update(const sf::Time& dt)
     findChangedDiscs();
 }
 
-int World::getAndResetCollisionCount()
+std::map<DiscType, int> World::getAndResetCollisionCount()
 {
-    int tmp = collisionCount_;
-    collisionCount_ = 0;
+    auto tmp = std::move(collisionCounts_);
+    collisionCounts_.clear();
 
     return tmp;
 }
@@ -55,9 +62,10 @@ void World::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
 
-    maxRadius_ = std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
-                                  [](const auto& a, const auto& b) { return a.first.radius_ < b.first.radius_; })
-                     ->first.radius_;
+    maxRadius_ =
+        std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
+                         [](const auto& a, const auto& b) { return a.first.getRadius() < b.first.getRadius(); })
+            ->first.getRadius();
 
     discs_.clear();
     startPositions_.clear();
@@ -72,21 +80,6 @@ void World::setBounds(const sf::Vector2f& bounds)
         throw std::runtime_error("Bounds must be > 0");
 
     bounds_ = bounds;
-}
-
-const std::vector<int>& World::getDestroyedDiscsIndices() const
-{
-    return destroyedDiscsIndices_;
-}
-
-const std::vector<int>& World::getChangedDiscsIndices() const
-{
-    return changedDiscsIndices_;
-}
-
-const std::vector<Disc>& World::getNewDiscs() const
-{
-    return newDiscs_;
 }
 
 void World::buildScene()
@@ -124,7 +117,7 @@ void World::buildScene()
         {
             if (randomNumber < percentage || percentage == 100)
             {
-                counts[discType.radius_]++;
+                counts[discType.getRadius()]++;
                 Disc newDisc(discType);
                 newDisc.setPosition(startPositions_.back());
                 newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));
@@ -173,10 +166,7 @@ void World::findChangedDiscs()
     for (int i = 0; i < discs_.size(); ++i)
     {
         if (discs_[i].isMarkedChanged())
-        {
-            changedDiscsIndices_.push_back(i);
             discs_[i].unmarkChanged();
-        }
     }
 }
 

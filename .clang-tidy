@@ -1,1 +1,1 @@
-Checks:             'clang-diagnostic-*,clang-analyzer-*,clang-analyzer-*,modernize-*,clang-diagnostic-*,cppcoreguidelines-*,-modernize-use-nodiscard,-cppcoreguidelines-special-member-functions'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,modernize-*,cppcoreguidelines-*,-modernize-use-nodiscard,-cppcoreguidelines-special-member-functions,-modernize-use-trailing-return-type'

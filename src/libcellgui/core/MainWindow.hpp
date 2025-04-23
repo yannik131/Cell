@@ -1,0 +1,58 @@
+#ifndef MAINWINDOW_HPP
+#define MAINWINDOW_HPP
+
+#include "DiscDistributionPreviewTableModel.hpp"
+#include "DiscTypeDistributionDialog.hpp"
+#include "DiscTypeDistributionTableModel.hpp"
+#include "FrameDTO.hpp"
+#include "PlotDataSelectionDialog.hpp"
+#include "PlotModel.hpp"
+#include "ReactionsDialog.hpp"
+#include "ReactionsTableModel.hpp"
+#include "Simulation.hpp"
+
+#include <QMainWindow>
+#include <QThread>
+#include <QTimer>
+
+namespace Ui
+{
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+public:
+    explicit MainWindow(QWidget* parent = nullptr);
+
+    ~MainWindow();
+
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
+private:
+    void startSimulation();
+    void stopSimulation();
+    void resetSimulation();
+    void setSimulationWidgetSize();
+
+private:
+    Ui::MainWindow* ui;
+    QThread* simulationThread_;
+    Simulation* simulation_;
+
+    const QString StartString = "Start";
+    const QString StopString = "Stop";
+
+    bool initialSizeSet_ = false;
+    QTimer resizeTimer_;
+
+    DiscTypeDistributionDialog* discDistributionDialog_;
+    ReactionsDialog* reactionsDialog_;
+    PlotDataSelectionDialog* plotDataSelectionDialog_;
+
+    PlotModel* plotModel_;
+};
+
+#endif /* MAINWINDOW_HPP */

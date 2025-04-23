@@ -36,7 +36,7 @@ add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 file(GLOB LIBCELL_SRC src/libcell/*.cpp)
 add_library(libcell ${LIBCELL_SRC})
 
-target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/include/libcell)
+target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/src/libcell/)
 
 target_link_libraries(libcell PRIVATE 
     sfml-graphics 
@@ -55,14 +55,23 @@ target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-file(GLOB QT_GUI_SRC src/libcellgui/*.cpp include/libcellgui/*.hpp)
+file(GLOB_RECURSE QT_GUI_SRC RELATIVE ${CMAKE_SOURCE_DIR}
+    src/libcellgui/*.cpp 
+    src/libcellgui/*.hpp
+)
 
 #the header files have to be added here as well for Q_OBJECT to work
 add_library(libcellgui
   ${QT_GUI_SRC} 
 )
 
-target_include_directories(libcellgui PUBLIC ${CMAKE_SOURCE_DIR}/include/libcellgui/)
+target_include_directories(libcellgui PUBLIC 
+    ${CMAKE_SOURCE_DIR}/src/libcellgui/core/
+    ${CMAKE_SOURCE_DIR}/src/libcellgui/delegates/
+    ${CMAKE_SOURCE_DIR}/src/libcellgui/dialogs/
+    ${CMAKE_SOURCE_DIR}/src/libcellgui/models/
+    ${CMAKE_SOURCE_DIR}/src/libcellgui/widgets/
+)
 
 target_link_libraries(libcellgui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
 
@@ -89,3 +98,6 @@ target_link_libraries(cell-gui-test
 
 include(GoogleTest)
 gtest_add_tests(TARGET cell-gui-test)
+
+add_executable(models_test src/models_test/Main.cpp)
+target_link_libraries(models_test Qt6::Core Qt6::Widgets)

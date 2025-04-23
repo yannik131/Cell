@@ -1,0 +1,155 @@
+#include "PlotWidget.hpp"
+#include "GlobalGUISettings.hpp"
+#include "GlobalSettingsFunctor.hpp"
+#include "Utility.hpp"
+
+#include <algorithm>
+
+PlotWidget::PlotWidget(QWidget* parent)
+    : QCustomPlot(parent)
+{
+    setInteraction(QCP::iRangeDrag, true); // Allow dragging the plot by left click-hold
+    setInteraction(QCP::iRangeZoom, true); // Allow zoom with mouse wheel
+
+    plotTitle_ =
+        new QCPTextElement(this, PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_],
+                           QFont("sans", 12, QFont::Bold));
+    plotLayout()->insertRow(0);
+    plotLayout()->addElement(0, 0, plotTitle_);
+
+    xAxis->setLabel("t [s]");
+    yAxis->setLabel("N");
+
+    addLayer("legend layer");
+    legend->setLayer("legend layer");
+    legend->setVisible(true);
+
+    // Place the legend
+    axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignCenter);
+
+    // These are the default colors for matplotlib. I like them.
+    colors_ << QColor(31, 119, 180) << QColor(255, 127, 14) << QColor(44, 160, 44) << QColor(214, 39, 40)
+            << QColor(148, 103, 189) << QColor(140, 86, 75) << QColor(227, 119, 194) << QColor(127, 127, 127)
+            << QColor(188, 189, 34) << QColor(23, 190, 207);
+
+    reset();
+}
+
+void PlotWidget::reset()
+{
+    xMin_ = 0;
+    xMax_ = INT_MIN;
+    yMin_ = INT_MAX;
+    yMax_ = INT_MIN;
+
+    clearGraphs();
+    graphs_.clear();
+    sumGraph_ = nullptr;
+
+    if (GlobalGUISettings::getGUISettings().plotSum_)
+    {
+        sumGraph_ = addGraph();
+        sumGraph_->setPen(QColor());
+        legend->setVisible(false);
+        plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_] +
+                            " (sum)");
+
+        return;
+    }
+
+    legend->setVisible(true);
+    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
+
+    const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
+    for (auto iter = discTypesPlotMap.begin(); iter != discTypesPlotMap.end(); ++iter)
+    {
+        if (!iter.value())
+            continue;
+
+        QCPGraph* graph = addGraph();
+        graph->setPen(Utility::sfColorToQColor(iter.key().getColor()));
+        graph->setName(QString::fromStdString(iter.key().getName()));
+        graphs_[iter.key()] = graph;
+    }
+
+    for (int i = 0; i < legend->itemCount(); ++i)
+        legend->item(i)->setLayer("legend layer");
+}
+
+void PlotWidget::replacePlot(const QVector<QMap<DiscType, double>>& dataPoints)
+{
+    reset();
+
+    if (dataPoints.empty())
+    {
+        replot();
+        return;
+    }
+
+    for (auto i = 0; i < dataPoints.size(); ++i)
+        plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
+}
+
+void PlotWidget::plotDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot)
+{
+    if (GlobalGUISettings::getGUISettings().plotSum_)
+        addDataPointSum(dataPoint);
+    else
+        addDataPoint(dataPoint);
+
+    if (doReplot)
+    {
+        yAxis->setRange(yMin_, yMax_);
+        xAxis->setRange(xMin_, xMax_);
+
+        replot();
+    }
+}
+
+void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint)
+{
+    if (graphs_.empty())
+        return;
+
+    const auto& size = graphs_.first()->dataCount();
+    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+
+    for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
+    {
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
+            continue;
+
+        xMax_ = timeStep * size;
+        graphs_[iter.key()]->addData(xMax_, iter.value());
+
+        yMin_ = std::min(yMin_, iter.value());
+        yMax_ = std::max(yMax_, iter.value());
+    }
+}
+
+void PlotWidget::addDataPointSum(const QMap<DiscType, double>& dataPoint)
+{
+    const auto& size = sumGraph_->dataCount();
+    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+    double sum = 0.0;
+
+    for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
+    {
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
+            continue;
+
+        xMax_ = timeStep * size;
+        sum += iter.value();
+    }
+
+    sumGraph_->addData(xMax_, sum);
+    yMin_ = std::min(yMin_, sum);
+    yMax_ = std::max(yMax_, sum);
+}
+
+void PlotWidget::setModel(PlotModel* plotModel)
+{
+    connect(plotModel, &PlotModel::dataPointAdded,
+            [this](const QMap<DiscType, double>& dataPoint) { plotDataPoint(dataPoint); });
+    connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
+}

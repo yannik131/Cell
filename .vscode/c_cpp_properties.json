@@ -3,8 +3,12 @@
         {
             "includePath": [
                 "${workspaceFolder}/contrib/qcustomplot/",
-                "${workspaceFolder}/include/libcell/",
-                "${workspaceFolder}/include/libcellgui/",
+                "${workspaceFolder}/src/libcell/",
+                "${workspaceFolder}/src/libcellgui/core",
+                "${workspaceFolder}/src/libcellgui/delegates/",
+                "${workspaceFolder}/src/libcellgui/dialogs/",
+                "${workspaceFolder}/src/libcellgui/models/",
+                "${workspaceFolder}/src/libcellgui/widgets/",
                 "${workspaceFolder}/build_debug/libcellgui_autogen/include_Debug",
                 "${workspaceFolder}/contrib/vcpkg/installed/x64-windows/include/Qt6/",
                 "${workspaceFolder}/contrib/vcpkg/installed/x64-windows/include/Qt6/QtConcurrent",
