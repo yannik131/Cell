@@ -19,9 +19,13 @@ PlotControlWidget::PlotControlWidget(QWidget* parent)
     ui->plotTypeComboBox->setCurrentIndex(
         SupportedPlotCategories.indexOf(GlobalGUISettings::getGUISettings().currentPlotCategory_));
 
+    ui->plotSumCheckBox->setChecked(GlobalGUISettings::getGUISettings().plotSum_);
+
     connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, [this]() { emit selectDiscTypesClicked(); });
     connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged,
             [](int value) { GlobalGUISettings::get().setPlotTimeInterval(sf::milliseconds(value)); });
     connect(ui->plotTypeComboBox, &QComboBox::currentIndexChanged,
             [](int index) { GlobalGUISettings::get().setCurrentPlotCategory(SupportedPlotCategories[index]); });
+    connect(ui->plotSumCheckBox, &QCheckBox::checkStateChanged,
+            [](bool value) { GlobalGUISettings::get().setPlotSum(value); });
 }

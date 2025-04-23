@@ -9,8 +9,7 @@ enum PlotCategory
     TotalCollisionCount,
     TotalAbsoluteImpulse,
     TotalKineticEnergy,
-    TypeCounts,
-    VelocityDistribution
+    TypeCounts
 };
 
 extern const QMap<PlotCategory, QString> PlotCategoryNameMapping;

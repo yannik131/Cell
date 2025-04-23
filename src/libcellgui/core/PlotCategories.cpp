@@ -5,8 +5,7 @@
 const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TotalCollisionCount, "Collision count"},
                                                           {PlotCategory::TotalAbsoluteImpulse, "Impulse"},
                                                           {PlotCategory::TotalKineticEnergy, "Kinetic energy"},
-                                                          {PlotCategory::TypeCounts, "Type counts"},
-                                                          {PlotCategory::VelocityDistribution, "Velocities"}};
+                                                          {PlotCategory::TypeCounts, "Type counts"}};
 
 const QMap<QString, PlotCategory> NamePlotCategoryMapping = Utility::invertMap(PlotCategoryNameMapping);
 

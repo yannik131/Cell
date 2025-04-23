@@ -63,17 +63,31 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QMap<DiscType, bool>& discType
 
 void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames)
 {
-    guiSettings_.discTypesPlotMap_.clear();
-
     QVector<DiscType> activeDiscTypes;
     for (const auto& selectedDiscTypeName : selectedDiscTypeNames)
         activeDiscTypes.push_back(Utility::getDiscTypeByName(selectedDiscTypeName));
 
+    bool hasTrueValue = false;
+    QMap<DiscType, bool> discTypePlotMap;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
     {
         auto iter = std::find(activeDiscTypes.begin(), activeDiscTypes.end(), discType);
-        guiSettings_.discTypesPlotMap_[discType] = iter != activeDiscTypes.end();
+        discTypePlotMap[discType] = iter != activeDiscTypes.end();
+        if (!hasTrueValue && discTypePlotMap[discType])
+            hasTrueValue = true;
     }
+
+    if (!hasTrueValue)
+        throw std::runtime_error("Plot selection can't be empty");
+
+    guiSettings_.discTypesPlotMap_ = discTypePlotMap;
+
+    emit plotResetRequired();
+}
+
+void GlobalGUISettings::setPlotSum(bool value)
+{
+    guiSettings_.plotSum_ = value;
 
     emit plotResetRequired();
 }

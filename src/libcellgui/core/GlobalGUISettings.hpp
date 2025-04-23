@@ -30,6 +30,8 @@ private:
     void setDiscTypesPlotMap(const QMap<DiscType, bool>& discTypesPlotMap);
     void setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames);
 
+    void setPlotSum(bool value);
+
     void updateDiscTypesPlotMap();
 
 private:

@@ -6,6 +6,9 @@
 #include "PlotCategories.hpp"
 #include "ui_PlotDataSelectionDialog.h"
 
+#include <QCloseEvent>
+#include <QMessageBox>
+
 PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::PlotDataSelectionDialog)
@@ -16,7 +19,6 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
             &QListWidget::clearSelection);
     connect(ui->selectAllButton, &QPushButton::clicked, ui->selectedDiscTypesListWidget, &QListWidget::selectAll);
 
-    connect(ui->doneButton, &QPushButton::clicked, this, &QDialog::accept);
     connect(ui->doneButton, &QPushButton::clicked, this, &PlotDataSelectionDialog::saveSettings);
 
     loadSettings();
@@ -24,11 +26,26 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
             &PlotDataSelectionDialog::loadSettings);
 }
 
+void PlotDataSelectionDialog::closeEvent(QCloseEvent* event)
+{
+    hide();
+    loadSettings();
+    event->ignore();
+}
+
 void PlotDataSelectionDialog::saveSettings()
 {
     const auto& selectedDiscTypeNames = ui->selectedDiscTypesListWidget->getSelectedNames();
 
-    GlobalGUISettings::get().setDiscTypesPlotMap(selectedDiscTypeNames);
+    try
+    {
+        GlobalGUISettings::get().setDiscTypesPlotMap(selectedDiscTypeNames);
+        hide();
+    }
+    catch (const std::runtime_error& e)
+    {
+        QMessageBox::critical(this, "Error", e.what());
+    }
 }
 
 void PlotDataSelectionDialog::loadSettings()
@@ -36,7 +53,10 @@ void PlotDataSelectionDialog::loadSettings()
     ui->selectedDiscTypesListWidget->clear();
 
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
-        ui->selectedDiscTypesListWidget->addItem(QString::fromStdString(discType.getName()));
+    {
+        auto item = new QListWidgetItem(QString::fromStdString(discType.getName()));
+        ui->selectedDiscTypesListWidget->addItem(item);
 
-    ui->selectedDiscTypesListWidget->selectAll();
+        item->setSelected(GlobalGUISettings::getGUISettings().discTypesPlotMap_[discType]);
+    }
 }

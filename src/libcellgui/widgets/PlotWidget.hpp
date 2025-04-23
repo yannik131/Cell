@@ -15,9 +15,13 @@ public:
     explicit PlotWidget(QWidget* parent);
 
     void setModel(PlotModel* plotModel);
-    void addDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot = true);
+    void plotDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot = true);
     void replacePlot(const QVector<QMap<DiscType, double>>& dataPoints);
     void reset();
+
+private:
+    void addDataPointSum(const QMap<DiscType, double>& dataPoint);
+    void addDataPoint(const QMap<DiscType, double>& dataPoint);
 
 private:
     QCPTextElement* plotTitle_;
@@ -30,6 +34,7 @@ private:
 
     QVector<QColor> colors_;
     QMap<DiscType, QCPGraph*> graphs_;
+    QCPGraph* sumGraph_;
 };
 
 #endif

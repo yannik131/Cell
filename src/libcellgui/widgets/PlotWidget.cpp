@@ -38,17 +38,29 @@ PlotWidget::PlotWidget(QWidget* parent)
 void PlotWidget::reset()
 {
     xMin_ = 0;
-    xMax_ = 0;
-    yMin_ = 0;
-    yMax_ = 0;
+    xMax_ = INT_MIN;
+    yMin_ = INT_MAX;
+    yMax_ = INT_MIN;
 
     clearGraphs();
     graphs_.clear();
+    sumGraph_ = nullptr;
 
+    if (GlobalGUISettings::getGUISettings().plotSum_)
+    {
+        sumGraph_ = addGraph();
+        sumGraph_->setPen(QColor());
+        legend->setVisible(false);
+        plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_] +
+                            " (sum)");
+
+        return;
+    }
+
+    legend->setVisible(true);
     plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
 
     const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
-    // TODO Updating legend after changing disc distribution doesn't work, crash on identical colors set
     for (auto iter = discTypesPlotMap.begin(); iter != discTypesPlotMap.end(); ++iter)
     {
         if (!iter.value())
@@ -74,23 +86,37 @@ void PlotWidget::replacePlot(const QVector<QMap<DiscType, double>>& dataPoints)
         return;
     }
 
-    for (size_t i = 0; i < dataPoints.size(); ++i)
-        addDataPoint(dataPoints[i], i == dataPoints.size() - 1);
+    for (auto i = 0; i < dataPoints.size(); ++i)
+        plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
 }
 
-void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot)
+void PlotWidget::plotDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot)
+{
+    if (GlobalGUISettings::getGUISettings().plotSum_)
+        addDataPointSum(dataPoint);
+    else
+        addDataPoint(dataPoint);
+
+    if (doReplot)
+    {
+        yAxis->setRange(yMin_, yMax_);
+        xAxis->setRange(xMin_, xMax_);
+
+        replot();
+    }
+}
+
+void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint)
 {
     if (graphs_.empty())
         return;
 
-    const auto size = graphs_.first()->dataCount();
-    const auto timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
-    double sum = 0.0;
+    const auto& size = graphs_.first()->dataCount();
+    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
 
     for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
     {
-        // Skip disabled disc types
-        if (!graphs_.contains(iter.key()))
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
             continue;
 
         xMax_ = timeStep * size;
@@ -98,24 +124,32 @@ void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint, bool doRe
 
         yMin_ = std::min(yMin_, iter.value());
         yMax_ = std::max(yMax_, iter.value());
+    }
+}
 
+void PlotWidget::addDataPointSum(const QMap<DiscType, double>& dataPoint)
+{
+    const auto& size = sumGraph_->dataCount();
+    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+    double sum = 0.0;
+
+    for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
+    {
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
+            continue;
+
+        xMax_ = timeStep * size;
         sum += iter.value();
     }
 
-    if (doReplot)
-    {
-        yAxis->setRange(yMin_, yMax_);
-        xAxis->setRange(xMin_, xMax_);
-
-        plotTitle_->setText("Sum: " + QString::number(sum));
-
-        replot();
-    }
+    sumGraph_->addData(xMax_, sum);
+    yMin_ = std::min(yMin_, sum);
+    yMax_ = std::max(yMax_, sum);
 }
 
 void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::dataPointAdded,
-            [this](const QMap<DiscType, double>& dataPoint) { addDataPoint(dataPoint); });
+            [this](const QMap<DiscType, double>& dataPoint) { plotDataPoint(dataPoint); });
     connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
 }

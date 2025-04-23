@@ -14,6 +14,11 @@ struct GUISettings
     int guiFPS_ = 60;
 
     /**
+     * @brief If enabled, only plot the total sum of all values
+     */
+    bool plotSum_ = false;
+
+    /**
      * @brief How long to wait between plots
      */
     sf::Time plotTimeInterval_ = sf::milliseconds(1000);
