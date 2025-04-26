@@ -37,7 +37,6 @@ bool combinationReaction(Disc* d1, Disc* d2)
             std::swap(d1, d2);
 
         d1->setType(resultType);
-        d1->markChanged();
         d1->setVelocity((d1->getType().getMass() * d1->getVelocity() + d2->getType().getMass() * d2->getVelocity()) /
                         resultType.getMass());
 
@@ -72,11 +71,9 @@ bool exchangeReaction(Disc* d1, Disc* d2)
         // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
         d1->scaleVelocity(std::sqrt(d1->getType().getMass() / reaction.getProduct1().getMass()));
         d1->setType(reaction.getProduct1());
-        d1->markChanged();
 
         d2->scaleVelocity(std::sqrt(d2->getType().getMass() / reaction.getProduct2().getMass()));
         d2->setType(reaction.getProduct2());
-        d2->markChanged();
 
         return true;
     }

@@ -25,7 +25,6 @@ public:
 private:
     void buildScene();
     void initializeStartPositions();
-    void findChangedDiscs();
     void removeDestroyedDiscs();
 
 private:

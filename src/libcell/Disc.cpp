@@ -65,16 +65,6 @@ void Disc::markDestroyed()
     destroyed_ = true;
 }
 
-void Disc::markChanged()
-{
-    changed_ = true;
-}
-
-void Disc::unmarkChanged()
-{
-    changed_ = false;
-}
-
 const sf::Vector2f& Disc::getVelocity() const
 {
     return velocity_;
@@ -95,11 +85,6 @@ bool Disc::isMarkedDestroyed() const
     return destroyed_;
 }
 
-bool Disc::isMarkedChanged() const
-{
-    return changed_;
-}
-
 int Disc::getId() const
 {
     return id_;
@@ -112,5 +97,5 @@ float Disc::getAbsoluteMomentum() const
 
 float Disc::getKineticEnergy() const
 {
-    return 0.5f * type_.getMass() * velocity_.x * velocity_.x + velocity_.y * velocity_.y;
+    return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }

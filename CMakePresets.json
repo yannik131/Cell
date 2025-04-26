@@ -29,7 +29,8 @@
                 "libcell",
                 "libcellgui",
                 "cell-gui",
-                "benchmark"
+                "benchmark",
+                "tests"
             ]
         },
         {
@@ -42,7 +43,8 @@
                 "libcell",
                 "libcellgui",
                 "cell-gui",
-                "benchmark"
+                "benchmark",
+                "tests"
             ]
         }
     ]

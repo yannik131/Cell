@@ -89,15 +89,15 @@ find_package(GTest REQUIRED)
 
 file(GLOB_RECURSE GUI_TEST_SRC ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
-add_executable(cell-gui-test ${GUI_TEST_SRC})
+add_executable(tests ${GUI_TEST_SRC})
 
-target_link_libraries(cell-gui-test 
+target_link_libraries(tests
     libcellgui 
     GTest::gtest_main
 )
 
 include(GoogleTest)
-gtest_add_tests(TARGET cell-gui-test)
+gtest_add_tests(TARGET tests)
 
 add_executable(models_test src/models_test/Main.cpp)
 target_link_libraries(models_test Qt6::Core Qt6::Widgets)

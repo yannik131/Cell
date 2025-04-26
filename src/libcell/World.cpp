@@ -42,7 +42,6 @@ void World::update(const sf::Time& dt)
 
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
     removeDestroyedDiscs();
-    findChangedDiscs();
 }
 
 std::map<DiscType, int> World::getAndResetCollisionCount()
@@ -159,16 +158,6 @@ void World::initializeStartPositions()
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
-}
-
-// TODO Remove
-void World::findChangedDiscs()
-{
-    for (int i = 0; i < discs_.size(); ++i)
-    {
-        if (discs_[i].isMarkedChanged())
-            discs_[i].unmarkChanged();
-    }
 }
 
 void World::removeDestroyedDiscs()

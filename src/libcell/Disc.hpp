@@ -28,10 +28,6 @@ public:
 
     void markDestroyed();
 
-    void markChanged();
-
-    void unmarkChanged();
-
     const sf::Vector2f& getVelocity() const;
 
     const sf::Vector2f& getPosition() const;
@@ -39,8 +35,6 @@ public:
     const DiscType& getType() const;
 
     bool isMarkedDestroyed() const;
-
-    bool isMarkedChanged() const;
 
     /**
      * @brief Necessary to map changes in the lib to changes in the GUI
@@ -73,12 +67,6 @@ private:
      * is set during the reaction processing and the world removed flagged discs after the update step
      */
     bool destroyed_ = false;
-
-    /**
-     * @brief Set when a disc changes types, for example in A + B -> C, we keep A and change it to C and destroy B. The
-     * UI needs to be informed of this to update the discs accordingly, which this flag is for
-     */
-    bool changed_ = false;
 
     /**
      * @brief The properties of this disc (mass, radius, ...)
