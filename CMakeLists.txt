@@ -75,7 +75,7 @@ target_include_directories(libcellgui PUBLIC
 
 target_link_libraries(libcellgui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
 
-add_executable(cell-gui src/cell-gui/Main.cpp)
+add_executable(cell-gui WIN32 src/cell-gui/Main.cpp)
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target

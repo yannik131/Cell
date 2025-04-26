@@ -161,6 +161,7 @@ void World::initializeStartPositions()
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 
+// TODO Remove
 void World::findChangedDiscs()
 {
     for (int i = 0; i < discs_.size(); ++i)

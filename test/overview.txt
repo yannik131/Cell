@@ -1,0 +1,3 @@
+- unit testing: testing of public functions that don't call any other functions of the project (they are independent)
+- integration testing: any test that causes at least 2 independent functions of the project to be called 
+- system testing: system tests are the smallest set of integration tests that execute most of the project's code. These are typically the highest-level functions that actually perform the task the whole application was written for
