@@ -127,6 +127,8 @@ void GlobalSettings::addReaction(const Reaction& reaction)
 
 void GlobalSettings::clearReactions()
 {
+    throwIfLocked();
+
     settings_.decompositionReactions_.clear();
     settings_.combinationReactions_.clear();
     settings_.exchangeReactions_.clear();
@@ -148,7 +150,7 @@ void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
 void GlobalSettings::throwIfLocked()
 {
     if (locked_)
-        throw std::runtime_error("Settings are locked");
+        throw ChangeDuringLockException("Settings are locked");
 }
 
 void GlobalSettings::lock()

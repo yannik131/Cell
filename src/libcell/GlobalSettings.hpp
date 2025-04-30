@@ -2,6 +2,7 @@
 #define GLOBALSETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "ExceptionMacro.hpp"
 #include "Settings.hpp"
 #include "StringUtils.hpp"
 
@@ -22,6 +23,8 @@ enum SettingID
     FrictionCoefficient = 1 << 5,
 };
 
+CUSTOM_EXCEPTION(ChangeDuringLockException)
+
 class GlobalSettings
 {
 public:
@@ -31,14 +34,13 @@ public:
 
     static void setCallback(const std::function<void(const SettingID& settingID)>& functor);
 
-private:
-    GlobalSettings();
-
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
 
     void setSimulationTimeScale(float simulationTimeScale);
 
     void setNumberOfDiscs(int numberOfDiscs);
+
+    void setFrictionCoefficient(float frictionCoefficient);
 
     void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
 
@@ -46,13 +48,14 @@ private:
 
     void clearReactions();
 
-    void setFrictionCoefficient(float frictionCoefficient);
-
     void throwIfLocked();
 
     void lock();
 
     void unlock();
+
+private:
+    GlobalSettings();
 
     void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
 
@@ -65,12 +68,6 @@ private:
 
     bool locked_ = false;
     std::function<void(const SettingID& settingID)> callback_;
-
-    friend class DiscTypeDistributionTableModel;
-    friend class ReactionsTableModel;
-    friend class Simulation;
-    friend class SimulationControlWidget;
-    friend void setBenchmarkSettings();
 };
 
 template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)

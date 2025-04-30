@@ -5,39 +5,86 @@
 
 #include <SFML/System/Vector2.hpp>
 
+/**
+ * @brief Represents a particle in the simulation that can collide with others and undergo reactions. Physical
+ * properties are defined by its DiscType
+ */
 class Disc
 {
 public:
+    /**
+     * @brief Copy-ctor that does not affect id
+     */
     Disc(const DiscType& discType);
 
+    /**
+     * @brief Sets the velocity of the disc in px/s
+     */
     void setVelocity(const sf::Vector2f& velocity);
 
+    /**
+     * @brief Multiplies both velocity components with `factor`
+     */
     void scaleVelocity(float factor);
 
+    /**
+     * @brief Adds `acceleration` to the velocity of the disc
+     */
     void accelerate(const sf::Vector2f& acceleration);
 
+    /**
+     * @brief Negates the x-component of the velocity
+     */
     void negateXVelocity();
 
+    /**
+     * @brief Negates the y-component of the velocity
+     */
     void negateYVelocity();
 
+    /**
+     * @brief Sets the position with no checks.
+     * @note In debug mode, checks for invalid values (nan, inf)
+     */
     void setPosition(const sf::Vector2f& position);
 
+    /**
+     * @brief Changes the disc's position by the given `distance`
+     */
     void move(const sf::Vector2f& distance);
 
+    /**
+     * @brief Assigns a new disc type (no checks)
+     */
     void setType(const DiscType& discType);
 
+    /**
+     * @brief Sets the internal destroyed flag (used for removing discs in the simulation)
+     */
     void markDestroyed();
 
+    /**
+     * @returns Velocity of the disc (px/s)
+     */
     const sf::Vector2f& getVelocity() const;
 
+    /**
+     * @returns Position of the disc (px)
+     */
     const sf::Vector2f& getPosition() const;
 
+    /**
+     * @returns DiscType of the disc
+     */
     const DiscType& getType() const;
 
+    /**
+     * @returns `true` if `markDestroyed()` has been called
+     */
     bool isMarkedDestroyed() const;
 
     /**
-     * @brief Necessary to map changes in the lib to changes in the GUI
+     * @brief Id using the instance count. Necessary to map changes in the lib to changes in the GUI
      */
     int getId() const;
 

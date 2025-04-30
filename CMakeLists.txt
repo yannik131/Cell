@@ -93,7 +93,7 @@ add_executable(tests ${GUI_TEST_SRC})
 
 target_link_libraries(tests
     libcellgui 
-    GTest::gtest_main
+    GTest::gtest
 )
 
 include(GoogleTest)
