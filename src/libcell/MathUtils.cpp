@@ -309,9 +309,9 @@ float abs(const sf::Vector2f& vec)
 std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
 {
     const sf::Vector2f& diff = d2.getPosition() - d1.getPosition();
-    float distance = abs(diff);
+    const float distance = abs(diff);
     const sf::Vector2f& normal = diff / distance;
-    float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
+    const float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
 
     if (overlap > 0)
     {

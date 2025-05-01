@@ -4,10 +4,20 @@
 
 #include <cmath>
 
+const DiscType A{"A", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
+const DiscType ACopy{"A", sf::Color::Green, DiscTypeLimits::MinRadius,
+                     DiscTypeLimits::MinMass}; // Same attributes, different ID
+const DiscType B{"B", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
+const DiscType C{"C", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
+
+const Reaction decomposition{A, std::nullopt, A, A, 0.1f};
+const Reaction combination{A, A, A, std::nullopt, 0.1f};
+const Reaction exchange{A, A, A, A, 0.1f};
+
+GlobalSettings& settings = GlobalSettings::get();
+
 TEST(GlobalSettingsTest, RangeChecksAreCorrect)
 {
-    GlobalSettings& settings = GlobalSettings::get();
-
     using namespace SettingsLimits;
 
     ASSERT_ANY_THROW(
@@ -41,7 +51,6 @@ TEST(GlobalSettingsTest, CallbackIsExecuted)
 {
     SettingID id = SettingID::DiscTypeDistribution;
     const auto& callback = [&](const SettingID& settingID) { id = settingID; };
-    GlobalSettings& settings = GlobalSettings::get();
     settings.setCallback(callback);
 
     settings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient);
@@ -51,8 +60,6 @@ TEST(GlobalSettingsTest, CallbackIsExecuted)
 
 TEST(GlobalSettingsTest, LockPreventsChanges)
 {
-    GlobalSettings& settings = GlobalSettings::get();
-
     settings.lock();
     settings.unlock();
 
@@ -62,12 +69,10 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     ASSERT_NO_THROW(settings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs));
     ASSERT_NO_THROW(settings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient));
 
-    const DiscType discType{"A", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
-    const std::map<DiscType, int> distribution{{discType, 100}};
+    const std::map<DiscType, int> distribution{{A, 100}};
     ASSERT_NO_THROW(settings.setDiscTypeDistribution(distribution));
 
-    const Reaction reaction{discType, discType, discType, std::nullopt, 0.01f};
-    ASSERT_NO_THROW(settings.addReaction(reaction));
+    ASSERT_NO_THROW(settings.addReaction(decomposition));
     ASSERT_NO_THROW(settings.clearReactions());
 
     // Lock the settings so that further changes are prohibited.
@@ -79,7 +84,7 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     ASSERT_THROW(settings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs), ChangeDuringLockException);
     ASSERT_THROW(settings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient), ChangeDuringLockException);
     ASSERT_THROW(settings.setDiscTypeDistribution(distribution), ChangeDuringLockException);
-    ASSERT_THROW(settings.addReaction(reaction), ChangeDuringLockException);
+    ASSERT_THROW(settings.addReaction(decomposition), ChangeDuringLockException);
     ASSERT_THROW(settings.clearReactions(), ChangeDuringLockException);
 
     settings.unlock();
@@ -87,8 +92,6 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
 
 TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 {
-    GlobalSettings& settings = GlobalSettings::get();
-
     ASSERT_FALSE(settings.isLocked());
 
     settings.lock();
@@ -96,4 +99,178 @@ TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 
     settings.unlock();
     ASSERT_FALSE(settings.isLocked());
+}
+
+TEST(GlobalSettingsTest, DiscTypeDistributionCantBeEmpty)
+{
+    auto distribution = settings.getSettings().discTypeDistribution_;
+    distribution.clear();
+
+    ASSERT_ANY_THROW(settings.setDiscTypeDistribution(distribution));
+}
+
+TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
+{
+    for (int i = -10; i < 200; i += 10)
+    {
+        std::map<DiscType, int> distribution{{A, i}};
+
+        if (i == 100)
+            ASSERT_NO_THROW(settings.setDiscTypeDistribution(distribution));
+        else
+            ASSERT_ANY_THROW(settings.setDiscTypeDistribution(distribution));
+    }
+}
+
+TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
+{
+    std::map<DiscType, int> distribution{{A, 50}, {ACopy, 50}};
+
+    ASSERT_ANY_THROW(settings.setDiscTypeDistribution(distribution));
+}
+
+void insertDefaultReactions(GlobalSettings& settings)
+{
+    settings.addReaction(decomposition);
+    settings.addReaction(combination);
+    settings.addReaction(exchange);
+}
+
+TEST(GlobalSettingsTest, ClearReactionsClearsReactions)
+{
+    insertDefaultReactions(settings);
+
+    settings.clearReactions();
+
+    ASSERT_TRUE(settings.getSettings().decompositionReactions_.empty());
+    ASSERT_TRUE(settings.getSettings().combinationReactions_.empty());
+    ASSERT_TRUE(settings.getSettings().exchangeReactions_.empty());
+}
+
+TEST(GlobalSettingsTest, ReactionsEndUpInTheRightPlace)
+{
+    settings.clearReactions();
+
+    insertDefaultReactions(settings);
+
+    ASSERT_EQ(settings.getSettings().decompositionReactions_.size(), 1);
+    ASSERT_EQ(settings.getSettings().decompositionReactions_.begin()->second.front(), decomposition);
+
+    ASSERT_EQ(settings.getSettings().combinationReactions_.size(), 1);
+    ASSERT_EQ(settings.getSettings().combinationReactions_.begin()->second.front(), combination);
+
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.size(), 1);
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.begin()->second.front(), exchange);
+}
+
+TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
+{
+    settings.clearReactions();
+
+    insertDefaultReactions(settings);
+
+    ASSERT_ANY_THROW(settings.addReaction(decomposition));
+    ASSERT_ANY_THROW(settings.addReaction(combination));
+    ASSERT_ANY_THROW(settings.addReaction(exchange));
+}
+
+TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
+{
+    settings.clearReactions();
+
+    Reaction noDuplicateCombination{A, B, A, std::nullopt, 0.1f};
+    Reaction noDuplicateExchange{A, B, A, B, 0.1f};
+
+    // These reactions should be added twice for keys {A, B} and {B, A} for easier lookup
+    settings.addReaction(noDuplicateCombination);
+    settings.addReaction(noDuplicateExchange);
+
+    ASSERT_EQ(settings.getSettings().combinationReactions_.size(), 2);
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.size(), 2);
+    settings.clearReactions();
+
+    // Here we have reactions with keys {A, A} -> Shouldn't be duplicated
+    insertDefaultReactions(settings);
+
+    ASSERT_EQ(settings.getSettings().combinationReactions_.size(), 1);
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.size(), 1);
+}
+
+template <typename T> bool isInEductsOrProducts(const T& reactionTable, const DiscType& discType)
+{
+    for (const auto& [educt, reactions] : reactionTable)
+    {
+        for (const auto& reaction : reactions)
+        {
+            if (reaction.getEduct1() == discType || reaction.getProduct1() == discType ||
+                (reaction.hasEduct2() && reaction.getEduct2() == discType) ||
+                (reaction.hasProduct2() && reaction.getProduct2() == discType))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
+{
+    std::map<DiscType, int> distribution{{A, 100}, {B, 0}, {C, 0}};
+    settings.setDiscTypeDistribution(distribution);
+
+    // 1 reaction with A as educt, 1 with A as product, 1 with A nowhere, for each reaction type
+    Reaction decompositionAEduct{A, std::nullopt, C, std::nullopt, 0.1f};
+    Reaction decompositionAProduct{B, std::nullopt, A, std::nullopt, 0.1f};
+    Reaction decompositionANowhere{B, std::nullopt, C, std::nullopt, 0.1f};
+
+    Reaction combinationAEduct{A, B, C, std::nullopt, 0.1f};
+    Reaction combinationAProduct{B, C, A, std::nullopt, 0.1f};
+    Reaction combinationANowhere{B, C, C, std::nullopt, 0.1f};
+
+    Reaction exchangeAEduct{A, B, C, B, 0.1f};
+    Reaction exchangeAProduct{B, C, A, A, 0.1f};
+    Reaction exchangeANowhere{B, C, C, C, 0.1f};
+
+    settings.clearReactions();
+
+    std::vector<Reaction> reactions = {decompositionAEduct, decompositionAProduct, decompositionANowhere,
+                                       combinationAEduct,   combinationAProduct,   combinationANowhere,
+                                       exchangeAEduct,      exchangeAProduct,      exchangeANowhere};
+
+    for (const auto& reaction : reactions)
+        settings.addReaction(reaction);
+
+    // Make sure they were all added (twice because educts were not identical for combination/exchange reactions)
+    ASSERT_EQ(settings.getSettings().decompositionReactions_.size(), 3);
+    ASSERT_EQ(settings.getSettings().combinationReactions_.size(), 6);
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.size(), 6);
+
+    // Now remove A from the distribution
+    distribution = {{B, 100}, {C, 0}};
+
+    settings.setDiscTypeDistribution(distribution);
+
+    ASSERT_EQ(settings.getSettings().decompositionReactions_.size(), 1);
+    ASSERT_FALSE(isInEductsOrProducts(settings.getSettings().decompositionReactions_, A));
+
+    ASSERT_EQ(settings.getSettings().combinationReactions_.size(), 2);
+    ASSERT_FALSE(isInEductsOrProducts(settings.getSettings().combinationReactions_, A));
+
+    ASSERT_EQ(settings.getSettings().exchangeReactions_.size(), 2);
+    ASSERT_FALSE(isInEductsOrProducts(settings.getSettings().exchangeReactions_, A));
+}
+
+TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
+{
+}
+
+TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
+{
+}
+
+TEST(GlobalSettingsTest, KeysAreIdenticalToEducts)
+{
+}
+
+TEST(GlobalSettingsTest, NoEmptyReactionVectors)
+{
 }
