@@ -32,15 +32,17 @@ void World::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
-        const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
-        newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-        const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
         currentKineticEnergy_ +=
             MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
+    const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
+    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+
+    const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
+    collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
+
     removeDestroyedDiscs();
 }
 

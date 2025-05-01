@@ -23,9 +23,9 @@ GlobalSettings::GlobalSettings()
     settings_.discTypeDistribution_[C] = 0;
     settings_.discTypeDistribution_[D] = 0;
 
-    addReaction(Reaction{A, std::nullopt, B, C, 1e-3f});
+    addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
     addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
-    addReaction(Reaction{D, std::nullopt, A, B, 1e-3f});
+    addReaction(Reaction{D, std::nullopt, A, B, 1e-2f});
     addReaction(Reaction{B, A, C, std::nullopt, 1e-2f});
 }
 
