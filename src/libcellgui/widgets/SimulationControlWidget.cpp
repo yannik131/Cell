@@ -36,8 +36,8 @@ void SimulationControlWidget::setRanges()
 {
     ui->fpsSpinBox->setRange(GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS);
     ui->numberOfDiscsSpinBox->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
-    ui->timeStepSpinBox->setRange(SettingsLimits::MinSimulationTimeStep.asMilliseconds(),
-                                  SettingsLimits::MaxSimulationTimeStep.asMilliseconds());
+    ui->timeStepSpinBox->setRange(SettingsLimits::MinSimulationTimeStep.asMicroseconds(),
+                                  SettingsLimits::MaxSimulationTimeStep.asMicroseconds());
     ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
                                          SettingsLimits::MaxSimulationTimeScale);
     ui->frictionDoubleSpinBox->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
@@ -50,7 +50,7 @@ void SimulationControlWidget::displayGlobalSettings()
 
     const auto& settings = GlobalSettings::getSettings();
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
-    ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMilliseconds());
+    ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMicroseconds());
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
     ui->frictionDoubleSpinBox->setValue(settings.frictionCoefficient);
 }
@@ -70,7 +70,7 @@ void SimulationControlWidget::setCallbacks()
             });
 
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
+            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value))) });
 
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });

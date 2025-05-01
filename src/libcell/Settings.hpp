@@ -17,7 +17,7 @@ struct Settings
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
      * able to keep up and start lagging
      */
-    sf::Time simulationTimeStep_ = sf::milliseconds(5);
+    sf::Time simulationTimeStep_ = sf::microseconds(5000);
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.
@@ -63,8 +63,8 @@ struct Settings
 
 namespace SettingsLimits
 {
-const sf::Time MinSimulationTimeStep = sf::milliseconds(1);
-const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
+const sf::Time MinSimulationTimeStep = sf::microseconds(100);
+const sf::Time MaxSimulationTimeStep = sf::microseconds(50000);
 
 const float MinSimulationTimeScale = 0.01f;
 const float MaxSimulationTimeScale = 10.f;

@@ -93,7 +93,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Timestep [ms]</string>
+            <string>Timestep [μs]</string>
            </property>
           </widget>
          </item>
