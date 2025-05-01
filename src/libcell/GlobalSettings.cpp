@@ -163,6 +163,11 @@ void GlobalSettings::unlock()
     locked_ = false;
 }
 
+bool GlobalSettings::isLocked() const
+{
+    return locked_;
+}
+
 template <typename T> void eraseIfInEducts(T& reactionTable, const DiscType& discType)
 {
     using KeyType = typename T::key_type;

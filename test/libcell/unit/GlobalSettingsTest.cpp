@@ -84,3 +84,16 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
 
     settings.unlock();
 }
+
+TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
+{
+    GlobalSettings& settings = GlobalSettings::get();
+
+    ASSERT_FALSE(settings.isLocked());
+
+    settings.lock();
+    ASSERT_TRUE(settings.isLocked());
+
+    settings.unlock();
+    ASSERT_FALSE(settings.isLocked());
+}

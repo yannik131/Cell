@@ -71,14 +71,14 @@ MainWindow::MainWindow(QWidget* parent)
 
 void MainWindow::resetSimulation()
 {
+    stopSimulation();
+
     if (simulationThread_ != nullptr)
         connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
     else
         simulation_->reset();
 
     plotModel_->clear();
-
-    stopSimulation();
 }
 
 void MainWindow::setSimulationWidgetSize()

@@ -54,6 +54,8 @@ public:
 
     void unlock();
 
+    bool isLocked() const;
+
 private:
     GlobalSettings();
 
