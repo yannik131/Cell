@@ -4,19 +4,9 @@
 
 int DiscType::instanceCount = 0;
 
-bool operator==(const DiscType& a, const DiscType& b)
-{
-    return a.getId() == b.getId();
-}
-
-bool operator<(const DiscType& a, const DiscType& b)
-{
-    return a.getId() < b.getId();
-}
-
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2)
 {
-    return d2 < d1 ? std::make_pair(d2, d1) : std::make_pair(d1, d2);
+    return d2.getId() < d1.getId() ? std::make_pair(d2, d1) : std::make_pair(d1, d2);
 }
 
 DiscType::DiscType(const std::string& name, const sf::Color& color, float radius, float mass)
@@ -103,4 +93,9 @@ void DiscType::setMass(float mass)
 int DiscType::getId() const
 {
     return id_;
+}
+
+bool DiscType::hasSameIdAs(const DiscType& other) const
+{
+    return id_ == other.id_;
 }

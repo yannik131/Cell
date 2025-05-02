@@ -8,3 +8,8 @@ Physics simulation for colliding discs. Idea:
 - Track state of the simulation with plots and a real-time view
 
 ![](doc/screenshot.png)
+
+## Tests
+
+- OOP: Test only public methods
+- Procedural code: Move internal helper functions to the translation unit (.cpp) and don't test them

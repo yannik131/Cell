@@ -40,25 +40,25 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_;
+    DiscType::map<int> discTypeDistribution_;
 
     /**
      * @brief Maps disc types to decomposition reactions A -> B + C by educt
      * @todo Lookup for decomposition reactions takes up some time though, maybe unordered_map is worth consideration
      */
-    std::map<DiscType, std::vector<Reaction>> decompositionReactions_;
+    DiscType::map<std::vector<Reaction>> decompositionReactions_;
 
     /**
      * @brief Maps pairs of disc types to combination reactions A + B -> C by educts. {A, B} and {B, A} map to the same
      * reactions
      */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> combinationReactions_;
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>, DiscType::IdComparator> combinationReactions_;
 
     /**
      * @brief Maps pairs of disc types to exchange reactions A + B -> C + D by educts. {A, B} and {B, A} map to the same
      * reactions
      */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> exchangeReactions_;
+    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>, DiscType::IdComparator> exchangeReactions_;
 };
 
 namespace SettingsLimits

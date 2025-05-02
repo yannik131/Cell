@@ -2,8 +2,176 @@
 
 #include <algorithm>
 #include <functional>
+#include <set>
 #include <type_traits>
 #include <vector>
+
+namespace
+{
+
+/**
+ * @returns Returns an optional containing the first duplicate by name found, if there was any
+ */
+std::optional<std::string> getFirstDuplicateByName(const DiscType::map<int>& discTypeDistribution)
+{
+    std::set<std::string> uniqueNames;
+    for (const auto& [discType, frequency] : discTypeDistribution)
+    {
+        if (uniqueNames.contains(discType.getName()))
+            return discType.getName();
+
+        uniqueNames.insert(discType.getName());
+    }
+
+    return std::nullopt;
+}
+
+/**
+ * @returns Sum of all values of the given map
+ */
+int calculateFrequencySum(const DiscType::map<int>& discTypeDistribution)
+{
+    int totalPercent = 0;
+    for (const auto& [type, percent] : discTypeDistribution)
+        totalPercent += percent;
+
+    return totalPercent;
+}
+
+/**
+ * @brief Given any one of the reaction maps (decomposition, collision, exchange, ...) remove any entries where the
+ * given DiscType is contained in the educts
+ */
+template <typename T> void eraseIfInEducts(T& reactionTable, const DiscType& discType)
+{
+    using KeyType = typename T::key_type;
+
+    for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
+    {
+        const Reaction& reaction = iter->second.front();
+        if (reaction.getEduct1().hasSameIdAs(discType) ||
+            (reaction.hasEduct2() && reaction.getEduct2().hasSameIdAs(discType)))
+        {
+            iter = reactionTable.erase(iter);
+            continue;
+        }
+        ++iter;
+    }
+}
+
+/**
+ * @brief Actual implementation of removeDanglingReactions
+ */
+template <typename T> void removeDanglingReactions(T& reactionTable, const std::vector<DiscType>& removedDiscTypes)
+{
+    for (const auto& removedDiscType : removedDiscTypes)
+    {
+        // Step 1: Erase all reactions that have the removed disc type as an educt
+        eraseIfInEducts(reactionTable, removedDiscType);
+
+        // Step 2: Erase all reactions that have the removed disc type as a product
+        for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
+        {
+            removeReactionsFromVector(iter->second, removedDiscType);
+            if (iter->second.empty())
+                iter = reactionTable.erase(iter);
+            else
+                ++iter;
+        }
+    }
+}
+
+/**
+ * @brief Given a new DiscType distribution, find any reactions in the given vector where any of the products/educts is
+ * equal to an updated DiscType using the getters of Reaction. Then, assign the new DiscType with the respective setter.
+ * To find the changed DiscType, DiscType::getId() is used.
+ */
+void updateDiscTypesInReactions(std::vector<Reaction>& reactions, const DiscType::map<int>& newDiscTypeDistribution)
+{
+    for (auto& reaction : reactions)
+    {
+        // If we find a disc type that has the same id as an updated one in any of the educts/products, we'll update
+        // the respective educt/product
+        std::vector<std::pair<std::function<DiscType()>, std::function<void(const DiscType&)>>> gettersSetters{
+            {std::bind(&Reaction::getEduct1, &reaction),
+             std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1)},
+            {std::bind(&Reaction::getEduct2, &reaction),
+             std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1)},
+            {std::bind(&Reaction::getProduct1, &reaction),
+             std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1)},
+            {std::bind(&Reaction::getProduct2, &reaction),
+             std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1)}};
+
+        if (!reaction.hasProduct2())
+            gettersSetters.erase(gettersSetters.begin() + 3);
+
+        if (!reaction.hasEduct2())
+            gettersSetters.erase(gettersSetters.begin() + 1);
+
+        for (auto& [getter, setter] : gettersSetters)
+        {
+            auto iter = newDiscTypeDistribution.find(getter());
+            if (iter != newDiscTypeDistribution.end())
+                setter(iter->first);
+        }
+    }
+}
+
+/**
+ * @brief Educts are the keys in the reaction tables, so try to find changed DiscTypes in the keys and replace those
+ * with the updated ones (keys are immutable and need to be replaced)
+ */
+template <typename T> void updateDiscTypesInEducts(T& reactionTable, const DiscType::map<int>& newDiscTypeDistribution)
+{
+    if (reactionTable.empty())
+        return;
+
+    using KeyType = typename T::key_type;
+
+    for (const auto& [discType, _] : newDiscTypeDistribution)
+    {
+        // Find all keys that contain a possibly updated DiscType (for combination/exchange reactions, there might be
+        // several; for decomposition reactions, there will only be 1)
+        std::vector<KeyType> matches;
+        for (const auto& [educts, reactions] : reactionTable)
+        {
+            const Reaction& reaction = reactions.front();
+            if (reaction.getEduct1().hasSameIdAs(discType) ||
+                (reaction.hasEduct2() && reaction.getEduct2().hasSameIdAs(discType)))
+                matches.push_back(educts);
+        }
+
+        // Replace these keys with updates ones
+        for (const auto& educts : matches)
+        {
+            auto iter = reactionTable.find(educts);
+            auto reactions = iter->second;
+            reactionTable.erase(iter);
+
+            if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
+            {
+                const auto& newKey = std::make_pair(educts.first.hasSameIdAs(discType) ? discType : educts.first,
+                                                    educts.second.hasSameIdAs(discType) ? discType : educts.second);
+                reactionTable[newKey] = reactions;
+            }
+            else
+                reactionTable[discType] = reactions;
+        }
+    }
+}
+
+template <typename T>
+void updateDiscTypesInReactions(T& reactionTable, const DiscType::map<int>& newDiscTypeDistribution)
+{
+    // Step 1: Update disc types in all reactions
+    for (auto& [educts, reactions] : reactionTable)
+        updateDiscTypesInReactions(reactions, newDiscTypeDistribution);
+
+    // Step 2: Update disc types in educts (keys)
+    updateDiscTypesInEducts(reactionTable, newDiscTypeDistribution);
+}
+
+} // namespace
 
 void GlobalSettings::setCallback(const std::function<void(const SettingID& settingID)>& functor)
 {
@@ -74,18 +242,17 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
     useCallback(SettingID::NumberOfDiscs);
 }
 
-void GlobalSettings::setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution)
+void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution)
 {
     throwIfLocked();
 
     if (discTypeDistribution.empty())
         throw std::runtime_error("Disc type distribution cannot be empty");
 
-    int totalPercent = 0;
-    for (const auto& [type, percent] : discTypeDistribution)
-        totalPercent += percent;
+    if (const auto& duplicateName = getFirstDuplicateByName(discTypeDistribution))
+        throw std::runtime_error("Duplicate disc type found: " + *duplicateName);
 
-    if (totalPercent != 100)
+    if (int totalPercent = calculateFrequencySum(discTypeDistribution); totalPercent != 100)
         throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They add up to " +
                                  std::to_string(totalPercent));
 
@@ -109,14 +276,14 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     case Reaction::Type::Combination:
         addReactionToVector(settings_.combinationReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
-        if (reaction.getEduct1() != reaction.getEduct2())
+        if (!reaction.getEduct1().hasSameIdAs(reaction.getEduct2()))
             addReactionToVector(
                 settings_.combinationReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
         break;
     case Reaction::Type::Exchange:
         addReactionToVector(settings_.exchangeReactions_[std::make_pair(reaction.getEduct1(), reaction.getEduct2())],
                             reaction);
-        if (reaction.getEduct1() != reaction.getEduct2())
+        if (!reaction.getEduct1().hasSameIdAs(reaction.getEduct2()))
             addReactionToVector(
                 settings_.exchangeReactions_[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
         break;
@@ -150,7 +317,7 @@ void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
 void GlobalSettings::throwIfLocked()
 {
     if (locked_)
-        throw ChangeDuringLockException("Settings are locked");
+        throw std::runtime_error("Settings are locked");
 }
 
 void GlobalSettings::lock()
@@ -169,52 +336,10 @@ bool GlobalSettings::isLocked() const
 }
 
 /**
- * @brief Given any one of the reaction maps (decomposition, collision, exchange, ...) remove any entries where the
- * given DiscType is contained in the educts
- */
-template <typename T> void eraseIfInEducts(T& reactionTable, const DiscType& discType)
-{
-    using KeyType = typename T::key_type;
-
-    for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
-    {
-        const Reaction& reaction = iter->second.front();
-        if (reaction.getEduct1() == discType || (reaction.hasEduct2() && reaction.getEduct2() == discType))
-        {
-            iter = reactionTable.erase(iter);
-            continue;
-        }
-        ++iter;
-    }
-}
-
-/**
- * @brief Actual implementation of removeDanglingReactions
- */
-template <typename T> void removeDanglingReactions(T& reactionTable, const std::vector<DiscType>& removedDiscTypes)
-{
-    for (const auto& removedDiscType : removedDiscTypes)
-    {
-        // Step 1: Erase all reactions that have the removed disc type as an educt
-        eraseIfInEducts(reactionTable, removedDiscType);
-
-        // Step 2: Erase all reactions that have the removed disc type as a product
-        for (auto iter = reactionTable.begin(); iter != reactionTable.end();)
-        {
-            removeReactionsFromVector(iter->second, removedDiscType);
-            if (iter->second.empty())
-                iter = reactionTable.erase(iter);
-            else
-                ++iter;
-        }
-    }
-}
-
-/**
  * @brief Given a reaction map, remove all entries where a removed DiscType is either in the educts or products of any
  * of the reactions
  */
-void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution)
+void GlobalSettings::removeDanglingReactions(const DiscType::map<int>& newDiscTypeDistribution)
 {
     std::vector<DiscType> removedDiscTypes;
 
@@ -229,98 +354,7 @@ void GlobalSettings::removeDanglingReactions(const std::map<DiscType, int>& newD
     ::removeDanglingReactions(settings_.exchangeReactions_, removedDiscTypes);
 }
 
-/**
- * @brief Given a new DiscType distribution, find any reactions in the given vector where any of the products/educts is
- * equal to an updated DiscType using the getters of Reaction. Then, assign the new DiscType with the respective setter.
- * To find the changed DiscType, DiscType::getId() is used.
- */
-void updateDiscTypesInReactions(std::vector<Reaction>& reactions,
-                                const std::map<DiscType, int>& newDiscTypeDistribution)
-{
-    for (auto& reaction : reactions)
-    {
-        // If we find a disc type that has the same id as an updated one in any of the educts/products, we'll update
-        // the respective educt/product
-        std::vector<std::pair<std::function<DiscType()>, std::function<void(const DiscType&)>>> gettersSetters{
-            {std::bind(&Reaction::getEduct1, &reaction),
-             std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1)},
-            {std::bind(&Reaction::getEduct2, &reaction),
-             std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1)},
-            {std::bind(&Reaction::getProduct1, &reaction),
-             std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1)},
-            {std::bind(&Reaction::getProduct2, &reaction),
-             std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1)}};
-
-        if (!reaction.hasProduct2())
-            gettersSetters.erase(gettersSetters.begin() + 3);
-
-        if (!reaction.hasEduct2())
-            gettersSetters.erase(gettersSetters.begin() + 1);
-
-        for (auto& [getter, setter] : gettersSetters)
-        {
-            auto iter = newDiscTypeDistribution.find(getter());
-            if (iter != newDiscTypeDistribution.end())
-                setter(iter->first);
-        }
-    }
-}
-
-/**
- * @brief Educts are the keys in the reaction tables, so try to find changed DiscTypes in the keys and replace those
- * with the updated ones (keys are immutable and need to be replaced)
- */
-template <typename T>
-void updateDiscTypesInEducts(T& reactionTable, const std::map<DiscType, int>& newDiscTypeDistribution)
-{
-    if (reactionTable.empty())
-        return;
-
-    using KeyType = typename T::key_type;
-
-    for (const auto& [discType, _] : newDiscTypeDistribution)
-    {
-        // Find all keys that contain a possibly updated DiscType (for combination/exchange reactions, there might be
-        // several; for decomposition reactions, there will only be 1)
-        std::vector<KeyType> matches;
-        for (const auto& [educts, reactions] : reactionTable)
-        {
-            const Reaction& reaction = reactions.front();
-            if (reaction.getEduct1() == discType || (reaction.hasEduct2() && reaction.getEduct2() == discType))
-                matches.push_back(educts);
-        }
-
-        // Replace these keys with updates ones
-        for (const auto& educts : matches)
-        {
-            auto iter = reactionTable.find(educts);
-            auto reactions = iter->second;
-            reactionTable.erase(iter);
-
-            if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
-            {
-                const auto& newKey = std::make_pair(educts.first == discType ? discType : educts.first,
-                                                    educts.second == discType ? discType : educts.second);
-                reactionTable[newKey] = reactions;
-            }
-            else
-                reactionTable[discType] = reactions;
-        }
-    }
-}
-
-template <typename T>
-void updateDiscTypesInReactions(T& reactionTable, const std::map<DiscType, int>& newDiscTypeDistribution)
-{
-    // Step 1: Update disc types in all reactions
-    for (auto& [educts, reactions] : reactionTable)
-        updateDiscTypesInReactions(reactions, newDiscTypeDistribution);
-
-    // Step 2: Update disc types in educts (keys)
-    updateDiscTypesInEducts(reactionTable, newDiscTypeDistribution);
-}
-
-void GlobalSettings::updateDiscTypesInReactions(const std::map<DiscType, int>& newDiscTypeDistribution)
+void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDiscTypeDistribution)
 {
     ::updateDiscTypesInReactions(settings_.decompositionReactions_, newDiscTypeDistribution);
     ::updateDiscTypesInReactions(settings_.combinationReactions_, newDiscTypeDistribution);

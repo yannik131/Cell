@@ -65,18 +65,14 @@ TEST(DiscTypeTest, EqualityOperator)
 {
     DiscType dt1("Equal", sf::Color::Blue, 3.0f, 6.0f);
     DiscType dt2("Equal", sf::Color::Blue, 3.0f, 6.0f);
+    DiscType dt3 = dt2;
+    DiscType dt4(dt2);
 
     // Don't have same ID
     EXPECT_FALSE(dt1 == dt2);
-}
 
-TEST(DiscTypeTest, LessOperator)
-{
-    DiscType dt1("Alpha", sf::Color::Blue, 3.0f, 6.0f);
-    DiscType dt2("Beta", sf::Color::Red, 4.0f, 8.0f);
-
-    EXPECT_TRUE(dt1 < dt2);
-    EXPECT_FALSE(dt2 < dt1);
+    EXPECT_TRUE(dt3 == dt2);
+    EXPECT_TRUE(dt4 == dt2);
 }
 
 TEST(DiscTypeTest, MakeOrderedPair)

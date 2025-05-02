@@ -3,7 +3,9 @@
 
 #include <SFML/Graphics/Color.hpp>
 
+#include <map>
 #include <string>
+#include <tuple>
 #include <utility>
 
 /**
@@ -12,6 +14,24 @@
  */
 class DiscType
 {
+public:
+    struct IdComparator
+    {
+        bool operator()(const DiscType& a, const DiscType& b) const
+        {
+            return a.getId() < b.getId();
+        }
+
+        bool operator()(const std::pair<DiscType, DiscType>& a, const std::pair<DiscType, DiscType>& b) const
+        {
+            return std::make_tuple(a.first.getId(), a.second.getId()) <
+                   std::make_tuple(b.first.getId(), b.second.getId());
+        }
+    };
+
+public:
+    template <typename T> using map = std::map<DiscType, T, IdComparator>;
+
 public:
     /**
      * @brief Creates a new disc type with unique ID
@@ -74,6 +94,16 @@ public:
      */
     int getId() const;
 
+    /**
+     * @returns `true` if the id's are identical
+     */
+    bool hasSameIdAs(const DiscType& other) const;
+
+    /**
+     * @brief Default comparison operator, compares all attributes
+     */
+    bool operator==(const DiscType& other) const = default;
+
 private:
     /**
      * @brief The name is just a convience property to work with DiscTypes more easily
@@ -107,16 +137,6 @@ private:
      */
     static int instanceCount;
 };
-
-/**
- * @brief Checks for equality in terms of ID
- */
-bool operator==(const DiscType& a, const DiscType& b);
-
-/**
- * @brief operator< with no semantic meaning, necessary for the disc type distribution std::map
- */
-bool operator<(const DiscType& a, const DiscType& b);
 
 /**
  * @brief Creates an ordered pair sorted by ID

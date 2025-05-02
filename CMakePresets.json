@@ -26,11 +26,9 @@
             "configuration": "Debug",
             "jobs": 4,
             "targets": [
-                "libcell",
-                "libcellgui",
                 "cell-gui",
                 "benchmark",
-                "tests"
+                "tests-libcell"
             ]
         },
         {
@@ -40,11 +38,9 @@
             "configuration": "Release",
             "jobs": 4,
             "targets": [
-                "libcell",
-                "libcellgui",
                 "cell-gui",
                 "benchmark",
-                "tests"
+                "tests-libcell"
             ]
         }
     ]

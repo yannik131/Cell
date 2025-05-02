@@ -16,7 +16,7 @@ World::World()
 {
 }
 
-template <typename T> std::map<DiscType, T> operator+=(std::map<DiscType, T>& a, const std::map<DiscType, T>& b)
+template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
 {
     for (const auto& [key, value] : b)
         a[key] += value;
@@ -46,7 +46,7 @@ void World::update(const sf::Time& dt)
     removeDestroyedDiscs();
 }
 
-std::map<DiscType, int> World::getAndResetCollisionCount()
+DiscType::map<int> World::getAndResetCollisionCount()
 {
     auto tmp = std::move(collisionCounts_);
     collisionCounts_.clear();

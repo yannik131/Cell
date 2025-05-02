@@ -2,7 +2,6 @@
 #define GLOBALSETTINGS_HPP
 
 #include "DiscType.hpp"
-#include "ExceptionMacro.hpp"
 #include "Settings.hpp"
 #include "StringUtils.hpp"
 
@@ -26,8 +25,6 @@ enum SettingID
     Reactions = 1 << 4,
     FrictionCoefficient = 1 << 5,
 };
-
-CUSTOM_EXCEPTION(ChangeDuringLockException)
 
 /**
  * @brief Singleton for global simulation settings. See Settings.hpp for a detailed documentation of the different
@@ -65,7 +62,7 @@ public:
      * a DiscType as an educt or product that is not contained in the new distribution. Also updates all reactions if an
      * existent DiscType was changed. Validates that the distribution isn't empty and percentages add up to 100
      */
-    void setDiscTypeDistribution(const std::map<DiscType, int>& discTypeDistribution);
+    void setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution);
 
     /**
      * @brief Determines the type of reaction and automatically adds it to the correct reaction map
@@ -102,12 +99,12 @@ private:
      * @brief Helper function to remove reactions were removed DiscTypes are in the educts or products ("dangling"
      * reactions)
      */
-    void removeDanglingReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
+    void removeDanglingReactions(const DiscType::map<int>& newDiscTypeDistribution);
 
     /**
      * @brief Helper function to update reactions were updated DiscTypes are in the educts or products
      */
-    void updateDiscTypesInReactions(const std::map<DiscType, int>& newDiscTypeDistribution);
+    void updateDiscTypesInReactions(const DiscType::map<int>& newDiscTypeDistribution);
 
     /**
      * @brief Calls the custom callback if it exists on the SettingID

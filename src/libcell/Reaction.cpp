@@ -1,4 +1,5 @@
 #include "Reaction.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -26,9 +27,9 @@ std::string toString(const Reaction& reaction)
 
 bool contains(const Reaction& reaction, const DiscType& discType)
 {
-    return reaction.getEduct1() == discType || reaction.getProduct1() == discType ||
-           (reaction.hasEduct2() && reaction.getEduct2() == discType) ||
-           (reaction.hasProduct2() && reaction.getProduct2() == discType);
+    return reaction.getEduct1().hasSameIdAs(discType) || reaction.getProduct1().hasSameIdAs(discType) ||
+           (reaction.hasEduct2() && reaction.getEduct2().hasSameIdAs(discType)) ||
+           (reaction.hasProduct2() && reaction.getProduct2().hasSameIdAs(discType));
 }
 
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
@@ -116,7 +117,7 @@ Reaction::Type inferType(const std::optional<DiscType>& educt2, const std::optio
     else if (educt2.has_value() && product2.has_value())
         return Reaction::Type::Exchange;
     else
-        throw std::runtime_error("Invalid number of educts or products");
+        throw ExceptionWithLocation("Reaction with no educt2 and no product2 is not allowed");
 }
 
 Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,

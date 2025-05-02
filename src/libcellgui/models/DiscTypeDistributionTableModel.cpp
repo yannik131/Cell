@@ -135,18 +135,7 @@ void DiscTypeDistributionTableModel::loadSettings()
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    auto compare = [](const DiscType& a, const DiscType& b) { return a.getName() < b.getName(); };
-    std::set<DiscType, decltype(compare)> uniqueDiscTypes(compare);
-
-    for (const auto& pair : rows_)
-    {
-        if (uniqueDiscTypes.contains(pair.first))
-            throw std::runtime_error("Duplicate disc type name found: " + pair.first.getName());
-
-        uniqueDiscTypes.insert(pair.first);
-    }
-
-    std::map<DiscType, int> result(rows_.begin(), rows_.end());
+    DiscType::map<int> result(rows_.begin(), rows_.end());
     GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }
 

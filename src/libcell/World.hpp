@@ -17,7 +17,7 @@ public:
     World();
 
     void update(const sf::Time& dt);
-    std::map<DiscType, int> getAndResetCollisionCount();
+    DiscType::map<int> getAndResetCollisionCount();
     const std::vector<Disc>& discs() const;
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
@@ -32,7 +32,7 @@ private:
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;
     int maxRadius_;
-    std::map<DiscType, int> collisionCounts_;
+    DiscType::map<int> collisionCounts_;
     float initialKineticEnergy_;
     float currentKineticEnergy_;
 

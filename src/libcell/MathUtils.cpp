@@ -182,9 +182,9 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
     return collidingDiscs;
 }
 
-std::map<DiscType, int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
+DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
-    std::map<DiscType, int> collisionCounts;
+    DiscType::map<int> collisionCounts;
 
     const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
 
