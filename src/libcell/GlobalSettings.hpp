@@ -2,6 +2,7 @@
 #define GLOBALSETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "Settings.hpp"
 #include "StringUtils.hpp"
 
@@ -138,7 +139,7 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
     using StringUtils::toString;
 
     if (value < min || value > max)
-        throw std::invalid_argument("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
+        throw ExceptionWithLocation("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
                                     "\" and \"" + toString(max) + "\", but is \"" + toString(value) + "\"");
 }
 

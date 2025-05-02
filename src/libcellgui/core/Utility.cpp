@@ -1,4 +1,5 @@
 #include "Utility.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "GlobalSettings.hpp"
 
 #include <stdexcept>
@@ -14,7 +15,7 @@ DiscType getDiscTypeByName(const QString& name)
             return discType;
     }
 
-    throw std::runtime_error(("No disc type found for name \"" + name + "\"").toStdString());
+    throw ExceptionWithLocation(("No disc type found for name \"" + name + "\"").toStdString());
 }
 
 QStringList getDiscTypeNames()

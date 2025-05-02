@@ -1,4 +1,5 @@
 #include "MainWindow.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
@@ -114,7 +115,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 void MainWindow::startSimulation()
 {
     if (simulationThread_ != nullptr)
-        throw std::runtime_error("Simulation can't be started: It's already running");
+        throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);

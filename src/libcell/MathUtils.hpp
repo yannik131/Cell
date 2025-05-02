@@ -9,6 +9,24 @@
 #include <set>
 #include <vector>
 
+template <typename T1, typename T2, typename T3>
+std::map<T1, T2, T3>& operator+=(std::map<T1, T2, T3>& a, const std::map<T1, T2, T3>& b)
+{
+    for (const auto& [key, value] : b)
+        a[key] += value;
+
+    return a;
+}
+
+template <typename T1, typename T2, typename T3, typename T4>
+std::map<T1, T2, T3>& operator/=(std::map<T1, T2, T3>& a, const T4& b)
+{
+    for (const auto& [key, value] : a)
+        a[key] /= b;
+
+    return a;
+}
+
 namespace MathUtils
 {
 
@@ -48,6 +66,20 @@ float abs(const sf::Vector2f& vec);
  * @returns {normal vector, distance, overlap}
  */
 std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2);
+
+/**
+ * @brief Turns a map<key, value> into a map<value, key>
+ */
+template <template <typename, typename> class MapType, typename KeyType, typename ValueType>
+MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
+{
+    MapType<ValueType, KeyType> inverted;
+
+    for (auto it = map.begin(); it != map.end(); ++it)
+        inverted[it.value()] = it.key();
+
+    return inverted;
+}
 
 /**
  * @brief Returns a random float within [0, 1)

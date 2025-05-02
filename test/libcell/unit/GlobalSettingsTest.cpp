@@ -154,7 +154,7 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     // Lock the settings so that further changes are prohibited.
     settings.lock();
 
-    // Now all modification calls should throw std::runtime_error.
+    // Now all modification calls should throw ExceptionWithLocation.
     EXPECT_THROW(settings.setSimulationTimeStep(SettingsLimits::MinSimulationTimeStep), std::runtime_error);
     EXPECT_THROW(settings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale), std::runtime_error);
     EXPECT_THROW(settings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs), std::runtime_error);

@@ -147,7 +147,7 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
-        throw std::runtime_error("Can't add reaction: There are no available disc types defined");
+        throw ExceptionWithLocation("Can't add reaction: There are no available disc types defined");
 
     const auto& defaultDiscType = discTypeDistribution.begin()->first;
 

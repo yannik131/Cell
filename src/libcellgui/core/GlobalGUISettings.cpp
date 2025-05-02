@@ -1,4 +1,5 @@
 #include "GlobalGUISettings.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "Utility.hpp"
@@ -25,7 +26,7 @@ GlobalGUISettings::GlobalGUISettings()
 
 void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
 {
-    QMap<DiscType, bool> discTypesPlotMap;
+    DiscType::map<bool> discTypesPlotMap;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
         discTypesPlotMap[discType] = true;
 
@@ -54,7 +55,7 @@ void GlobalGUISettings::setCurrentPlotCategory(const PlotCategory& plotCategory)
     emit plotResetRequired();
 }
 
-void GlobalGUISettings::setDiscTypesPlotMap(const QMap<DiscType, bool>& discTypesPlotMap)
+void GlobalGUISettings::setDiscTypesPlotMap(const DiscType::map<bool>& discTypesPlotMap)
 {
     guiSettings_.discTypesPlotMap_ = discTypesPlotMap;
 
@@ -68,7 +69,7 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
         activeDiscTypes.push_back(Utility::getDiscTypeByName(selectedDiscTypeName));
 
     bool hasTrueValue = false;
-    QMap<DiscType, bool> discTypePlotMap;
+    DiscType::map<bool> discTypePlotMap;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
     {
         auto iter = std::find(activeDiscTypes.begin(), activeDiscTypes.end(), discType);
@@ -78,7 +79,7 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
     }
 
     if (!hasTrueValue)
-        throw std::runtime_error("Plot selection can't be empty");
+        throw ExceptionWithLocation("Plot selection can't be empty");
 
     guiSettings_.discTypesPlotMap_ = discTypePlotMap;
 
@@ -94,7 +95,7 @@ void GlobalGUISettings::setPlotSum(bool value)
 
 void GlobalGUISettings::updateDiscTypesPlotMap()
 {
-    QMap<DiscType, bool> updatedDiscTypesPlotMap;
+    DiscType::map<bool> updatedDiscTypesPlotMap;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
     {
         if (guiSettings_.discTypesPlotMap_.contains(discType))

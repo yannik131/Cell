@@ -41,7 +41,7 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
     }
 
     if (std::find(reactions.begin(), reactions.end(), reaction) != reactions.end())
-        throw std::runtime_error("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
+        throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
 
     float totalProbability = reactions.front().getProbability();
 
@@ -49,7 +49,7 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
         totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
 
     if (reaction.getProbability() + totalProbability > 1.f)
-        throw std::runtime_error("Can't add reaction to vector: Accumulative probability > 1");
+        throw ExceptionWithLocation("Can't add reaction to vector: Accumulative probability > 1");
 
     reaction.setProbability(reaction.getProbability() + totalProbability);
     reactions.push_back(reaction);
@@ -144,7 +144,7 @@ void Reaction::setEduct1(const DiscType& educt1)
 const DiscType& Reaction::getEduct2() const
 {
     if (type_ == Decomposition)
-        throw std::runtime_error("Can't get educt2: Decomposition reactions have no educt2");
+        throw ExceptionWithLocation("Can't get educt2: Decomposition reactions have no educt2");
 
     return *educt2_;
 }
@@ -157,7 +157,7 @@ bool Reaction::hasEduct2() const
 void Reaction::setEduct2(const DiscType& educt2)
 {
     if (type_ == Decomposition)
-        throw std::runtime_error("Can't set educt2: Decomposition reactions have no educt2");
+        throw ExceptionWithLocation("Can't set educt2: Decomposition reactions have no educt2");
 
     educt2_ = educt2;
 }
@@ -175,7 +175,7 @@ void Reaction::setProduct1(const DiscType& product1)
 const DiscType& Reaction::getProduct2() const
 {
     if (type_ == Combination)
-        throw std::runtime_error("Can't get product2: Combination reactions have no product2");
+        throw ExceptionWithLocation("Can't get product2: Combination reactions have no product2");
 
     return *product2_;
 }
@@ -188,7 +188,7 @@ bool Reaction::hasProduct2() const
 void Reaction::setProduct2(const DiscType& product2)
 {
     if (type_ == Combination)
-        throw std::runtime_error("Can't set product2: Combination reactions have no product2");
+        throw ExceptionWithLocation("Can't set product2: Combination reactions have no product2");
 
     product2_ = product2;
 }
@@ -201,7 +201,7 @@ float Reaction::getProbability() const
 void Reaction::setProbability(float probability)
 {
     if (probability < 0 || probability > 1)
-        throw std::runtime_error("Probability must be between 0 and 1");
+        throw ExceptionWithLocation("Probability must be between 0 and 1");
 
     probability_ = probability;
 }

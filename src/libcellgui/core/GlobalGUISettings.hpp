@@ -27,7 +27,7 @@ private:
 
     void setCurrentPlotCategory(const PlotCategory& plotCategory);
 
-    void setDiscTypesPlotMap(const QMap<DiscType, bool>& discTypesPlotMap);
+    void setDiscTypesPlotMap(const DiscType::map<bool>& discTypesPlotMap);
     void setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames);
 
     void setPlotSum(bool value);

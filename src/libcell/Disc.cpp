@@ -1,4 +1,5 @@
 #include "Disc.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <cmath>
 #include <functional>
@@ -16,7 +17,7 @@ void Disc::setVelocity(const sf::Vector2f& velocity)
 {
 #ifdef DEBUG
     if (std::isnan(velocity.x) || std::isnan(velocity.y) || std::isinf(velocity.x) || std::isinf(velocity.y))
-        throw std::runtime_error("Trying to assign an invalid value to velocity");
+        throw ExceptionWithLocation("Trying to assign an invalid value to velocity");
 #endif
     velocity_ = velocity;
 }
@@ -45,7 +46,7 @@ void Disc::setPosition(const sf::Vector2f& position)
 {
 #ifdef DEBUG
     if (std::isnan(position.x) || std::isnan(position.y) || std::isinf(position.x) || std::isinf(position.y))
-        throw std::runtime_error("Trying to assign an invalid value to position");
+        throw ExceptionWithLocation("Trying to assign an invalid value to position");
 #endif
     position_ = position;
 }

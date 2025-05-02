@@ -57,6 +57,6 @@ void PlotDataSelectionDialog::loadSettings()
         auto item = new QListWidgetItem(QString::fromStdString(discType.getName()));
         ui->selectedDiscTypesListWidget->addItem(item);
 
-        item->setSelected(GlobalGUISettings::getGUISettings().discTypesPlotMap_[discType]);
+        item->setSelected(GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType));
     }
 }

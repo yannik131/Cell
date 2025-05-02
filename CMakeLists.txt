@@ -38,7 +38,7 @@ add_library(libcell ${LIBCELL_SRC})
 
 target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/src/libcell/)
 
-target_link_libraries(libcell PRIVATE 
+target_link_libraries(libcell PUBLIC
     sfml-graphics 
     sfml-window 
     sfml-system

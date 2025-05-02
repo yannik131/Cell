@@ -1,4 +1,5 @@
 #include "DiscType.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <stdexcept>
 
@@ -46,7 +47,7 @@ const std::string& DiscType::getName() const
 void DiscType::setName(const std::string& name)
 {
     if (name.empty())
-        throw std::runtime_error("Disc type name cannot be empty");
+        throw ExceptionWithLocation("Disc type name cannot be empty");
 
     name_ = name;
 }
@@ -59,7 +60,7 @@ const sf::Color& DiscType::getColor() const
 void DiscType::setColor(const sf::Color& color)
 {
     if (color == sf::Color())
-        throw std::runtime_error("Disc type must have a valid color");
+        throw ExceptionWithLocation("Disc type must have a valid color");
 
     color_ = color;
 }
@@ -72,7 +73,7 @@ float DiscType::getRadius() const
 void DiscType::setRadius(float radius)
 {
     if (radius <= 0)
-        throw std::runtime_error("Disc type radius must be positive");
+        throw ExceptionWithLocation("Disc type radius must be positive");
 
     radius_ = radius;
 }
@@ -85,7 +86,7 @@ float DiscType::getMass() const
 void DiscType::setMass(float mass)
 {
     if (mass <= 0)
-        throw std::runtime_error("Disc type mass must be positive");
+        throw ExceptionWithLocation("Disc type mass must be positive");
 
     mass_ = mass;
 }

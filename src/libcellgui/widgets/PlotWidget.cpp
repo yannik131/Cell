@@ -61,22 +61,22 @@ void PlotWidget::reset()
     plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
 
     const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
-    for (auto iter = discTypesPlotMap.begin(); iter != discTypesPlotMap.end(); ++iter)
+    for (const auto& [discType, plotEnabled] : discTypesPlotMap)
     {
-        if (!iter.value())
+        if (!plotEnabled)
             continue;
 
         QCPGraph* graph = addGraph();
-        graph->setPen(Utility::sfColorToQColor(iter.key().getColor()));
-        graph->setName(QString::fromStdString(iter.key().getName()));
-        graphs_[iter.key()] = graph;
+        graph->setPen(Utility::sfColorToQColor(discType.getColor()));
+        graph->setName(QString::fromStdString(discType.getName()));
+        graphs_[discType] = graph;
     }
 
     for (int i = 0; i < legend->itemCount(); ++i)
         legend->item(i)->setLayer("legend layer");
 }
 
-void PlotWidget::replacePlot(const QVector<QMap<DiscType, double>>& dataPoints)
+void PlotWidget::replacePlot(const QVector<DiscType::map<double>>& dataPoints)
 {
     reset();
 
@@ -90,7 +90,7 @@ void PlotWidget::replacePlot(const QVector<QMap<DiscType, double>>& dataPoints)
         plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
 }
 
-void PlotWidget::plotDataPoint(const QMap<DiscType, double>& dataPoint, bool doReplot)
+void PlotWidget::plotDataPoint(const DiscType::map<double>& dataPoint, bool doReplot)
 {
     if (GlobalGUISettings::getGUISettings().plotSum_)
         addDataPointSum(dataPoint);
@@ -106,40 +106,40 @@ void PlotWidget::plotDataPoint(const QMap<DiscType, double>& dataPoint, bool doR
     }
 }
 
-void PlotWidget::addDataPoint(const QMap<DiscType, double>& dataPoint)
+void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
 {
     if (graphs_.empty())
         return;
 
-    const auto& size = graphs_.first()->dataCount();
+    const auto& size = graphs_.begin()->second->dataCount();
     const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
 
-    for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
+    for (const auto& [discType, value] : dataPoint)
     {
-        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
             continue;
 
         xMax_ = timeStep * size;
-        graphs_[iter.key()]->addData(xMax_, iter.value());
+        graphs_[discType]->addData(xMax_, value);
 
-        yMin_ = std::min(yMin_, iter.value());
-        yMax_ = std::max(yMax_, iter.value());
+        yMin_ = std::min(yMin_, value);
+        yMax_ = std::max(yMax_, value);
     }
 }
 
-void PlotWidget::addDataPointSum(const QMap<DiscType, double>& dataPoint)
+void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
 {
     const auto& size = sumGraph_->dataCount();
     const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
     double sum = 0.0;
 
-    for (auto iter = dataPoint.begin(); iter != dataPoint.end(); ++iter)
+    for (const auto& [discType, value] : dataPoint)
     {
-        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_[iter.key()])
+        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
             continue;
 
         xMax_ = timeStep * size;
-        sum += iter.value();
+        sum += value;
     }
 
     sumGraph_->addData(xMax_, sum);
@@ -150,6 +150,6 @@ void PlotWidget::addDataPointSum(const QMap<DiscType, double>& dataPoint)
 void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::dataPointAdded,
-            [this](const QMap<DiscType, double>& dataPoint) { plotDataPoint(dataPoint); });
+            [this](const DiscType::map<double>& dataPoint) { plotDataPoint(dataPoint); });
     connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
 }

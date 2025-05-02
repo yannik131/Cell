@@ -259,14 +259,14 @@ void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeD
     throwIfLocked();
 
     if (discTypeDistribution.empty())
-        throw std::runtime_error("Disc type distribution cannot be empty");
+        throw ExceptionWithLocation("Disc type distribution cannot be empty");
 
     if (const auto& duplicateName = getFirstDuplicateByName(discTypeDistribution))
-        throw std::runtime_error("Duplicate disc type found: " + *duplicateName);
+        throw ExceptionWithLocation("Duplicate disc type found: " + *duplicateName);
 
     if (int totalPercent = calculateFrequencySum(discTypeDistribution); totalPercent != 100)
-        throw std::runtime_error("Percentages for disc type distribution don't add up to 100. They add up to " +
-                                 std::to_string(totalPercent));
+        throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100. They add up to " +
+                                    std::to_string(totalPercent));
 
     removeDanglingReactions(discTypeDistribution);
     updateDiscTypesInReactions(discTypeDistribution);
@@ -338,7 +338,7 @@ void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
 void GlobalSettings::throwIfLocked()
 {
     if (locked_)
-        throw std::runtime_error("Settings are locked");
+        throw ExceptionWithLocation("Settings are locked");
 }
 
 void GlobalSettings::lock()

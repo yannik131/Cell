@@ -78,7 +78,7 @@ void World::reinitialize()
 void World::setBounds(const sf::Vector2f& bounds)
 {
     if (bounds.x <= 0 || bounds.y <= 0)
-        throw std::runtime_error("Bounds must be > 0");
+        throw ExceptionWithLocation("Bounds must be > 0");
 
     bounds_ = bounds;
 }
@@ -145,7 +145,7 @@ void World::buildScene()
 void World::initializeStartPositions()
 {
     if (bounds_.x == 0 || bounds_.y == 0)
-        throw std::runtime_error("Can't initialize world: Bounds not set");
+        throw ExceptionWithLocation("Can't initialize world: Bounds not set");
 
     startPositions_.reserve((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_));
 
