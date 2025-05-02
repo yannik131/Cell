@@ -1,4 +1,5 @@
 #include "GlobalSettings.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -171,6 +172,17 @@ void updateDiscTypesInReactions(T& reactionTable, const DiscType::map<int>& newD
     updateDiscTypesInEducts(reactionTable, newDiscTypeDistribution);
 }
 
+void throwIfNotInDistribution(const DiscType& discType, const DiscType::map<int>& distribution)
+{
+    for (const auto& [other, frequency] : distribution)
+    {
+        if (other == discType)
+            return;
+    }
+
+    throw ExceptionWithLocation("DiscType \"" + discType.getName() + "\" not found in distribution");
+}
+
 } // namespace
 
 void GlobalSettings::setCallback(const std::function<void(const SettingID& settingID)>& functor)
@@ -267,6 +279,15 @@ void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeD
 void GlobalSettings::addReaction(const Reaction& reaction)
 {
     throwIfLocked();
+
+    throwIfNotInDistribution(reaction.getEduct1(), settings_.discTypeDistribution_);
+    throwIfNotInDistribution(reaction.getProduct1(), settings_.discTypeDistribution_);
+
+    if (reaction.hasEduct2())
+        throwIfNotInDistribution(reaction.getEduct2(), settings_.discTypeDistribution_);
+
+    if (reaction.hasProduct2())
+        throwIfNotInDistribution(reaction.getProduct2(), settings_.discTypeDistribution_);
 
     switch (reaction.getType())
     {

@@ -42,7 +42,7 @@ template <typename T> bool isInEductsOrProducts(const T& reactionTable, const Di
     return false;
 }
 
-template <typename T> int countIdsInReactions(const T& reactionTable, int id)
+template <typename T> int countDiscTypeInReactionTable(const T& reactionTable, const DiscType& discType)
 {
     using KeyType = T::key_type;
 
@@ -51,29 +51,39 @@ template <typename T> int countIdsInReactions(const T& reactionTable, int id)
     {
         if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
         {
-            if (educts.first.getId() == id)
+            if (educts.first == discType)
                 ++count;
-            if (educts.second.getId() == id)
+            if (educts.second == discType)
                 ++count;
         }
         else
         {
-            if (educts.getId() == id)
+            if (educts == discType)
                 ++count;
         }
 
         for (const auto& reaction : reactions)
         {
-            if (reaction.getEduct1().getId() == id)
+            if (reaction.getEduct1() == discType)
                 ++count;
-            if (reaction.hasEduct2() && reaction.getEduct2().getId() == id)
+            if (reaction.hasEduct2() && reaction.getEduct2() == discType)
                 ++count;
-            if (reaction.getProduct1().getId() == id)
+            if (reaction.getProduct1() == discType)
                 ++count;
-            if (reaction.hasProduct2() && reaction.getProduct2().getId() == id)
+            if (reaction.hasProduct2() && reaction.getProduct2() == discType)
                 ++count;
         }
     }
+
+    return count;
+}
+
+int countDiscTypeInReactions(const GlobalSettings& globalSettings, const DiscType& discType)
+{
+    int count = 0;
+    count += countDiscTypeInReactionTable(globalSettings.getSettings().combinationReactions_, discType);
+    count += countDiscTypeInReactionTable(globalSettings.getSettings().decompositionReactions_, discType);
+    count += countDiscTypeInReactionTable(globalSettings.getSettings().exchangeReactions_, discType);
 
     return count;
 }
@@ -236,6 +246,7 @@ TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 {
     settings.clearReactions();
+    settings.setDiscTypeDistribution({{A, 50}, {B, 50}});
 
     Reaction noDuplicateCombination{A, B, A, std::nullopt, 0.1f};
     Reaction noDuplicateExchange{A, B, A, B, 0.1f};
@@ -326,16 +337,48 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 
 TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 {
+    DiscType::map<int> distribution{{A, 100}};
+
+    settings.setDiscTypeDistribution(distribution);
+    settings.clearReactions();
+
+    settings.addReaction(Reaction{A, std::nullopt, A, A, 0.1f});
+    settings.addReaction(Reaction{A, A, A, std::nullopt, 0.1f});
+    settings.addReaction(Reaction{A, A, A, A, 0.1f});
+
+    int count = countDiscTypeInReactions(settings, A);
+
+    DiscType AModified = A;
+    AModified.setName("AModified");
+    distribution = {{AModified, 100}};
+    settings.setDiscTypeDistribution(distribution);
+
+    EXPECT_EQ(count, countDiscTypeInReactions(settings, AModified));
 }
 
 TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
 {
+    settings.setDiscTypeDistribution({{A, 100}});
+    settings.clearReactions();
+
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, std::nullopt, B, B, 0.1f}));
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, B, B, std::nullopt, 0.1f}));
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, B, B, B, 0.1f}));
+    EXPECT_NO_THROW(settings.addReaction(Reaction{A, A, A, A, 0.1f}));
 }
 
-TEST(GlobalSettingsTest, KeysAreIdenticalToEducts)
+TEST(GlobalSettingsTest, EmptyReactionVectorsAreRemoved)
 {
-}
+    settings.setDiscTypeDistribution({{A, 100}});
+    settings.clearReactions();
 
-TEST(GlobalSettingsTest, NoEmptyReactionVectors)
-{
+    settings.addReaction(Reaction{A, std::nullopt, A, A, 0.1f});
+    settings.addReaction(Reaction{A, A, A, std::nullopt, 0.1f});
+    settings.addReaction(Reaction{A, A, A, A, 0.1f});
+
+    settings.setDiscTypeDistribution({{B, 100}});
+
+    EXPECT_TRUE(settings.getSettings().decompositionReactions_.empty());
+    EXPECT_TRUE(settings.getSettings().combinationReactions_.empty());
+    EXPECT_TRUE(settings.getSettings().exchangeReactions_.empty());
 }
