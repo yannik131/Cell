@@ -6,7 +6,18 @@
 #include <glog/logging.h>
 
 #include <numeric>
+#include <ostream>
 #include <random>
+
+sf::Vector2f operator*(const sf::Vector2f& a, const sf::Vector2f& b)
+{
+    return sf::Vector2f{a.x * b.x, a.y * b.y};
+}
+
+std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
+{
+    return os << "(" << v.x << ", " << v.y << ")";
+}
 
 namespace MathUtils
 {
@@ -158,10 +169,9 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
         for (size_t i = 0; i < discsInRadius.size(); ++i)
         {
-            if (discsInRadius[i].second == 0)
-                continue;
-
             auto& otherDisc = discs[discsInRadius[i].first];
+            if (&otherDisc == &disc)
+                continue;
 
             const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
 
@@ -308,18 +318,37 @@ float abs(const sf::Vector2f& vec)
 
 std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
 {
-    const sf::Vector2f& diff = d2.getPosition() - d1.getPosition();
-    const float distance = abs(diff);
-    const sf::Vector2f& normal = diff / distance;
-    const float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
+    const sf::Vector2f dVec = d2.getPosition() - d1.getPosition();
+    const float d = abs(dVec);
 
-    if (overlap > 0)
+    if (d == 0)
     {
-        d1.move(-overlap * normal / 2.0f);
-        d2.move(overlap * normal / 2.0f);
+        // Overlap correction not possible if we can't compute a normal vector
+        // Ignore this collision and try again next frame!
+        return {{0, 0}, 0, 0};
     }
 
-    return {normal, distance, overlap};
+    const sf::Vector2f n = dVec / d;
+    const float l = d1.getType().getRadius() + d2.getType().getRadius() - d;
+
+    if (l > 0)
+    {
+        const auto& r = d1.getPosition() - d2.getPosition();
+        const auto& v = d1.getVelocity() - d2.getVelocity();
+        const auto& R1 = d1.getType().getRadius();
+        const auto& R2 = d2.getType().getRadius();
+        const float RadiiSumSquared = (R1 + R2) * (R1 + R2);
+
+        const float dt = (-r.x * v.x - r.y * v.y -
+                          std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
+                                    v.x * v.x * RadiiSumSquared + v.y * v.y * RadiiSumSquared)) /
+                         (v.x * v.x + v.y * v.y);
+
+        d1.move(dt * d1.getVelocity());
+        d2.move(dt * d2.getVelocity());
+    }
+
+    return {n, d, l};
 }
 
 float getRandomFloat()

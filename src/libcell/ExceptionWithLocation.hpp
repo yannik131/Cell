@@ -18,8 +18,8 @@ private:
     static std::string buildMessage(const std::string& description, const std::source_location& location)
     {
         std::ostringstream oss;
-        oss << "Error: " << description << "\nLine: " << location.file_name() << ":" << location.line()
-            << "\nCalled function: " << location.function_name();
+        oss << "Error:\t" << description << "\nLine:\t" << location.file_name() << ":" << location.line()
+            << "\nFunction:\t" << location.function_name();
         return oss.str();
     }
 };

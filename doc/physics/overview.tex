@@ -1,0 +1,54 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+	language=Python,
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	commentstyle=\color{green},
+	numberstyle=\tiny\color{gray},
+	numbers=left,
+	stepnumber=1,
+	numbersep=10pt,
+	showstringspaces=false,
+	tabsize=4,
+}
+
+\begin{document}
+	\section{Collision physics}
+	\subsection{Overlap correction}
+	
+	The overlap $l$ of 2 circles is the sum of their radii minus the distance between them. If the overlap is $> 0$, we have a collision. The current positions of the circles are $\vec{r}_{i, 0}$.
+	\begin{equation}
+		l = R_1 + R_2 - \left|\vec{v}_{2, 0} - \vec{v}_{1, 0}\right|
+	\end{equation}
+	We want to move the circles to the positions they had just before the collision (when they were just touching without intersection). For this, we need to move them back using their velocities for a time $dt$ we have to calculate. At that time, the overlap is 0:
+	\begin{align*}
+		l(t) &= R_1 + R_2 - \left|\vec{r_2}(t) - \vec{r_1}(t)\right|\\
+	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} + t\cdot\vec{v_2} - \vec{r}_{1, 0} - t\cdot\vec{v_1}\right|\\
+	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0} + t\left(\vec{v_2} - \vec{v_1}\right)\right|\\
+	 &= R_1 + R_2 - \left|\vec{r} + t\cdot\vec{v}\right| \overset{!}{=} 0\\
+	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
+	 &\Rightarrow t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + v_x^2 (R_1 + R_2)^2 + v_y^2 (R_1 + R_2)^2}}{v_x^2 + v_y^2}
+	\end{align*}
+	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles.
+	
+	\begin{lstlisting}
+from sympy import symbols, Eq, solve, simplify, sqrt
+
+rx, ry, vx, vy, R1, R2, t = symbols("rx ry vx vy R1 R2 t")
+eq = Eq(sqrt((rx + t*vx)**2+(ry+t*vy)**2), R1+R2)
+solution = solve(eq, t)
+
+simplified = [simplify(sol) for sol in solution]
+
+for sol in simplified:
+	print(sol)
+	\end{lstlisting}
+	
+\end{document}

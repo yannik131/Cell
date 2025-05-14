@@ -19,7 +19,7 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
     QApplication::style()->drawControl(QStyle::CE_PushButton, &buttonOption, painter);
 }
 
-bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
+bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel*, const QStyleOptionViewItem& option,
                                  const QModelIndex& index)
 {
     auto* mouseEvent = dynamic_cast<QMouseEvent*>(event);

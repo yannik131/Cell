@@ -27,9 +27,13 @@ std::map<T1, T2, T3>& operator/=(std::map<T1, T2, T3>& a, const T4& b)
     return a;
 }
 
+// TODO switch to a different library
+sf::Vector2f operator*(const sf::Vector2f& a, const sf::Vector2f& b);
+
+std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
+
 namespace MathUtils
 {
-
 /**
  * @brief Finds all discs in the vector that overlap and returns them as unique pairs.
  * @param discs The vector of discs
