@@ -36,7 +36,15 @@
 	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
 	 &\Rightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + (R_1 + R_2)^2 (v_x^2 + v_y^2)}}{v_x^2 + v_y^2}
 	\end{align*}
-	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. We select the negative one of the 2 solutions because we want to move the circles back in time.
+	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. We'll select the positive solution.\\
+	Now the correct initial positions $\vec{r}_{i, c}$ at the time of collision can easily be calculated:
+	\begin{equation}
+		\vec{r}_{i, c} =\vec{r}_{i, 0} - \Delta t \cdot \vec{v}_i
+	\end{equation}
+	After the collision was handled and the new velocities $\vec{v}'_i$ have been calculated, the circles need to be winded forward in time with their corrected velocities:
+	\begin{equation}
+		\vec{r}_{i} =\vec{r}_{i, c} + \Delta t \cdot \vec{v}'_i
+	\end{equation}
 	
 	\begin{lstlisting}[caption={Code to calculate $t$}]
 from sympy import symbols, Eq, solve, simplify, sqrt
@@ -48,18 +56,8 @@ solution = solve(eq, t)
 simplified = [simplify(sol) for sol in solution]
 
 for sol in simplified:
-	print(sol)
+print(sol)
 	\end{lstlisting}
-
-	Now the correct initial positions $\vec{r}_{i, c}$ at the time of the collisions can easily be calculated:
-	\begin{equation}
-		\vec{r}_{i, c} =\vec{r}_{i, 0} + \Delta t \cdot \vec{v}_i
-	\end{equation}
-	After the collision was handled and the new velocities $\vec{v}'_i$ have been calculated, the circles need to be winded forward in time with their corrected velocities:
-	\begin{equation}
-		\vec{r}_{i} =\vec{r}_{i, c} + \Delta t \cdot \vec{v}'_i
-	\end{equation}
-	
 
 	\subsection{Collision handling}
 	
