@@ -27,18 +27,18 @@
 	\begin{equation}
 		l = R_1 + R_2 - \left|\vec{v}_{2, 0} - \vec{v}_{1, 0}\right|
 	\end{equation}
-	We want to move the circles to the positions they had just before the collision (when they were just touching without intersection). For this, we need to move them back using their velocities for a time $dt$ we have to calculate. At that time, the overlap is 0:
+	We want to move the circles to the positions they had just before the collision (when they were just touching without intersection). For this, we need to move them back in time using their velocities multiplied with a time $\Delta t$ we have to calculate. At that time, the overlap should be 0:
 	\begin{align*}
 		l(t) &= R_1 + R_2 - \left|\vec{r_2}(t) - \vec{r_1}(t)\right|\\
 	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} + t\cdot\vec{v_2} - \vec{r}_{1, 0} - t\cdot\vec{v_1}\right|\\
 	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0} + t\left(\vec{v_2} - \vec{v_1}\right)\right|\\
 	 &= R_1 + R_2 - \left|\vec{r} + t\cdot\vec{v}\right| \overset{!}{=} 0\\
 	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
-	 &\Rightarrow t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + v_x^2 (R_1 + R_2)^2 + v_y^2 (R_1 + R_2)^2}}{v_x^2 + v_y^2}
+	 &\Rightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + (R_1 + R_2)^2 (v_x^2 + v_y^2)}}{v_x^2 + v_y^2}
 	\end{align*}
-	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles.
+	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. We select the negative one of the 2 solutions because we want to move the circles back in time.
 	
-	\begin{lstlisting}
+	\begin{lstlisting}[caption={Code to calculate $t$}]
 from sympy import symbols, Eq, solve, simplify, sqrt
 
 rx, ry, vx, vy, R1, R2, t = symbols("rx ry vx vy R1 R2 t")
@@ -50,5 +50,17 @@ simplified = [simplify(sol) for sol in solution]
 for sol in simplified:
 	print(sol)
 	\end{lstlisting}
+
+	Now the correct initial positions $\vec{r}_{i, c}$ at the time of the collisions can easily be calculated:
+	\begin{equation}
+		\vec{r}_{i, c} =\vec{r}_{i, 0} + \Delta t \cdot \vec{v}_i
+	\end{equation}
+	After the collision was handled and the new velocities $\vec{v}'_i$ have been calculated, the circles need to be winded forward in time with their corrected velocities:
+	\begin{equation}
+		\vec{r}_{i} =\vec{r}_{i, c} + \Delta t \cdot \vec{v}'_i
+	\end{equation}
+	
+
+	\subsection{Collision handling}
 	
 \end{document}

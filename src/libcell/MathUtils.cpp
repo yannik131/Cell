@@ -337,11 +337,10 @@ std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
         const auto& v = d1.getVelocity() - d2.getVelocity();
         const auto& R1 = d1.getType().getRadius();
         const auto& R2 = d2.getType().getRadius();
-        const float RadiiSumSquared = (R1 + R2) * (R1 + R2);
 
         const float dt = (-r.x * v.x - r.y * v.y -
                           std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
-                                    v.x * v.x * RadiiSumSquared + v.y * v.y * RadiiSumSquared)) /
+                                    ((R1 + R2) * (R1 + R2)) * (v.x * v.x + v.y * v.y))) /
                          (v.x * v.x + v.y * v.y);
 
         d1.move(dt * d1.getVelocity());
