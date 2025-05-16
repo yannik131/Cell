@@ -123,8 +123,6 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
         product2.setPosition(r + product2.getVelocity() / vAbs);
 
-        correctOverlap(product1, product2);
-
         newDiscs.push_back(std::move(product1));
         newDiscs.push_back(std::move(product2));
         d1->markDestroyed();
@@ -200,48 +198,31 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
 
     for (const auto& [p1, p2] : collidingDiscs)
     {
-        const auto& [normal, distance, overlap] = correctOverlap(*p1, *p2);
+        const OverlapResults& overlapResults = calculateOverlap(*p1, *p2);
 
         // No overlap -> no collision
-        if (overlap <= 0)
+        if (overlapResults.distance <= 0)
             continue;
 
         ++collisionCounts[p1->getType()];
         ++collisionCounts[p2->getType()];
 
         // Don't handle collision if reaction occured
+        // TODO Handle overlap after collision (or just ignore it and let it be handled in the next time step)
         if (combinationReaction(p1, p2))
             continue;
 
-        // Tangential vector of the collision
-        sf::Vector2f tangent(-normal.y, normal.x);
+        float dt = calculateTimeBeforeCollision(*p1, *p2, overlapResults);
 
-        // Relative velocity
-        sf::Vector2f relativeVelocity = p2->getVelocity() - p1->getVelocity();
-        float velocityAlongNormal = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
-        float velocityAlongTangent = relativeVelocity.x * tangent.x + relativeVelocity.y * tangent.y;
+        p1->move(dt * p1->getVelocity());
+        p2->move(dt * p2->getVelocity());
 
-        // Coefficient of restitution (elasticity of the collision)
-        const float e = 1.f; // Fully elastic
+        updateVelocitiesAtCollision(*p1, *p2);
 
-        const auto &m1 = p1->getType().getMass(), m2 = p2->getType().getMass();
-        // Impulse exchange in the normal direction
-        float jNormal = -(1 + e) * velocityAlongNormal;
-        jNormal /= (1 / m1 + 1 / m2);
+        p1->move(-dt * p1->getVelocity());
+        p2->move(-dt * p2->getVelocity());
 
-        // Impulse exchange in the tangential direction (considering friction)
-        float jTangent = -frictionCoefficient * velocityAlongTangent;
-        jTangent /= (1 / m1 + 1 / m2);
-
-        // Total impulse
-        sf::Vector2f impulse = jNormal * normal + jTangent * tangent;
-
-        // Apply the impulse
-        p1->accelerate(-impulse / m1);
-        p2->accelerate(impulse / m2);
-
-        if (exchangeReaction(p1, p2))
-            correctOverlap(*p1, *p2);
+        exchangeReaction(p1, p2);
     }
 
     return collisionCounts;
@@ -301,7 +282,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
     float randomNumber = getRandomFloat() / 2.f;
-    if (kineticEnergyDeficiency <= 0)
+    if (kineticEnergyDeficiency < 0)
         randomNumber = -randomNumber; // TODO This is a hack until the physics are correctly implemented - no reaction
                                       // should "give" kinetic energy, they need activation energy that they use
 
@@ -316,38 +297,51 @@ float abs(const sf::Vector2f& vec)
     return std::hypot(vec.x, vec.y);
 }
 
-std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2)
+OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
 {
-    const sf::Vector2f dVec = d2.getPosition() - d1.getPosition();
-    const float d = abs(dVec);
+    sf::Vector2f rVec = d2.getPosition() - d1.getPosition();
+    float distance = abs(rVec);
 
-    if (d == 0)
+    if (distance == 0)
     {
-        // Overlap correction not possible if we can't compute a normal vector
-        // Ignore this collision and try again next frame!
-        return {{0, 0}, 0, 0};
+        static const OverlapResults badResult{.rVec = {0, 0}, .nVec = {0, 0}, .distance = 0, .overlap = 0};
+
+        return badResult;
     }
 
-    const sf::Vector2f n = dVec / d;
-    const float l = d1.getType().getRadius() + d2.getType().getRadius() - d;
+    sf::Vector2f nVec = rVec / distance;
+    float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
 
-    if (l > 0)
-    {
-        const auto& r = d1.getPosition() - d2.getPosition();
-        const auto& v = d1.getVelocity() - d2.getVelocity();
-        const auto& R1 = d1.getType().getRadius();
-        const auto& R2 = d2.getType().getRadius();
+    return OverlapResults{.rVec = rVec, .nVec = nVec, .distance = distance, .overlap = overlap};
+}
 
-        const float dt = (-r.x * v.x - r.y * v.y -
-                          std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
-                                    ((R1 + R2) * (R1 + R2)) * (v.x * v.x + v.y * v.y))) /
-                         (v.x * v.x + v.y * v.y);
+float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults)
+{
+    const auto& r = overlapResults.rVec;
+    sf::Vector2f v = d2.getVelocity() - d1.getVelocity();
+    const auto& R1 = d1.getType().getRadius();
+    const auto& R2 = d2.getType().getRadius();
 
-        d1.move(dt * d1.getVelocity());
-        d2.move(dt * d2.getVelocity());
-    }
+    return (-r.x * v.x - r.y * v.y -
+            std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
+                      ((R1 + R2) * (R1 + R2)) * (v.x * v.x + v.y * v.y))) /
+           (v.x * v.x + v.y * v.y);
+}
 
-    return {n, d, l};
+void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
+{
+    static const float e = 1.f;
+
+    float v = abs(d2.getVelocity() - d1.getVelocity());
+    const auto& m1 = d1.getType().getMass();
+    const auto& m2 = d2.getType().getMass();
+
+    float impulse = v * (e + 1) / (1.f / m1 + 1.f / m2);
+    sf::Vector2f rVec = d2.getPosition() - d1.getPosition();
+    sf::Vector2f nVec = rVec / abs(rVec);
+
+    d1.accelerate(-impulse / m1 * nVec);
+    d2.accelerate(impulse / m2 * nVec);
 }
 
 float getRandomFloat()

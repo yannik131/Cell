@@ -79,7 +79,7 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     EXPECT_TRUE(collisions.contains(pair3));
 }
 
-TEST(MathUtilsTest, CorrectOverlap)
+/*TEST(MathUtilsTest, CorrectOverlap)
 {
     DiscType discType("B", sf::Color::Red, 1.f, 1.f);
     Disc d1(discType), d2(discType);
@@ -101,4 +101,4 @@ TEST(MathUtilsTest, CorrectOverlap)
 
     EXPECT_NEAR(d2.getPosition().x, sqrt2, 1e-4);
     EXPECT_NEAR(d2.getPosition().y, -sqrt2, 1e-4);
-}
+}*/

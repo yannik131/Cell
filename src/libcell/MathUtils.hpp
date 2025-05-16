@@ -9,6 +9,14 @@
 #include <set>
 #include <vector>
 
+struct OverlapResults
+{
+    sf::Vector2f rVec;
+    sf::Vector2f nVec;
+    float distance;
+    float overlap;
+};
+
 template <typename T1, typename T2, typename T3>
 std::map<T1, T2, T3>& operator+=(std::map<T1, T2, T3>& a, const std::map<T1, T2, T3>& b)
 {
@@ -66,10 +74,13 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
 float abs(const sf::Vector2f& vec);
 
 /**
- * @brief Moves intersecting discs away from another (overlap > 0). Returns intermediate results
- * @returns {normal vector, distance, overlap}
+ * @brief
  */
-std::tuple<sf::Vector2f, float, float> correctOverlap(Disc& d1, Disc& d2);
+OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
+
+float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
+
+void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
 
 /**
  * @brief Turns a map<key, value> into a map<value, key>
