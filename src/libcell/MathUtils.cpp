@@ -77,9 +77,6 @@ bool exchangeReaction(Disc* d1, Disc* d2)
         if (randomNumber > reaction.getProbability())
             continue;
 
-        // TODO This looks wrong: Write down the math for all reaction types in latex with nice graphics
-        // Edit: It's not wrong, but latex is still a good idea.
-        // m1*v1^2 = m2*v2^2 <-> v2 = sqrt(m1/m2)*v1
         d1->scaleVelocity(std::sqrt(d1->getType().getMass() / reaction.getProduct1().getMass()));
         d1->setType(reaction.getProduct1());
 
@@ -108,20 +105,19 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         if (randomNumber > reaction.getProbability() * simulationTimeStep)
             continue;
 
-        const float MassFraction =
-            d1->getType().getMass() / (reaction.getProduct1().getMass() + reaction.getProduct2().getMass());
-        const float Factor = std::sqrt(2) / 2 * MassFraction;
-        const auto& v = d1->getVelocity();
-        const auto& r = d1->getPosition();
-        const float vAbs = abs(v);
+        const auto& vVec = d1->getVelocity();
+        const float v = abs(vVec);
+        const sf::Vector2f n = vVec / v;
 
+        // We will let the collision handling in the next time step take care of separation
+        // But we can't have identical positions, so move them a little
         Disc product1(reaction.getProduct1());
-        product1.setVelocity(Factor * sf::Vector2f{v.x - v.y, v.x + v.y});
-        product1.setPosition(r + product1.getVelocity() / vAbs);
+        product1.setVelocity(v * sf::Vector2f{-n.y, n.x});
+        product1.setPosition(d1->getPosition() + d1->getVelocity() * 1e-4f);
 
         Disc product2(reaction.getProduct2());
-        product2.setVelocity(Factor * sf::Vector2f{v.x + v.y, v.y - v.x});
-        product2.setPosition(r + product2.getVelocity() / vAbs);
+        product2.setVelocity(v * sf::Vector2f{n.y, -n.x});
+        product2.setPosition(d1->getPosition() + d1->getVelocity() * 1e-4f);
 
         newDiscs.push_back(std::move(product1));
         newDiscs.push_back(std::move(product2));
@@ -230,52 +226,59 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
 
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)
 {
-    // https://hermann-baum.de/bouncing-balls/
-    const auto& r = disc.getType().getRadius();
-    const auto& pos = disc.getPosition();
+    const auto& R = disc.getType().getRadius();
+    const auto& r = disc.getPosition();
     const auto& v = disc.getVelocity();
 
-    float dx = 0, dy = 0;
+#ifdef DEBUG
+    if (v.x == 0 || v.y == 0)
+        throw ExceptionWithLocation("Possible division by 0");
+#endif
+
+    // Right now top left of bounds is (0, 0) but the algorithm is general for rectangular bounds
+    static const float xmin = 0;
+    static const float ymin = 0;
+    const auto& xmax = bounds.x;
+    const auto& ymax = bounds.y;
+
     bool collided = false;
 
-    if (pos.x < r)
+    if (R + xmin - r.x > 0) // Left wall
     {
-        dx = r - pos.x + 1;
-        dy = dx * v.y / v.x;
-
+        float dt = (R + xmin - r.x) / v.x;
+        disc.move({-2 * dt * v.x, 0});
         disc.negateXVelocity();
+
         collided = true;
     }
-    else if (pos.x > bounds.x - r)
+    else if (R - xmax + r.x > 0) // Right wall
     {
-        dx = -(pos.x + r - bounds.x + 1);
-        dy = -(dx * v.y / v.x);
-
+        float dt = -(xmax - R - r.x) / v.x;
+        disc.move({-2 * dt * v.x, 0});
         disc.negateXVelocity();
+
         collided = true;
     }
 
-    if (pos.y < r)
+    if (R + ymin - r.y > 0) // Top wall
     {
-        dy = r - pos.y + 1;
-        dx = dy * v.x / v.y;
-
+        float dt = (R + ymin - r.y) / v.y;
+        disc.move({0, -2 * dt * v.y});
         disc.negateYVelocity();
+
         collided = true;
     }
-    else if (pos.y > bounds.y - r)
+    else if (R - ymax + r.y > 0) // Bottom wall
     {
-        dy = -(pos.y + r - bounds.y + 1);
-        dx = -(dy * v.x / v.y);
-
+        float dt = -(ymax - R - r.y) / v.y;
+        disc.move({0, -2 * dt * v.y});
         disc.negateYVelocity();
+
         collided = true;
     }
 
     if (!collided)
         return 0.f;
-
-    disc.move({dx, dy});
 
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
@@ -283,8 +286,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     // initialKineticEnergy - currentTotalKineticEnergy)
     float randomNumber = getRandomFloat() / 2.f;
     if (kineticEnergyDeficiency < 0)
-        randomNumber = -randomNumber; // TODO This is a hack until the physics are correctly implemented - no reaction
-                                      // should "give" kinetic energy, they need activation energy that they use
+        throw std::runtime_error("We have more energy than we started with!");
 
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);

@@ -129,6 +129,12 @@ Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2
     , type_(inferType(educt2, product2))
 {
     setProbability(probability);
+
+    const float eductMass = educt1.getMass() + (educt2.has_value() ? educt2->getMass() : 0);
+    const float productMass = product1.getMass() + (product2.has_value() ? product2->getMass() : 0);
+
+    if (eductMass != productMass)
+        throw ExceptionWithLocation("Product- and educt masses need to be identical");
 }
 
 const DiscType& Reaction::getEduct1() const

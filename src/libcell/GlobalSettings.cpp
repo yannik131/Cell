@@ -193,10 +193,10 @@ void GlobalSettings::setCallback(const std::function<void(const SettingID& setti
 GlobalSettings::GlobalSettings()
 {
     // TODO save settings as json, load default
-    DiscType A("A", sf::Color::Green, 5, 5);
+    DiscType A("A", sf::Color::Green, 5, 10);
     DiscType B("B", sf::Color::Red, 10, 5);
     DiscType C("C", sf::Color::Blue, 12, 5);
-    DiscType D("D", sf::Color::Magenta, 15, 5);
+    DiscType D("D", sf::Color::Magenta, 15, 10);
 
     settings_.discTypeDistribution_[A] = 100;
     settings_.discTypeDistribution_[B] = 0;
@@ -205,8 +205,7 @@ GlobalSettings::GlobalSettings()
 
     addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
     addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
-    addReaction(Reaction{D, std::nullopt, A, B, 1e-2f});
-    addReaction(Reaction{B, A, C, std::nullopt, 1e-2f});
+    addReaction(Reaction{B, A, C, D, 1e-2f});
 }
 
 GlobalSettings& GlobalSettings::get()

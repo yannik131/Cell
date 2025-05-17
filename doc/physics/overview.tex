@@ -152,9 +152,52 @@ print(sol)
 
 	\section{Reactions}
 	
+	\subsection{Transformation $A \rightarrow B$}
+	
+	We just require that $m$ won't change. 
+	
 	\subsection{Decomposition: $A \rightarrow B + C$}
 	
-	A is moving with $\vec{r}_A(t)$. B and C move in opposite directions away from where A was, conserving energy and impulse.
+	Let A have $\vec{p} = (m_1 + m_2)\vec{v}$. B and C should move in opposite directions perpendicular to $\vec{v}$ after the decomposition, conserving energy and momentum. We only need conservation of momentum to see:
 	
+	\begin{align*}
+		(m_1 + m_2)v = m_1v_1 + m_2v_2 \Rightarrow v_1 = v_2 = v
+	\end{align*}
+
+	Since we want B and C to move away perpendicular from the previous direction, we'll just multiply $v$ with 2 perpendicular unit vectors:
+	
+	\begin{align*}
+		\vec{n} = \frac{\vec{v}}{v} \hspace{20px} \vec{v}_1 = v\begin{pmatrix} -n_y\\ n_x\end{pmatrix} \hspace{20px} \vec{v}_2 = v\begin{pmatrix} n_y\\ -n_x\end{pmatrix}
+	\end{align*}
+	
+	\subsection{Combination: $A + B \rightarrow C$}
+	This is just a classical inelastic collision (see wikipedia for derivation):
+	
+	\begin{align*}
+		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2}
+	\end{align*}
+
+	Note that after this collision, $C$ gained internal energy:
+	
+	\begin{align*}
+		\Delta U_C = \frac{1}{2}\frac{m_1 m_2}{m_1 + m_2}(v_1 - v_2)^2
+	\end{align*}
+
+	This internal energy will lead to the reverse reaction $C \rightarrow A + B$ if $U_C > E_a$, where $E_a$ is the activation energy required for the forward reaction.
+	
+	\subsection{Exchange: $A + B \rightarrow C + D$}
+	This is handled like a normal collision, we just change the types after. We handle this in terms of 2 separate transformations $A \rightarrow C$ and $B \rightarrow D$, conserving energy:
+	
+	\begin{align*}
+		m_A v_A^2 = m_C v_C^2 \Leftrightarrow v_C = \sqrt{\frac{m_A}{m_C}}v_A
+	\end{align*}
+
+	and mass
+	
+	\begin{align*}
+		m_A + m_B = m_C + m_D
+	\end{align*}
+	
+	This does not conserve momentum and is wrong until internal and activation energies are taken into account (TODO).
 
 \end{document}
