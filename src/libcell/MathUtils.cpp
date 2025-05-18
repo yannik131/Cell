@@ -147,10 +147,12 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
     static std::vector<nanoflann::ResultItem<uint32_t, float>> discsInRadius;
+    std::set<Disc*> discsInCollisions;
 
     for (auto& disc : discs)
     {
-        if (disc.isMarkedDestroyed())
+        // We do not support multiple simultaneous collisions
+        if (disc.isMarkedDestroyed() || discsInCollisions.contains(&disc))
             continue;
 
         discsInRadius.clear();
@@ -164,20 +166,18 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
         for (size_t i = 0; i < discsInRadius.size(); ++i)
         {
             auto& otherDisc = discs[discsInRadius[i].first];
-            if (&otherDisc == &disc)
+            if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
                 continue;
 
             const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
 
             if (discsInRadius[i].second <= radiusSum * radiusSum)
             {
-                Disc* p1 = &disc;
-                Disc* p2 = &otherDisc;
+                const auto& pair = makeOrderedPair(&disc, &otherDisc);
+                collidingDiscs.insert(pair);
 
-                if (p2 < p1)
-                    std::swap(p1, p2);
-
-                collidingDiscs.insert(std::make_pair(p1, p2));
+                discsInCollisions.insert(pair.first);
+                discsInCollisions.insert(pair.second);
                 break;
             }
         }
@@ -189,8 +189,6 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
     DiscType::map<int> collisionCounts;
-
-    const float frictionCoefficient = GlobalSettings::getSettings().frictionCoefficient;
 
     for (const auto& [p1, p2] : collidingDiscs)
     {
@@ -224,29 +222,24 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
     return collisionCounts;
 }
 
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency)
+float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
+                                float kineticEnergyDeficiency)
 {
-    const auto& R = disc.getType().getRadius();
-    const auto& r = disc.getPosition();
-    const auto& v = disc.getVelocity();
+    const float& R = disc.getType().getRadius();
+    const sf::Vector2f& r = disc.getPosition();
+    const sf::Vector2f& v = disc.getVelocity();
 
-#ifdef DEBUG
-    if (v.x == 0 || v.y == 0)
-        throw ExceptionWithLocation("Possible division by 0");
-#endif
-
-    // Right now top left of bounds is (0, 0) but the algorithm is general for rectangular bounds
-    static const float xmin = 0;
-    static const float ymin = 0;
-    const auto& xmax = bounds.x;
-    const auto& ymax = bounds.y;
+    const float& xmin = boundsTopLeft.x;
+    const float& ymin = boundsTopLeft.y;
+    const float& xmax = boundsBottomRight.x;
+    const float& ymax = boundsBottomRight.y;
 
     bool collided = false;
 
     if (R + xmin - r.x > 0) // Left wall
     {
         float dt = (R + xmin - r.x) / v.x;
-        disc.move({-2 * dt * v.x, 0});
+        disc.move({2 * dt * v.x, 0});
         disc.negateXVelocity();
 
         collided = true;
@@ -263,7 +256,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
     if (R + ymin - r.y > 0) // Top wall
     {
         float dt = (R + ymin - r.y) / v.y;
-        disc.move({0, -2 * dt * v.y});
+        disc.move({0, 2 * dt * v.y});
         disc.negateYVelocity();
 
         collided = true;
@@ -277,17 +270,15 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float ki
         collided = true;
     }
 
-    if (!collided)
+    if (!collided || kineticEnergyDeficiency <= 0)
         return 0.f;
 
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
-    float randomNumber = getRandomFloat() / 2.f;
-    if (kineticEnergyDeficiency < 0)
-        throw std::runtime_error("We have more energy than we started with!");
 
+    float randomNumber = getRandomFloat() / 2.f;
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
 

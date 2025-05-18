@@ -7,20 +7,25 @@
 namespace
 {
 
-const DiscType A{"A", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
-const DiscType ACopy{"A", sf::Color::Green, DiscTypeLimits::MinRadius,
-                     DiscTypeLimits::MinMass}; // Same attributes, different ID
-const DiscType B{"B", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
-const DiscType C{"C", sf::Color::Green, DiscTypeLimits::MinRadius, DiscTypeLimits::MinMass};
+const DiscType Mass5{"A", sf::Color::Green, DiscTypeLimits::MinRadius, 5};
+const DiscType Mass10{"B", sf::Color::Green, DiscTypeLimits::MinRadius, 10};
+const DiscType Mass15{"C", sf::Color::Green, DiscTypeLimits::MinRadius, 15};
+const DiscType Mass20{"D", sf::Color::Green, DiscTypeLimits::MinRadius, 20};
+const DiscType Mass25{"E", sf::Color::Green, DiscTypeLimits::MinRadius, 25};
+const DiscType Unused{"F", sf::Color::Green, DiscTypeLimits::MinRadius, 30};
 
-const Reaction decomposition{A, std::nullopt, A, A, 0.1f};
-const Reaction combination{A, A, A, std::nullopt, 0.1f};
-const Reaction exchange{A, A, A, A, 0.1f};
+const Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+const Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+const Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};
+
+const DiscType::map<int> DefaultDistribution{{Mass5, 100}, {Mass10, 0}, {Mass15, 0}, {Mass20, 0}, {Mass25, 0}};
 
 GlobalSettings& settings = GlobalSettings::get();
 
 void insertDefaultReactions(GlobalSettings& globalSettings)
 {
+    globalSettings.clearReactions();
+    globalSettings.setDiscTypeDistribution(DefaultDistribution);
     globalSettings.addReaction(decomposition);
     globalSettings.addReaction(combination);
     globalSettings.addReaction(exchange);
@@ -145,8 +150,7 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     EXPECT_NO_THROW(settings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs));
     EXPECT_NO_THROW(settings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient));
 
-    const DiscType::map<int> distribution{{A, 100}};
-    EXPECT_NO_THROW(settings.setDiscTypeDistribution(distribution));
+    EXPECT_NO_THROW(settings.setDiscTypeDistribution(DefaultDistribution));
 
     EXPECT_NO_THROW(settings.addReaction(decomposition));
     EXPECT_NO_THROW(settings.clearReactions());
@@ -159,7 +163,7 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     EXPECT_THROW(settings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale), std::runtime_error);
     EXPECT_THROW(settings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs), std::runtime_error);
     EXPECT_THROW(settings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient), std::runtime_error);
-    EXPECT_THROW(settings.setDiscTypeDistribution(distribution), std::runtime_error);
+    EXPECT_THROW(settings.setDiscTypeDistribution(DefaultDistribution), std::runtime_error);
     EXPECT_THROW(settings.addReaction(decomposition), std::runtime_error);
     EXPECT_THROW(settings.clearReactions(), std::runtime_error);
 
@@ -189,7 +193,7 @@ TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 {
     for (int i = -10; i < 200; i += 10)
     {
-        DiscType::map<int> distribution{{A, i}};
+        DiscType::map<int> distribution{{Mass5, i}};
 
         if (i == 100)
             EXPECT_NO_THROW(settings.setDiscTypeDistribution(distribution));
@@ -200,7 +204,7 @@ TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 
 TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
 {
-    DiscType::map<int> distribution{{A, 50}, {ACopy, 50}};
+    DiscType::map<int> distribution{{Mass5, 50}, {Mass5, 50}};
 
     EXPECT_ANY_THROW(settings.setDiscTypeDistribution(distribution));
 }
@@ -246,10 +250,10 @@ TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 {
     settings.clearReactions();
-    settings.setDiscTypeDistribution({{A, 50}, {B, 50}});
+    settings.setDiscTypeDistribution({{Mass5, 50}, {Mass10, 50}, {Mass15, 0}});
 
-    Reaction noDuplicateCombination{A, B, A, std::nullopt, 0.1f};
-    Reaction noDuplicateExchange{A, B, A, B, 0.1f};
+    Reaction noDuplicateCombination{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
+    Reaction noDuplicateExchange{Mass5, Mass10, Mass5, Mass10, 0.1f};
 
     // These reactions should be added twice for keys {A, B} and {B, A} for easier lookup
     settings.addReaction(noDuplicateCombination);
@@ -270,21 +274,21 @@ TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 
 TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 {
-    DiscType::map<int> distribution{{A, 100}, {B, 0}, {C, 0}};
-    settings.setDiscTypeDistribution(distribution);
+    settings.setDiscTypeDistribution(DefaultDistribution);
 
-    // 1 reaction with A as educt, 1 with A as product, 1 with A nowhere, for each reaction type
-    Reaction decompositionAEduct{A, std::nullopt, C, B, 0.1f};
-    Reaction decompositionAProduct{B, std::nullopt, A, B, 0.1f};
-    Reaction decompositionANowhere{B, std::nullopt, C, B, 0.1f};
+    // 1 reaction with Mass10 as educt, 1 with Mass10 as product, 1 with Mass10 nowhere, for each reaction type
+    // A = Mass10 for notation
+    Reaction decompositionAEduct{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+    Reaction decompositionAProduct{Mass15, std::nullopt, Mass5, Mass10, 0.1f};
+    Reaction decompositionANowhere{Mass20, std::nullopt, Mass15, Mass5, 0.1f};
 
-    Reaction combinationAEduct{A, B, C, std::nullopt, 0.1f};
-    Reaction combinationAProduct{B, C, A, std::nullopt, 0.1f};
-    Reaction combinationANowhere{B, C, C, std::nullopt, 0.1f};
+    Reaction combinationAEduct{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
+    Reaction combinationAProduct{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    Reaction combinationANowhere{Mass5, Mass15, Mass20, std::nullopt, 0.1f};
 
-    Reaction exchangeAEduct{A, B, C, B, 0.1f};
-    Reaction exchangeAProduct{B, C, A, A, 0.1f};
-    Reaction exchangeANowhere{B, C, C, C, 0.1f};
+    Reaction exchangeAEduct{Mass10, Mass15, Mass5, Mass20, 0.1f};
+    Reaction exchangeAProduct{Mass5, Mass20, Mass10, Mass15, 0.1f};
+    Reaction exchangeANowhere{Mass15, Mass15, Mass25, Mass5, 0.1f};
 
     settings.clearReactions();
 
@@ -298,87 +302,57 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 
     // Make sure they were all added (some twice because educts were not identical for combination/exchange reactions)
 
-    EXPECT_EQ(settings.getSettings().decompositionReactions_.size(), 2);
-    EXPECT_EQ(settings.getSettings().combinationReactions_.size(), 4);
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.size(), 4);
+    EXPECT_EQ(settings.getSettings().decompositionReactions_.size(), 3);
+    EXPECT_EQ(settings.getSettings().combinationReactions_.size(), 5);
+    EXPECT_EQ(settings.getSettings().exchangeReactions_.size(), 5);
 
-    EXPECT_EQ(settings.getSettings().decompositionReactions_.at(A).size(), 1);
-    EXPECT_EQ(settings.getSettings().decompositionReactions_.at(B).size(), 2);
-
-    const auto& eductsAB1 = std::make_pair(A, B);
-    const auto& eductsAB2 = std::make_pair(B, A);
-    const auto& eductsBC1 = std::make_pair(B, C);
-    const auto& eductsBC2 = std::make_pair(C, B);
-
-    EXPECT_EQ(settings.getSettings().combinationReactions_.at(eductsAB1).size(), 1);
-    EXPECT_EQ(settings.getSettings().combinationReactions_.at(eductsAB2).size(), 1);
-    EXPECT_EQ(settings.getSettings().combinationReactions_.at(eductsBC1).size(), 2);
-    EXPECT_EQ(settings.getSettings().combinationReactions_.at(eductsBC2).size(), 2);
-
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.at(eductsAB1).size(), 1);
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.at(eductsAB2).size(), 1);
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.at(eductsBC1).size(), 2);
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.at(eductsBC2).size(), 2);
-
-    // Now remove A from the distribution
-    distribution = {{B, 100}, {C, 0}};
+    // Now remove Mass10 from the distribution
+    DiscType::map<int> distribution = DefaultDistribution;
+    distribution.erase(Mass10);
 
     settings.setDiscTypeDistribution(distribution);
 
     EXPECT_EQ(settings.getSettings().decompositionReactions_.size(), 1);
-    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().decompositionReactions_, A));
+    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().decompositionReactions_, Mass10));
 
     EXPECT_EQ(settings.getSettings().combinationReactions_.size(), 2);
-    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().combinationReactions_, A));
+    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().combinationReactions_, Mass10));
 
-    EXPECT_EQ(settings.getSettings().exchangeReactions_.size(), 2);
-    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().exchangeReactions_, A));
-}
+    EXPECT_EQ(settings.getSettings().exchangeReactions_.size(), 1);
+    EXPECT_FALSE(isInEductsOrProducts(settings.getSettings().exchangeReactions_, Mass10));
 
-TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
-{
-    DiscType::map<int> distribution{{A, 100}};
-
-    settings.setDiscTypeDistribution(distribution);
-    settings.clearReactions();
-
-    settings.addReaction(Reaction{A, std::nullopt, A, A, 0.1f});
-    settings.addReaction(Reaction{A, A, A, std::nullopt, 0.1f});
-    settings.addReaction(Reaction{A, A, A, A, 0.1f});
-
-    int count = countDiscTypeInReactions(settings, A);
-
-    DiscType AModified = A;
-    AModified.setName("AModified");
-    distribution = {{AModified, 100}};
-    settings.setDiscTypeDistribution(distribution);
-
-    EXPECT_EQ(count, countDiscTypeInReactions(settings, AModified));
-}
-
-TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
-{
-    settings.setDiscTypeDistribution({{A, 100}});
-    settings.clearReactions();
-
-    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, std::nullopt, B, B, 0.1f}));
-    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, B, B, std::nullopt, 0.1f}));
-    EXPECT_ANY_THROW(settings.addReaction(Reaction{B, B, B, B, 0.1f}));
-    EXPECT_NO_THROW(settings.addReaction(Reaction{A, A, A, A, 0.1f}));
-}
-
-TEST(GlobalSettingsTest, EmptyReactionVectorsAreRemoved)
-{
-    settings.setDiscTypeDistribution({{A, 100}});
-    settings.clearReactions();
-
-    settings.addReaction(Reaction{A, std::nullopt, A, A, 0.1f});
-    settings.addReaction(Reaction{A, A, A, std::nullopt, 0.1f});
-    settings.addReaction(Reaction{A, A, A, A, 0.1f});
-
-    settings.setDiscTypeDistribution({{B, 100}});
+    // Remove all disc types -> All reactions should be cleared
+    settings.setDiscTypeDistribution({{Unused, 100}});
 
     EXPECT_TRUE(settings.getSettings().decompositionReactions_.empty());
     EXPECT_TRUE(settings.getSettings().combinationReactions_.empty());
     EXPECT_TRUE(settings.getSettings().exchangeReactions_.empty());
+}
+
+TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
+{
+    settings.setDiscTypeDistribution(DefaultDistribution);
+    settings.clearReactions();
+    insertDefaultReactions(settings);
+
+    int count = countDiscTypeInReactions(settings, Mass5);
+
+    DiscType Mass5Modified = Mass5;
+    Mass5Modified.setName("Modified");
+    DiscType::map<int> distribution = DefaultDistribution;
+    distribution.erase(Mass5);
+    distribution[Mass5Modified] = 100;
+    settings.setDiscTypeDistribution(distribution);
+
+    EXPECT_EQ(count, countDiscTypeInReactions(settings, Mass5Modified));
+}
+
+TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
+{
+    DiscType Mass50{"LOL", sf::Color::Cyan, 2.1f, 50};
+    DiscType Mass100{"LOOL", sf::Color::Cyan, 2.1f, 100};
+
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{Mass100, std::nullopt, Mass50, Mass50, 0.1f}));
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{Mass50, Mass50, Mass100, std::nullopt, 0.1f}));
+    EXPECT_ANY_THROW(settings.addReaction(Reaction{Mass50, Mass50, Mass50, Mass50, 0.1f}));
 }

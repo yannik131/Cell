@@ -33,7 +33,7 @@ void World::update(const sf::Time& dt)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
         currentKineticEnergy_ +=
-            MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+            MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
     const auto& newDiscs = MathUtils::decomposeDiscs(discs_);

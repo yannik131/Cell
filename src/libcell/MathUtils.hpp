@@ -66,7 +66,8 @@ std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs);
  * @brief Makes the disc bounce back from the walls
  * @note Gives additional kinetic energy to the disc if there is less kinetic energy than at the start of the simulation
  */
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& bounds, float kineticEnergyDeficiency);
+float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
+                                float kineticEnergyDeficiency);
 
 /**
  * @returns |vec|
@@ -100,6 +101,14 @@ MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
  * @brief Returns a random float within [0, 1)
  */
 float getRandomFloat();
+
+template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
+{
+    if (a <= b)
+        return std::make_pair(a, b);
+
+    return std::make_pair(b, a);
+}
 } // namespace MathUtils
 
 #endif /* MATHUTILS_HPP */
