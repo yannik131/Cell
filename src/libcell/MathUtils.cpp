@@ -9,11 +9,6 @@
 #include <ostream>
 #include <random>
 
-sf::Vector2f operator*(const sf::Vector2f& a, const sf::Vector2f& b)
-{
-    return sf::Vector2f{a.x * b.x, a.y * b.y};
-}
-
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";

@@ -77,6 +77,57 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     EXPECT_EQ(collisionCount, 1);
 }
 
+TEST(MathutilsTest, HandleDiscCollisions)
+{
+    FAIL();
+}
+
+TEST(MathUtilsTest, DecompositionReaction)
+{
+    FAIL();
+}
+
+TEST(MathUtilsTest, CollisionsWithBounds)
+{
+    const sf::Vector2f boundsTopLeft{0, 0};
+    const sf::Vector2f boundsBottomRight{100, 100};
+
+    Disc d(t);
+    const float R = d.getType().getRadius();
+
+    // Collision with top and right wall
+    d.setPosition(boundsTopLeft);
+    d.setVelocity({-1.f, 1.f});
+
+    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
+
+    // The disc is already R units behind the wall, so the algorithm should move it back to where it should
+    // have collided, calculate the new velocity, calculate how long it took the disc to travel R units, and then move
+    // it in the direction of the new velocity for that time
+    EXPECT_NEAR(d.getPosition().x, boundsTopLeft.x + 2 * R, 1e-4f);
+    EXPECT_NEAR(d.getPosition().y, boundsTopLeft.y + 2 * R, 1e-4f);
+
+    // Collision with bottom and left wall
+    d.setPosition(boundsBottomRight);
+    d.setVelocity({1.f, -1.f});
+
+    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
+
+    EXPECT_NEAR(d.getPosition().x, boundsBottomRight.x - 2 * R, 1e-4f);
+    EXPECT_NEAR(d.getPosition().y, boundsBottomRight.y - 2 * R, 1e-4f);
+}
+
+TEST(MathUtilsTest, Abs)
+{
+    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{1, 1}), std::sqrt(2), 1e-4);
+    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{0, 0}), 0, 0));
+}
+
+TEST(MathUtilsTest, CalculateOverlap)
+{
+    FAIL();
+}
+
 TEST(MathUtilsTest, TimeOfCollisionIsCalculatedCorrectly)
 {
     DiscType discType("B", sf::Color::Red, 1.f, 1.f);
@@ -101,31 +152,22 @@ TEST(MathUtilsTest, TimeOfCollisionIsCalculatedCorrectly)
     EXPECT_NEAR(-dt, calculatedDt, 1e-4f);
 }
 
-TEST(MathUtilsTest, CollisionsWithBounds)
+TEST(MathUtilsTest, UpdateVelocitiesAtCollision)
 {
-    const sf::Vector2f boundsTopLeft{0, 0};
-    const sf::Vector2f boundsBottomRight{100, 100};
+    FAIL();
+}
 
-    Disc d(t);
-    const float R = d.getType().getRadius();
+TEST(MathUtilsTest, InvertMap)
+{
+    FAIL();
+}
 
-    // Collision with top and right wall
-    d.setPosition(boundsTopLeft);
-    d.setVelocity({-1.f, 1.f});
+TEST(MathUtilsTest, getRandomFloat)
+{
+    FAIL();
+}
 
-    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
-
-    // The disc is already R units behind the wall, so the algorithm should move it back to where it should
-    // have collided, calculate the new velocity, calculate how long it took the disc to travel R units, and then move
-    // it in the direction of the new velocity for that time
-    EXPECT_NEAR(d.getPosition().x, boundsTopLeft.x + 2 * R, 1e-4f);
-    EXPECT_NEAR(d.getPosition().y, boundsTopLeft.y + 2 * R, 1e-4f);
-
-    d.setPosition(boundsBottomRight);
-    d.setVelocity({1.f, -1.f});
-
-    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
-
-    EXPECT_NEAR(d.getPosition().x, boundsBottomRight.x - 2 * R, 1e-4f);
-    EXPECT_NEAR(d.getPosition().y, boundsBottomRight.y - 2 * R, 1e-4f);
+TEST(MathUtilsTest, makeOrderedPair)
+{
+    FAIL();
 }
