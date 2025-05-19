@@ -5,6 +5,12 @@
 
 static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
 
+void expectNear(const sf::Vector2f& actual, const sf::Vector2f& expected, float epsilon)
+{
+    EXPECT_NEAR(actual.x, expected.x, epsilon);
+    EXPECT_NEAR(actual.y, expected.y, epsilon);
+}
+
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
     std::map<int, double> m1{{1, 1.0}, {2, 2.0}};
@@ -77,11 +83,6 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     EXPECT_EQ(collisionCount, 1);
 }
 
-TEST(MathutilsTest, HandleDiscCollisions)
-{
-    FAIL();
-}
-
 TEST(MathUtilsTest, DecompositionReaction)
 {
     FAIL();
@@ -120,25 +121,23 @@ TEST(MathUtilsTest, CollisionsWithBounds)
 TEST(MathUtilsTest, Abs)
 {
     EXPECT_NEAR(MathUtils::abs(sf::Vector2f{1, 1}), std::sqrt(2), 1e-4);
-    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{0, 0}), 0, 0));
+    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{0, 0}), 0, 0);
 }
 
-TEST(MathUtilsTest, CalculateOverlap)
-{
-    FAIL();
-}
-
-TEST(MathUtilsTest, TimeOfCollisionIsCalculatedCorrectly)
+// Kind of a system test that tests the entire collision response
+TEST(MathUtilsTest, CollisionHandling)
 {
     DiscType discType("B", sf::Color::Red, 1.f, 1.f);
     Disc d1(discType), d2(discType);
 
-    d1.setPosition({0, 0});
+    sf::Vector2f d1InitialPosition{0, 0};
+    d1.setPosition(d1InitialPosition);
     d1.setVelocity({1, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
     const float sqrt2 = std::sqrt(2);
-    d2.setPosition({sqrt2, -sqrt2});
+    sf::Vector2f d2InitialPosition{sqrt2, -sqrt2};
+    d2.setPosition(d2InitialPosition);
     d2.setVelocity({1, 1});
 
     const float dt = 0.15f;
@@ -150,16 +149,22 @@ TEST(MathUtilsTest, TimeOfCollisionIsCalculatedCorrectly)
     const float calculatedDt = MathUtils::calculateTimeBeforeCollision(d1, d2, overlapResults);
 
     EXPECT_NEAR(-dt, calculatedDt, 1e-4f);
-}
 
-TEST(MathUtilsTest, UpdateVelocitiesAtCollision)
-{
-    FAIL();
+    MathUtils::handleDiscCollisions({std::make_pair(&d1, &d2)});
+
+    // Values calculated once for regression testing
+
+    expectNear(d1.getPosition(), {-0.062132f, 0.062132f}, 1e-4f);
+    expectNear(d2.getPosition(), {1.77635f, -1.47635f}, 1e-4f);
+
+    expectNear(d1.getVelocity(), {-0.414214f, 0.414214f}, 1e-4f);
+    expectNear(d2.getVelocity(), {2.41421f, -0.414214f}, 1e-4f);
 }
 
 TEST(MathUtilsTest, InvertMap)
 {
-    FAIL();
+    std::map<int, float> m{{1, 1.0}, {2, 2.0}};
+    auto inverted = MathUtils::invertMap(m);
 }
 
 TEST(MathUtilsTest, getRandomFloat)

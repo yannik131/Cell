@@ -222,50 +222,43 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
 {
     const float& R = disc.getType().getRadius();
     const sf::Vector2f& r = disc.getPosition();
-    const sf::Vector2f& v = disc.getVelocity();
-
-    const float& xmin = boundsTopLeft.x;
-    const float& ymin = boundsTopLeft.y;
-    const float& xmax = boundsBottomRight.x;
-    const float& ymax = boundsBottomRight.y;
 
     bool collided = false;
+    float l;
+    float dx = 0, dy = 0;
 
-    if (R + xmin - r.x > 0) // Left wall
+    if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall
     {
-        float dt = (R + xmin - r.x) / v.x;
-        disc.move({2 * dt * v.x, 0});
+        dx = 2 * l;
         disc.negateXVelocity();
-
         collided = true;
     }
-    else if (R - xmax + r.x > 0) // Right wall
+    else if (l = R - boundsBottomRight.x + r.x; l > 0) // Right wall
     {
-        float dt = -(xmax - R - r.x) / v.x;
-        disc.move({-2 * dt * v.x, 0});
+        dx = -2 * l;
         disc.negateXVelocity();
-
         collided = true;
     }
 
-    if (R + ymin - r.y > 0) // Top wall
+    if (l = R + boundsTopLeft.y - r.y; l > 0) // Top wall
     {
-        float dt = (R + ymin - r.y) / v.y;
-        disc.move({0, 2 * dt * v.y});
+        dy = 2 * l;
         disc.negateYVelocity();
-
         collided = true;
     }
-    else if (R - ymax + r.y > 0) // Bottom wall
+    else if (l = R - boundsBottomRight.y + r.y; l > 0) // Bottom wall
     {
-        float dt = -(ymax - R - r.y) / v.y;
-        disc.move({0, -2 * dt * v.y});
+        dy = -2 * l;
         disc.negateYVelocity();
-
         collided = true;
     }
 
-    if (!collided || kineticEnergyDeficiency <= 0)
+    if (!collided)
+        return 0.f;
+
+    disc.move({dx, dy});
+
+    if (kineticEnergyDeficiency <= 0)
         return 0.f;
 
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
