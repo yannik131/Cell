@@ -81,20 +81,6 @@ float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overlap
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
 
 /**
- * @brief Turns a map<key, value> into a map<value, key>
- */
-template <template <typename, typename> class MapType, typename KeyType, typename ValueType>
-MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
-{
-    MapType<ValueType, KeyType> inverted;
-
-    for (auto it = map.begin(); it != map.end(); ++it)
-        inverted[it.value()] = it.key();
-
-    return inverted;
-}
-
-/**
  * @brief Returns a random float within [0, 1)
  */
 float getRandomFloat();

@@ -161,18 +161,27 @@ TEST(MathUtilsTest, CollisionHandling)
     expectNear(d2.getVelocity(), {2.41421f, -0.414214f}, 1e-4f);
 }
 
-TEST(MathUtilsTest, InvertMap)
-{
-    std::map<int, float> m{{1, 1.0}, {2, 2.0}};
-    auto inverted = MathUtils::invertMap(m);
-}
-
 TEST(MathUtilsTest, getRandomFloat)
 {
-    FAIL();
+    float f1 = MathUtils::getRandomFloat();
+    float f2 = MathUtils::getRandomFloat();
+
+    EXPECT_NE(f1, f2); // Maybe
+
+    EXPECT_GE(f1, 0.0f);
+    EXPECT_LE(f1, 1.0f);
+
+    EXPECT_GE(f2, 0.0f);
+    EXPECT_LE(f2, 1.0f);
 }
 
 TEST(MathUtilsTest, makeOrderedPair)
 {
-    FAIL();
+    int i1, i2;
+    auto pair = MathUtils::makeOrderedPair(&i1, &i2);
+
+    std::swap(i1, i2);
+    auto pair2 = MathUtils::makeOrderedPair(&i1, &i2);
+
+    EXPECT_EQ(pair, pair2);
 }
