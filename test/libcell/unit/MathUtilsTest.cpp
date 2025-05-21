@@ -83,11 +83,6 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     EXPECT_EQ(collisionCount, 1);
 }
 
-TEST(MathUtilsTest, DecompositionReaction)
-{
-    FAIL();
-}
-
 TEST(MathUtilsTest, CollisionsWithBounds)
 {
     const sf::Vector2f boundsTopLeft{0, 0};
@@ -132,13 +127,15 @@ TEST(MathUtilsTest, CollisionHandling)
 
     sf::Vector2f d1InitialPosition{0, 0};
     d1.setPosition(d1InitialPosition);
-    d1.setVelocity({1, -1});
+    d1.setVelocity({1.1f, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
     const float sqrt2 = std::sqrt(2);
     sf::Vector2f d2InitialPosition{sqrt2, -sqrt2};
     d2.setPosition(d2InitialPosition);
-    d2.setVelocity({1, 1});
+    d2.setVelocity({1.2f, 1});
+
+    float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     const float dt = 0.15f;
 
@@ -148,17 +145,21 @@ TEST(MathUtilsTest, CollisionHandling)
     const auto& overlapResults = MathUtils::calculateOverlap(d1, d2);
     const float calculatedDt = MathUtils::calculateTimeBeforeCollision(d1, d2, overlapResults);
 
-    EXPECT_NEAR(-dt, calculatedDt, 1e-4f);
+    EXPECT_FLOAT_EQ(-dt, calculatedDt);
 
     MathUtils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
+    float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
+
     // Values calculated once for regression testing
 
-    expectNear(d1.getPosition(), {-0.062132f, 0.062132f}, 1e-4f);
-    expectNear(d2.getPosition(), {1.77635f, -1.47635f}, 1e-4f);
+    expectNear(d1.getPosition(), {0.0225f, -0.0075f}, 1e-4f);
+    expectNear(d2.getPosition(), {1.73671f, -1.40671f}, 1e-4f);
 
-    expectNear(d1.getVelocity(), {-0.414214f, 0.414214f}, 1e-4f);
-    expectNear(d2.getVelocity(), {2.41421f, -0.414214f}, 1e-4f);
+    expectNear(d1.getVelocity(), {0.15f, -0.05f}, 1e-4f);
+    expectNear(d2.getVelocity(), {2.15f, 0.05f}, 1e-4f);
+
+    EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
 }
 
 TEST(MathUtilsTest, getRandomFloat)

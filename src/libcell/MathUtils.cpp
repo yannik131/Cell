@@ -15,6 +15,11 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
     return os << "(" << v.x << ", " << v.y << ")";
 }
 
+float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
 namespace MathUtils
 {
 
@@ -210,16 +215,17 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 {
     static const float e = 1.f;
 
-    float v = abs(d2.getVelocity() - d1.getVelocity());
-    const auto& m1 = d1.getType().getMass();
-    const auto& m2 = d2.getType().getMass();
-
-    float impulse = v * (e + 1) / (1.f / m1 + 1.f / m2);
     sf::Vector2f rVec = d2.getPosition() - d1.getPosition();
     sf::Vector2f nVec = rVec / abs(rVec);
 
-    d1.accelerate(-impulse / m1 * nVec);
-    d2.accelerate(impulse / m2 * nVec);
+    float vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
+    const auto& m1 = d1.getType().getMass();
+    const auto& m2 = d2.getType().getMass();
+
+    float impulse = -vrN * (e + 1) / (1.f / m1 + 1.f / m2);
+
+    d1.accelerate(impulse / m1 * nVec);
+    d2.accelerate(-impulse / m2 * nVec);
 }
 
 float getRandomFloat()

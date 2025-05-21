@@ -37,6 +37,8 @@ std::map<T1, T2, T3>& operator/=(std::map<T1, T2, T3>& a, const T4& b)
 
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
 
+float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
+
 namespace MathUtils
 {
 /**

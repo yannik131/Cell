@@ -1,5 +1,4 @@
 #include "ColorMapping.hpp"
-#include "MathUtils.hpp"
 #include "Utility.hpp"
 
 namespace sf
@@ -24,7 +23,7 @@ const QMap<sf::Color, QString>& getColorNameMapping()
 
 const QMap<QString, sf::Color>& getNameColorMapping()
 {
-    static const QMap<QString, sf::Color> nameColorMapping = MathUtils::invertMap(getColorNameMapping());
+    static const QMap<QString, sf::Color> nameColorMapping = Utility::invertMap(getColorNameMapping());
     return nameColorMapping;
 }
 

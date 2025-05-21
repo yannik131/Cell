@@ -95,29 +95,34 @@ print(sol)
 
 	\subsection{Collision handling}
 		
-	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, we obtain the following equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
+	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
 	
 	\begin{align*}
-		\Delta \vec{p} &= m_1\left(\vec{v}_{1+} - \vec{v}_{1-}\right),\\
-		-\Delta \vec{p} &= m_2\left(\vec{v}_{2+} - \vec{v}_{2-}\right),\\
+		\Delta p &= m_1\left(v_{1+} - v_{1-}\right),\\
+		-\Delta p &= m_2\left(v_{2+} - v_{2-}\right),\\
 		e &= -\frac{v_{1+} - v_{2+}}{v_{1-} - v_{2-}}.
 	\end{align*}
-
-	$e$ is the coefficient of restitution, a value in the interval $[0, 1]$ where $1$ indicates a completely elastic collision (the deformed objects "bounce" back completely after the collision) and $0$ indicates an inelastic collision. In atomic collisions, no deformations occur and $e = 1$.\\
-	$\Delta p$ is the impulse that changes the momentums of both circles along the line of action.\\
-	After solving the first equations for $\vec{v}_{1+}$ and $\vec{v}_{2+}$, these values are substituted in the last equation:
+	
+	Note that since $\Delta p$ acts along the collision normal, $v_{1-}$ and $v_{2-}$ in this context are the velocities projected on that normal, given by the projection
 	
 	\begin{align*}
-		&\vec{v}_{1+} = \frac{\Delta \vec{p}}{m_1} + \vec{v}_{1-} \Rightarrow v_{1+} = \frac{\Delta p}{m_1} + v_{1-}\\
-		&\vec{v}_{2+} = -\frac{\Delta \vec{p}}{m_2} + \vec{v}_{2-} \Rightarrow v_{2+} = -\frac{\Delta p}{m_2} + v_{2-}\\
-		&\Rightarrow e = -\frac{\frac{\Delta p}{m_1} + v_{1-} - \left(-\frac{\Delta \vec{p}}{m_2} + v_{2-}\right)}{v_{1-} - v_{2-}}\\
-		&\Leftrightarrow e\left(v_{1-} - v_{2-}\right) = -\left(v_{1-} - v_{2-} + \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\right)\\
-		&\Leftrightarrow -ev_r = v_r - \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\\
-		&\Leftrightarrow \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = v_r + ev_r\\
-		&\Leftrightarrow \Delta p = \frac{v_r(e + 1)}{\frac{1}{m_1} + \frac{1}{m_2}}
+		\vec{v}_n = \frac{\vec{v}\cdot\vec{n}}{\vec{n}\cdot\vec{n}}\vec{n} \Rightarrow v_n = \vec{v}\cdot\vec{n}.
 	\end{align*}
 
-	with the relative veloctiy $\vec{v}_r = \vec{v}_{2-} - \vec{v}_{1-}$. The impulse $\Delta p$ acts along the line of action connecting the center of masses of both circles, so we'll need the normal vector $\vec{n}$ along the collision:
+	$e$ is the coefficient of restitution, a value in the interval $[0, 1]$ where $1$ indicates a completely elastic collision 
+	 and $0$ indicates an inelastic collision. In atomic collisions, no deformations occur and $e = 1$.\\
+	After solving the first equations for $v_{1+}$ and $v_{2+}$, these values are substituted in the last equation:
+	
+	\begin{align*}
+		&v_{1+} = \frac{\Delta p}{m_1} + v_{1-} \hspace{2cm} v_{2+} = -\frac{\Delta p}{m_2} + v_{2-}\\
+		&\Rightarrow e = -\frac{\frac{\Delta p}{m_1} + v_{1-} - \left(-\frac{\Delta p}{m_2} + v_{2-}\right)}{v_{1-} - v_{2-}}\\
+		&\Leftrightarrow e\left(v_{1-} - v_{2-}\right) = -\left(v_{1-} - v_{2-} + \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\right)\\
+		&\Leftrightarrow ev_r = -v_r - \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\\
+		&\Leftrightarrow -\Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = e v_r + v_r\\
+		&\Leftrightarrow \Delta p = -\frac{v_r(e + 1)}{\frac{1}{m_1} + \frac{1}{m_2}}
+	\end{align*}
+
+	with the relative veloctiy $v_r = v_{1-} - v_{2-}$. The impulse $\Delta p$ acts along the line of action connecting the center of masses of both circles, so we'll need the normal vector $\vec{n}$ along the collision:
 	
 	\begin{align*}
 		\vec{n} = \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}.
@@ -126,9 +131,11 @@ print(sol)
 	With this, the new velocities are
 	
 	\begin{align*}
-		&\vec{v}_{1+} = \vec{v}_{1-} - \frac{\Delta p}{m_1}\vec{n},\\
-		&\vec{v}_{2+} = \vec{v}_{2-} + \frac{\Delta p}{m_2}\vec{n}.
+		&\vec{v}_{1+} = \vec{v}_{1-} + \frac{\Delta p}{m_1}\vec{n},\\
+		&\vec{v}_{2+} = \vec{v}_{2-} - \frac{\Delta p}{m_2}\vec{n}.
 	\end{align*}
+
+	Here, $\vec{v}_{1-}$ and $\vec{v}_{2-}$ are the full velocities before the collision, not just the projection along the normal.
 
 	\section{Reactions}
 	
@@ -137,6 +144,19 @@ print(sol)
 	We just require that $m$ won't change. 
 	
 	\subsection{Decomposition: $A \rightarrow B + C$}
+	
+	\subsubsection*{Probability}
+	
+	The decomposition reaction probability is given in $\frac{\%}{s}$. Let's say the user specified probability $p$ and simulation time step $\Delta t$ in s. The reaction chance is $1 - (1 - p')^N$ and we want a reaction chance of $p$ after $N = \frac{1}{\Delta t}$:
+	
+	\begin{align*}
+		&p = 1 - (1 - p')^{\Delta t^{-1}}\\
+		&\Leftrightarrow (1 - p')^{\Delta t^{-1}} = 1 - p\\
+		&\Leftrightarrow p' = 1 - \sqrt[\Delta t^{-1}]{1 - p} = 1 - (1 - p)^{\frac{1}{\Delta t^{-1}}}\\
+		&\Rightarrow p' = 1 - (1 - p)^{\Delta t}
+	\end{align*}
+	
+	\subsubsection*{Physics}
 	
 	Let A have $\vec{p} = (m_1 + m_2)\vec{v}$. B and C should move in opposite directions perpendicular to $\vec{v}$ after the decomposition, conserving energy and momentum. We only need conservation of momentum to see:
 	

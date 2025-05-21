@@ -25,9 +25,9 @@ bool combinationReaction(Disc* d1, Disc* d2)
             std::abs(resultType.getRadius() - d2->getType().getRadius()))
             std::swap(d1, d2);
 
-        d1->setType(resultType);
         d1->setVelocity((d1->getType().getMass() * d1->getVelocity() + d2->getType().getMass() * d2->getVelocity()) /
                         resultType.getMass());
+        d1->setType(resultType);
 
         d2->markDestroyed();
 
@@ -70,7 +70,7 @@ bool exchangeReaction(Disc* d1, Disc* d2)
 void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
     const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
-    const float& simulationTimeStep = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
     const auto& iter = decompositionReactionTable.find(d1->getType());
     if (iter == decompositionReactionTable.end())
@@ -80,7 +80,7 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
     float randomNumber = MathUtils::getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > reaction.getProbability() * simulationTimeStep)
+        if (randomNumber > 1 - std::powf(1 - reaction.getProbability(), dt))
             continue;
 
         const auto& vVec = d1->getVelocity();
@@ -88,14 +88,13 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         const sf::Vector2f n = vVec / v;
 
         // We will let the collision handling in the next time step take care of separation
-        // But we can't have identical positions, so move them a little
+        // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
+        // handling
         Disc product1(reaction.getProduct1());
         product1.setVelocity(v * sf::Vector2f{-n.y, n.x});
-        product1.setPosition(d1->getPosition() + d1->getVelocity() * 1e-4f);
 
         Disc product2(reaction.getProduct2());
         product2.setVelocity(v * sf::Vector2f{n.y, -n.x});
-        product2.setPosition(d1->getPosition() + d1->getVelocity() * 1e-4f);
 
         newDiscs.push_back(std::move(product1));
         newDiscs.push_back(std::move(product2));
