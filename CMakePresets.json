@@ -24,7 +24,7 @@
             "hidden": false,
             "configurePreset": "Debug",
             "configuration": "Debug",
-            "jobs": 4,
+            "jobs": 16,
             "targets": [
                 "cell-gui",
                 "benchmark",
@@ -36,7 +36,7 @@
             "hidden": false,
             "configurePreset": "Release",
             "configuration": "Release",
-            "jobs": 4,
+            "jobs": 16,
             "targets": [
                 "cell-gui",
                 "benchmark",

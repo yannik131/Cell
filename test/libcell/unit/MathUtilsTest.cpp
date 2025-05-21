@@ -1,15 +1,10 @@
 #include "MathUtils.hpp"
+#include "TestUtils.hpp"
 
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
 static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
-
-void expectNear(const sf::Vector2f& actual, const sf::Vector2f& expected, float epsilon)
-{
-    EXPECT_NEAR(actual.x, expected.x, epsilon);
-    EXPECT_NEAR(actual.y, expected.y, epsilon);
-}
 
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {

@@ -4,6 +4,7 @@
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "Reaction.hpp"
+#include "TestUtils.hpp"
 
 #include <gtest/gtest.h>
 
@@ -50,6 +51,7 @@ TEST(ReactionsTest, combinationReaction)
 
 TEST(ReactionsTest, decompositionReaction)
 {
+    // TODO Prevent decomposition if there is not enough space available around the disc
     DiscType::map<int> distribution{{Mass5Radius5, 100}, {Mass10Radius5, 0}};
     Reaction decomposition{Mass10Radius5, std::nullopt, Mass5Radius5, Mass5Radius5, 1};
     GlobalSettings::get().setDiscTypeDistribution(distribution);
@@ -59,7 +61,7 @@ TEST(ReactionsTest, decompositionReaction)
     GlobalSettings::get().setSimulationTimeStep(SettingsLimits::MaxSimulationTimeStep);
 
     Disc d1(Mass10Radius5);
-    d1.setPosition({0, 0});
+    d1.setPosition({10, 10});
     d1.setVelocity({1, 1});
 
     // Since the reaction has a chance of 100% in 1 second, we need 1/dt tries where dt is the simulation time step in
@@ -86,6 +88,9 @@ TEST(ReactionsTest, decompositionReaction)
 
     EXPECT_EQ(newDiscs[0].getType(), decomposition.getProduct1());
     EXPECT_EQ(newDiscs[1].getType(), decomposition.getProduct2());
+
+    expectNear(newDiscs[0].getPosition(), d1.getPosition(), 1e-4f);
+    expectNear(newDiscs[1].getPosition(), d1.getPosition(), 1e-4f);
 }
 
 TEST(ReactionsTest, exchangeReaction)
@@ -103,12 +108,12 @@ TEST(ReactionsTest, exchangeReaction)
     d2.setVelocity({1.2f, 1.3f});
 
     float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
-    float momentumBefore = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
+    // float momentumBefore = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
 
     ASSERT_TRUE(exchangeReaction(&d1, &d2));
 
     float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
-    float momentumAfter = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
+    // float momentumAfter = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
 
     EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
     // TODO EXPECT_FLOAT_EQ(momentumBefore, momentumAfter);

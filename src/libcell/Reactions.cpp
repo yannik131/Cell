@@ -91,9 +91,11 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
         // handling
         Disc product1(reaction.getProduct1());
+        product1.setPosition(d1->getPosition());
         product1.setVelocity(v * sf::Vector2f{-n.y, n.x});
 
         Disc product2(reaction.getProduct2());
+        product2.setPosition(d1->getPosition());
         product2.setVelocity(v * sf::Vector2f{n.y, -n.x});
 
         newDiscs.push_back(std::move(product1));
