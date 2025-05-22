@@ -3,6 +3,7 @@
 
 #include "DiscType.hpp"
 #include "Reaction.hpp"
+#include "ReactionTable.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -42,23 +43,7 @@ struct Settings
      */
     DiscType::map<int> discTypeDistribution_;
 
-    /**
-     * @brief Maps disc types to decomposition reactions A -> B + C by educt
-     * @todo Lookup for decomposition reactions takes up some time though, maybe unordered_map is worth consideration
-     */
-    DiscType::map<std::vector<Reaction>> decompositionReactions_;
-
-    /**
-     * @brief Maps pairs of disc types to combination reactions A + B -> C by educts. {A, B} and {B, A} map to the same
-     * reactions
-     */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>, DiscType::IdComparator> combinationReactions_;
-
-    /**
-     * @brief Maps pairs of disc types to exchange reactions A + B -> C + D by educts. {A, B} and {B, A} map to the same
-     * reactions
-     */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>, DiscType::IdComparator> exchangeReactions_;
+    ReactionTable reactionTable_;
 };
 
 namespace SettingsLimits

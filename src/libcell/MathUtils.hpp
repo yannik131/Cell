@@ -56,12 +56,6 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
 DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 
 /**
- * @brief Lets the discs in the passed vector decompose according to the schemes A -> B + C defined in the settings with
- * the corresponding probabilities (per second)
- */
-std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs);
-
-/**
  * @brief Makes the disc bounce back from the walls
  * @note Gives additional kinetic energy to the disc if there is less kinetic energy than at the start of the simulation
  */

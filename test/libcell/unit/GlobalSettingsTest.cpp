@@ -7,13 +7,6 @@
 namespace
 {
 
-const DiscType Mass5{"A", sf::Color::Green, DiscTypeLimits::MinRadius, 5};
-const DiscType Mass10{"B", sf::Color::Green, DiscTypeLimits::MinRadius, 10};
-const DiscType Mass15{"C", sf::Color::Green, DiscTypeLimits::MinRadius, 15};
-const DiscType Mass20{"D", sf::Color::Green, DiscTypeLimits::MinRadius, 20};
-const DiscType Mass25{"E", sf::Color::Green, DiscTypeLimits::MinRadius, 25};
-const DiscType Unused{"F", sf::Color::Green, DiscTypeLimits::MinRadius, 30};
-
 const Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
 const Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
 const Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};

@@ -10,24 +10,6 @@
 
 #include <cmath>
 
-namespace
-{
-
-DiscType discType(float radius, float mass)
-{
-    static int count = 0;
-
-    char name = static_cast<int>('A') + count++ % 20;
-    return DiscType{std::string(1, name), sf::Color::Green, radius, mass};
-}
-
-const DiscType Mass5Radius5 = discType(5, 5);
-const DiscType Mass10Radius5 = discType(5, 10);
-const DiscType Mass5Radius10 = discType(10, 5);
-const DiscType Mass15Radius10 = discType(10, 15);
-
-} // namespace
-
 TEST(ReactionsTest, combinationReaction)
 {
     DiscType::map<int> distribution{{Mass5Radius5, 100}, {Mass10Radius5, 0}, {Mass5Radius10, 0}};
@@ -37,8 +19,8 @@ TEST(ReactionsTest, combinationReaction)
 
     Disc d1(Mass5Radius5), d2(Mass5Radius10);
 
-    d1.setPosition({0, 0});
-    d2.setPosition({0, 0});
+    d1.setPosition({2, 2});
+    d2.setPosition({2, 2});
 
     d1.setVelocity({1, 0});
     d2.setVelocity({-1, 0});
@@ -47,6 +29,7 @@ TEST(ReactionsTest, combinationReaction)
     EXPECT_TRUE(d2.isMarkedDestroyed());
     EXPECT_FLOAT_EQ(MathUtils::abs(d1.getVelocity()), 0);
     EXPECT_EQ(d1.getType(), Mass10Radius5);
+    expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
 }
 
 TEST(ReactionsTest, decompositionReaction)
@@ -101,8 +84,8 @@ TEST(ReactionsTest, exchangeReaction)
     GlobalSettings::get().addReaction(exchange);
 
     Disc d1(Mass5Radius5), d2(Mass15Radius10);
-    d1.setPosition({0, 0});
-    d2.setPosition({0, 0});
+    d1.setPosition({2, 2});
+    d2.setPosition({2, 2});
 
     d1.setVelocity({1, 1});
     d2.setVelocity({1.2f, 1.3f});
@@ -120,4 +103,7 @@ TEST(ReactionsTest, exchangeReaction)
 
     EXPECT_EQ(d1.getType(), exchange.getProduct1());
     EXPECT_EQ(d2.getType(), exchange.getProduct2());
+
+    expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
+    expectNear(d2.getPosition(), {2.f, 2.f}, 1e-4f);
 }

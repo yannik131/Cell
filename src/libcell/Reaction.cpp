@@ -110,14 +110,14 @@ size_t ReactionHash::operator()(const Reaction& reaction) const
 
 Reaction::Type inferType(const std::optional<DiscType>& educt2, const std::optional<DiscType>& product2)
 {
-    if (educt2.has_value() && !product2.has_value())
+    if (!educt2.has_value() && !product2.has_value())
+        return Reaction::Type::Transformation;
+    else if (educt2.has_value() && !product2.has_value())
         return Reaction::Type::Combination;
     else if (!educt2.has_value() && product2.has_value())
         return Reaction::Type::Decomposition;
     else if (educt2.has_value() && product2.has_value())
         return Reaction::Type::Exchange;
-    else
-        throw ExceptionWithLocation("Reaction with no educt2 and no product2 is not allowed");
 }
 
 Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,

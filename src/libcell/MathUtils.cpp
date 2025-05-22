@@ -26,16 +26,6 @@ namespace MathUtils
 typedef nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter> AdapterType;
 typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KDTree;
 
-std::vector<Disc> decomposeDiscs(std::vector<Disc>& discs)
-{
-    std::vector<Disc> newDiscs;
-
-    for (auto& disc : discs)
-        decompositionReaction(&disc, newDiscs);
-
-    return newDiscs;
-}
-
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
 {
     NanoflannAdapter adapter(discs);

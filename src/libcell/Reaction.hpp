@@ -11,6 +11,7 @@ class Reaction
 public:
     enum Type
     {
+        Transformation,
         Decomposition,
         Combination,
         Exchange
@@ -47,9 +48,6 @@ private:
     float probability_ = 0;
     Type type_;
 };
-
-Reaction::Type inferReactionType(const DiscType& educt1, const DiscType& educt2, const DiscType& product1,
-                                 const DiscType& product2);
 
 struct ReactionHash
 {

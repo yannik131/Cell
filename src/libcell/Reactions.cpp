@@ -67,14 +67,14 @@ bool exchangeReaction(Disc* d1, Disc* d2)
     return false;
 }
 
-void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
+bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
     const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
     const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
     const auto& iter = decompositionReactionTable.find(d1->getType());
     if (iter == decompositionReactionTable.end())
-        return;
+        return false;
 
     const auto& possibleReactions = iter->second;
     float randomNumber = MathUtils::getRandomFloat();
@@ -102,8 +102,25 @@ void decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         newDiscs.push_back(std::move(product2));
         d1->markDestroyed();
 
-        return;
+        return true;
     }
 
-    return;
+    return false;
+}
+
+bool transformationReaction(Disc* d1)
+{
+    return false;
+}
+
+std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs)
+{
+    std::vector<Disc> newDiscs;
+
+    for (auto& disc : discs)
+    {
+        decompositionReaction(&disc, newDiscs);
+    }
+
+    return newDiscs;
 }
