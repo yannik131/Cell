@@ -3,9 +3,9 @@
 
 #include <SFML/Graphics/Color.hpp>
 
-#include <map>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <utility>
 
 /**
@@ -15,22 +15,19 @@
 class DiscType
 {
 public:
-    struct IdComparator
+    struct IdHasher
     {
-        bool operator()(const DiscType& a, const DiscType& b) const
-        {
-            return a.getId() < b.getId();
-        }
+        int operator()(const DiscType& discType) const;
+    };
 
-        bool operator()(const std::pair<DiscType, DiscType>& a, const std::pair<DiscType, DiscType>& b) const
-        {
-            return std::make_tuple(a.first.getId(), a.second.getId()) <
-                   std::make_tuple(b.first.getId(), b.second.getId());
-        }
+    struct PairHasher
+    {
+        int operator()(const std::pair<DiscType, DiscType>& pair) const;
     };
 
 public:
-    template <typename T> using map = std::map<DiscType, T, IdComparator>;
+    template <typename T> using map = std::unordered_map<DiscType, T, IdHasher>;
+    template <typename T> using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher>;
 
 public:
     /**

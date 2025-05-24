@@ -116,7 +116,7 @@ Reaction::Type inferType(const std::optional<DiscType>& educt2, const std::optio
         return Reaction::Type::Combination;
     else if (!educt2.has_value() && product2.has_value())
         return Reaction::Type::Decomposition;
-    else if (educt2.has_value() && product2.has_value())
+    else
         return Reaction::Type::Exchange;
 }
 
@@ -129,12 +129,6 @@ Reaction::Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2
     , type_(inferType(educt2, product2))
 {
     setProbability(probability);
-
-    const float eductMass = educt1.getMass() + (educt2.has_value() ? educt2->getMass() : 0);
-    const float productMass = product1.getMass() + (product2.has_value() ? product2->getMass() : 0);
-
-    if (eductMass != productMass)
-        throw ExceptionWithLocation("Product- and educt masses need to be identical");
 }
 
 const DiscType& Reaction::getEduct1() const
@@ -149,20 +143,20 @@ void Reaction::setEduct1(const DiscType& educt1)
 
 const DiscType& Reaction::getEduct2() const
 {
-    if (type_ == Decomposition)
-        throw ExceptionWithLocation("Can't get educt2: Decomposition reactions have no educt2");
+    if (type_ & (Transformation | Decomposition))
+        throw ExceptionWithLocation("Can't get educt2: Decomposition/transformation reactions have no educt2");
 
     return *educt2_;
 }
 
 bool Reaction::hasEduct2() const
 {
-    return type_ != Decomposition;
+    return type_ & (Combination | Exchange);
 }
 
 void Reaction::setEduct2(const DiscType& educt2)
 {
-    if (type_ == Decomposition)
+    if (type_ & (Transformation | Decomposition))
         throw ExceptionWithLocation("Can't set educt2: Decomposition reactions have no educt2");
 
     educt2_ = educt2;
@@ -180,21 +174,21 @@ void Reaction::setProduct1(const DiscType& product1)
 
 const DiscType& Reaction::getProduct2() const
 {
-    if (type_ == Combination)
-        throw ExceptionWithLocation("Can't get product2: Combination reactions have no product2");
+    if (type_ & (Transformation | Combination))
+        throw ExceptionWithLocation("Can't get product2: Combination/transformation reactions have no product2");
 
     return *product2_;
 }
 
 bool Reaction::hasProduct2() const
 {
-    return type_ != Combination;
+    return type_ & (Decomposition | Exchange);
 }
 
 void Reaction::setProduct2(const DiscType& product2)
 {
-    if (type_ == Combination)
-        throw ExceptionWithLocation("Can't set product2: Combination reactions have no product2");
+    if (type_ & (Transformation | Combination))
+        throw ExceptionWithLocation("Can't set product2: Combination/transformation reactions have no product2");
 
     product2_ = product2;
 }
@@ -215,4 +209,16 @@ void Reaction::setProbability(float probability)
 const Reaction::Type& Reaction::getType() const
 {
     return type_;
+}
+
+void Reaction::validate() const
+{
+    const float eductMass = educt1_.getMass() + (educt2_.has_value() ? educt2_->getMass() : 0);
+    const float productMass = product1_.getMass() + (product2_.has_value() ? product2_->getMass() : 0);
+
+    if (eductMass != productMass)
+        throw ExceptionWithLocation(toString(*this) + ": Product- and educt masses need to be identical");
+
+    if (type_ == Transformation && educt1_ == educt2_)
+        throw ExceptionWithLocation(toString(*this) + ": Educt 1 and product 1 are identical");
 }

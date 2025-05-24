@@ -2,6 +2,7 @@
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "NanoflannAdapter.hpp"
+#include "Reactions.hpp"
 
 #include <glog/logging.h>
 
@@ -36,7 +37,7 @@ void World::update(const sf::Time& dt)
             MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
-    const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
+    const auto& newDiscs = unimolecularReactions(discs_);
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
 

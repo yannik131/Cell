@@ -1,5 +1,6 @@
 #include "DiscType.hpp"
 #include "ExceptionWithLocation.hpp"
+#include "MathUtils.hpp"
 
 #include <stdexcept>
 
@@ -99,4 +100,14 @@ int DiscType::getId() const
 bool DiscType::hasSameIdAs(const DiscType& other) const
 {
     return id_ == other.id_;
+}
+
+int DiscType::IdHasher::operator()(const DiscType& discType) const
+{
+    return discType.getId();
+}
+
+int DiscType::PairHasher::operator()(const std::pair<DiscType, DiscType>& pair) const
+{
+    return MathUtils::calculateHash(pair.first.getId(), pair.second.getId());
 }

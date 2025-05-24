@@ -11,10 +11,10 @@ class Reaction
 public:
     enum Type
     {
-        Transformation,
-        Decomposition,
-        Combination,
-        Exchange
+        Transformation = 1 << 0,
+        Decomposition = 1 << 1,
+        Combination = 1 << 2,
+        Exchange = 1 << 3
     };
 
 public:
@@ -39,6 +39,8 @@ public:
     void setProbability(float probability);
 
     const Type& getType() const;
+
+    void validate() const;
 
 private:
     DiscType educt1_;

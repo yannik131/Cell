@@ -22,6 +22,7 @@ inline DiscType discType(float radius, float mass)
 
 inline const DiscType Mass5Radius5 = discType(5, 5);
 inline const DiscType Mass10Radius5 = discType(5, 10);
+inline const DiscType Mass10Radius10 = discType(10, 10);
 inline const DiscType Mass5Radius10 = discType(10, 5);
 inline const DiscType Mass15Radius10 = discType(10, 15);
 

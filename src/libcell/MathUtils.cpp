@@ -227,4 +227,10 @@ float getRandomFloat()
     return distribution(gen);
 }
 
+int calculateHash(int x, int y)
+{
+    int prime = 100003;
+    return (x * prime) ^ y;
+}
+
 } // namespace MathUtils

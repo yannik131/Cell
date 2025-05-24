@@ -5,9 +5,10 @@
 
 bool combinationReaction(Disc* d1, Disc* d2)
 {
-    const auto& combinationReactionTable = GlobalSettings::getSettings().combinationReactions_;
-    auto iter = combinationReactionTable.find(std::make_pair(d2->getType(), d1->getType()));
+    static const auto& combinationReactionTable =
+        GlobalSettings::getSettings().reactionTable_.getCombinationReactionLookupMap();
 
+    auto iter = combinationReactionTable.find(std::make_pair(d2->getType(), d1->getType()));
     if (iter == combinationReactionTable.end())
         return false;
 
@@ -39,12 +40,10 @@ bool combinationReaction(Disc* d1, Disc* d2)
 
 bool exchangeReaction(Disc* d1, Disc* d2)
 {
-    // TODO Probabilities of exchange and combination reactions should together add up to 100%
-    const auto& settings = GlobalSettings::getSettings();
+    static const auto& exchangeReactionTable =
+        GlobalSettings::getSettings().reactionTable_.getExchangeReactionLookupMap();
 
-    const auto& exchangeReactionTable = settings.exchangeReactions_;
     auto iter = exchangeReactionTable.find(std::make_pair(d2->getType(), d1->getType()));
-
     if (iter == exchangeReactionTable.end())
         return false;
 
@@ -69,8 +68,9 @@ bool exchangeReaction(Disc* d1, Disc* d2)
 
 bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
-    const auto& decompositionReactionTable = GlobalSettings::getSettings().decompositionReactions_;
-    const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    static const auto& decompositionReactionTable =
+        GlobalSettings::getSettings().reactionTable_.getDecompositionReactionLookupMap();
+    static const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
     const auto& iter = decompositionReactionTable.find(d1->getType());
     if (iter == decompositionReactionTable.end())
@@ -108,8 +108,28 @@ bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
     return false;
 }
 
-bool transformationReaction(Disc* d1)
+bool transformationReaction(Disc* disc)
 {
+    static const auto& transformationReactionTable =
+        GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
+    static const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+
+    const auto& iter = transformationReactionTable.find(disc->getType());
+    if (iter == transformationReactionTable.end())
+        return false;
+
+    const auto& possibleReactions = iter->second;
+    float randomNumber = MathUtils::getRandomFloat();
+    for (const auto& reaction : possibleReactions)
+    {
+        if (randomNumber > 1 - std::powf(1 - reaction.getProbability(), dt))
+            continue;
+
+        disc->setType(reaction.getProduct1());
+
+        return true;
+    }
+
     return false;
 }
 
@@ -119,7 +139,8 @@ std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs)
 
     for (auto& disc : discs)
     {
-        decompositionReaction(&disc, newDiscs);
+        if (!decompositionReaction(&disc, newDiscs))
+            transformationReaction(&disc);
     }
 
     return newDiscs;

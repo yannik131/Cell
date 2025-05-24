@@ -88,6 +88,9 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
 
     return std::make_pair(b, a);
 }
+
+int calculateHash(int x, int y);
+
 } // namespace MathUtils
 
 #endif /* MATHUTILS_HPP */

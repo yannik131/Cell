@@ -26,5 +26,5 @@ TEST(ReactionTableTest, LookupMapsWork)
 
     EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().size(), 2);
     EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().at(std::make_pair(Mass5, Mass15)).front(), exchange);
-    EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().at(std::make_pair(Mass15, Mass5)), exchange);
+    EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().at(std::make_pair(Mass15, Mass5)).front(), exchange);
 }

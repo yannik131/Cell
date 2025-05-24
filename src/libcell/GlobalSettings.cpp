@@ -156,6 +156,8 @@ void GlobalSettings::addReaction(const Reaction& reaction)
     if (reaction.hasProduct2())
         throwIfNotInDistribution(reaction.getProduct2(), settings_.discTypeDistribution_);
 
+    reaction.validate();
+
     settings_.reactionTable_.addReaction(reaction);
 
     useCallback(SettingID::Reactions);
@@ -222,12 +224,12 @@ void GlobalSettings::removeDanglingReactions(const DiscType::map<int>& newDiscTy
 
 void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDiscTypeDistribution)
 {
-    std::map<int, DiscType> updatedDiscTypes;
+    DiscType::map<DiscType> updatedDiscTypes;
     for (const auto& [oldDiscType, frequency] : settings_.discTypeDistribution_)
     {
         auto iter = newDiscTypeDistribution.find(oldDiscType);
         if (iter != newDiscTypeDistribution.end())
-            updatedDiscTypes[oldDiscType.getId()] = iter->first;
+            updatedDiscTypes.emplace(oldDiscType, iter->first);
     }
 
     settings_.reactionTable_.updateDiscTypes(updatedDiscTypes);

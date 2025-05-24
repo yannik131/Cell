@@ -4,6 +4,8 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
+#include <unordered_set>
+
 static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
 
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
@@ -180,4 +182,21 @@ TEST(MathUtilsTest, makeOrderedPair)
     auto pair2 = MathUtils::makeOrderedPair(&i1, &i2);
 
     EXPECT_EQ(pair, pair2);
+}
+
+TEST(MathUtilsTest, calculateHash)
+{
+    std::unordered_set<int> hashSet;
+
+    for (int x = 0; x <= 1000; ++x)
+    {
+        for (int y = 0; y <= 1000; ++y)
+        {
+            int hashValue = MathUtils::calculateHash(x, y);
+            if (hashSet.find(hashValue) != hashSet.end())
+                FAIL() << "Duplicate hash value for " << x << " " << y;
+
+            hashSet.insert(hashValue);
+        }
+    }
 }

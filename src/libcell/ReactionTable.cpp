@@ -1,24 +1,22 @@
 #include "ReactionTable.hpp"
 #include "Reaction.hpp"
 
-const std::unordered_map<DiscType, std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
+const DiscType::map<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
 {
     return decompositionReactionLookupMap_;
 }
 
-const std::unordered_map<DiscType, std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
+const DiscType::map<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
 {
     return transformationReactionLookupMap_;
 }
 
-const std::unordered_map<std::pair<DiscType, DiscType>, std::vector<Reaction>>&
-ReactionTable::getCombinationReactionLookupMap() const
+const DiscType::pair_map<std::vector<Reaction>>& ReactionTable::getCombinationReactionLookupMap() const
 {
     return combinationReactionLookupMap_;
 }
 
-const std::unordered_map<std::pair<DiscType, DiscType>, std::vector<Reaction>>&
-ReactionTable::getExchangeReactionLookupMap() const
+const DiscType::pair_map<std::vector<Reaction>>& ReactionTable::getExchangeReactionLookupMap() const
 {
     return exchangeReactionLookupMap_;
 }
@@ -35,17 +33,19 @@ void ReactionTable::setReactions(const std::vector<Reaction>& reactions)
     createLookupMaps();
 }
 
-void ReactionTable::updateDiscTypes(const std::map<int, DiscType>& updatedDiscTypes)
+void ReactionTable::updateDiscTypes(const DiscType::map<DiscType>& updatedDiscTypes)
 {
     std::vector<Reaction> updatedReactions;
     for (const auto& reaction : reactions_)
     {
         std::vector<std::optional<DiscType>> reactionParts(
-            {reaction.getEduct1(), reaction.getEduct2(), reaction.getProduct1(), reaction.getProduct2()});
+            {reaction.getEduct1(), reaction.hasEduct2() ? std::optional<DiscType>(reaction.getEduct2()) : std::nullopt,
+             reaction.getProduct1(),
+             reaction.hasProduct2() ? std::optional<DiscType>(reaction.getProduct2()) : std::nullopt});
         for (auto& part : reactionParts)
         {
-            if (part.has_value() && updatedDiscTypes.contains(part->getId()))
-                *part = updatedDiscTypes.at(part->getId());
+            if (part.has_value() && updatedDiscTypes.contains(*part))
+                *part = updatedDiscTypes.at(*part);
         }
 
         updatedReactions.push_back(Reaction{*reactionParts[0], reactionParts[1], *reactionParts[2], reactionParts[3],
@@ -97,17 +97,16 @@ void ReactionTable::createLookupMaps()
 
     for (const auto& reaction : reactions_)
     {
-        if (reaction.getType() == Reaction::Transformation || reaction.getType() == Reaction::Decomposition)
+        if (reaction.getType() & (Reaction::Transformation | Reaction::Decomposition))
         {
-            auto lookupMap = reaction.getType() == Reaction::Transformation ? transformationReactionLookupMap_
+            auto& lookupMap = reaction.getType() & Reaction::Transformation ? transformationReactionLookupMap_
                                                                             : decompositionReactionLookupMap_;
-            lookupMap[reaction.getEduct1()].push_back(reaction);
             addReactionToVector(lookupMap[reaction.getEduct1()], reaction);
         }
         else
         {
-            auto lookupMap = reaction.getType() == Reaction::Combination ? combinationReactionLookupMap_
-                                                                         : exchangeReactionLookupMap_;
+            auto& lookupMap =
+                reaction.getType() & Reaction::Combination ? combinationReactionLookupMap_ : exchangeReactionLookupMap_;
             addReactionToVector(lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())], reaction);
             if (reaction.getEduct1() != reaction.getEduct2())
                 addReactionToVector(lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
