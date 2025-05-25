@@ -18,7 +18,7 @@ jobs:
     - name: Set up vcpkg
       run: |
         ./contrib/vcpkg/bootstrap-vcpkg.sh
-        ./contrib/vcpkg/vcpkg install glog sfml nanoflann qtbase gtest
+        ./contrib/vcpkg/vcpkg install
 
     - name: Create build directory
       run: mkdir build_release
