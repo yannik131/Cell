@@ -17,6 +17,7 @@ jobs:
 
     - name: Set up vcpkg
       run: |
+        git -C ./contrib/vcpkg/ pull
         ./contrib/vcpkg/bootstrap-vcpkg.sh
         ./contrib/vcpkg/vcpkg install
 
