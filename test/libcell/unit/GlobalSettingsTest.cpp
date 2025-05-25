@@ -287,6 +287,7 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 
     // 1 reaction with Mass10 as educt, 1 with Mass10 as product, 1 with Mass10 nowhere, for each reaction type
     // A = Mass10 for notation
+
     Reaction transformationAEduct{Mass10, std::nullopt, Mass10Radius10, std::nullopt, 0.1f};
     Reaction transformationAProduct{Mass10Radius10, std::nullopt, Mass10, std::nullopt, 0.1f};
     Reaction transformationANowhere{Mass10Radius10, std::nullopt, Mass10Radius5, std::nullopt, 0.1f};

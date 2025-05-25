@@ -92,14 +92,11 @@ public:
     int getId() const;
 
     /**
-     * @returns `true` if the id's are identical
+     * @brief Comparison by ID
      */
-    bool hasSameIdAs(const DiscType& other) const;
+    bool operator==(const DiscType& other) const;
 
-    /**
-     * @brief Default comparison operator, compares all attributes
-     */
-    bool operator==(const DiscType& other) const = default;
+    bool equalsTo(const DiscType& other) const;
 
 private:
     /**

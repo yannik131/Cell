@@ -27,6 +27,32 @@
     <widget class="QWidget" name="widget_3" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
+       <widget class="QPushButton" name="addTransformationReactionPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Transformation</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addDecompositionReactionPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Decomposition reaction</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="addCombinationReactionPushButton">
         <property name="maximumSize">
          <size>
@@ -49,19 +75,6 @@
         </property>
         <property name="text">
          <string>Exchange reaction</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="addDecompositionReactionPushButton">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Decomposition reaction</string>
         </property>
        </widget>
       </item>

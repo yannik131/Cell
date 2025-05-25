@@ -3,7 +3,6 @@
 
 #include "DiscType.hpp"
 
-#include <map>
 #include <vector>
 
 class Reaction;

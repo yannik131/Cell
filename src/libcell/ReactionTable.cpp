@@ -48,8 +48,11 @@ void ReactionTable::updateDiscTypes(const DiscType::map<DiscType>& updatedDiscTy
                 *part = updatedDiscTypes.at(*part);
         }
 
-        updatedReactions.push_back(Reaction{*reactionParts[0], reactionParts[1], *reactionParts[2], reactionParts[3],
-                                            reaction.getProbability()});
+        Reaction updatedReaction{*reactionParts[0], reactionParts[1], *reactionParts[2], reactionParts[3],
+                                 reaction.getProbability()};
+        updatedReaction.validate();
+
+        updatedReactions.push_back(updatedReaction);
     }
 
     reactions_ = updatedReactions;

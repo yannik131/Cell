@@ -115,10 +115,15 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
     static const QVector<bool> decompositionFlags{true, false, false, false, true, false, true, true, true};
     static const QVector<bool> combinationFlags{true, false, true, false, true, false, false, true, true};
     static const QVector<bool> exchangeFlags{true, false, true, false, true, false, true, true, true};
+    static const QVector<bool> transformationFlags{true, false, false, false, true, false, false, true, true};
 
     const auto& reaction = rows_.at(index.row());
     switch (reaction.getType())
     {
+    case Reaction::Type::Transformation:
+        if (!transformationFlags[index.column()])
+            return defaultFlags;
+        break;
     case Reaction::Type::Combination:
         if (!combinationFlags[index.column()])
             return defaultFlags;
@@ -138,7 +143,7 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
 
 void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back(reaction);
     endInsertRows();
 }
@@ -153,6 +158,9 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 
     switch (type)
     {
+    case Reaction::Type::Transformation:
+        addRowFromReaction(Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.f});
+        break;
     case Reaction::Type::Combination:
         addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
         break;
@@ -167,7 +175,7 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 
 void ReactionsTableModel::removeRow(int row)
 {
-    if (row < 0 || row >= rows_.size())
+    if (row < 0 || row >= static_cast<int>(rows_.size()))
         return;
 
     beginRemoveRows(QModelIndex(), row, row);
@@ -194,14 +202,15 @@ void ReactionsTableModel::loadSettings()
         }
     };
 
-    collectReactions(settings.decompositionReactions_);
-    collectReactions(settings.combinationReactions_);
-    collectReactions(settings.exchangeReactions_);
+    collectReactions(settings.reactionTable_.getTransformationReactionLookupMap());
+    collectReactions(settings.reactionTable_.getDecompositionReactionLookupMap());
+    collectReactions(settings.reactionTable_.getCombinationReactionLookupMap());
+    collectReactions(settings.reactionTable_.getExchangeReactionLookupMap());
 
     if (reactionSet.empty())
         return;
 
-    beginInsertRows(QModelIndex(), 0, reactionSet.size() - 1);
+    beginInsertRows(QModelIndex(), 0, static_cast<int>(reactionSet.size()) - 1);
 
     for (const auto& reaction : reactionSet)
         rows_.push_back(reaction);

@@ -5,8 +5,8 @@
 
 #include <SFML/System/Time.hpp>
 
-#include <map>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 struct OverlapResults
@@ -18,7 +18,7 @@ struct OverlapResults
 };
 
 template <typename T1, typename T2, typename T3>
-std::map<T1, T2, T3>& operator+=(std::map<T1, T2, T3>& a, const std::map<T1, T2, T3>& b)
+std::unordered_map<T1, T2, T3>& operator+=(std::unordered_map<T1, T2, T3>& a, const std::unordered_map<T1, T2, T3>& b)
 {
     for (const auto& [key, value] : b)
         a[key] += value;
@@ -27,7 +27,7 @@ std::map<T1, T2, T3>& operator+=(std::map<T1, T2, T3>& a, const std::map<T1, T2,
 }
 
 template <typename T1, typename T2, typename T3, typename T4>
-std::map<T1, T2, T3>& operator/=(std::map<T1, T2, T3>& a, const T4& b)
+std::unordered_map<T1, T2, T3>& operator/=(std::unordered_map<T1, T2, T3>& a, const T4& b)
 {
     for (const auto& [key, value] : a)
         a[key] /= b;

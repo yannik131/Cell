@@ -27,9 +27,8 @@ std::string toString(const Reaction& reaction)
 
 bool contains(const Reaction& reaction, const DiscType& discType)
 {
-    return reaction.getEduct1().hasSameIdAs(discType) || reaction.getProduct1().hasSameIdAs(discType) ||
-           (reaction.hasEduct2() && reaction.getEduct2().hasSameIdAs(discType)) ||
-           (reaction.hasProduct2() && reaction.getProduct2().hasSameIdAs(discType));
+    return reaction.getEduct1() == discType || reaction.hasEduct2() && reaction.getEduct2() == discType ||
+           reaction.getProduct1() == discType || reaction.hasProduct2() && reaction.getProduct2() == discType;
 }
 
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
@@ -219,6 +218,6 @@ void Reaction::validate() const
     if (eductMass != productMass)
         throw ExceptionWithLocation(toString(*this) + ": Product- and educt masses need to be identical");
 
-    if (type_ == Transformation && educt1_ == educt2_)
+    if (type_ == Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this) + ": Educt 1 and product 1 are identical");
 }

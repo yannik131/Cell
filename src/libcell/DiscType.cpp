@@ -97,9 +97,15 @@ int DiscType::getId() const
     return id_;
 }
 
-bool DiscType::hasSameIdAs(const DiscType& other) const
+bool DiscType::operator==(const DiscType& other) const
 {
     return id_ == other.id_;
+}
+
+bool DiscType::equalsTo(const DiscType& other) const
+{
+    return name_ == other.name_ && color_ == other.color_ && radius_ == other.radius_ && mass_ == other.mass_ &&
+           id_ == other.id_;
 }
 
 int DiscType::IdHasher::operator()(const DiscType& discType) const

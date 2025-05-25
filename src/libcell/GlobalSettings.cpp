@@ -228,7 +228,7 @@ void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDis
     for (const auto& [oldDiscType, frequency] : settings_.discTypeDistribution_)
     {
         auto iter = newDiscTypeDistribution.find(oldDiscType);
-        if (iter != newDiscTypeDistribution.end())
+        if (iter != newDiscTypeDistribution.end() && !iter->first.equalsTo(oldDiscType))
             updatedDiscTypes.emplace(oldDiscType, iter->first);
     }
 

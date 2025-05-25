@@ -38,6 +38,8 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             [this]() { requestEmptyRowFromModel(Reaction::Type::Decomposition); });
     connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
             [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
+    connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
+            [this]() { requestEmptyRowFromModel(Reaction::Type::Transformation); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 

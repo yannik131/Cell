@@ -1,0 +1,38 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on all branches
+
+jobs:
+  setup_and_build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true  # Ensure submodules are updated
+
+    - name: Set up vcpkg
+      run: |
+        ./contrib/vcpkg/bootstrap-vcpkg.sh
+        ./contrib/vcpkg/vcpkg install glog sfml nanoflann qtbase gtest
+
+    - name: Create build directory
+      run: mkdir build_release
+
+    - name: Configure with CMake
+      run: |
+        cd build_release
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build with CMake
+      run: |
+        cd build_release
+        cmake --build . --config Release --parallel 4
+
+    - name: Run tests
+      run: |
+        ./build_release/Release/tests-libcell

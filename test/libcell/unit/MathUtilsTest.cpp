@@ -10,8 +10,8 @@ static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
 
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
-    std::map<int, double> m1{{1, 1.0}, {2, 2.0}};
-    std::map<int, double> m2{{1, 2.0}, {2, 3.0}, {3, 3.0}};
+    std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
+    std::unordered_map<int, double> m2{{1, 2.0}, {2, 3.0}, {3, 3.0}};
 
     m1 += m2;
 
@@ -21,7 +21,7 @@ TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 
 TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 {
-    std::map<int, double> m1{{1, 1.0}, {2, 2.0}};
+    std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
     m1 /= 2.0;
 
     EXPECT_DOUBLE_EQ(m1[1], 0.5);
