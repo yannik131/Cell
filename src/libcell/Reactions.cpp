@@ -3,6 +3,8 @@
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 
+#include <cmath>
+
 bool combinationReaction(Disc* d1, Disc* d2)
 {
     static const auto& combinationReactionTable =
