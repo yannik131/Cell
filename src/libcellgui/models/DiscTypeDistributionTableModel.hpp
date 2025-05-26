@@ -4,7 +4,7 @@
 #include "DiscType.hpp"
 
 #include <QAbstractTableModel>
-#include <Qvector>
+#include <QVector>
 
 class DiscTypeDistributionTableModel : public QAbstractTableModel
 {
