@@ -38,4 +38,4 @@ jobs:
 
     - name: Run tests
       run: |
-        ./build_release/Release/tests-libcell
+        ./build_release/tests-libcell
