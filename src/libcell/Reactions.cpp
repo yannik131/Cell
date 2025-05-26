@@ -82,7 +82,7 @@ bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
     float randomNumber = MathUtils::getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > 1 - std::powf(1 - reaction.getProbability(), dt))
+        if (randomNumber > 1 - std::pow(1 - reaction.getProbability(), dt))
             continue;
 
         const auto& vVec = d1->getVelocity();
@@ -124,7 +124,7 @@ bool transformationReaction(Disc* disc)
     float randomNumber = MathUtils::getRandomFloat();
     for (const auto& reaction : possibleReactions)
     {
-        if (randomNumber > 1 - std::powf(1 - reaction.getProbability(), dt))
+        if (randomNumber > 1 - std::pow(1 - reaction.getProbability(), dt))
             continue;
 
         disc->setType(reaction.getProduct1());
