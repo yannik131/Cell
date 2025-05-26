@@ -11,7 +11,7 @@ DiscType getDiscTypeByName(const QString& name)
 {
     for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
     {
-        if (discType.getName() == name)
+        if (discType.getName() == name.toStdString())
             return discType;
     }
 
