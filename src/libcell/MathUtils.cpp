@@ -6,6 +6,7 @@
 #include "nanoflann.hpp"
 #include <glog/logging.h>
 
+#include <cmath>
 #include <numeric>
 #include <ostream>
 #include <random>

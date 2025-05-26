@@ -19,9 +19,9 @@ jobs:
       run: |
         if [ -f ./contrib/vcpkg/.git/shallow ]; then
             git -C ./contrib/vcpkg/ fetch --unshallow
+            ./contrib/vcpkg/bootstrap-vcpkg.sh
+            ./contrib/vcpkg/vcpkg install
         fi
-        ./contrib/vcpkg/bootstrap-vcpkg.sh
-        ./contrib/vcpkg/vcpkg install
 
     - name: Create build directory
       run: mkdir build_release

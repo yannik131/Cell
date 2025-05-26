@@ -4,6 +4,7 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <unordered_set>
 
 static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
