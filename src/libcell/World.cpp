@@ -95,7 +95,7 @@ void World::buildScene()
     discs_.reserve(settings.numberOfDiscs_);
     std::map<int, int> counts;
 
-    if (settings.numberOfDiscs_ > startPositions_.size())
+    if (settings.numberOfDiscs_ > static_cast<int>(startPositions_.size()))
         LOG(WARNING) << "According to the settings, " << std::to_string(settings.numberOfDiscs_)
                      << " discs should be created, but the render window can only fit "
                      << std::to_string(startPositions_.size()) << ". "

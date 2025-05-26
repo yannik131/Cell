@@ -18,7 +18,6 @@ cd "$(dirname "$0")/../../"
 if [ ! -d "contrib/vcpkg/" ]; then
     git submodule update
     ./contrib/vcpkg/bootstrap-vcpkg.sh
-    ./contrib/vcpkg/vcpkg install
 fi
 
 # Release build

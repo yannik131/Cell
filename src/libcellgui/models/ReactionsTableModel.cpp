@@ -38,7 +38,7 @@ QVariant ReactionsTableModel::headerData(int section, Qt::Orientation orientatio
 
 QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() >= rows_.size() || (role != Qt::DisplayRole && role != Qt::EditRole))
+    if (index.row() >= static_cast<int>(rows_.size()) || (role != Qt::DisplayRole && role != Qt::EditRole))
         return {};
 
     const auto& reaction = rows_.at(index.row());
@@ -68,7 +68,7 @@ QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
 
 bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (index.row() >= rows_.size() || role != Qt::EditRole)
+    if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
         return false;
 
     std::optional<DiscType> discType;

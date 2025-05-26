@@ -27,8 +27,8 @@ std::string toString(const Reaction& reaction)
 
 bool contains(const Reaction& reaction, const DiscType& discType)
 {
-    return reaction.getEduct1() == discType || reaction.hasEduct2() && reaction.getEduct2() == discType ||
-           reaction.getProduct1() == discType || reaction.hasProduct2() && reaction.getProduct2() == discType;
+    return reaction.getEduct1() == discType || (reaction.hasEduct2() && reaction.getEduct2() == discType) ||
+           reaction.getProduct1() == discType || (reaction.hasProduct2() && reaction.getProduct2() == discType);
 }
 
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
@@ -44,7 +44,7 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
 
     float totalProbability = reactions.front().getProbability();
 
-    for (int i = 0; i < reactions.size() - 1; ++i)
+    for (std::size_t i = 0; i < reactions.size() - 1; ++i)
         totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
 
     if (reaction.getProbability() + totalProbability > 1.f)

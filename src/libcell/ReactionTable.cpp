@@ -68,9 +68,9 @@ void ReactionTable::removeDiscTypes(const std::vector<DiscType>& discTypesToRemo
         for (const auto& removedDiscType : discTypesToRemove)
         {
             if (reaction.getEduct1() == removedDiscType ||
-                reaction.hasEduct2() && reaction.getEduct2() == removedDiscType ||
+                (reaction.hasEduct2() && reaction.getEduct2() == removedDiscType) ||
                 reaction.getProduct1() == removedDiscType ||
-                reaction.hasProduct2() && reaction.getProduct2() == removedDiscType)
+                (reaction.hasProduct2() && reaction.getProduct2() == removedDiscType))
             {
                 affected = true;
                 break;
