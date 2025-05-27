@@ -15,6 +15,12 @@ jobs:
       with:
         submodules: true  # Ensure submodules are updated
 
+    - name: Check clang-format
+      run: |
+        # Find all .cpp and .hpp files in src/ recursively and check their formatting
+        find src/ -type f \( -name '*.cpp' -o -name '*.hpp' \) \
+          -exec clang-format --dry-run --Werror {} +
+
     - name: Set up vcpkg
       run: |
         if [ -f ./contrib/vcpkg/.git/shallow ]; then
