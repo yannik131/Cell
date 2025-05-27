@@ -9,12 +9,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG)
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/contrib/vcpkg/scripts/buildsystems/vcpkg.cmake)
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 
 if(MSVC)
     add_compile_options(/W4 /wd4244)
@@ -91,6 +88,12 @@ find_package(GTest REQUIRED)
 file(GLOB_RECURSE LIBCELL_TEST_SRC ${PROJECT_SOURCE_DIR}/test/libcell/*.cpp)
 
 add_executable(tests-libcell ${LIBCELL_TEST_SRC})
+
+set_target_properties(tests-libcell PROPERTIES 
+    SKIP_BUILD_RPATH TRUE
+    # Explicitly tell CMake not to watch these files for reconfigure
+    CMAKE_CONFIGURE_DEPENDS ""
+)
 
 target_link_libraries(tests-libcell
     libcell

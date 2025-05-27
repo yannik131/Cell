@@ -1,3 +1,11 @@
+# to build in 64 bit mode on windows with ninja and use clang-tidy:
+# - open x64 native tools command prompt for vs 2022
+# - obtain these env vars: echo %PATH%, echo %LIB%, echo %INCLUDE%
+# - in the shell for building, set PATH, LIB and INCLUDE to those values and run:
+# cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl ..
+# - in vs code, add to .vscode/settings.json:
+# { ... "cmake.environment": { "PATH": ..., "LIB": ..., "INCLUDE": ... } }
+
 # echo commands
 Set-PSDebug -Trace 1
 
