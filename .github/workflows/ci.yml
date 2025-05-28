@@ -43,7 +43,9 @@ jobs:
         cmake --build . --config Release --parallel 4
 
     - name: clang-tidy
-      run: ./scripts/unix/clang-tidy-check.sh
+      run: |
+        chmod +x ./scripts/unix/clang-tidy-check.sh
+        ./scripts/unix/clang-tidy-check.sh
 
     - name: Run tests
       run: |
