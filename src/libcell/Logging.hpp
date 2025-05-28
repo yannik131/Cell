@@ -14,7 +14,7 @@
 /**
  * @brief Formats the message in the format TIME - source:line LEVEL <message>
  */
-void MyPrefixFormatter(std::ostream &s, const google::LogMessage &m, void * /*data*/)
+void MyPrefixFormatter(std::ostream& s, const google::LogMessage& m, void* /*data*/)
 {
     using std::setw, std::setfill;
     s << setw(2) << m.time().hour() << ':' << setw(2) << m.time().min() << ':' << setw(2) << m.time().sec() << ","
@@ -26,7 +26,7 @@ void MyPrefixFormatter(std::ostream &s, const google::LogMessage &m, void * /*da
  * @brief Installs the above PrefixFormatter, lets gflags parse command line options (like --v=N) and configures the
  * logging
  */
-void initLogging(int argc, char **argv)
+void initLogging(int argc, char** argv)
 {
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -40,6 +40,5 @@ void initLogging(int argc, char **argv)
 
     google::InstallPrefixFormatter(&MyPrefixFormatter);
 }
-
 
 #endif /* LOGGING_HPP */
