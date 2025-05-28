@@ -58,15 +58,10 @@ struct ReactionHash
 
 /**
  * @brief Checks if all products and educts have identical disc type names
- * @note Does not take probability into account because 2 reactions with identical products and educts but different
- * probabilities don't make sense
  */
 bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 std::string toString(const Reaction& reaction);
 bool contains(const Reaction& reaction, const DiscType& discType);
-
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
-void removeReactionFromVector(std::vector<Reaction>& reactions, Reaction reaction);
-void removeReactionsFromVector(std::vector<Reaction>& reactions, const DiscType& discType);
 
 #endif /* REACTION_HPP */

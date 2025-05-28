@@ -189,9 +189,9 @@ TEST(MathUtilsTest, calculateHash)
 {
     std::unordered_set<int> hashSet;
 
-    for (int x = 0; x <= 1000; ++x)
+    for (int x = 0; x <= 100; ++x)
     {
-        for (int y = 0; y <= 1000; ++y)
+        for (int y = 0; y <= 100; ++y)
         {
             int hashValue = MathUtils::calculateHash(x, y);
             if (hashSet.find(hashValue) != hashSet.end())

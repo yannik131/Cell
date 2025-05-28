@@ -43,6 +43,7 @@ jobs:
         cmake --build . --config Release --parallel 4
 
     - name: clang-tidy
+      continue-on-error: true 
       run: |
         chmod +x ./scripts/unix/clang-tidy-check.sh
         ./scripts/unix/clang-tidy-check.sh

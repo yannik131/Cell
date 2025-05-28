@@ -39,8 +39,14 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
         return;
     }
 
-    if (std::find(reactions.begin(), reactions.end(), reaction) != reactions.end())
-        throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
+    for (const auto& r : reactions)
+    {
+        if (r == reaction)
+            throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
+
+        if (r.getType() != reaction.getType())
+            throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r) + " vs. " + toString(reaction));
+    }
 
     float totalProbability = reactions.front().getProbability();
 
@@ -55,49 +61,6 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
 
     std::sort(reactions.begin(), reactions.end(), [](const auto& reaction1, const auto& reaction2)
               { return reaction1.getProbability() < reaction2.getProbability(); });
-}
-
-void removeReactionFromVector(std::vector<Reaction>& reactions, Reaction reaction)
-{
-    float subtrahend = 0;
-    for (auto iter = reactions.begin(); iter != reactions.end();)
-    {
-        if (*iter == reaction)
-        {
-            if (iter == reactions.begin())
-                subtrahend = iter->getProbability();
-            else
-                subtrahend = iter->getProbability() - (iter - 1)->getProbability();
-
-            iter = reactions.erase(iter);
-            continue;
-        }
-
-        if (subtrahend != 0)
-            iter->setProbability(iter->getProbability() - subtrahend);
-
-        ++iter;
-    }
-}
-
-void removeReactionsFromVector(std::vector<Reaction>& reactions, const DiscType& discType)
-{
-    std::vector<Reaction> reactionsToRemove;
-
-    for (const auto& reaction : reactions)
-    {
-        if (contains(reaction, discType))
-            reactionsToRemove.push_back(reaction);
-    }
-
-    if (reactions.size() == reactionsToRemove.size())
-    {
-        reactions.clear();
-        return;
-    }
-
-    for (const auto& reaction : reactionsToRemove)
-        removeReactionFromVector(reactions, reaction);
 }
 
 size_t ReactionHash::operator()(const Reaction& reaction) const

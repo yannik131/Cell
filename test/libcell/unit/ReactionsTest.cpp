@@ -91,19 +91,22 @@ TEST(ReactionsTest, exchangeReaction)
     d2.setVelocity({1.2f, 1.3f});
 
     float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
-    // float momentumBefore = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
+    float momentumBefore = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
 
     ASSERT_TRUE(exchangeReaction(&d1, &d2));
 
     float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
-    // float momentumAfter = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
+    float momentumAfter = d1.getAbsoluteMomentum() + d2.getAbsoluteMomentum();
 
     EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
-    // TODO EXPECT_FLOAT_EQ(momentumBefore, momentumAfter);
 
     EXPECT_EQ(d1.getType(), exchange.getProduct1());
     EXPECT_EQ(d2.getType(), exchange.getProduct2());
 
     expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
     expectNear(d2.getPosition(), {2.f, 2.f}, 1e-4f);
+
+    GTEST_SKIP() << "Todo: Fix exchange reaction physics";
+
+    EXPECT_FLOAT_EQ(momentumBefore, momentumAfter);
 }
