@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 TEST(ReactionTest, invalidReactions)
 {
     Reaction wrongMasses{Mass5, Mass5, Mass10, Mass5, 0.1f};
