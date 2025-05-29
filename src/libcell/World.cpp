@@ -99,7 +99,7 @@ void World::buildScene()
     const auto& settings = GlobalSettings::getSettings();
 
     discs_.reserve(settings.numberOfDiscs_);
-    std::map<int, int> counts;
+    DiscType::map<int> counts;
 
     if (settings.numberOfDiscs_ > static_cast<int>(startPositions_.size()))
         LOG(WARNING) << "According to the settings, " << std::to_string(settings.numberOfDiscs_)
@@ -124,7 +124,7 @@ void World::buildScene()
         {
             if (randomNumber < percentage || percentage == 100)
             {
-                counts[discType.getRadius()]++;
+                counts[discType]++;
                 Disc newDisc(discType);
                 newDisc.setPosition(startPositions_.back());
                 newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));
@@ -141,10 +141,11 @@ void World::buildScene()
     currentKineticEnergy_ = initialKineticEnergy_;
 
     DLOG(INFO) << "Radius distribution";
-    for (const auto& [radius, count] : counts)
+    for (const auto& [discType, count] : counts)
     {
-        DLOG(INFO) << radius << ": " << count << "/" << settings.numberOfDiscs_ << " ("
-                   << count / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
+        DLOG(INFO) << discType.getName() << " (" + std::to_string(discType.getRadius()) + "px): " << count << "/"
+                   << settings.numberOfDiscs_ << " (" << count / static_cast<float>(settings.numberOfDiscs_) * 100
+                   << "%)\n";
     }
 }
 

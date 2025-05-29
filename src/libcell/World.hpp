@@ -34,7 +34,7 @@ private:
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;
-    int maxRadius_{};
+    float maxRadius_{};
     DiscType::map<int> collisionCounts_;
     float initialKineticEnergy_{};
     float currentKineticEnergy_{};

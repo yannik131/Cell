@@ -23,7 +23,7 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
     // The settings are only locked if the simulation is running
     // If it is not running, we have no frame limit
     if (GlobalSettings::get().isLocked() &&
-        clock_.getElapsedTime() < sf::seconds(1.f / GlobalGUISettings::getGUISettings().guiFPS_))
+        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(GlobalGUISettings::getGUISettings().guiFPS_)))
         return;
 
     clock_.restart();

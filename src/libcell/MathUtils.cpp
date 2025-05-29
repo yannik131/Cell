@@ -27,7 +27,7 @@ namespace MathUtils
 using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
 using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2>;
 
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
+std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius)
 {
     NanoflannAdapter adapter(discs);
     KDTree kdtree(2, adapter);

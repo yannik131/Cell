@@ -17,7 +17,7 @@ PlotControlWidget::PlotControlWidget(QWidget* parent)
     ui->plotTypeComboBox->clear();
     ui->plotTypeComboBox->addItems(SupportedPlotCategoryNames);
     ui->plotTypeComboBox->setCurrentIndex(
-        SupportedPlotCategories.indexOf(GlobalGUISettings::getGUISettings().currentPlotCategory_));
+        static_cast<int>(SupportedPlotCategories.indexOf(GlobalGUISettings::getGUISettings().currentPlotCategory_)));
 
     ui->plotSumCheckBox->setChecked(GlobalGUISettings::getGUISettings().plotSum_);
 

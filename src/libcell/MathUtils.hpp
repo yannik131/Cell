@@ -47,7 +47,7 @@ namespace MathUtils
  * @param maxRadius The largest radius of all discs in the simulation. Used for the radius search in the kd tree to find
  * candidates for collision
  */
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius);
+std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius);
 
 /**
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
