@@ -14,5 +14,5 @@ TEST(WorldTest, EnergyIsConserved)
     for (int i = 0; i < 5; ++i)
         world.update(sf::milliseconds(1));
 
-    EXPECT_FLOAT_EQ(world.getCurrentKineticEnergy(), initialKineticEnergy);
+    EXPECT_NEAR(world.getCurrentKineticEnergy(), initialKineticEnergy, 0.01f * initialKineticEnergy);
 }

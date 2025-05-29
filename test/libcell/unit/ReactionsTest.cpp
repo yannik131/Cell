@@ -110,3 +110,28 @@ TEST(ReactionsTest, exchangeReaction)
 
     EXPECT_FLOAT_EQ(momentumBefore, momentumAfter);
 }
+
+TEST(ReactionsTest, transformationReaction)
+{
+    DiscType::map<int> distribution{{Mass5Radius5, 100}, {Mass5Radius10, 0}};
+    Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1};
+    GlobalSettings::get().setDiscTypeDistribution(distribution);
+    GlobalSettings::get().addReaction(transformation);
+
+    GlobalSettings::get().setSimulationTimeStep(SettingsLimits::MaxSimulationTimeStep);
+
+    Disc d1(Mass5Radius5);
+    d1.setPosition({10, 10});
+    d1.setVelocity({1, 1});
+
+    float dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    int N = static_cast<int>(1.f / dt) + 1;
+
+    for (int i = 0; i < N; ++i)
+    {
+        if (transformationReaction(&d1))
+            break;
+    }
+
+    EXPECT_EQ(d1.getType(), transformation.getProduct1());
+}
