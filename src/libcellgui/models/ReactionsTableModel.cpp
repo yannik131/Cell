@@ -22,7 +22,7 @@ int ReactionsTableModel::rowCount(const QModelIndex&) const
 
 int ReactionsTableModel::columnCount(const QModelIndex&) const
 {
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     return 9;
 }
 
@@ -31,7 +31,7 @@ QVariant ReactionsTableModel::headerData(int section, Qt::Orientation orientatio
     if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
         return {};
 
-    static const QStringList Headers{"A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"};
+    static const QStringList Headers{"A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"};
 
     return Headers[section];
 }
@@ -111,7 +111,7 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
 
     const auto defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     static const QVector<bool> decompositionFlags{true, false, false, false, true, false, true, true, true};
     static const QVector<bool> combinationFlags{true, false, true, false, true, false, false, true, true};
     static const QVector<bool> exchangeFlags{true, false, true, false, true, false, true, true, true};

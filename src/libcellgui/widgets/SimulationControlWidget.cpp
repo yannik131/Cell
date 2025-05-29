@@ -40,7 +40,6 @@ void SimulationControlWidget::setRanges()
                                   SettingsLimits::MaxSimulationTimeStep.asMicroseconds());
     ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
                                          SettingsLimits::MaxSimulationTimeScale);
-    ui->frictionDoubleSpinBox->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
 }
 
 void SimulationControlWidget::displayGlobalSettings()
@@ -52,7 +51,6 @@ void SimulationControlWidget::displayGlobalSettings()
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
     ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMicroseconds());
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
-    ui->frictionDoubleSpinBox->setValue(settings.frictionCoefficient);
 }
 
 void SimulationControlWidget::setCallbacks()
@@ -74,9 +72,6 @@ void SimulationControlWidget::setCallbacks()
 
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
             [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });
-
-    connect(ui->frictionDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
-            [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setFrictionCoefficient(value)) });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });

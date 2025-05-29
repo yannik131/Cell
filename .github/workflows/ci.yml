@@ -16,7 +16,6 @@ jobs:
         submodules: true 
 
     - name: clang-format
-      continue-on-error: true 
       run: |
         find src/ -type f \( -name '*.cpp' -o -name '*.hpp' \) \
           -exec clang-format --dry-run --Werror {} +
@@ -45,12 +44,10 @@ jobs:
         cmake --build . --config Debug --parallel 4
 
     - name: Run tests
-      continue-on-error: true
       run: |
         ./build_debug/tests-libcell
     
     - name: Generate html for test coverage
-      continue-on-error: true
       run: |
         cd build_debug
         lcov --capture --exclude '/usr/*' --exclude '*build_debug*' --exclude '*test/*' --directory . --output-file coverage.info
@@ -58,7 +55,6 @@ jobs:
         genhtml coverage.info --output-directory /home/github-runner/cellcoverage/
 
     - name: clang-tidy
-      continue-on-error: true 
       run: |
         chmod +x ./scripts/unix/clang-tidy-check.sh
         ./scripts/unix/clang-tidy-check.sh
