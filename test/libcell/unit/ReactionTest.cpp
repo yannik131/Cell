@@ -21,18 +21,19 @@ TEST(ReactionTest, invalidReactions)
 
 void testReactionGettersSetters(Reaction& reaction, std::vector<bool> availableParts)
 {
-    std::vector<std::function<DiscType()>> getters{
-        std::bind(&Reaction::getEduct1, &reaction), std::bind(&Reaction::getEduct2, &reaction),
-        std::bind(&Reaction::getProduct1, &reaction), std::bind(&Reaction::getProduct2, &reaction)};
+    std::vector<std::function<DiscType()>> getters{[ObjectPtr = &reaction] { return ObjectPtr->getEduct1(); },
+                                                   [ObjectPtr = &reaction] { return ObjectPtr->getEduct2(); },
+                                                   [ObjectPtr = &reaction] { return ObjectPtr->getProduct1(); },
+                                                   [ObjectPtr = &reaction] { return ObjectPtr->getProduct2(); }};
 
     std::vector<std::function<void(const DiscType&)>> setters{
-        std::bind(&Reaction::setEduct1, &reaction, std::placeholders::_1),
-        std::bind(&Reaction::setEduct2, &reaction, std::placeholders::_1),
-        std::bind(&Reaction::setProduct1, &reaction, std::placeholders::_1),
-        std::bind(&Reaction::setProduct2, &reaction, std::placeholders::_1)};
+        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setEduct1(std::forward<decltype(PH1)>(PH1)); },
+        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setEduct2(std::forward<decltype(PH1)>(PH1)); },
+        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setProduct1(std::forward<decltype(PH1)>(PH1)); },
+        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setProduct2(std::forward<decltype(PH1)>(PH1)); }};
 
-    std::vector<std::function<bool()>> checkers{nullptr, std::bind(&Reaction::hasEduct2, &reaction), nullptr,
-                                                std::bind(&Reaction::hasProduct2, &reaction)};
+    std::vector<std::function<bool()>> checkers{nullptr, [ObjectPtr = &reaction] { return ObjectPtr->hasEduct2(); },
+                                                nullptr, [ObjectPtr = &reaction] { return ObjectPtr->hasProduct2(); }};
 
     for (std::size_t i = 0; i < availableParts.size(); ++i)
     {

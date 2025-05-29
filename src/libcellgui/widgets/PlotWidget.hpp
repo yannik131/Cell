@@ -34,7 +34,7 @@ private:
 
     QVector<QColor> colors_;
     DiscType::map<QCPGraph*> graphs_;
-    QCPGraph* sumGraph_;
+    QCPGraph* sumGraph_{};
 };
 
 #endif

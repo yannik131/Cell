@@ -20,7 +20,7 @@ public:
 
 private:
     // Only called when the user closes the dialog manually without clicking a custom button
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
     void cancel();
 
 signals:

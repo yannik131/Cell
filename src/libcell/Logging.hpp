@@ -31,12 +31,12 @@ void initLogging(int argc, char** argv)
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-    FLAGS_alsologtostderr = true;        // Log both to file and stderr
-    FLAGS_logbuflevel = -1;              // No buffering, write immediately
-    FLAGS_minloglevel = 0;               // Don't suppress any log messages in general
-    FLAGS_stderrthreshold = 0;           // Don't suppress any log messages for stderr output
-    FLAGS_timestamp_in_logfile_name = 0; // We just want a single logfile at the moment
-    FLAGS_colorlogtostderr = 1;          // Looks pretty, why not
+    FLAGS_alsologtostderr = true;            // Log both to file and stderr
+    FLAGS_logbuflevel = -1;                  // No buffering, write immediately
+    FLAGS_minloglevel = 0;                   // Don't suppress any log messages in general
+    FLAGS_stderrthreshold = 0;               // Don't suppress any log messages for stderr output
+    FLAGS_timestamp_in_logfile_name = false; // We just want a single logfile at the moment
+    FLAGS_colorlogtostderr = true;           // Looks pretty, why not
 
     google::InstallPrefixFormatter(&MyPrefixFormatter);
 }

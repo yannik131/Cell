@@ -49,7 +49,7 @@ void SimulationControlWidget::displayGlobalSettings()
 
     const auto& settings = GlobalSettings::getSettings();
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
-    ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMicroseconds());
+    ui->timeStepSpinBox->setValue(static_cast<int>(settings.simulationTimeStep_.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
 }
 

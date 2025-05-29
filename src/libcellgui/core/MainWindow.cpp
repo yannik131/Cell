@@ -23,7 +23,6 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , simulationThread_(nullptr)
     , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypeDistributionDialog(this))
     , reactionsDialog_(new ReactionsDialog(this))

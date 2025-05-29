@@ -29,7 +29,7 @@ QStringList getDiscTypeNames()
 
 QColor sfColorToQColor(const sf::Color& sfColor)
 {
-    return QColor(sfColor.r, sfColor.g, sfColor.b, sfColor.a);
+    return {sfColor.r, sfColor.g, sfColor.b, sfColor.a};
 }
 
 } // namespace Utility

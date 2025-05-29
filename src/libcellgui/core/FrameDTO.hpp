@@ -13,7 +13,7 @@ struct FrameDTO
 {
     std::vector<Disc> discs_;
     DiscType::map<int> collisionCounts_;
-    long long simulationTimeStepUs;
+    long long simulationTimeStepUs{};
 };
 
 Q_DECLARE_METATYPE(FrameDTO);

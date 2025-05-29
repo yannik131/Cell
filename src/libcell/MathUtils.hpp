@@ -13,8 +13,8 @@ struct OverlapResults
 {
     sf::Vector2f rVec;
     sf::Vector2f nVec;
-    float distance;
-    float overlap;
+    float distance{};
+    float overlap{};
 };
 
 template <typename T1, typename T2, typename T3>

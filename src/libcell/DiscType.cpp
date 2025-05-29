@@ -20,25 +20,8 @@ DiscType::DiscType(const std::string& name, const sf::Color& color, float radius
     setMass(mass);
 }
 
-DiscType::DiscType(const DiscType& other)
-    : name_(other.name_)
-    , color_(other.color_)
-    , radius_(other.radius_)
-    , mass_(other.mass_)
-    , id_(other.id_)
-{
-}
-
-DiscType& DiscType::operator=(const DiscType& other)
-{
-    name_ = other.name_;
-    color_ = other.color_;
-    radius_ = other.radius_;
-    mass_ = other.mass_;
-    id_ = other.id_;
-
-    return *this;
-}
+DiscType::DiscType(const DiscType& other) = default;
+DiscType& DiscType::operator=(const DiscType& other) = default;
 
 const std::string& DiscType::getName() const
 {

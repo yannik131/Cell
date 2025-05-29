@@ -24,8 +24,8 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
 namespace MathUtils
 {
 
-typedef nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter> AdapterType;
-typedef nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2> KDTree;
+using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
+using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2>;
 
 std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, int maxRadius)
 {
@@ -51,15 +51,15 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, i
         kdtree.radiusSearch(&disc.getPosition().x, maxCollisionDistance * maxCollisionDistance, discsInRadius,
                             searchParams);
 
-        for (size_t i = 0; i < discsInRadius.size(); ++i)
+        for (const auto& result : discsInRadius)
         {
-            auto& otherDisc = discs[discsInRadius[i].first];
+            auto& otherDisc = discs[result.first];
             if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
                 continue;
 
             const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
 
-            if (discsInRadius[i].second <= radiusSum * radiusSum)
+            if (result.second <= radiusSum * radiusSum)
             {
                 const auto& pair = makeOrderedPair(&disc, &otherDisc);
                 collidingDiscs.insert(pair);
@@ -117,7 +117,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     const sf::Vector2f& r = disc.getPosition();
 
     bool collided = false;
-    float l;
+    float l = NAN;
     float dx = 0, dy = 0;
 
     if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall

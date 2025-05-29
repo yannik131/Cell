@@ -9,7 +9,7 @@
                 "${workspaceFolder}/src/libcellgui/dialogs/",
                 "${workspaceFolder}/src/libcellgui/models/",
                 "${workspaceFolder}/src/libcellgui/widgets/",
-                "${workspaceFolder}/build_debug/libcellgui_autogen/include_Debug",
+                "${workspaceFolder}/build_debug/libcellgui_autogen/include",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/QtConcurrent",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/QtCore",

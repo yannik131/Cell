@@ -5,12 +5,12 @@ Set-Location ..
 
 if ($args.Count -gt 0 -and $args[0] -eq "-f") {
     Write-Host "Formatting files..."
-    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/, test/ | 
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, test/ | 
     ForEach-Object { & clang-format -i $_.FullName }
 
     Write-Host "Letting clang-tidy try to fix stuff..."
     Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, include/ | 
-    ForEach-Object { & clang-tidy -p=build_debug --fix $_.FullName }
+    ForEach-Object { & clang-tidy -header-filter=".*src/.*|.*test/.*" -p=build_debug --fix $_.FullName }
 }
 else {
     Write-Host "Checking with clang-format..."
@@ -19,5 +19,5 @@ else {
 
     Write-Host "Checking with clang-tidy..."
     Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, test/ | 
-    ForEach-Object { & clang-tidy -p=build_debug $_.FullName }
+    ForEach-Object { & clang-tidy -header-filter=".*src/.*|.*test/.*" -p=build_debug $_.FullName }
 }

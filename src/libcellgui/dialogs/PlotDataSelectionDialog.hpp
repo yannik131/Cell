@@ -16,7 +16,7 @@ class PlotDataSelectionDialog : public QDialog
     Q_OBJECT
 public:
     explicit PlotDataSelectionDialog(QWidget* parent = nullptr);
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     void saveSettings();

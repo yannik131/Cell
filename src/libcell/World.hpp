@@ -34,10 +34,10 @@ private:
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;
-    int maxRadius_;
+    int maxRadius_{};
     DiscType::map<int> collisionCounts_;
-    float initialKineticEnergy_;
-    float currentKineticEnergy_;
+    float initialKineticEnergy_{};
+    float currentKineticEnergy_{};
 
     std::vector<int> destroyedDiscsIndices_;
     std::vector<Disc> newDiscs_;

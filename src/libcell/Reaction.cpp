@@ -59,8 +59,8 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
     reaction.setProbability(reaction.getProbability() + totalProbability);
     reactions.push_back(reaction);
 
-    std::sort(reactions.begin(), reactions.end(), [](const auto& reaction1, const auto& reaction2)
-              { return reaction1.getProbability() < reaction2.getProbability(); });
+    std::ranges::sort(reactions, [](const auto& reaction1, const auto& reaction2)
+                      { return reaction1.getProbability() < reaction2.getProbability(); });
 }
 
 size_t ReactionHash::operator()(const Reaction& reaction) const

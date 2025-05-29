@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <numbers>
 #include <unordered_set>
 
 static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
@@ -128,7 +129,7 @@ TEST(MathUtilsTest, CollisionHandling)
     d1.setVelocity({1.1f, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
-    const float sqrt2 = std::sqrt(2);
+    const float sqrt2 = static_cast<float>(std::numbers::sqrt2);
     sf::Vector2f d2InitialPosition{sqrt2, -sqrt2};
     d2.setPosition(d2InitialPosition);
     d2.setVelocity({1.2f, 1});
@@ -176,7 +177,7 @@ TEST(MathUtilsTest, getRandomFloat)
 
 TEST(MathUtilsTest, makeOrderedPair)
 {
-    int i1, i2;
+    int i1 = 0, i2 = 0;
     auto pair = MathUtils::makeOrderedPair(&i1, &i2);
 
     std::swap(i1, i2);

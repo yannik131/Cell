@@ -4,7 +4,6 @@
 
 QSFMLWidget::QSFMLWidget(QWidget* parent)
     : QWidget(parent)
-    , initialized_(false)
 {
     // Setup some states to allow direct rendering into the widget
     setAttribute(Qt::WA_PaintOnScreen);
@@ -31,7 +30,7 @@ void QSFMLWidget::resizeEvent(QResizeEvent* event)
 
 QPaintEngine* QSFMLWidget::paintEngine() const
 {
-    return 0;
+    return nullptr;
 }
 
 void QSFMLWidget::showEvent(QShowEvent*)

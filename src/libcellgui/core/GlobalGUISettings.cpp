@@ -4,6 +4,8 @@
 #include "GlobalSettingsFunctor.hpp"
 #include "Utility.hpp"
 
+#include <algorithm>
+
 GlobalGUISettings& GlobalGUISettings::get()
 {
     static GlobalGUISettings instance;
@@ -72,7 +74,7 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
     DiscType::map<bool> discTypePlotMap;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
     {
-        auto iter = std::find(activeDiscTypes.begin(), activeDiscTypes.end(), discType);
+        auto iter = std::ranges::find(activeDiscTypes, discType);
         discTypePlotMap[discType] = iter != activeDiscTypes.end();
         if (!hasTrueValue && discTypePlotMap[discType])
             hasTrueValue = true;

@@ -41,11 +41,11 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
 
     using SpinBoxDelegate = SpinBoxDelegate<QSpinBox>;
 
-    ComboBoxDelegate* colorComboBoxDelegate = new ComboBoxDelegate(this);
-    SpinBoxDelegate* radiusSpinBoxDelegate = new SpinBoxDelegate(this);
-    SpinBoxDelegate* massSpinBoxDelegate = new SpinBoxDelegate(this);
-    SpinBoxDelegate* frequencySpinBoxDelegate = new SpinBoxDelegate(this);
-    ButtonDelegate* deleteButtonDelegate = new ButtonDelegate(this);
+    auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
+    auto* radiusSpinBoxDelegate = new SpinBoxDelegate(this);
+    auto* massSpinBoxDelegate = new SpinBoxDelegate(this);
+    auto* frequencySpinBoxDelegate = new SpinBoxDelegate(this);
+    auto* deleteButtonDelegate = new ButtonDelegate(this);
 
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });

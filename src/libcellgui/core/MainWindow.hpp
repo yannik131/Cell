@@ -26,7 +26,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
-    ~MainWindow();
+    ~MainWindow() override;
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -39,7 +39,7 @@ private:
 
 private:
     Ui::MainWindow* ui;
-    QThread* simulationThread_;
+    QThread* simulationThread_{nullptr};
     Simulation* simulation_;
 
     const QString StartString = "Start";

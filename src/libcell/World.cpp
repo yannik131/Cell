@@ -13,9 +13,7 @@
 #include <random>
 #include <set>
 
-World::World()
-{
-}
+World::World() = default;
 
 template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
 {
@@ -63,10 +61,9 @@ void World::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
 
-    maxRadius_ =
-        std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
-                         [](const auto& a, const auto& b) { return a.first.getRadius() < b.first.getRadius(); })
-            ->first.getRadius();
+    maxRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
+                                          { return a.first.getRadius() < b.first.getRadius(); })
+                     ->first.getRadius();
 
     discs_.clear();
     startPositions_.clear();
@@ -114,10 +111,9 @@ void World::buildScene()
     // We need the accumulated percentages sorted in ascending order for the random number approach to work
     std::vector<std::pair<DiscType, int>> discTypes;
     for (const auto& pair : settings.discTypeDistribution_)
-        discTypes.push_back(
-            std::make_pair(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second)));
+        discTypes.emplace_back(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
 
-    std::sort(discTypes.begin(), discTypes.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
+    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
 
     initialKineticEnergy_ = 0.f;
     for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
@@ -164,7 +160,7 @@ void World::initializeStartPositions()
     for (float x = spacing; x < bounds_.x - spacing; x += 2 * spacing)
     {
         for (float y = spacing; y < bounds_.y - spacing; y += 2 * spacing)
-            startPositions_.push_back(sf::Vector2f(x, y));
+            startPositions_.emplace_back(x, y);
     }
 
     std::random_device rd;
