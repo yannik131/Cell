@@ -23,8 +23,9 @@ jobs:
 
     - name: Set up vcpkg
       run: |
-        if [ -f ./contrib/vcpkg/.git/shallow ]; then
-            git -C ./contrib/vcpkg/ fetch --unshallow
+        if [ "$(git rev-parse --is-shallow-repository)" == "true" ]; then
+            echo "Repository is shallow, fetching full history..."
+            git fetch --unshallow
         fi
         
         ./contrib/vcpkg/bootstrap-vcpkg.sh
