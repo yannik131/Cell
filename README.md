@@ -11,5 +11,4 @@ Physics simulation for colliding discs. Idea:
 
 ## Tests
 
-- OOP: Test only public methods
-- Procedural code: Move internal helper functions to the translation unit (.cpp) and don't test them
+Code coverage (currently only libcell): [cellcoverage.myactivities.net](cellcoverage.myactivities.net)

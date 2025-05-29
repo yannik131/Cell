@@ -22,6 +22,9 @@ public:
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
 
+    float getInitialKineticEnergy() const;
+    float getCurrentKineticEnergy() const;
+
 private:
     void buildScene();
     void initializeStartPositions();

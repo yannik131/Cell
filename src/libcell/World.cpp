@@ -33,8 +33,7 @@ void World::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
-        currentKineticEnergy_ +=
-            MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+        MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
     const auto& newDiscs = unimolecularReactions(discs_);
@@ -82,6 +81,16 @@ void World::setBounds(const sf::Vector2f& bounds)
         throw ExceptionWithLocation("Bounds must be > 0");
 
     bounds_ = bounds;
+}
+
+float World::getInitialKineticEnergy() const
+{
+    return initialKineticEnergy_;
+}
+
+float World::getCurrentKineticEnergy() const
+{
+    return currentKineticEnergy_;
 }
 
 void World::buildScene()
