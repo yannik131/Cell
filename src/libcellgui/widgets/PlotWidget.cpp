@@ -119,7 +119,7 @@ void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
         if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
             continue;
 
-        xMax_ = timeStep * size;
+        xMax_ = timeStep * static_cast<float>(size);
         graphs_[discType]->addData(xMax_, value);
 
         yMin_ = std::min(yMin_, value);

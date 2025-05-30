@@ -14,7 +14,7 @@ DiscDistributionPreviewTableModel::DiscDistributionPreviewTableModel(QObject* pa
 
 int DiscDistributionPreviewTableModel::rowCount(const QModelIndex&) const
 {
-    return distribution_.size();
+    return static_cast<int>(distribution_.size());
 }
 
 int DiscDistributionPreviewTableModel::columnCount(const QModelIndex&) const
