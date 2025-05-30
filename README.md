@@ -11,4 +11,4 @@ Physics simulation for colliding discs. Idea:
 
 ## Tests
 
-Code coverage (currently only libcell): [cellcoverage.myactivities.net](cellcoverage.myactivities.net)
+Code coverage (currently only libcell): [cellcoverage.myactivities.net](https://cellcoverage.myactivities.net)
