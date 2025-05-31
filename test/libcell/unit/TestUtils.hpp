@@ -16,7 +16,7 @@ inline DiscType generateDiscType(float radius, float mass)
 {
     static int count = 0;
 
-    char name = static_cast<int>('A') + count++ % 20;
+    char name = 'A' + (count++ % 20);
     return DiscType{std::string(1, name), sf::Color::Green, radius, mass};
 }
 

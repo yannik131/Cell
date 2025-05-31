@@ -8,8 +8,6 @@
 #include <numbers>
 #include <unordered_set>
 
-static const DiscType t("A", sf::Color::Green, 5.f, 5.f);
-
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
     std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
@@ -32,7 +30,7 @@ TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 
 TEST(MathUtilsTest, FindsCollidingDiscs)
 {
-    Disc d1(t), d2(t);
+    Disc d1(Mass5), d2(Mass5);
     d1.setPosition({0, 0});
     d2.setPosition({0, 0});
 
@@ -57,7 +55,7 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     collisions = MathUtils::findCollidingDiscs(discs, 5);
     EXPECT_EQ(collisions.size(), 0);
 
-    Disc d3(t);
+    Disc d3(Mass5);
     d2.setPosition({0, 0});
     d3.setPosition({0, 0});
 
@@ -87,7 +85,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
     const sf::Vector2f boundsTopLeft{0, 0};
     const sf::Vector2f boundsBottomRight{100, 100};
 
-    Disc d(t);
+    Disc d(Mass5);
     const float R = d.getType().getRadius();
 
     // Collision with top and right wall
@@ -129,12 +127,12 @@ TEST(MathUtilsTest, CollisionHandling)
     d1.setVelocity({1.1f, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
-    const float sqrt2 = static_cast<float>(std::numbers::sqrt2);
+    const auto sqrt2 = static_cast<float>(std::numbers::sqrt2);
     sf::Vector2f d2InitialPosition{sqrt2, -sqrt2};
     d2.setPosition(d2InitialPosition);
     d2.setVelocity({1.2f, 1});
 
-    float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     const float dt = 0.15f;
 
@@ -148,7 +146,7 @@ TEST(MathUtilsTest, CollisionHandling)
 
     MathUtils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
-    float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     // Values calculated once for regression testing
 

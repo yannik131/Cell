@@ -18,12 +18,12 @@ QSFMLWidget::QSFMLWidget(QWidget* parent)
 
 void QSFMLWidget::resizeEvent(QResizeEvent* event)
 {
-    sf::Vector2f newSize(event->size().width(), event->size().height());
-    sf::Vector2f oldSize(event->oldSize().width(), event->oldSize().height());
+    sf::Vector2u newSize(event->size().width(), event->size().height());
+    sf::Vector2u oldSize(event->oldSize().width(), event->oldSize().height());
 
-    RenderWindow::setSize(sf::Vector2u(newSize));
+    RenderWindow::setSize(newSize);
     // The old Views position would now be wrong, simply place a new view with the correct size
-    RenderWindow::setView(sf::View(sf::FloatRect(0, 0, newSize.x, newSize.y)));
+    RenderWindow::setView(sf::View(sf::FloatRect(0, 0, static_cast<float>(newSize.x), static_cast<float>(newSize.y))));
 
     QWidget::resizeEvent(event);
 }

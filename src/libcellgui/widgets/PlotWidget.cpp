@@ -129,6 +129,10 @@ void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
 
 void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
 {
+    if (sumGraph_ == nullptr)
+        throw ExceptionWithLocation(
+            "Can't add data point to sumGraph_: Is nullptr (this is a bug and shouldn't happen");
+
     const auto& size = sumGraph_->dataCount();
     const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
     double sum = 0.0;
@@ -138,7 +142,7 @@ void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
         if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
             continue;
 
-        xMax_ = timeStep * size;
+        xMax_ = timeStep * static_cast<float>(size);
         sum += value;
     }
 

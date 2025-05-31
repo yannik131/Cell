@@ -95,7 +95,7 @@ void World::buildScene()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution(0, 100);
-    std::uniform_int_distribution<int> velocityDistribution(-600, 600);
+    std::uniform_real_distribution<float> velocityDistribution(-600.f, 600.f);
     const auto& settings = GlobalSettings::getSettings();
 
     discs_.reserve(settings.numberOfDiscs_);
@@ -144,8 +144,8 @@ void World::buildScene()
     for (const auto& [discType, count] : counts)
     {
         DLOG(INFO) << discType.getName() << " (" + std::to_string(discType.getRadius()) + "px): " << count << "/"
-                   << settings.numberOfDiscs_ << " (" << count / static_cast<float>(settings.numberOfDiscs_) * 100
-                   << "%)\n";
+                   << settings.numberOfDiscs_ << " ("
+                   << static_cast<float>(count) / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
     }
 }
 
@@ -154,7 +154,7 @@ void World::initializeStartPositions()
     if (bounds_.x == 0 || bounds_.y == 0)
         throw ExceptionWithLocation("Can't initialize world: Bounds not set");
 
-    startPositions_.reserve((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_));
+    startPositions_.reserve(static_cast<std::size_t>((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_)));
 
     float spacing = maxRadius_ + 1;
 
