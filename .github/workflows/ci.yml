@@ -11,8 +11,9 @@ jobs:
 
     steps:
     - name: Print debug info 
-      run: printf "PATH: %s\nHOME: %s\nDate: %s\n" "$PATH" "$HOME" "$(date)"
-      
+      run: | 
+        printf "PATH: %s\nHOME: %s\nDate: %s\n" "$PATH" "$HOME" "$(date)"
+
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
