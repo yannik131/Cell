@@ -16,7 +16,6 @@ const Reaction transformation{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 
 const DiscType::map<int> DefaultDistribution{{Mass5, 100}, {Mass10, 0},        {Mass15, 0},         {Mass20, 0},
                                              {Mass25, 0},  {Mass5Radius10, 0}, {Mass10Radius10, 0}, {Mass10Radius5, 0}};
 
-GlobalSettings& globalSettings = GlobalSettings::get();
 const Settings& settings = GlobalSettings::getSettings();
 const auto& transformationReactions = GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
 const auto& decompositionReactions = GlobalSettings::getSettings().reactionTable_.getDecompositionReactionLookupMap();
@@ -101,6 +100,7 @@ int countDiscTypeInReactions(const DiscType& discType)
 
 TEST(GlobalSettingsTest, RangeChecksAreCorrect)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
     using namespace SettingsLimits;
 
     EXPECT_ANY_THROW(
@@ -132,6 +132,8 @@ TEST(GlobalSettingsTest, RangeChecksAreCorrect)
 
 TEST(GlobalSettingsTest, CallbackIsExecuted)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     SettingID id = SettingID::DiscTypeDistribution;
     const auto& callback = [&](const SettingID& settingID) { id = settingID; };
     globalSettings.setCallback(callback);
@@ -145,6 +147,8 @@ TEST(GlobalSettingsTest, CallbackIsExecuted)
 
 TEST(GlobalSettingsTest, LockPreventsChanges)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.lock();
     globalSettings.unlock();
 
@@ -176,6 +180,8 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
 
 TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     EXPECT_FALSE(globalSettings.isLocked());
 
     globalSettings.lock();
@@ -187,6 +193,7 @@ TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 
 TEST(GlobalSettingsTest, DiscTypeDistributionCantBeEmpty)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
     auto distribution = settings.discTypeDistribution_;
     distribution.clear();
 
@@ -195,6 +202,8 @@ TEST(GlobalSettingsTest, DiscTypeDistributionCantBeEmpty)
 
 TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     for (int i = -10; i < 200; i += 10)
     {
         DiscType::map<int> distribution{{Mass5, i}};
@@ -208,6 +217,8 @@ TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 
 TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     DiscType::map<int> distribution{{Mass5, 50}, {Mass5, 50}};
 
     EXPECT_ANY_THROW(globalSettings.setDiscTypeDistribution(distribution));
@@ -215,6 +226,8 @@ TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
 
 TEST(GlobalSettingsTest, ClearReactionsClearsReactions)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     insertDefaultReactions(globalSettings);
 
     globalSettings.clearReactions();
@@ -227,6 +240,8 @@ TEST(GlobalSettingsTest, ClearReactionsClearsReactions)
 
 TEST(GlobalSettingsTest, ReactionsEndUpInTheRightPlace)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.clearReactions();
 
     insertDefaultReactions(globalSettings);
@@ -246,6 +261,8 @@ TEST(GlobalSettingsTest, ReactionsEndUpInTheRightPlace)
 
 TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.clearReactions();
 
     insertDefaultReactions(globalSettings);
@@ -258,6 +275,8 @@ TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 
 TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.clearReactions();
     globalSettings.setDiscTypeDistribution({{Mass5, 50}, {Mass10, 50}, {Mass15, 0}});
 
@@ -283,6 +302,8 @@ TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 
 TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.setDiscTypeDistribution(DefaultDistribution);
 
     // 1 reaction with Mass10 as educt, 1 with Mass10 as product, 1 with Mass10 nowhere, for each reaction type
@@ -351,6 +372,8 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 
 TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     globalSettings.setDiscTypeDistribution(DefaultDistribution);
     globalSettings.clearReactions();
     insertDefaultReactions(globalSettings);
@@ -369,6 +392,8 @@ TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 
 TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
 {
+    GlobalSettings& globalSettings = GlobalSettings::get();
+
     DiscType Mass50{"a", sf::Color::Cyan, 2.1f, 50};
     DiscType Mass50Radius100{"b", sf::Color::Cyan, 100, 50};
     DiscType Mass100{"LOOL", sf::Color::Cyan, 2.1f, 100};
