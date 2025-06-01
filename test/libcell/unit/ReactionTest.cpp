@@ -21,19 +21,19 @@ TEST(ReactionTest, invalidReactions)
 
 void testReactionGettersSetters(Reaction& reaction, std::vector<bool> availableParts)
 {
-    std::vector<std::function<DiscType()>> getters{[ObjectPtr = &reaction] { return ObjectPtr->getEduct1(); },
-                                                   [ObjectPtr = &reaction] { return ObjectPtr->getEduct2(); },
-                                                   [ObjectPtr = &reaction] { return ObjectPtr->getProduct1(); },
-                                                   [ObjectPtr = &reaction] { return ObjectPtr->getProduct2(); }};
+    auto* reactionPtr = &reaction;
+
+    std::vector<std::function<DiscType()>> getters{
+        [reactionPtr] { return reactionPtr->getEduct1(); }, [reactionPtr] { return reactionPtr->getEduct2(); },
+        [reactionPtr] { return reactionPtr->getProduct1(); }, [reactionPtr] { return reactionPtr->getProduct2(); }};
 
     std::vector<std::function<void(const DiscType&)>> setters{
-        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setEduct1(std::forward<decltype(PH1)>(PH1)); },
-        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setEduct2(std::forward<decltype(PH1)>(PH1)); },
-        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setProduct1(std::forward<decltype(PH1)>(PH1)); },
-        [ObjectPtr = &reaction](auto&& PH1) { ObjectPtr->setProduct2(std::forward<decltype(PH1)>(PH1)); }};
+        [reactionPtr](const DiscType& value) { reactionPtr->setEduct1(value); }, [reactionPtr](const DiscType& value)
+        { reactionPtr->setEduct2(value); }, [reactionPtr](const DiscType& value) { reactionPtr->setProduct1(value); },
+        [reactionPtr](const DiscType& value) { reactionPtr->setProduct2(value); }};
 
-    std::vector<std::function<bool()>> checkers{nullptr, [ObjectPtr = &reaction] { return ObjectPtr->hasEduct2(); },
-                                                nullptr, [ObjectPtr = &reaction] { return ObjectPtr->hasProduct2(); }};
+    std::vector<std::function<bool()>> checkers{nullptr, [reactionPtr] { return reactionPtr->hasEduct2(); }, nullptr,
+                                                [reactionPtr] { return reactionPtr->hasProduct2(); }};
 
     for (std::size_t i = 0; i < availableParts.size(); ++i)
     {

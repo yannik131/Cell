@@ -11,6 +11,7 @@ std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType
     return d2.getId() < d1.getId() ? std::make_pair(d2, d1) : std::make_pair(d1, d2);
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 DiscType::DiscType(const std::string& name, const sf::Color& color, float radius, float mass)
     : id_(instanceCount++)
 {

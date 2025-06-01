@@ -149,7 +149,7 @@ bool Reaction::hasProduct2() const
 
 void Reaction::setProduct2(const DiscType& product2)
 {
-    if (product2_.has_value())
+    if (!product2_.has_value())
         throw ExceptionWithLocation("Can't set product2: Combination/transformation reactions have no product2");
 
     product2_ = product2;
