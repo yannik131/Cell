@@ -35,7 +35,7 @@ private:
     {
         try
         {
-            func();
+            std::forward<Func>(func)();
         }
         catch (const std::exception& e)
         {

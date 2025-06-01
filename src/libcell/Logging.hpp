@@ -28,6 +28,7 @@ void MyPrefixFormatter(std::ostream& s, const google::LogMessage& m, void* /*dat
  */
 void initLogging(int argc, char** argv)
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 

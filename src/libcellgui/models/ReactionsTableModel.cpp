@@ -77,21 +77,14 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     {
         DiscType discType = Utility::getDiscTypeByName(value.toString());
 
-        switch (index.column())
-        {
-        case 0:
+        if (index.column() == 0)
             reaction.setEduct1(discType);
-            break;
-        case 2:
+        else if (index.column() == 2)
             reaction.setEduct2(discType);
-            break;
-        case 4:
+        else if (index.column() == 4)
             reaction.setProduct1(discType);
-            break;
-        case 6:
+        else if (index.column() == 6)
             reaction.setProduct2(discType);
-            break;
-        }
     }
     else if (index.column() == 7)
         reaction.setProbability(value.toFloat());
