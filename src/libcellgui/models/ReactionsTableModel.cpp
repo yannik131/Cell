@@ -71,25 +71,25 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
         return false;
 
-    std::optional<DiscType> discType;
-    if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
-        discType = Utility::getDiscTypeByName(value.toString());
+    if (!(index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6))
+        return false;
 
+    DiscType discType = Utility::getDiscTypeByName(value.toString());
     auto& reaction = rows_[index.row()];
 
     switch (index.column())
     {
     case 0:
-        reaction.setEduct1(*discType);
+        reaction.setEduct1(discType);
         break;
     case 2:
-        reaction.setEduct2(*discType);
+        reaction.setEduct2(discType);
         break;
     case 4:
-        reaction.setProduct1(*discType);
+        reaction.setProduct1(discType);
         break;
     case 6:
-        reaction.setProduct2(*discType);
+        reaction.setProduct2(discType);
         break;
     case 7:
         reaction.setProbability(value.toFloat());

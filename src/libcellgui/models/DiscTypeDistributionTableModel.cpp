@@ -69,7 +69,7 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
         discType.setName(value.toString().toStdString());
         break;
     case 1:
-        discType.setRadius(value.toInt());
+        discType.setRadius(value.toFloat());
         break;
     case 2:
         discType.setMass(value.toInt());
