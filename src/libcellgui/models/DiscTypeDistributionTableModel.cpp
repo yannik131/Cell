@@ -72,7 +72,7 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
         discType.setRadius(value.toFloat());
         break;
     case 2:
-        discType.setMass(value.toInt());
+        discType.setMass(value.toFloat());
         break;
     case 3:
         discType.setColor(getNameColorMapping()[value.toString()]);

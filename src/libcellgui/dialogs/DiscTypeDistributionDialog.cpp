@@ -41,7 +41,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
 
     auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
-    auto* massSpinBoxDelegate = new SpinBoxDelegate<QSpinBox>(this);
+    auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* frequencySpinBoxDelegate = new SpinBoxDelegate<QSpinBox>(this);
     auto* deleteButtonDelegate = new ButtonDelegate(this);
 
@@ -50,8 +50,8 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     connect(
         radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated, [](QWidget* spinBox)
         { qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius); });
-    connect(massSpinBoxDelegate, &SpinBoxDelegate<QSpinBox>::editorCreated, [](QWidget* spinBox)
-            { qobject_cast<QSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
+    connect(massSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated, [](QWidget* spinBox)
+            { qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
     connect(frequencySpinBoxDelegate, &SpinBoxDelegate<QSpinBox>::editorCreated,
             [](QWidget* spinBox) { qobject_cast<QSpinBox*>(spinBox)->setRange(0, 100); });
     connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, discTypeDistributionTableModel_,
