@@ -105,7 +105,7 @@ void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType
 void DiscTypeDistributionTableModel::addEmptyRow()
 {
     beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
-    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 1});
+    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
     endInsertRows();
 }
 

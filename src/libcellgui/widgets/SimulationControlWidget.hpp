@@ -3,6 +3,7 @@
 
 #include "DiscDistributionPreviewTableModel.hpp"
 
+#include <QMessageBox>
 #include <QWidget>
 
 namespace Ui
@@ -29,6 +30,21 @@ private:
     void setCallbacks();
     void toggleStartStopButtonState();
     void reset();
+
+    template <typename Func> void tryExecuteWithExceptionHandling(Func&& func, QWidget* parent)
+    {
+        try
+        {
+            func();
+        }
+        catch (const std::exception& e)
+        {
+            if (auto* self = dynamic_cast<SimulationControlWidget*>(parent))
+                self->displayGlobalSettings();
+
+            QMessageBox::critical(parent, "Fehler", e.what());
+        }
+    }
 
 private:
     Ui::SimulationControlWidget* ui;

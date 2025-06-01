@@ -71,35 +71,34 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
     if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
         return false;
 
-    if (!(index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6))
-        return false;
-
-    DiscType discType = Utility::getDiscTypeByName(value.toString());
     auto& reaction = rows_[index.row()];
 
-    switch (index.column())
+    if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
     {
-    case 0:
-        reaction.setEduct1(discType);
-        break;
-    case 2:
-        reaction.setEduct2(discType);
-        break;
-    case 4:
-        reaction.setProduct1(discType);
-        break;
-    case 6:
-        reaction.setProduct2(discType);
-        break;
-    case 7:
-        reaction.setProbability(value.toFloat());
-        break;
-    default:
-        return false;
-    }
+        DiscType discType = Utility::getDiscTypeByName(value.toString());
 
-    if (index.column() < columnCount())
-        emit dataChanged(index, index);
+        switch (index.column())
+        {
+        case 0:
+            reaction.setEduct1(discType);
+            break;
+        case 2:
+            reaction.setEduct2(discType);
+            break;
+        case 4:
+            reaction.setProduct1(discType);
+            break;
+        case 6:
+            reaction.setProduct2(discType);
+            break;
+        }
+    }
+    else if (index.column() == 7)
+        reaction.setProbability(value.toFloat());
+    else
+        return false;
+
+    emit dataChanged(index, index);
 
     return true;
 }
