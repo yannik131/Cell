@@ -7,19 +7,6 @@
 
 #include <QMessageBox>
 
-#define SAFE_EXECUTE(function, msg)                                                                                    \
-    [this]()                                                                                                           \
-    {                                                                                                                  \
-        try                                                                                                            \
-        {                                                                                                              \
-            function();                                                                                                \
-        }                                                                                                              \
-        catch (const std::exception& e)                                                                                \
-        {                                                                                                              \
-            QMessageBox::critical(this, "Error", msg + QString(e.what()));                                             \
-        }                                                                                                              \
-    }
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -40,7 +27,17 @@ MainWindow::MainWindow(QWidget* parent)
             &Simulation::reset);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
-            SAFE_EXECUTE(startSimulation, "Error starting the simulation: "));
+            [this]()
+            {
+                try
+                {
+                    startSimulation();
+                }
+                catch (const std::exception& e)
+                {
+                    QMessageBox::critical(this, "Error", "Error starting the simulation: " + QString(e.what()));
+                }
+            });
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStopClicked, this,
             &MainWindow::stopSimulation);
 
@@ -84,7 +81,8 @@ void MainWindow::resetSimulation()
 void MainWindow::setSimulationWidgetSize()
 {
     const auto& simulationSize = ui->simulationWidget->size();
-    simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
+    simulation_->setWorldBounds(
+        sf::Vector2f(static_cast<float>(simulationSize.width()), static_cast<float>(simulationSize.height())));
     simulation_->reset();
     plotModel_->clear();
 }

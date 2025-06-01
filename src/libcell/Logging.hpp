@@ -18,8 +18,8 @@ void MyPrefixFormatter(std::ostream& s, const google::LogMessage& m, void* /*dat
 {
     using std::setw, std::setfill;
     s << setw(2) << m.time().hour() << ':' << setw(2) << m.time().min() << ':' << setw(2) << m.time().sec() << ","
-      << setw(3) << static_cast<int>(m.time().usec() / 1000.0) << " - " << m.basename() << ':' << m.line() << " "
-      << setfill(' ') << setw(7) << google::GetLogSeverityName(m.severity());
+      << setw(3) << m.time().usec() / 1000 << " - " << m.basename() << ':' << m.line() << " " << setfill(' ') << setw(7)
+      << google::GetLogSeverityName(m.severity());
 }
 
 /**

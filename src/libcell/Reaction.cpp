@@ -105,7 +105,7 @@ void Reaction::setEduct1(const DiscType& educt1)
 
 const DiscType& Reaction::getEduct2() const
 {
-    if (type_ & (Transformation | Decomposition))
+    if (!educt2_.has_value())
         throw ExceptionWithLocation("Can't get educt2: Decomposition/transformation reactions have no educt2");
 
     return *educt2_;
@@ -118,7 +118,7 @@ bool Reaction::hasEduct2() const
 
 void Reaction::setEduct2(const DiscType& educt2)
 {
-    if (type_ & (Transformation | Decomposition))
+    if (!educt2_.has_value())
         throw ExceptionWithLocation("Can't set educt2: Decomposition reactions have no educt2");
 
     educt2_ = educt2;
@@ -136,7 +136,7 @@ void Reaction::setProduct1(const DiscType& product1)
 
 const DiscType& Reaction::getProduct2() const
 {
-    if (type_ & (Transformation | Combination))
+    if (!product2_.has_value())
         throw ExceptionWithLocation("Can't get product2: Combination/transformation reactions have no product2");
 
     return *product2_;
@@ -149,7 +149,7 @@ bool Reaction::hasProduct2() const
 
 void Reaction::setProduct2(const DiscType& product2)
 {
-    if (type_ & (Transformation | Combination))
+    if (product2_.has_value())
         throw ExceptionWithLocation("Can't set product2: Combination/transformation reactions have no product2");
 
     product2_ = product2;

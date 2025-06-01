@@ -2,7 +2,12 @@
 
 #include <gtest/gtest.h>
 
-static const DiscType Type{"A", sf::Color::White, 5.f, 5.f};
+static DiscType defaultType()
+{
+    return {"A", sf::Color::White, 5.f, 5.f};
+}
+
+static const DiscType Type = defaultType();
 
 TEST(DiscTest, DefaultValuesMakeSense)
 {
