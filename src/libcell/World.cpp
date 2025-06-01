@@ -155,13 +155,13 @@ void World::initializeStartPositions()
         throw ExceptionWithLocation("Can't initialize world: Bounds not set");
 
     startPositions_.reserve(static_cast<std::size_t>((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_)));
-
     float spacing = maxRadius_ + 1;
 
-    for (float x = spacing; x < bounds_.x - spacing; x += 2 * spacing)
+    for (int i = 0; i < static_cast<int>(bounds_.x / (2 * spacing)); ++i)
     {
-        for (float y = spacing; y < bounds_.y - spacing; y += 2 * spacing)
-            startPositions_.emplace_back(x, y);
+        for (int j = 0; j < static_cast<int>(bounds_.y / (2 * spacing)); ++j)
+            startPositions_.emplace_back(spacing * static_cast<float>(2 * i + 1),
+                                         spacing * static_cast<float>(2 * j + 1));
     }
 
     std::random_device rd;

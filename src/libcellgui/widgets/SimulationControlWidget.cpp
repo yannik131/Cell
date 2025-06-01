@@ -50,7 +50,7 @@ void SimulationControlWidget::setCallbacks()
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
-                    [=, this]
+                    [value, this]
                     {
                         GlobalSettings::get().setNumberOfDiscs(value);
                         emit simulationResetTriggered();

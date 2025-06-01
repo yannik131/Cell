@@ -97,14 +97,14 @@ Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
 
 void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType)
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back({discType, 0});
     endInsertRows();
 }
 
 void DiscTypeDistributionTableModel::addEmptyRow()
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
     endInsertRows();
 }

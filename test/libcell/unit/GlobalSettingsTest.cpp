@@ -110,8 +110,8 @@ TEST(GlobalSettingsTest, RangeChecksAreCorrect)
     EXPECT_NO_THROW(globalSettings.setFrictionCoefficient(MinFrictionCoefficient));
     EXPECT_NO_THROW(globalSettings.setFrictionCoefficient(MaxFrictionCoefficient));
 
-    int minTimeUs = MinSimulationTimeStep.asMicroseconds();
-    int maxTimeUs = MaxSimulationTimeStep.asMicroseconds();
+    auto minTimeUs = MinSimulationTimeStep.asMicroseconds();
+    auto maxTimeUs = MaxSimulationTimeStep.asMicroseconds();
     EXPECT_ANY_THROW(globalSettings.setSimulationTimeStep(sf::microseconds(minTimeUs - 1)));
     EXPECT_ANY_THROW(globalSettings.setSimulationTimeStep(sf::microseconds(maxTimeUs + 1)));
     EXPECT_NO_THROW(globalSettings.setSimulationTimeStep(sf::microseconds(minTimeUs)));
