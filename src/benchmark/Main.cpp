@@ -33,5 +33,5 @@ int main(int argc, char** argv)
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     LOG(INFO) << "Elapsed time: " << StringUtils::timeString(ns);
-    LOG(INFO) << "Time per update: " << StringUtils::timeString(ns / 1e3);
+    LOG(INFO) << "Time per update: " << StringUtils::timeString(ns / 1000);
 }

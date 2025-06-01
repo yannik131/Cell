@@ -1,4 +1,5 @@
 #include "Utility.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "GlobalSettings.hpp"
 
 #include <stdexcept>
@@ -10,11 +11,11 @@ DiscType getDiscTypeByName(const QString& name)
 {
     for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
     {
-        if (discType.getName() == name)
+        if (discType.getName() == name.toStdString())
             return discType;
     }
 
-    throw std::runtime_error(("No disc type found for name \"" + name + "\"").toStdString());
+    throw ExceptionWithLocation(("No disc type found for name \"" + name + "\"").toStdString());
 }
 
 QStringList getDiscTypeNames()
@@ -28,7 +29,7 @@ QStringList getDiscTypeNames()
 
 QColor sfColorToQColor(const sf::Color& sfColor)
 {
-    return QColor(sfColor.r, sfColor.g, sfColor.b, sfColor.a);
+    return {sfColor.r, sfColor.g, sfColor.b, sfColor.a};
 }
 
 } // namespace Utility

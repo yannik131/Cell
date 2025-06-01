@@ -11,9 +11,10 @@ class Reaction
 public:
     enum Type
     {
-        Decomposition,
-        Combination,
-        Exchange
+        Transformation = 1 << 0,
+        Decomposition = 1 << 1,
+        Combination = 1 << 2,
+        Exchange = 1 << 3
     };
 
 public:
@@ -39,6 +40,8 @@ public:
 
     const Type& getType() const;
 
+    void validate() const;
+
 private:
     DiscType educt1_;
     std::optional<DiscType> educt2_;
@@ -48,9 +51,6 @@ private:
     Type type_;
 };
 
-Reaction::Type inferReactionType(const DiscType& educt1, const DiscType& educt2, const DiscType& product1,
-                                 const DiscType& product2);
-
 struct ReactionHash
 {
     size_t operator()(const Reaction& reaction) const;
@@ -58,15 +58,10 @@ struct ReactionHash
 
 /**
  * @brief Checks if all products and educts have identical disc type names
- * @note Does not take probability into account because 2 reactions with identical products and educts but different
- * probabilities don't make sense
  */
 bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 std::string toString(const Reaction& reaction);
 bool contains(const Reaction& reaction, const DiscType& discType);
-
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
-void removeReactionFromVector(std::vector<Reaction>& reactions, Reaction reaction);
-void removeReactionsFromVector(std::vector<Reaction>& reactions, const DiscType& discType);
 
 #endif /* REACTION_HPP */

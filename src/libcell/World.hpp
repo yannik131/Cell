@@ -17,25 +17,27 @@ public:
     World();
 
     void update(const sf::Time& dt);
-    std::map<DiscType, int> getAndResetCollisionCount();
+    DiscType::map<int> getAndResetCollisionCount();
     const std::vector<Disc>& discs() const;
     void reinitialize(); // Has to be called before update()!
     void setBounds(const sf::Vector2f& bounds);
 
+    float getInitialKineticEnergy() const;
+    float getCurrentKineticEnergy() const;
+
 private:
     void buildScene();
     void initializeStartPositions();
-    void findChangedDiscs();
     void removeDestroyedDiscs();
 
 private:
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
     sf::Vector2f bounds_;
-    int maxRadius_;
-    std::map<DiscType, int> collisionCounts_;
-    float initialKineticEnergy_;
-    float currentKineticEnergy_;
+    float maxRadius_{};
+    DiscType::map<int> collisionCounts_;
+    float initialKineticEnergy_{};
+    float currentKineticEnergy_{};
 
     std::vector<int> destroyedDiscsIndices_;
     std::vector<Disc> newDiscs_;

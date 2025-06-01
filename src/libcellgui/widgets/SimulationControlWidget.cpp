@@ -4,20 +4,6 @@
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_SimulationControlWidget.h"
 
-#include <QMessageBox>
-
-#define DISPLAY_EXCEPTION_AND_RETURN(statement)                                                                        \
-    try                                                                                                                \
-    {                                                                                                                  \
-        statement;                                                                                                     \
-    }                                                                                                                  \
-    catch (const std::exception& e)                                                                                    \
-    {                                                                                                                  \
-        displayGlobalSettings();                                                                                       \
-        QMessageBox::critical(this, "Fehler", e.what());                                                               \
-        return;                                                                                                        \
-    }
-
 SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::SimulationControlWidget)
@@ -36,11 +22,10 @@ void SimulationControlWidget::setRanges()
 {
     ui->fpsSpinBox->setRange(GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS);
     ui->numberOfDiscsSpinBox->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
-    ui->timeStepSpinBox->setRange(SettingsLimits::MinSimulationTimeStep.asMilliseconds(),
-                                  SettingsLimits::MaxSimulationTimeStep.asMilliseconds());
+    ui->timeStepSpinBox->setRange(static_cast<int>(SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
+                                  static_cast<int>(SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
                                          SettingsLimits::MaxSimulationTimeScale);
-    ui->frictionDoubleSpinBox->setRange(SettingsLimits::MinFrictionCoefficient, SettingsLimits::MaxFrictionCoefficient);
 }
 
 void SimulationControlWidget::displayGlobalSettings()
@@ -50,33 +35,38 @@ void SimulationControlWidget::displayGlobalSettings()
 
     const auto& settings = GlobalSettings::getSettings();
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
-    ui->timeStepSpinBox->setValue(settings.simulationTimeStep_.asMilliseconds());
+    ui->timeStepSpinBox->setValue(static_cast<int>(settings.simulationTimeStep_.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
-    ui->frictionDoubleSpinBox->setValue(settings.frictionCoefficient);
 }
 
 void SimulationControlWidget::setCallbacks()
 {
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
-    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
-            [this](int value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalGUISettings::get().setGuiFPS(value)) });
+    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this, [this](int value)
+            { tryExecuteWithExceptionHandling([=] { GlobalGUISettings::get().setGuiFPS(value); }, this); });
 
     connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
             [this](int value)
             {
-                DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setNumberOfDiscs(value))
-                emit simulationResetTriggered();
+                tryExecuteWithExceptionHandling(
+                    [value, this]
+                    {
+                        GlobalSettings::get().setNumberOfDiscs(value);
+                        emit simulationResetTriggered();
+                    },
+                    this);
             });
 
-    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(value))) });
+    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this,
+            [this](int value)
+            {
+                tryExecuteWithExceptionHandling(
+                    [=] { GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); }, this);
+            });
 
-    connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
-            [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setSimulationTimeScale(value)) });
-
-    connect(ui->frictionDoubleSpinBox, &QDoubleSpinBox::valueChanged, this,
-            [this](float value) { DISPLAY_EXCEPTION_AND_RETURN(GlobalSettings::get().setFrictionCoefficient(value)) });
+    connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this, [this](float value)
+            { tryExecuteWithExceptionHandling([=] { GlobalSettings::get().setSimulationTimeScale(value); }, this); });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });

@@ -1,5 +1,6 @@
 #include "SimulationWidget.hpp"
 #include "GlobalGUISettings.hpp"
+#include "GlobalSettings.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -19,7 +20,10 @@ void SimulationWidget::initialize(const std::vector<Disc>& discs)
 
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
-    if (clock_.getElapsedTime() < sf::seconds(1.f / GlobalGUISettings::getGUISettings().guiFPS_))
+    // The settings are only locked if the simulation is running
+    // If it is not running, we have no frame limit
+    if (GlobalSettings::get().isLocked() &&
+        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(GlobalGUISettings::getGUISettings().guiFPS_)))
         return;
 
     clock_.restart();

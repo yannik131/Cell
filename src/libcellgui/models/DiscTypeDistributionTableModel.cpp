@@ -69,10 +69,10 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
         discType.setName(value.toString().toStdString());
         break;
     case 1:
-        discType.setRadius(value.toInt());
+        discType.setRadius(value.toFloat());
         break;
     case 2:
-        discType.setMass(value.toInt());
+        discType.setMass(value.toFloat());
         break;
     case 3:
         discType.setColor(getNameColorMapping()[value.toString()]);
@@ -97,15 +97,15 @@ Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
 
 void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType)
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back({discType, 0});
     endInsertRows();
 }
 
 void DiscTypeDistributionTableModel::addEmptyRow()
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
-    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 1});
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
+    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
     endInsertRows();
 }
 
@@ -127,7 +127,7 @@ void DiscTypeDistributionTableModel::loadSettings()
     if (discTypeDistribution.empty())
         return;
 
-    beginInsertRows(QModelIndex(), 0, discTypeDistribution.size() - 1);
+    beginInsertRows(QModelIndex(), 0, static_cast<int>(discTypeDistribution.size()) - 1);
     for (const auto& pair : discTypeDistribution)
         rows_.push_back(pair);
     endInsertRows();
@@ -135,18 +135,7 @@ void DiscTypeDistributionTableModel::loadSettings()
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    auto compare = [](const DiscType& a, const DiscType& b) { return a.getName() < b.getName(); };
-    std::set<DiscType, decltype(compare)> uniqueDiscTypes(compare);
-
-    for (const auto& pair : rows_)
-    {
-        if (uniqueDiscTypes.contains(pair.first))
-            throw std::runtime_error("Duplicate disc type name found: " + pair.first.getName());
-
-        uniqueDiscTypes.insert(pair.first);
-    }
-
-    std::map<DiscType, int> result(rows_.begin(), rows_.end());
+    DiscType::map<int> result(rows_.begin(), rows_.end());
     GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }
 

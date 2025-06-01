@@ -2,7 +2,19 @@
     "version": 3,
     "configurePresets": [
         {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "toolchainFile": "${sourceDir}/contrib/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
             "name": "Debug",
+            "inherits": "base",
             "hidden": false,
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
@@ -11,6 +23,7 @@
         },
         {
             "name": "Release",
+            "inherits": "base",
             "hidden": false,
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
@@ -24,12 +37,11 @@
             "hidden": false,
             "configurePreset": "Debug",
             "configuration": "Debug",
-            "jobs": 4,
+            "jobs": 16,
             "targets": [
-                "libcell",
-                "libcellgui",
                 "cell-gui",
-                "benchmark"
+                "benchmark",
+                "tests-libcell"
             ]
         },
         {
@@ -37,12 +49,11 @@
             "hidden": false,
             "configurePreset": "Release",
             "configuration": "Release",
-            "jobs": 4,
+            "jobs": 16,
             "targets": [
-                "libcell",
-                "libcellgui",
                 "cell-gui",
-                "benchmark"
+                "benchmark",
+                "tests-libcell"
             ]
         }
     ]

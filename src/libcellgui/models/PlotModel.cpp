@@ -1,9 +1,9 @@
 #include "PlotModel.hpp"
 #include "GlobalGUISettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
-#include "Utility.hpp"
+#include "MathUtils.hpp"
 
-const QMap<DiscType, double>& getActiveMap(const DataPoint& dataPoint)
+const DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
 {
     switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
     {
@@ -16,7 +16,7 @@ const QMap<DiscType, double>& getActiveMap(const DataPoint& dataPoint)
     case PlotCategory::TypeCounts:
         return dataPoint.discTypeCountMap_;
     default:
-        throw std::runtime_error("Unknown plot category selected");
+        throw ExceptionWithLocation("Unknown plot category selected");
     }
 }
 
@@ -69,7 +69,9 @@ void PlotModel::clear()
 void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
-    dataPoint.collisionCounts_ = Utility::convertToQMap<DiscType, double, int>(frameDTO.collisionCounts_);
+
+    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
+        dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
     dataPoint.elapsedTimeUs_ = frameDTO.simulationTimeStepUs;
 
     for (const auto& disc : frameDTO.discs_)
@@ -101,7 +103,7 @@ void PlotModel::emitDataPoint(DataPoint& averagedDataPoint)
 
 void PlotModel::emitPlot()
 {
-    QVector<QMap<DiscType, double>> fullPlotData;
+    QVector<DiscType::map<double>> fullPlotData;
     QVector<DataPoint> dataPointsToAverage;
     sf::Time elapsedTime = sf::Time::Zero;
 

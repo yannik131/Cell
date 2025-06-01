@@ -24,6 +24,8 @@ void Simulation::run()
     {
         if (QThread::currentThread()->isInterruptionRequested())
         {
+            // TODO Collision counts decrease with the simulation time step which makes no sense (finer step size ->
+            // more detected collisions due to less clipping)
             world_.getAndResetCollisionCount(); // Reset collision count to 0 for the next run
             break;
         }

@@ -9,12 +9,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG)
 endif()
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/contrib/vcpkg/scripts/buildsystems/vcpkg.cmake)
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 
 if(MSVC)
     add_compile_options(/W4 /wd4244)
@@ -38,11 +35,12 @@ add_library(libcell ${LIBCELL_SRC})
 
 target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/src/libcell/)
 
-target_link_libraries(libcell PRIVATE 
-    sfml-graphics 
-    sfml-window 
+target_link_libraries(libcell PUBLIC
     sfml-system
+    sfml-window
+    sfml-graphics
     nanoflann::nanoflann
+    glog::glog
 )
 
 # qcustomplot
@@ -73,31 +71,34 @@ target_include_directories(libcellgui PUBLIC
     ${CMAKE_SOURCE_DIR}/src/libcellgui/widgets/
 )
 
-target_link_libraries(libcellgui libcell glog::glog Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+target_link_libraries(libcellgui libcell Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
 
-add_executable(cell-gui src/cell-gui/Main.cpp)
+add_executable(cell-gui WIN32 src/cell-gui/Main.cpp)
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
 add_executable(benchmark src/benchmark/Main.cpp)
-target_link_libraries(benchmark libcell glog::glog)
+target_link_libraries(benchmark libcell)
 
 # testing
 enable_testing()
 
 find_package(GTest REQUIRED)
 
-file(GLOB_RECURSE GUI_TEST_SRC ${PROJECT_SOURCE_DIR}/test/*.cpp)
+file(GLOB_RECURSE LIBCELL_TEST_SRC ${PROJECT_SOURCE_DIR}/test/libcell/*.cpp)
 
-add_executable(cell-gui-test ${GUI_TEST_SRC})
+add_executable(tests-libcell ${LIBCELL_TEST_SRC})
 
-target_link_libraries(cell-gui-test 
-    libcellgui 
-    GTest::gtest_main
+set_target_properties(tests-libcell PROPERTIES 
+    SKIP_BUILD_RPATH TRUE
+    # Explicitly tell CMake not to watch these files for reconfigure
+    CMAKE_CONFIGURE_DEPENDS ""
+)
+
+target_link_libraries(tests-libcell
+    libcell
+    GTest::gtest
 )
 
 include(GoogleTest)
-gtest_add_tests(TARGET cell-gui-test)
-
-add_executable(models_test src/models_test/Main.cpp)
-target_link_libraries(models_test Qt6::Core Qt6::Widgets)
+gtest_add_tests(TARGET tests-libcell)

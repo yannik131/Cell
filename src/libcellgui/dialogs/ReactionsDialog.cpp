@@ -38,14 +38,16 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             [this]() { requestEmptyRowFromModel(Reaction::Type::Decomposition); });
     connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
             [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
+    connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
+            [this]() { requestEmptyRowFromModel(Reaction::Type::Transformation); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
 
-    ButtonDelegate* deleteButtonDelegate = new ButtonDelegate(this);
+    auto* deleteButtonDelegate = new ButtonDelegate(this);
     ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
-    SpinBoxDelegate* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
+    auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
     connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, reactionsTableModel_, &ReactionsTableModel::removeRow);
     connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,

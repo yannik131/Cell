@@ -2,6 +2,7 @@
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "NanoflannAdapter.hpp"
+#include "Reactions.hpp"
 
 #include <glog/logging.h>
 
@@ -12,11 +13,9 @@
 #include <random>
 #include <set>
 
-World::World()
-{
-}
+World::World() = default;
 
-template <typename T> std::map<DiscType, T> operator+=(std::map<DiscType, T>& a, const std::map<DiscType, T>& b)
+template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
 {
     for (const auto& [key, value] : b)
         a[key] += value;
@@ -32,20 +31,20 @@ void World::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
-        const auto& newDiscs = MathUtils::decomposeDiscs(discs_);
-        newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-        const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-        collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
-        currentKineticEnergy_ +=
-            MathUtils::handleWorldBoundCollision(disc, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+        MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
+    const auto& newDiscs = unimolecularReactions(discs_);
+    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+
+    const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
+    collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
+
     removeDestroyedDiscs();
-    findChangedDiscs();
 }
 
-std::map<DiscType, int> World::getAndResetCollisionCount()
+DiscType::map<int> World::getAndResetCollisionCount()
 {
     auto tmp = std::move(collisionCounts_);
     collisionCounts_.clear();
@@ -62,10 +61,9 @@ void World::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
 
-    maxRadius_ =
-        std::max_element(discTypeDistribution.begin(), discTypeDistribution.end(),
-                         [](const auto& a, const auto& b) { return a.first.getRadius() < b.first.getRadius(); })
-            ->first.getRadius();
+    maxRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
+                                          { return a.first.getRadius() < b.first.getRadius(); })
+                     ->first.getRadius();
 
     discs_.clear();
     startPositions_.clear();
@@ -77,9 +75,19 @@ void World::reinitialize()
 void World::setBounds(const sf::Vector2f& bounds)
 {
     if (bounds.x <= 0 || bounds.y <= 0)
-        throw std::runtime_error("Bounds must be > 0");
+        throw ExceptionWithLocation("Bounds must be > 0");
 
     bounds_ = bounds;
+}
+
+float World::getInitialKineticEnergy() const
+{
+    return initialKineticEnergy_;
+}
+
+float World::getCurrentKineticEnergy() const
+{
+    return currentKineticEnergy_;
 }
 
 void World::buildScene()
@@ -87,13 +95,13 @@ void World::buildScene()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution(0, 100);
-    std::uniform_int_distribution<int> velocityDistribution(-600, 600);
+    std::uniform_real_distribution<float> velocityDistribution(-600.f, 600.f);
     const auto& settings = GlobalSettings::getSettings();
 
     discs_.reserve(settings.numberOfDiscs_);
-    std::map<int, int> counts;
+    DiscType::map<int> counts;
 
-    if (settings.numberOfDiscs_ > startPositions_.size())
+    if (settings.numberOfDiscs_ > static_cast<int>(startPositions_.size()))
         LOG(WARNING) << "According to the settings, " << std::to_string(settings.numberOfDiscs_)
                      << " discs should be created, but the render window can only fit "
                      << std::to_string(startPositions_.size()) << ". "
@@ -103,10 +111,9 @@ void World::buildScene()
     // We need the accumulated percentages sorted in ascending order for the random number approach to work
     std::vector<std::pair<DiscType, int>> discTypes;
     for (const auto& pair : settings.discTypeDistribution_)
-        discTypes.push_back(
-            std::make_pair(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second)));
+        discTypes.emplace_back(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
 
-    std::sort(discTypes.begin(), discTypes.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
+    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
 
     initialKineticEnergy_ = 0.f;
     for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
@@ -117,7 +124,7 @@ void World::buildScene()
         {
             if (randomNumber < percentage || percentage == 100)
             {
-                counts[discType.getRadius()]++;
+                counts[discType]++;
                 Disc newDisc(discType);
                 newDisc.setPosition(startPositions_.back());
                 newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));
@@ -134,40 +141,32 @@ void World::buildScene()
     currentKineticEnergy_ = initialKineticEnergy_;
 
     DLOG(INFO) << "Radius distribution";
-    for (const auto& [radius, count] : counts)
+    for (const auto& [discType, count] : counts)
     {
-        DLOG(INFO) << radius << ": " << count << "/" << settings.numberOfDiscs_ << " ("
-                   << count / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
+        DLOG(INFO) << discType.getName() << " (" + std::to_string(discType.getRadius()) + "px): " << count << "/"
+                   << settings.numberOfDiscs_ << " ("
+                   << static_cast<float>(count) / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
     }
 }
 
 void World::initializeStartPositions()
 {
     if (bounds_.x == 0 || bounds_.y == 0)
-        throw std::runtime_error("Can't initialize world: Bounds not set");
+        throw ExceptionWithLocation("Can't initialize world: Bounds not set");
 
-    startPositions_.reserve((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_));
-
+    startPositions_.reserve(static_cast<std::size_t>((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_)));
     float spacing = maxRadius_ + 1;
 
-    for (float x = spacing; x < bounds_.x - spacing; x += 2 * spacing)
+    for (int i = 0; i < static_cast<int>(bounds_.x / (2 * spacing)); ++i)
     {
-        for (float y = spacing; y < bounds_.y - spacing; y += 2 * spacing)
-            startPositions_.push_back(sf::Vector2f(x, y));
+        for (int j = 0; j < static_cast<int>(bounds_.y / (2 * spacing)); ++j)
+            startPositions_.emplace_back(spacing * static_cast<float>(2 * i + 1),
+                                         spacing * static_cast<float>(2 * j + 1));
     }
 
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
-}
-
-void World::findChangedDiscs()
-{
-    for (int i = 0; i < discs_.size(); ++i)
-    {
-        if (discs_[i].isMarkedChanged())
-            discs_[i].unmarkChanged();
-    }
 }
 
 void World::removeDestroyedDiscs()

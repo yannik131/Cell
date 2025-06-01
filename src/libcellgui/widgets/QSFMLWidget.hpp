@@ -1,9 +1,9 @@
 #ifndef QSFMLWIDGET_HPP
 #define QSFMLWIDGET_HPP
 
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <QWidget>
 #include <QTimer>
+#include <QWidget>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 class QSFMLWidget : public QWidget, public sf::RenderWindow
 {
@@ -11,16 +11,15 @@ class QSFMLWidget : public QWidget, public sf::RenderWindow
 public:
     QSFMLWidget(QWidget* parent);
 
-    virtual ~QSFMLWidget() = default;
-    void resizeEvent(QResizeEvent* event);
+    ~QSFMLWidget() override = default;
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
-    virtual QPaintEngine* paintEngine() const;
-    virtual void showEvent(QShowEvent*);
+    QPaintEngine* paintEngine() const override;
+    void showEvent(QShowEvent*) override;
 
 private:
-    bool initialized_;
+    bool initialized_{false};
 };
-
 
 #endif /* QSFMLWIDGET_HPP */

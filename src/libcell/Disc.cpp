@@ -1,4 +1,5 @@
 #include "Disc.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <cmath>
 #include <functional>
@@ -16,7 +17,7 @@ void Disc::setVelocity(const sf::Vector2f& velocity)
 {
 #ifdef DEBUG
     if (std::isnan(velocity.x) || std::isnan(velocity.y) || std::isinf(velocity.x) || std::isinf(velocity.y))
-        throw std::runtime_error("Trying to assign an invalid value to velocity");
+        throw ExceptionWithLocation("Trying to assign an invalid value to velocity");
 #endif
     velocity_ = velocity;
 }
@@ -45,7 +46,7 @@ void Disc::setPosition(const sf::Vector2f& position)
 {
 #ifdef DEBUG
     if (std::isnan(position.x) || std::isnan(position.y) || std::isinf(position.x) || std::isinf(position.y))
-        throw std::runtime_error("Trying to assign an invalid value to position");
+        throw ExceptionWithLocation("Trying to assign an invalid value to position");
 #endif
     position_ = position;
 }
@@ -63,16 +64,6 @@ void Disc::setType(const DiscType& discType)
 void Disc::markDestroyed()
 {
     destroyed_ = true;
-}
-
-void Disc::markChanged()
-{
-    changed_ = true;
-}
-
-void Disc::unmarkChanged()
-{
-    changed_ = false;
 }
 
 const sf::Vector2f& Disc::getVelocity() const
@@ -95,11 +86,6 @@ bool Disc::isMarkedDestroyed() const
     return destroyed_;
 }
 
-bool Disc::isMarkedChanged() const
-{
-    return changed_;
-}
-
 int Disc::getId() const
 {
     return id_;
@@ -112,5 +98,5 @@ float Disc::getAbsoluteMomentum() const
 
 float Disc::getKineticEnergy() const
 {
-    return 0.5f * type_.getMass() * velocity_.x * velocity_.x + velocity_.y * velocity_.y;
+    return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>553</height>
+    <width>407</width>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
        <height>500</height>
       </size>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,0,0">
       <item>
        <widget class="QWidget" name="widget" native="true">
         <property name="maximumSize">
@@ -86,14 +86,14 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>999</height>
+          <height>50</height>
          </size>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Timestep [ms]</string>
+            <string>Timestep [μs]</string>
            </property>
           </widget>
          </item>
@@ -105,6 +105,9 @@
            <property name="maximum">
             <number>100</number>
            </property>
+           <property name="singleStep">
+            <number>100</number>
+           </property>
           </widget>
          </item>
         </layout>
@@ -112,6 +115,12 @@
       </item>
       <item>
        <widget class="QWidget" name="widget_4" native="true">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QLabel" name="label_5">
@@ -123,30 +132,7 @@
          <item>
           <widget class="QDoubleSpinBox" name="timeScaleDoubleSpinBox">
            <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="widget_10" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Friction</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="frictionDoubleSpinBox">
-           <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-           <property name="stepType">
-            <enum>QAbstractSpinBox::DefaultStepType</enum>
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>

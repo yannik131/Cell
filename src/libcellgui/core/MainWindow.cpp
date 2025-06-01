@@ -1,4 +1,5 @@
 #include "MainWindow.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
@@ -6,23 +7,9 @@
 
 #include <QMessageBox>
 
-#define SAFE_EXECUTE(function, msg)                                                                                    \
-    [this]()                                                                                                           \
-    {                                                                                                                  \
-        try                                                                                                            \
-        {                                                                                                              \
-            function();                                                                                                \
-        }                                                                                                              \
-        catch (const std::exception& e)                                                                                \
-        {                                                                                                              \
-            QMessageBox::critical(this, "Error", msg + QString(e.what()));                                             \
-        }                                                                                                              \
-    }
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , simulationThread_(nullptr)
     , simulation_(new Simulation())
     , discDistributionDialog_(new DiscTypeDistributionDialog(this))
     , reactionsDialog_(new ReactionsDialog(this))
@@ -40,7 +27,17 @@ MainWindow::MainWindow(QWidget* parent)
             &Simulation::reset);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
-            SAFE_EXECUTE(startSimulation, "Error starting the simulation: "));
+            [this]()
+            {
+                try
+                {
+                    startSimulation();
+                }
+                catch (const std::exception& e)
+                {
+                    QMessageBox::critical(this, "Error", "Error starting the simulation: " + QString(e.what()));
+                }
+            });
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStopClicked, this,
             &MainWindow::stopSimulation);
 
@@ -71,20 +68,21 @@ MainWindow::MainWindow(QWidget* parent)
 
 void MainWindow::resetSimulation()
 {
+    stopSimulation();
+
     if (simulationThread_ != nullptr)
         connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
     else
         simulation_->reset();
 
     plotModel_->clear();
-
-    stopSimulation();
 }
 
 void MainWindow::setSimulationWidgetSize()
 {
     const auto& simulationSize = ui->simulationWidget->size();
-    simulation_->setWorldBounds(sf::Vector2f(simulationSize.width(), simulationSize.height()));
+    simulation_->setWorldBounds(
+        sf::Vector2f(static_cast<float>(simulationSize.width()), static_cast<float>(simulationSize.height())));
     simulation_->reset();
     plotModel_->clear();
 }
@@ -114,7 +112,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 void MainWindow::startSimulation()
 {
     if (simulationThread_ != nullptr)
-        throw std::runtime_error("Simulation can't be started: It's already running");
+        throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);

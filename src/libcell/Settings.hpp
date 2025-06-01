@@ -3,6 +3,7 @@
 
 #include "DiscType.hpp"
 #include "Reaction.hpp"
+#include "ReactionTable.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -17,7 +18,7 @@ struct Settings
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
      * able to keep up and start lagging
      */
-    sf::Time simulationTimeStep_ = sf::milliseconds(5);
+    sf::Time simulationTimeStep_ = sf::microseconds(5000);
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.
@@ -40,31 +41,15 @@ struct Settings
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
-    std::map<DiscType, int> discTypeDistribution_;
+    DiscType::map<int> discTypeDistribution_;
 
-    /**
-     * @brief Maps disc types to decomposition reactions A -> B + C by educt
-     * @todo Lookup for decomposition reactions takes up some time though, maybe unordered_map is worth consideration
-     */
-    std::map<DiscType, std::vector<Reaction>> decompositionReactions_;
-
-    /**
-     * @brief Maps pairs of disc types to combination reactions A + B -> C by educts. {A, B} and {B, A} map to the same
-     * reactions
-     */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> combinationReactions_;
-
-    /**
-     * @brief Maps pairs of disc types to exchange reactions A + B -> C + D by educts. {A, B} and {B, A} map to the same
-     * reactions
-     */
-    std::map<std::pair<DiscType, DiscType>, std::vector<Reaction>> exchangeReactions_;
+    ReactionTable reactionTable_;
 };
 
 namespace SettingsLimits
 {
-const sf::Time MinSimulationTimeStep = sf::milliseconds(1);
-const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
+const sf::Time MinSimulationTimeStep = sf::microseconds(100);
+const sf::Time MaxSimulationTimeStep = sf::microseconds(50000);
 
 const float MinSimulationTimeScale = 0.01f;
 const float MaxSimulationTimeScale = 10.f;

@@ -18,7 +18,7 @@ class ReactionsDialog : public QDialog
 public:
     explicit ReactionsDialog(QWidget* parent = nullptr);
 
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     void requestEmptyRowFromModel(const Reaction::Type& type);

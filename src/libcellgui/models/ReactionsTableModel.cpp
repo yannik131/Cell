@@ -22,7 +22,7 @@ int ReactionsTableModel::rowCount(const QModelIndex&) const
 
 int ReactionsTableModel::columnCount(const QModelIndex&) const
 {
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     return 9;
 }
 
@@ -31,14 +31,14 @@ QVariant ReactionsTableModel::headerData(int section, Qt::Orientation orientatio
     if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
         return {};
 
-    static const QStringList Headers{"A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"};
+    static const QStringList Headers{"A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"};
 
     return Headers[section];
 }
 
 QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() >= rows_.size() || (role != Qt::DisplayRole && role != Qt::EditRole))
+    if (index.row() >= static_cast<int>(rows_.size()) || (role != Qt::DisplayRole && role != Qt::EditRole))
         return {};
 
     const auto& reaction = rows_.at(index.row());
@@ -68,38 +68,30 @@ QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
 
 bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (index.row() >= rows_.size() || role != Qt::EditRole)
+    if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
         return false;
-
-    std::optional<DiscType> discType;
-    if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
-        discType = Utility::getDiscTypeByName(value.toString());
 
     auto& reaction = rows_[index.row()];
 
-    switch (index.column())
+    if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
     {
-    case 0:
-        reaction.setEduct1(*discType);
-        break;
-    case 2:
-        reaction.setEduct2(*discType);
-        break;
-    case 4:
-        reaction.setProduct1(*discType);
-        break;
-    case 6:
-        reaction.setProduct2(*discType);
-        break;
-    case 7:
-        reaction.setProbability(value.toFloat());
-        break;
-    default:
-        return false;
-    }
+        DiscType discType = Utility::getDiscTypeByName(value.toString());
 
-    if (index.column() < columnCount())
-        emit dataChanged(index, index);
+        if (index.column() == 0)
+            reaction.setEduct1(discType);
+        else if (index.column() == 2)
+            reaction.setEduct2(discType);
+        else if (index.column() == 4)
+            reaction.setProduct1(discType);
+        else if (index.column() == 6)
+            reaction.setProduct2(discType);
+    }
+    else if (index.column() == 7)
+        reaction.setProbability(value.toFloat());
+    else
+        return false;
+
+    emit dataChanged(index, index);
 
     return true;
 }
@@ -111,14 +103,19 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
 
     const auto defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability [%]", "Delete"
+    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     static const QVector<bool> decompositionFlags{true, false, false, false, true, false, true, true, true};
     static const QVector<bool> combinationFlags{true, false, true, false, true, false, false, true, true};
     static const QVector<bool> exchangeFlags{true, false, true, false, true, false, true, true, true};
+    static const QVector<bool> transformationFlags{true, false, false, false, true, false, false, true, true};
 
     const auto& reaction = rows_.at(index.row());
     switch (reaction.getType())
     {
+    case Reaction::Type::Transformation:
+        if (!transformationFlags[index.column()])
+            return defaultFlags;
+        break;
     case Reaction::Type::Combination:
         if (!combinationFlags[index.column()])
             return defaultFlags;
@@ -138,7 +135,7 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
 
 void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
 {
-    beginInsertRows(QModelIndex(), rows_.size(), rows_.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back(reaction);
     endInsertRows();
 }
@@ -147,12 +144,15 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
-        throw std::runtime_error("Can't add reaction: There are no available disc types defined");
+        throw ExceptionWithLocation("Can't add reaction: There are no available disc types defined");
 
     const auto& defaultDiscType = discTypeDistribution.begin()->first;
 
     switch (type)
     {
+    case Reaction::Type::Transformation:
+        addRowFromReaction(Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.f});
+        break;
     case Reaction::Type::Combination:
         addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
         break;
@@ -167,7 +167,7 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 
 void ReactionsTableModel::removeRow(int row)
 {
-    if (row < 0 || row >= rows_.size())
+    if (row < 0 || row >= static_cast<int>(rows_.size()))
         return;
 
     beginRemoveRows(QModelIndex(), row, row);
@@ -194,14 +194,15 @@ void ReactionsTableModel::loadSettings()
         }
     };
 
-    collectReactions(settings.decompositionReactions_);
-    collectReactions(settings.combinationReactions_);
-    collectReactions(settings.exchangeReactions_);
+    collectReactions(settings.reactionTable_.getTransformationReactionLookupMap());
+    collectReactions(settings.reactionTable_.getDecompositionReactionLookupMap());
+    collectReactions(settings.reactionTable_.getCombinationReactionLookupMap());
+    collectReactions(settings.reactionTable_.getExchangeReactionLookupMap());
 
     if (reactionSet.empty())
         return;
 
-    beginInsertRows(QModelIndex(), 0, reactionSet.size() - 1);
+    beginInsertRows(QModelIndex(), 0, static_cast<int>(reactionSet.size()) - 1);
 
     for (const auto& reaction : reactionSet)
         rows_.push_back(reaction);

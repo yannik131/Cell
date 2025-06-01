@@ -1,0 +1,203 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+	language=Python,
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	commentstyle=\color{green},
+	numberstyle=\tiny\color{gray},
+	numbers=left,
+	stepnumber=1,
+	numbersep=10pt,
+	showstringspaces=false,
+	tabsize=4,
+}
+
+\begin{document}
+	\section{Collision physics}
+	\subsection{Collision with the bounds}
+	\subsubsection{Rectangular bounds}
+	We'll describe the rectangular bounds by their 2 corner points $(x_{min}, y_{min})$ and $(x_{max}, y_{max})$. 
+	The circle is at position $(x(t), y(t))$ with radius $R$. The penetration $l$ through the wall is $l > 0$ if the circle is overlapping with the bounds. To handle the collision, negate the offending velocity component and move the disc $\Delta x_i = \pm 2 l$ along the respective axis:
+
+	\subsubsection*{Left wall}
+	\begin{align*}
+		l(t) &= R + x_{min} - x(t)\\
+		\Delta x &= 2 l\\
+		v_x' &= -v_x
+	\end{align*}
+
+	\subsubsection*{Right wall}
+	\begin{align*}
+		l(t) &= R - x_{max} + x(t)\\
+		\Delta x &= - 2 l\\
+		v_x' &= -v_x
+	\end{align*}
+
+	\subsubsection*{Top wall}
+	\begin{align*}
+		l(t) &= R + y_{min} - y(t)\\
+		\Delta y &= 2 l\\
+		v_y' &= -v_y
+	\end{align*}
+
+	\subsubsection*{Bottom wall}
+	\begin{align*}
+		l(t) &= R - y_{max} + y(t)\\
+		\Delta y &= - 2 l\\
+		v_y' &= -v_y
+	\end{align*}
+	
+	\subsection{Overlap between circles}
+	The overlap $l$ of 2 circles is the sum of their radii minus the distance between them. If the overlap is $> 0$, we have a collision. The current positions of the circles are $\vec{r}_{i, 0}$.
+	\begin{equation}
+		l = R_1 + R_2 - \left|\vec{v}_{2, 0} - \vec{v}_{1, 0}\right|
+	\end{equation}
+	We want to move the circles to the positions they had just before the collision (when they were just touching without intersection). For this, we need to move them back in time using their velocities multiplied with a time $\Delta t$ we have to calculate. At that time, the overlap should be 0:
+	
+	\begin{align*}
+		l(t) &= R_1 + R_2 - \left|\vec{r_2}(t) - \vec{r_1}(t)\right|\\
+	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} + t\cdot\vec{v_2} - \vec{r}_{1, 0} - t\cdot\vec{v_1}\right|\\
+	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0} + t\left(\vec{v_2} - \vec{v_1}\right)\right|\\
+	 &= R_1 + R_2 - \left|\vec{r} + t\cdot\vec{v}\right| \overset{!}{=} 0\\
+	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
+	 &\Rightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + (R_1 + R_2)^2 (v_x^2 + v_y^2)}}{v_x^2 + v_y^2}
+	\end{align*}
+
+	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. The 2 solutions for $\Delta t$ refer to the first point of contact before overlap and the point in time exactly after the circles have passed through each other. The first contact happens at an earlier time, so we'll select the earlier of the 2 solutions, the one with $-\sqrt{...}$.\\
+	Now the correct initial positions $\vec{r}_{i, c}$ at the time of collision can easily be calculated:
+	\begin{equation}
+		\vec{r}_{i, c} =\vec{r}_{i, 0} + \Delta t \cdot \vec{v}_i
+	\end{equation}
+	After the collision was handled and the new velocities $\vec{v}'_i$ have been calculated, the circles need to be wound forward in time with their corrected velocities:
+	\begin{equation}
+		\vec{r}_{i} =\vec{r}_{i, c} - \Delta t \cdot \vec{v}'_i
+	\end{equation}
+	
+	\begin{lstlisting}[caption={Code to calculate $t$}]
+from sympy import symbols, Eq, solve, simplify, sqrt
+
+rx, ry, vx, vy, R1, R2, t = symbols("rx ry vx vy R1 R2 t")
+eq = Eq(sqrt((rx + t*vx)**2+(ry+t*vy)**2), R1+R2)
+solution = solve(eq, t)
+
+simplified = [simplify(sol) for sol in solution]
+
+for sol in simplified:
+print(sol)
+	\end{lstlisting}
+
+	\subsection{Collision handling}
+		
+	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
+	
+	\begin{align*}
+		\Delta p &= m_1\left(v_{1+} - v_{1-}\right),\\
+		-\Delta p &= m_2\left(v_{2+} - v_{2-}\right),\\
+		e &= -\frac{v_{1+} - v_{2+}}{v_{1-} - v_{2-}}.
+	\end{align*}
+	
+	Note that since $\Delta p$ acts along the collision normal, $v_{1-}$ and $v_{2-}$ in this context are the velocities projected on that normal, given by the projection
+	
+	\begin{align*}
+		\vec{v}_n = \frac{\vec{v}\cdot\vec{n}}{\vec{n}\cdot\vec{n}}\vec{n} \Rightarrow v_n = \vec{v}\cdot\vec{n}.
+	\end{align*}
+
+	$e$ is the coefficient of restitution, a value in the interval $[0, 1]$ where $1$ indicates a completely elastic collision 
+	 and $0$ indicates an inelastic collision. In atomic collisions, no deformations occur and $e = 1$.\\
+	After solving the first equations for $v_{1+}$ and $v_{2+}$, these values are substituted in the last equation:
+	
+	\begin{align*}
+		&v_{1+} = \frac{\Delta p}{m_1} + v_{1-} \hspace{2cm} v_{2+} = -\frac{\Delta p}{m_2} + v_{2-}\\
+		&\Rightarrow e = -\frac{\frac{\Delta p}{m_1} + v_{1-} - \left(-\frac{\Delta p}{m_2} + v_{2-}\right)}{v_{1-} - v_{2-}}\\
+		&\Leftrightarrow e\left(v_{1-} - v_{2-}\right) = -\left(v_{1-} - v_{2-} + \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\right)\\
+		&\Leftrightarrow ev_r = -v_r - \Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right)\\
+		&\Leftrightarrow -\Delta p\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = e v_r + v_r\\
+		&\Leftrightarrow \Delta p = -\frac{v_r(e + 1)}{\frac{1}{m_1} + \frac{1}{m_2}}
+	\end{align*}
+
+	with the relative veloctiy $v_r = v_{1-} - v_{2-}$. The impulse $\Delta p$ acts along the line of action connecting the center of masses of both circles, so we'll need the normal vector $\vec{n}$ along the collision:
+	
+	\begin{align*}
+		\vec{n} = \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}.
+	\end{align*}
+
+	With this, the new velocities are
+	
+	\begin{align*}
+		&\vec{v}_{1+} = \vec{v}_{1-} + \frac{\Delta p}{m_1}\vec{n},\\
+		&\vec{v}_{2+} = \vec{v}_{2-} - \frac{\Delta p}{m_2}\vec{n}.
+	\end{align*}
+
+	Here, $\vec{v}_{1-}$ and $\vec{v}_{2-}$ are the full velocities before the collision, not just the projection along the normal.
+
+	\section{Reactions}
+	
+	\subsection{Transformation $A \rightarrow B$}
+	
+	We just require that $m$ won't change. 
+	
+	\subsection{Decomposition: $A \rightarrow B + C$}
+	
+	\subsubsection*{Probability}
+	
+	The decomposition reaction probability is given in $\frac{\%}{s}$. Let's say the user specified probability $p$ and simulation time step $\Delta t$ in s. The reaction chance is $1 - (1 - p')^N$ and we want a reaction chance of $p$ after $N = \frac{1}{\Delta t}$:
+	
+	\begin{align*}
+		&p = 1 - (1 - p')^{\Delta t^{-1}}\\
+		&\Leftrightarrow (1 - p')^{\Delta t^{-1}} = 1 - p\\
+		&\Leftrightarrow p' = 1 - \sqrt[\Delta t^{-1}]{1 - p} = 1 - (1 - p)^{\frac{1}{\Delta t^{-1}}}\\
+		&\Rightarrow p' = 1 - (1 - p)^{\Delta t}
+	\end{align*}
+	
+	\subsubsection*{Physics}
+	
+	Let A have $\vec{p} = (m_1 + m_2)\vec{v}$. B and C should move in opposite directions perpendicular to $\vec{v}$ after the decomposition, conserving energy and momentum. We only need conservation of momentum to see:
+	
+	\begin{align*}
+		(m_1 + m_2)v = m_1v_1 + m_2v_2 \Rightarrow v_1 = v_2 = v
+	\end{align*}
+
+	Since we want B and C to move away perpendicular from the previous direction, we'll just multiply $v$ with 2 perpendicular unit vectors:
+	
+	\begin{align*}
+		\vec{n} = \frac{\vec{v}}{v} \hspace{20px} \vec{v}_1 = v\begin{pmatrix} -n_y\\ n_x\end{pmatrix} \hspace{20px} \vec{v}_2 = v\begin{pmatrix} n_y\\ -n_x\end{pmatrix}
+	\end{align*}
+	
+	\subsection{Combination: $A + B \rightarrow C$}
+	This is just a classical inelastic collision (see wikipedia for derivation):
+	
+	\begin{align*}
+		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2}
+	\end{align*}
+
+	Note that after this collision, $C$ gained internal energy:
+	
+	\begin{align*}
+		\Delta U_C = \frac{1}{2}\frac{m_1 m_2}{m_1 + m_2}(v_1 - v_2)^2
+	\end{align*}
+
+	This internal energy will lead to the reverse reaction $C \rightarrow A + B$ if $U_C > E_a$, where $E_a$ is the activation energy required for the forward reaction.
+	
+	\subsection{Exchange: $A + B \rightarrow C + D$}
+	This is handled like a normal collision, we just change the types after. We handle this in terms of 2 separate transformations $A \rightarrow C$ and $B \rightarrow D$, conserving energy:
+	
+	\begin{align*}
+		m_A v_A^2 = m_C v_C^2 \Leftrightarrow v_C = \sqrt{\frac{m_A}{m_C}}v_A
+	\end{align*}
+
+	and mass
+	
+	\begin{align*}
+		m_A + m_B = m_C + m_D
+	\end{align*}
+	
+	This does not conserve momentum and is wrong until internal and activation energies are taken into account (TODO).
+
+\end{document}
