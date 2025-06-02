@@ -46,6 +46,9 @@ void PlotWidget::reset()
     graphs_.clear();
     sumGraph_ = nullptr;
 
+    // TODO This is really ugly because we could be in 2 different states (plotting sums or not) which need to be
+    // handled differently but also share some things
+
     if (GlobalGUISettings::getGUISettings().plotSum_)
     {
         sumGraph_ = addGraph();

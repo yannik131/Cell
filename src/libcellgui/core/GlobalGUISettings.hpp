@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+// TODO Use separate namespaces for GUI and backend to avoid crappy names and confusion
+
 class GlobalGUISettings : public QObject
 {
     Q_OBJECT
