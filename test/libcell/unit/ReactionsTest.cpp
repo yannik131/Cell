@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 
 TEST(ReactionsTest, combinationReaction)
@@ -130,4 +131,50 @@ TEST(ReactionsTest, transformationReaction)
     }
 
     EXPECT_EQ(d1.getType(), transformation.getProduct1());
+}
+
+TEST(ReactionTest, transformationProbabilityShouldntIncreaseWithDecreasedSimulationTimeStep)
+{
+    // Used to be a bug: transformationReaction and decompositionReaction used a static const reference to .asSeconds()
+    // which returns a new value and not a reference.
+
+    DiscType::map<int> distribution{{Mass5Radius5, 100}, {Mass5Radius10, 0}};
+    Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    GlobalSettings::get().setDiscTypeDistribution(distribution);
+    GlobalSettings::get().addReaction(transformation);
+
+    std::vector<Disc> discs1(1000, Disc(Mass5Radius5));
+    std::vector<Disc> discs2 = discs1;
+
+    // Big time step
+
+    GlobalSettings::get().setSimulationTimeStep(SettingsLimits::MaxSimulationTimeStep);
+
+    int N = static_cast<int>(sf::seconds(10) / SettingsLimits::MaxSimulationTimeStep);
+
+    for (int i = 0; i < N; ++i)
+    {
+        for (auto& disc : discs1)
+            transformationReaction(&disc);
+    }
+
+    // Smaller time step
+
+    auto newTimeStep = 0.1f * SettingsLimits::MaxSimulationTimeStep;
+    GlobalSettings::get().setSimulationTimeStep(newTimeStep);
+
+    N = static_cast<int>(sf::seconds(10) / newTimeStep);
+
+    for (int i = 0; i < N; ++i)
+    {
+        for (auto& disc : discs2)
+            transformationReaction(&disc);
+    }
+
+    int transformed1 =
+        std::count_if(discs1.begin(), discs1.end(), [](const Disc& disc) { return disc.getType() == Mass5Radius10; });
+    int transformed2 =
+        std::count_if(discs2.begin(), discs2.end(), [](const Disc& disc) { return disc.getType() == Mass5Radius10; });
+
+    EXPECT_LT(std::abs(transformed1 - transformed2), 100);
 }

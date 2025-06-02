@@ -35,7 +35,9 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
         average.discTypeCountMap_ += dataPoint.discTypeCountMap_;
     }
 
-    average.collisionCounts_ /= dataPoints.size();
+    const auto dt = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+
+    average.collisionCounts_ /= dt;
     average.totalKineticEnergyMap_ /= dataPoints.size();
     average.totalMomentumMap_ /= dataPoints.size();
     average.discTypeCountMap_ /= dataPoints.size();
