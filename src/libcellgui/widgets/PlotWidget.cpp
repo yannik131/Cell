@@ -42,6 +42,9 @@ void PlotWidget::reset()
     yMin_ = INT_MAX;
     yMax_ = INT_MIN;
 
+    yAxis->setRange(0, 5);
+    xAxis->setRange(0, 5);
+
     clearGraphs();
     graphs_.clear();
     sumGraph_ = nullptr;
@@ -102,7 +105,11 @@ void PlotWidget::plotDataPoint(const DiscType::map<double>& dataPoint, bool doRe
 
     if (doReplot)
     {
-        yAxis->setRange(yMin_, yMax_);
+        if (yMin_ == yMax_)
+            yAxis->setRange(yMin_ - 1, yMax_ + 1);
+        else
+            yAxis->setRange(yMin_, yMax_);
+
         xAxis->setRange(xMin_, xMax_);
 
         replot();

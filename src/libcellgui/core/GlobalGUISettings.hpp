@@ -16,7 +16,7 @@ public:
     static const GUISettings& getGUISettings();
 
 signals:
-    void plotResetRequired();
+    void replotRequired();
 
 private:
     GlobalGUISettings();

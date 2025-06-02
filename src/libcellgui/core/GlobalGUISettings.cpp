@@ -47,21 +47,21 @@ void GlobalGUISettings::setPlotTimeInterval(const sf::Time& plotTimeInterval)
                       "Plot time interval");
     guiSettings_.plotTimeInterval_ = plotTimeInterval;
 
-    emit plotResetRequired();
+    emit replotRequired();
 }
 
 void GlobalGUISettings::setCurrentPlotCategory(const PlotCategory& plotCategory)
 {
     guiSettings_.currentPlotCategory_ = plotCategory;
 
-    emit plotResetRequired();
+    emit replotRequired();
 }
 
 void GlobalGUISettings::setDiscTypesPlotMap(const DiscType::map<bool>& discTypesPlotMap)
 {
     guiSettings_.discTypesPlotMap_ = discTypesPlotMap;
 
-    emit plotResetRequired();
+    emit replotRequired();
 }
 
 void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames)
@@ -85,14 +85,14 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
 
     guiSettings_.discTypesPlotMap_ = discTypePlotMap;
 
-    emit plotResetRequired();
+    emit replotRequired();
 }
 
 void GlobalGUISettings::setPlotSum(bool value)
 {
     guiSettings_.plotSum_ = value;
 
-    emit plotResetRequired();
+    emit replotRequired();
 }
 
 void GlobalGUISettings::updateDiscTypesPlotMap()
@@ -107,4 +107,6 @@ void GlobalGUISettings::updateDiscTypesPlotMap()
     }
 
     setDiscTypesPlotMap(updatedDiscTypesPlotMap);
+
+    emit replotRequired();
 }
