@@ -42,9 +42,15 @@ void PlotWidget::reset()
     yMin_ = INT_MAX;
     yMax_ = INT_MIN;
 
+    yAxis->setRange(0, 5);
+    xAxis->setRange(0, 5);
+
     clearGraphs();
     graphs_.clear();
     sumGraph_ = nullptr;
+
+    // TODO This is really ugly because we could be in 2 different states (plotting sums or not) which need to be
+    // handled differently but also share some things
 
     if (GlobalGUISettings::getGUISettings().plotSum_)
     {
@@ -99,7 +105,7 @@ void PlotWidget::plotDataPoint(const DiscType::map<double>& dataPoint, bool doRe
 
     if (doReplot)
     {
-        yAxis->setRange(yMin_, yMax_);
+        yAxis->setRange(yMin_ - 1, yMax_ + 1);
         xAxis->setRange(xMin_, xMax_);
 
         replot();
@@ -114,10 +120,12 @@ void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
     const auto& size = graphs_.begin()->second->dataCount();
     const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
 
-    for (const auto& [discType, value] : dataPoint)
+    for (const auto& [discType, enabled] : GlobalGUISettings::getGUISettings().discTypesPlotMap_)
     {
-        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
+        if (!enabled)
             continue;
+
+        auto value = dataPoint.contains(discType) ? dataPoint.at(discType) : 0;
 
         xMax_ = timeStep * static_cast<float>(size);
         graphs_[discType]->addData(xMax_, value);

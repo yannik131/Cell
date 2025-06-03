@@ -25,7 +25,6 @@ template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const Dis
 
 void World::update(const sf::Time& dt)
 {
-    destroyedDiscsIndices_.clear();
     newDiscs_.clear();
 
     for (auto& disc : discs_)
@@ -160,8 +159,10 @@ void World::initializeStartPositions()
     for (int i = 0; i < static_cast<int>(bounds_.x / (2 * spacing)); ++i)
     {
         for (int j = 0; j < static_cast<int>(bounds_.y / (2 * spacing)); ++j)
+        {
             startPositions_.emplace_back(spacing * static_cast<float>(2 * i + 1),
                                          spacing * static_cast<float>(2 * j + 1));
+        }
     }
 
     std::random_device rd;
@@ -171,23 +172,15 @@ void World::initializeStartPositions()
 
 void World::removeDestroyedDiscs()
 {
-    // TODO rename this function, have it iterate all discs and call various methods on each discs etc.
     currentKineticEnergy_ = 0.f;
-    int currentIndex = 0;
     for (auto iter = discs_.begin(); iter != discs_.end();)
     {
         if (iter->isMarkedDestroyed())
-        {
             iter = discs_.erase(iter);
-            destroyedDiscsIndices_.push_back(currentIndex);
-        }
-        // TODO also find changed discs here, no need to iterate twice
         else
         {
             currentKineticEnergy_ += iter->getKineticEnergy();
             ++iter;
         }
-
-        ++currentIndex;
     }
 }
