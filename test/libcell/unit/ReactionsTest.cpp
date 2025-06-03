@@ -171,9 +171,9 @@ TEST(ReactionTest, transformationProbabilityShouldntIncreaseWithDecreasedSimulat
             transformationReaction(&disc);
     }
 
-    int transformed1 =
+    auto transformed1 =
         std::count_if(discs1.begin(), discs1.end(), [](const Disc& disc) { return disc.getType() == Mass5Radius10; });
-    int transformed2 =
+    auto transformed2 =
         std::count_if(discs2.begin(), discs2.end(), [](const Disc& disc) { return disc.getType() == Mass5Radius10; });
 
     EXPECT_LT(std::abs(transformed1 - transformed2), 100);
