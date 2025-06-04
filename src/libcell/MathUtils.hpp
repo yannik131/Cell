@@ -9,14 +9,36 @@
 #include <unordered_map>
 #include <vector>
 
+/**
+ * @brief Struct for the intermediate results of the overlap calculation, since they're useful for the following
+ * collision response
+ */
 struct OverlapResults
 {
+    /**
+     * @brief Direction vector from the first disc to the second
+     */
     sf::Vector2f rVec;
+
+    /**
+     * @brief Normalized direction vector from first disc to second
+     */
     sf::Vector2f nVec;
+
+    /**
+     * @brief Absolute distance between the 2 discs
+     */
     float distance{};
+
+    /**
+     * @brief A positive value for the overlap means the discs are overlapping
+     */
     float overlap{};
 };
 
+/**
+ * @brief Entry-wise addition of 2 maps, i. e. {1: 1, 2: 3} + {1: 0, 2: 4} = {1: 1, 2: 7}
+ */
 template <typename T1, typename T2, typename T3>
 std::unordered_map<T1, T2, T3>& operator+=(std::unordered_map<T1, T2, T3>& a, const std::unordered_map<T1, T2, T3>& b)
 {
@@ -26,6 +48,9 @@ std::unordered_map<T1, T2, T3>& operator+=(std::unordered_map<T1, T2, T3>& a, co
     return a;
 }
 
+/**
+ * @brief Entry-wise division of 2 maps
+ */
 template <typename T1, typename T2, typename T3, typename T4>
 std::unordered_map<T1, T2, T3>& operator/=(std::unordered_map<T1, T2, T3>& a, const T4& b)
 {
@@ -35,8 +60,14 @@ std::unordered_map<T1, T2, T3>& operator/=(std::unordered_map<T1, T2, T3>& a, co
     return a;
 }
 
+/**
+ * @brief Prints the x and y coordinates to the given stream
+ */
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
 
+/**
+ * @brief Scalar product of 2 vectors
+ */
 float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
 
 namespace MathUtils
@@ -68,7 +99,8 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
 float abs(const sf::Vector2f& vec);
 
 /**
- * @brief
+ * @returns Instance of `OverlapResults` with appropriate values if the positions of the 2 discs aren't identical,
+ * otherwise every entry of the return `OverlapResults` is 0.
  */
 OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
 

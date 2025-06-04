@@ -26,7 +26,14 @@ public:
     };
 
 public:
+    /**
+     * @brief Type to be used for reaction and disc type distribution tables
+     */
     template <typename T> using map = std::unordered_map<DiscType, T, IdHasher>;
+
+    /**
+     * @brief Type for the bimolecular reaction tables
+     */
     template <typename T> using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher>;
 
 public:
@@ -96,6 +103,9 @@ public:
      */
     bool operator==(const DiscType& other) const;
 
+    /**
+     * @brief Comparison by all members
+     */
     bool equalsTo(const DiscType& other) const;
 
 private:

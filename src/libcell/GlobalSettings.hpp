@@ -134,6 +134,10 @@ private:
     std::function<void(const SettingID& settingID)> callback_;
 };
 
+/**
+ * @brief Helper function for range checking
+ * @note Example: `throwIfNotInRange(theAge, 0, 120, "age");`
+ */
 template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)
 {
     using StringUtils::toString;
