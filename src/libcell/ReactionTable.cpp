@@ -1,14 +1,14 @@
 #include "ReactionTable.hpp"
 #include "Reaction.hpp"
 
-const DiscType::map<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
-{
-    return decompositionReactionLookupMap_;
-}
-
 const DiscType::map<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
 {
     return transformationReactionLookupMap_;
+}
+
+const DiscType::map<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
+{
+    return decompositionReactionLookupMap_;
 }
 
 const DiscType::pair_map<std::vector<Reaction>>& ReactionTable::getCombinationReactionLookupMap() const

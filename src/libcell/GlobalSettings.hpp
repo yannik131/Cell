@@ -23,8 +23,7 @@ enum SettingID
     SimulationTimeScale = 1 << 1,
     NumberOfDiscs = 1 << 2,
     DiscTypeDistribution = 1 << 3,
-    Reactions = 1 << 4,
-    FrictionCoefficient = 1 << 5,
+    Reactions = 1 << 4
 };
 
 /**
@@ -50,13 +49,17 @@ public:
      */
     static void setCallback(const std::function<void(const SettingID& settingID)>& functor);
 
+    /**
+     * @brief Until loading settings is supported, this is just a helper to set to a default setting for testing
+     */
+    void restoreDefault();
+
     // All these setters check the limits in SettingsLimits, throw if locked and otherwise don't deserve their own
     // comment
 
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(float simulationTimeScale);
     void setNumberOfDiscs(int numberOfDiscs);
-    void setFrictionCoefficient(float frictionCoefficient);
 
     /**
      * @brief Sets the current disc type distribution and automatically removes all currently set reactions with

@@ -1,4 +1,4 @@
-#include "World.hpp"
+#include "Cell.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "NanoflannAdapter.hpp"
@@ -13,7 +13,7 @@
 #include <random>
 #include <set>
 
-World::World() = default;
+Cell::Cell() = default;
 
 template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
 {
@@ -23,14 +23,15 @@ template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const Dis
     return a;
 }
 
-void World::update(const sf::Time& dt)
+void Cell::update(const sf::Time& dt)
 {
     newDiscs_.clear();
 
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
-        MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+        currentKineticEnergy_ +=
+            MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
     const auto& newDiscs = unimolecularReactions(discs_);
@@ -43,7 +44,7 @@ void World::update(const sf::Time& dt)
     removeDestroyedDiscs();
 }
 
-DiscType::map<int> World::getAndResetCollisionCount()
+DiscType::map<int> Cell::getAndResetCollisionCount()
 {
     auto tmp = std::move(collisionCounts_);
     collisionCounts_.clear();
@@ -51,12 +52,12 @@ DiscType::map<int> World::getAndResetCollisionCount()
     return tmp;
 }
 
-const std::vector<Disc>& World::discs() const
+const std::vector<Disc>& Cell::discs() const
 {
     return discs_;
 }
 
-void World::reinitialize()
+void Cell::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
 
@@ -71,7 +72,7 @@ void World::reinitialize()
     buildScene();
 }
 
-void World::setBounds(const sf::Vector2f& bounds)
+void Cell::setBounds(const sf::Vector2f& bounds)
 {
     if (bounds.x <= 0 || bounds.y <= 0)
         throw ExceptionWithLocation("Bounds must be > 0");
@@ -79,17 +80,17 @@ void World::setBounds(const sf::Vector2f& bounds)
     bounds_ = bounds;
 }
 
-float World::getInitialKineticEnergy() const
+float Cell::getInitialKineticEnergy() const
 {
     return initialKineticEnergy_;
 }
 
-float World::getCurrentKineticEnergy() const
+float Cell::getCurrentKineticEnergy() const
 {
     return currentKineticEnergy_;
 }
 
-void World::buildScene()
+void Cell::buildScene()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -148,7 +149,7 @@ void World::buildScene()
     }
 }
 
-void World::initializeStartPositions()
+void Cell::initializeStartPositions()
 {
     if (bounds_.x == 0 || bounds_.y == 0)
         throw ExceptionWithLocation("Can't initialize world: Bounds not set");
@@ -170,7 +171,7 @@ void World::initializeStartPositions()
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 
-void World::removeDestroyedDiscs()
+void Cell::removeDestroyedDiscs()
 {
     currentKineticEnergy_ = 0.f;
     for (auto iter = discs_.begin(); iter != discs_.end();)

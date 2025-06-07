@@ -5,6 +5,9 @@
 
 #include <nanoflann.hpp>
 
+/**
+ * @brief Wrapper around a vector<Disc> for nanoflann
+ */
 struct NanoflannAdapter
 {
     const std::vector<Disc>& elements;

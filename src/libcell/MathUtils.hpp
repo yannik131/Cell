@@ -1,6 +1,10 @@
 #ifndef MATHUTILS_HPP
 #define MATHUTILS_HPP
 
+/**
+ * @brief The math utilities here are partly explained in the physics part of the documentation
+ */
+
 #include "Disc.hpp"
 
 #include <SFML/System/Time.hpp>
@@ -87,8 +91,9 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, f
 DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 
 /**
- * @brief Makes the disc bounce back from the walls
- * @note Gives additional kinetic energy to the disc if there is less kinetic energy than at the start of the simulation
+ * @brief Makes the disc bounce back from the walls. Gives additional kinetic energy to the disc if
+ * `kineticEnergyDeficiency > 0`
+ * @returns the kinetic energy added to the disc, if any
  */
 float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
                                 float kineticEnergyDeficiency);
@@ -104,8 +109,14 @@ float abs(const sf::Vector2f& vec);
  */
 OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
 
+/**
+ * @brief Given 2 discs, returns the earlier of the 2 times where they just started touching
+ */
 float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
 
+/**
+ * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
+ */
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
 
 /**
@@ -113,6 +124,9 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
  */
 float getRandomFloat();
 
+/**
+ * @return pair where pair.first <= pair.second
+ */
 template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
 {
     if (a <= b)
@@ -121,6 +135,9 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
     return std::make_pair(b, a);
 }
 
+/**
+ * @returns Unique integer for the given arguments
+ */
 int calculateHash(int x, int y);
 
 } // namespace MathUtils

@@ -1,9 +1,9 @@
 // configure using cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. and profile with VerySleepy
 
+#include "Cell.hpp"
 #include "GlobalSettings.hpp"
 #include "Logging.hpp"
 #include "StringUtils.hpp"
-#include "World.hpp"
 
 #include <chrono>
 
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     initLogging(argc, argv);
     setBenchmarkSettings();
 
-    World world;
+    Cell world;
     world.setBounds(sf::Vector2f(1000, 1000));
     world.reinitialize();
 

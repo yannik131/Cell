@@ -1,8 +1,8 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
+#include "Cell.hpp"
 #include "FrameDTO.hpp"
-#include "World.hpp"
 
 #include <QObject>
 #include <SFML/System/Time.hpp>
@@ -26,7 +26,7 @@ signals:
     void sceneData(const std::vector<Disc>& discs);
 
 private:
-    World world_;
+    Cell world_;
     const std::vector<Disc>& worldDiscs_;
 };
 

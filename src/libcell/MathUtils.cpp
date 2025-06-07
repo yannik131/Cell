@@ -66,6 +66,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, f
 
                 discsInCollisions.insert(pair.first);
                 discsInCollisions.insert(pair.second);
+
                 break;
             }
         }
@@ -159,7 +160,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentTotalKineticEnergy)
 
-    float randomNumber = getRandomFloat() / 2.f;
+    float randomNumber = getRandomFloat() / 2;
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
 
