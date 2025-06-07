@@ -10,7 +10,7 @@ bool operator<(const sf::Color& a, const sf::Color& b)
 } // namespace sf
 
 /**
- * @brief Since the sf::Color::... constants are static, we need a helper func here to avoid SIOF
+ * @brief Avoiding SIOF here
  */
 const QMap<sf::Color, QString>& getColorNameMapping()
 {

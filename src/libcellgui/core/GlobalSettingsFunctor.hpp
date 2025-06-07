@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+// TODO documentation once generic settings class is here
+
 class GlobalSettingsFunctor : public QObject
 {
     Q_OBJECT
