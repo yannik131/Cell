@@ -30,7 +30,7 @@ TEST(WorldTest, EnergyIsConserved)
     }
 
     DLOG(INFO) << "Took " << updateCount << " updates to reach " << collisionTarget << " collisions ("
-               << collisionTarget / static_cast<float>(updateCount) << " collisions/s)";
+               << static_cast<float>(collisionTarget) / static_cast<float>(updateCount) << " collisions/s)";
 
     // Currently, combination reactions don't conserve kinetic energy
     EXPECT_NEAR(world.getCurrentKineticEnergy(), initialKineticEnergy, 0.01f * initialKineticEnergy);
