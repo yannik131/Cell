@@ -35,7 +35,9 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
         average.discTypeCountMap_ += dataPoint.discTypeCountMap_;
     }
 
-    average.collisionCounts_ /= dataPoints.size();
+    const auto dt = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+
+    average.collisionCounts_ /= dt;
     average.totalKineticEnergyMap_ /= dataPoints.size();
     average.totalMomentumMap_ /= dataPoints.size();
     average.discTypeCountMap_ /= dataPoints.size();
@@ -43,7 +45,6 @@ DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
     return average;
 }
 
-// TODO Bug: Run simulation, then set frequency of some discs to 0, reset, plot window is not resetted correctly
 PlotModel::PlotModel(QObject* parent)
     : QObject(parent)
 {
@@ -51,10 +52,10 @@ PlotModel::PlotModel(QObject* parent)
     // We'll reserve enough space for 5 minutes of plotting, 5*60*200
     dataPoints_.reserve(60000);
 
-    connect(&GlobalGUISettings::get(), &GlobalGUISettings::plotResetRequired, this, &PlotModel::emitPlot);
+    connect(&GlobalGUISettings::get(), &GlobalGUISettings::replotRequired, this, &PlotModel::emitPlot);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, this, &PlotModel::clear);
-    // Updating the disc type distribution will cause the GlobalGUISettings to emit plotResetRequired, so no need to
-    // connect to it here
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
+            &PlotModel::clear);
 }
 
 void PlotModel::clear()

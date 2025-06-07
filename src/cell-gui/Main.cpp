@@ -8,9 +8,6 @@
 #include <QMessageBox>
 #include <QtCore/QMetaType>
 
-// TODO Remove and check if it did smth
-Q_DECLARE_METATYPE(Settings);
-
 int main(int argc, char* argv[])
 {
     initLogging(argc, argv);

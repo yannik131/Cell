@@ -72,7 +72,7 @@ bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
     static const auto& decompositionReactionTable =
         GlobalSettings::getSettings().reactionTable_.getDecompositionReactionLookupMap();
-    static const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    const auto dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
     const auto& iter = decompositionReactionTable.find(d1->getType());
     if (iter == decompositionReactionTable.end())
@@ -114,7 +114,7 @@ bool transformationReaction(Disc* disc)
 {
     static const auto& transformationReactionTable =
         GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
-    static const float& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    const auto dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
     const auto& iter = transformationReactionTable.find(disc->getType());
     if (iter == transformationReactionTable.end())
