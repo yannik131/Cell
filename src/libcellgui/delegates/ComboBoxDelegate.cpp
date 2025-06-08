@@ -1,5 +1,6 @@
 #include "ComboBoxDelegate.hpp"
 #include "GlobalSettingsFunctor.hpp"
+#include "SafeCast.hpp"
 #include "Utility.hpp"
 
 ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
@@ -18,7 +19,7 @@ QWidget* ComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
 void ComboBoxDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     QString value = index.model()->data(index, Qt::EditRole).toString();
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
+    auto* comboBox = safeCast<QComboBox*>(editor);
     int i = comboBox->findText(value);
     if (i >= 0)
         comboBox->setCurrentIndex(i);
@@ -26,7 +27,7 @@ void ComboBoxDelegate::setEditorData(QWidget* editor, const QModelIndex& index) 
 
 void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-    auto* comboBox = qobject_cast<QComboBox*>(editor);
+    auto* comboBox = safeCast<QComboBox*>(editor);
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 

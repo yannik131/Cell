@@ -3,6 +3,7 @@
 #include "ComboBoxDelegate.hpp"
 #include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
+#include "SafeCast.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "Utility.hpp"
 #include "ui_ReactionsDialog.h"
@@ -54,9 +55,9 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
             [](QWidget* spinBox)
             {
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
+                safeCast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
+                safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
+                safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
             });
 
     ui->reactionsTableView->setItemDelegateForColumn(0, discTypeComboBoxDelegate);

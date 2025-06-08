@@ -1,6 +1,8 @@
 #ifndef SPINBOXDELEGATE_HPP
 #define SPINBOXDELEGATE_HPP
 
+#include "SafeCast.hpp"
+
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QStyledItemDelegate>
@@ -48,7 +50,8 @@ public:
      */
     void setEditorData(QWidget* editor, const QModelIndex& index) const override
     {
-        auto* spinBox = qobject_cast<SpinBoxType*>(editor);
+        auto* spinBox = safeCast<SpinBoxType*>(editor);
+
         auto data = index.model()->data(index, Qt::EditRole);
 
         if constexpr (std::is_same_v<SpinBoxType, QSpinBox>)
@@ -62,7 +65,8 @@ public:
      */
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override
     {
-        auto* spinBox = qobject_cast<SpinBoxType*>(editor);
+        auto* spinBox = safeCast<SpinBoxType*>(editor);
+
         model->setData(index, spinBox->value(), Qt::EditRole);
     }
 };

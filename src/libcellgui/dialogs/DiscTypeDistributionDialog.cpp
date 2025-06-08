@@ -3,6 +3,7 @@
 #include "ColorMapping.hpp"
 #include "ComboBoxDelegate.hpp"
 #include "GlobalSettingsFunctor.hpp"
+#include "SafeCast.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
@@ -47,13 +48,12 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
 
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
-    connect(
-        radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated, [](QWidget* spinBox)
-        { qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius); });
+    connect(radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated, [](QWidget* spinBox)
+            { safeCast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinRadius, DiscTypeLimits::MaxRadius); });
     connect(massSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated, [](QWidget* spinBox)
-            { qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
+            { safeCast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
     connect(frequencySpinBoxDelegate, &SpinBoxDelegate<QSpinBox>::editorCreated,
-            [](QWidget* spinBox) { qobject_cast<QSpinBox*>(spinBox)->setRange(0, 100); });
+            [](QWidget* spinBox) { safeCast<QSpinBox*>(spinBox)->setRange(0, 100); });
     connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::removeRow);
 
