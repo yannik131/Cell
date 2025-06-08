@@ -46,10 +46,10 @@ struct Settings
 
 namespace SettingsLimits
 {
-const sf::Time MinSimulationTimeStep = sf::microseconds(100);
-const sf::Time MaxSimulationTimeStep = sf::microseconds(50000);
+const sf::Time MinSimulationTimeStep = sf::microseconds(1);
+const sf::Time MaxSimulationTimeStep = sf::microseconds(100000);
 
-const float MinSimulationTimeScale = 0.01f;
+const float MinSimulationTimeScale = 0.0001f;
 const float MaxSimulationTimeScale = 10.f;
 
 const int MinNumberOfDiscs = 1;

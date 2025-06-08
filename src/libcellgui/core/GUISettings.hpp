@@ -6,6 +6,9 @@
 
 #include <SFML/System/Time.hpp>
 
+/**
+ * @deprecated https://github.com/yannik131/Cell/issues/24
+ */
 struct GUISettings
 {
     /**

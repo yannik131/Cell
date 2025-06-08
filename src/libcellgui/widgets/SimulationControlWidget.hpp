@@ -31,7 +31,7 @@ private:
     void toggleStartStopButtonState();
     void reset();
 
-    template <typename Func> void tryExecuteWithExceptionHandling(Func&& func, QWidget* parent)
+    template <typename Func> void tryExecuteWithExceptionHandling(Func&& func)
     {
         try
         {
@@ -39,10 +39,8 @@ private:
         }
         catch (const std::exception& e)
         {
-            if (auto* self = dynamic_cast<SimulationControlWidget*>(parent))
-                self->displayGlobalSettings();
-
-            QMessageBox::critical(parent, "Fehler", e.what());
+            displayGlobalSettings();
+            QMessageBox::critical(this, "Fehler", e.what());
         }
     }
 

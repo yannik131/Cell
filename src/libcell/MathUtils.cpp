@@ -158,7 +158,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
-    // initialKineticEnergy - currentTotalKineticEnergy)
+    // initialKineticEnergy - currentKineticEnergy)
 
     float randomNumber = getRandomFloat() / 2;
     float kineticEnergyBefore = disc.getKineticEnergy();

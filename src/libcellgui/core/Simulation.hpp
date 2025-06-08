@@ -9,13 +9,29 @@
 
 #include <vector>
 
+/**
+ * @brief Contains and runs the cell for the simulation
+ */
 class Simulation : public QObject
 {
     Q_OBJECT
 public:
     explicit Simulation(QObject* parent = nullptr);
+
+    /**
+     * @brief Runs the simulation and emits information about the current frame (disc positions etc.). Stops the
+     * simulation if an interruption of the current thread was requested
+     */
     void run();
+
+    /**
+     * @brief Resets the cell and emits the new cell setup as frame data
+     */
     void reset();
+
+    /**
+     * @brief Sets bounds of the cell without any additional checks
+     */
     void setWorldBounds(const sf::Vector2f& bounds);
 
 private:
@@ -23,10 +39,9 @@ private:
 
 signals:
     void frameData(const FrameDTO& data);
-    void sceneData(const std::vector<Disc>& discs);
 
 private:
-    Cell world_;
+    Cell cell_;
     const std::vector<Disc>& worldDiscs_;
 };
 

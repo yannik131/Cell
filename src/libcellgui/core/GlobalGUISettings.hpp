@@ -21,14 +21,6 @@ public:
      */
     static const GUISettings& getGUISettings();
 
-signals:
-    void replotRequired();
-
-private:
-    GlobalGUISettings();
-
-    void loadDefaultDiscTypesPlotMap();
-
     /**
      * @brief Sets the refresh rate for the simulation widget
      */
@@ -45,21 +37,32 @@ private:
     void setCurrentPlotCategory(const PlotCategory& plotCategory);
 
     /**
-     * @brief
+     * @brief Enables only the plot types contained in the given list for the analysis plot
      */
-    void setDiscTypesPlotMap(const DiscType::map<bool>& discTypesPlotMap);
     void setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames);
 
+    /**
+     * @brief Sets whether or not the sum for all disc types of the currently selected plot type should be plotted
+     */
     void setPlotSum(bool value);
 
+    /**
+     * @brief Maintains the plot status for the previous disc types, enable plotting for all new ones and remove disc
+     * types from the plot map that are no longer in the current disc type distribution
+     */
     void updateDiscTypesPlotMap();
+
+signals:
+    void replotRequired();
+
+private:
+    GlobalGUISettings();
+
+    // TODO remove once loading settings is supported
+    void loadDefaultDiscTypesPlotMap();
 
 private:
     GUISettings guiSettings_;
-
-    friend class SimulationControlWidget;
-    friend class PlotControlWidget;
-    friend class PlotDataSelectionDialog;
 };
 
 #endif /* GLOBALGUISETTINGS_HPP */

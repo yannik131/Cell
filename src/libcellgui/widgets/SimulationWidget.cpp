@@ -13,11 +13,6 @@ SimulationWidget::SimulationWidget(QWidget* parent)
 {
 }
 
-void SimulationWidget::initialize(const std::vector<Disc>& discs)
-{
-    render({.discs_ = discs});
-}
-
 void SimulationWidget::render(const FrameDTO& frameDTO)
 {
     // The settings are only locked if the simulation is running

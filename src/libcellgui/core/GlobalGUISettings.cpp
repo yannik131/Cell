@@ -28,11 +28,11 @@ GlobalGUISettings::GlobalGUISettings()
 
 void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
 {
-    DiscType::map<bool> discTypesPlotMap;
+    QStringList selectedDiscTypeNames;
     for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
-        discTypesPlotMap[discType] = true;
+        selectedDiscTypeNames.push_back(QString::fromStdString(discType.getName()));
 
-    setDiscTypesPlotMap(discTypesPlotMap);
+    setDiscTypesPlotMap(selectedDiscTypeNames);
 }
 
 void GlobalGUISettings::setGuiFPS(int guiFPS)
@@ -53,13 +53,6 @@ void GlobalGUISettings::setPlotTimeInterval(const sf::Time& plotTimeInterval)
 void GlobalGUISettings::setCurrentPlotCategory(const PlotCategory& plotCategory)
 {
     guiSettings_.currentPlotCategory_ = plotCategory;
-
-    emit replotRequired();
-}
-
-void GlobalGUISettings::setDiscTypesPlotMap(const DiscType::map<bool>& discTypesPlotMap)
-{
-    guiSettings_.discTypesPlotMap_ = discTypesPlotMap;
 
     emit replotRequired();
 }
@@ -106,7 +99,6 @@ void GlobalGUISettings::updateDiscTypesPlotMap()
             updatedDiscTypesPlotMap[discType] = true;
     }
 
-    setDiscTypesPlotMap(updatedDiscTypesPlotMap);
-
+    guiSettings_.discTypesPlotMap_ = updatedDiscTypesPlotMap;
     emit replotRequired();
 }

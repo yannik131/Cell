@@ -3,11 +3,9 @@
 #include "Utility.hpp"
 
 const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TypeCounts, "Type counts"},
-                                                          {PlotCategory::TotalCollisionCount, "Collision count"},
-                                                          {PlotCategory::TotalAbsoluteImpulse, "Impulse"},
-                                                          {PlotCategory::TotalKineticEnergy, "Kinetic energy"}};
-
-const QMap<QString, PlotCategory> NamePlotCategoryMapping = Utility::invertMap(PlotCategoryNameMapping);
+                                                          {PlotCategory::CollisionCounts, "Collision count"},
+                                                          {PlotCategory::AbsoluteImpulse, "Impulse"},
+                                                          {PlotCategory::KineticEnergy, "Kinetic energy"}};
 
 const QList<PlotCategory> SupportedPlotCategories = PlotCategoryNameMapping.keys();
 const QStringList SupportedPlotCategoryNames = PlotCategoryNameMapping.values();

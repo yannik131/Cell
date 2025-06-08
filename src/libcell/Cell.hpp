@@ -13,6 +13,13 @@
 
 /**
  * @brief Represents a single cell with bounds and discs that can move around, collide and react
+ * @note Usage:
+ * ```cpp
+ * Cell cell;
+ * cell.setBounds(sf::Vector2f{500, 500});
+ * cell.reinitialize(); // Populate the cell
+ * cell.update(sf::milliseconds(1)); // Advance the simulation
+ * // Do whatever
  */
 class Cell
 {

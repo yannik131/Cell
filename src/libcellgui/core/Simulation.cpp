@@ -8,7 +8,7 @@
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
-    , worldDiscs_(world_.discs())
+    , worldDiscs_(cell_.discs())
 {
 }
 
@@ -23,12 +23,7 @@ void Simulation::run()
     while (true)
     {
         if (QThread::currentThread()->isInterruptionRequested())
-        {
-            // TODO Collision counts decrease with the simulation time step which makes no sense (finer step size ->
-            // more detected collisions due to less clipping)
-            world_.getAndResetCollisionCount(); // Reset collision count to 0 for the next run
             break;
-        }
 
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
@@ -37,7 +32,7 @@ void Simulation::run()
         {
             timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
 
-            world_.update(settings.simulationTimeStep_);
+            cell_.update(settings.simulationTimeStep_);
             emitFrameData();
         }
     }
@@ -47,22 +42,19 @@ void Simulation::run()
 
 void Simulation::reset()
 {
-    world_.reinitialize();
-    emit sceneData(worldDiscs_);
+    cell_.reinitialize();
     emitFrameData();
 }
 
 void Simulation::setWorldBounds(const sf::Vector2f& bounds)
 {
-    world_.setBounds(bounds);
+    cell_.setBounds(bounds);
 }
 
 void Simulation::emitFrameData()
 {
-    // Benchmarks have shown that a single emit of 1B takes about as long as one of 40kB (5-10us, several 100x slower
-    // than calculating a simulation step)
     FrameDTO frameDTO{.discs_ = worldDiscs_,
-                      .collisionCounts_ = world_.getAndResetCollisionCount(),
+                      .collisionCounts_ = cell_.getAndResetCollisionCount(),
                       .simulationTimeStepUs = GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 
     emit frameData(frameDTO);
