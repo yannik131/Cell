@@ -93,6 +93,11 @@ public:
      */
     bool isLocked() const;
 
+    /**
+     * @brief Returns a vector containing all reactions in the reaction table
+     */
+    const std::vector<Reaction>& getReactions() const;
+
 private:
     /**
      * @brief Singleton: Private ctor

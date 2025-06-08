@@ -96,6 +96,11 @@ void ReactionTable::clear()
     createLookupMaps();
 }
 
+const std::vector<Reaction>& ReactionTable::getReactions() const
+{
+    return reactions_;
+}
+
 void ReactionTable::createLookupMaps()
 {
     transformationReactionLookupMap_.clear();

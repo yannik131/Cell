@@ -7,6 +7,10 @@
 
 #include <type_traits>
 
+/**
+ * @brief Classes with Q_OBJECT can't be templates. However, classes deriving from a class with Q_OBJECT can, so this is
+ * an empty base class defining the signals the actual class will use
+ */
 class SpinBoxDelegateBase : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -17,6 +21,9 @@ signals:
     void editorCreated(QWidget* spinBox) const;
 };
 
+/**
+ * @brief Template class for QSpinBox and QDoubleSpinBox delegates
+ */
 template <typename SpinBoxType> class SpinBoxDelegate : public SpinBoxDelegateBase
 {
 public:
@@ -25,6 +32,9 @@ public:
 
     using SpinBoxDelegateBase::SpinBoxDelegateBase;
 
+    /**
+     * @brief Creates the spin box and emits the `editorCreated` signal
+     */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override
     {
         auto* editor = new SpinBoxType(parent);
@@ -32,6 +42,10 @@ public:
         return editor;
     }
 
+    /**
+     * @brief Sets the current value of the spin box to the one given by the model, using the appropriate type for the
+     * specified spin box type
+     */
     void setEditorData(QWidget* editor, const QModelIndex& index) const override
     {
         auto* spinBox = qobject_cast<SpinBoxType*>(editor);
@@ -43,6 +57,9 @@ public:
             spinBox->setValue(data.toDouble());
     }
 
+    /**
+     * @brief Calls `setData` on the respective model with the current value
+     */
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override
     {
         auto* spinBox = qobject_cast<SpinBoxType*>(editor);

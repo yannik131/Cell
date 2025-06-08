@@ -110,7 +110,7 @@ public:
 
 private:
     /**
-     * @brief The name is just a convience property to work with DiscTypes more easily
+     * @brief The name is used to uniquely identify disc types within the disc type distribution
      */
     std::string name_;
 
@@ -121,6 +121,7 @@ private:
 
     /**
      * @brief Radius in px
+     * @todo https://github.com/yannik131/Cell/issues/25
      */
     float radius_ = 0;
 

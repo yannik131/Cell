@@ -43,7 +43,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* frequencySpinBoxDelegate = new SpinBoxDelegate<QSpinBox>(this);
-    auto* deleteButtonDelegate = new ButtonDelegate(this);
+    auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
 
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
@@ -54,7 +54,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
             { qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(DiscTypeLimits::MinMass, DiscTypeLimits::MaxMass); });
     connect(frequencySpinBoxDelegate, &SpinBoxDelegate<QSpinBox>::editorCreated,
             [](QWidget* spinBox) { qobject_cast<QSpinBox*>(spinBox)->setRange(0, 100); });
-    connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, discTypeDistributionTableModel_,
+    connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::removeRow);
 
     ui->discTypeDistributionTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);

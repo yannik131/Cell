@@ -54,6 +54,11 @@ public:
      */
     void clear();
 
+    /**
+     * @returns a vector containing all reactions currently in the table
+     */
+    const std::vector<Reaction>& getReactions() const;
+
 private:
     /**
      * @brief Clears the old lookup maps and creates new ones based on the current reaction vector

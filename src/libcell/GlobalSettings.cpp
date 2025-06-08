@@ -200,6 +200,11 @@ bool GlobalSettings::isLocked() const
     return locked_;
 }
 
+const std::vector<Reaction>& GlobalSettings::getReactions() const
+{
+    return settings_.reactionTable_.getReactions();
+}
+
 /**
  * @brief Given a reaction map, remove all entries where a removed DiscType is either in the educts or products of any
  * of the reactions

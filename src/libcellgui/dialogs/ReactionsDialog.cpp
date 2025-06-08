@@ -45,11 +45,12 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
 
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
 
-    auto* deleteButtonDelegate = new ButtonDelegate(this);
+    auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
     ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
     auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
-    connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, reactionsTableModel_, &ReactionsTableModel::removeRow);
+    connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, reactionsTableModel_,
+            &ReactionsTableModel::removeRow);
     connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
             [](QWidget* spinBox)
             {

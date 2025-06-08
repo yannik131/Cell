@@ -4,8 +4,9 @@
 #include <QMouseEvent>
 #include <QStyleOptionButton>
 
-ButtonDelegate::ButtonDelegate(QObject* parent)
+ButtonDelegate::ButtonDelegate(QObject* parent, const QString& text)
     : QStyledItemDelegate(parent)
+    , text_(text)
 {
 }
 
@@ -13,7 +14,7 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 {
     QStyleOptionButton buttonOption;
     buttonOption.rect = option.rect;
-    buttonOption.text = "Delete";
+    buttonOption.text = text_;
     buttonOption.state = QStyle::State_Enabled;
 
     QApplication::style()->drawControl(QStyle::CE_PushButton, &buttonOption, painter);
@@ -26,7 +27,7 @@ bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel*, const QStyl
 
     if (event->type() == QEvent::MouseButtonRelease && mouseEvent->button() == Qt::LeftButton &&
         option.rect.contains(mouseEvent->pos()))
-        emit deleteRow(index.row());
+        emit buttonClicked(index.row());
 
     return true;
 }

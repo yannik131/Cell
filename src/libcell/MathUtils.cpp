@@ -118,7 +118,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     const sf::Vector2f& r = disc.getPosition();
 
     bool collided = false;
-    float l = NAN;
+    float l = NAN; // We must satisfy clang-tidy!
     float dx = 0, dy = 0;
 
     if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall
