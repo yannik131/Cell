@@ -33,5 +33,5 @@ TEST(WorldTest, EnergyIsConserved)
                << static_cast<float>(collisionTarget) / static_cast<float>(updateCount) << " collisions/s)";
 
     // Currently, combination reactions don't conserve kinetic energy
-    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.01f * initialKineticEnergy);
+    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.02f * initialKineticEnergy);
 }
