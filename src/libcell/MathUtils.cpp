@@ -24,7 +24,9 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
     return a.x * b.x + a.y * b.y;
 }
 
-namespace mathutils
+} // namespace cell
+
+namespace cell::mathutils
 {
 
 using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
@@ -240,6 +242,4 @@ int calculateHash(int x, int y)
     return (x * prime) ^ y;
 }
 
-} // namespace mathutils
-
-} // namespace cell
+} // namespace cell::mathutils
