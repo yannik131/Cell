@@ -42,6 +42,7 @@ void PlotWidget::reset()
     yMin_ = INT_MAX;
     yMax_ = INT_MIN;
 
+    // These seem to be the default values used by QCustomPlot
     yAxis->setRange(0, 5);
     xAxis->setRange(0, 5);
 
@@ -49,37 +50,10 @@ void PlotWidget::reset()
     graphs_.clear();
     sumGraph_ = nullptr;
 
-    // TODO This is really ugly because we could be in 2 different states (plotting sums or not) which need to be
-    // handled differently but also share some things
-
     if (GlobalGUISettings::getGUISettings().plotSum_)
-    {
-        sumGraph_ = addGraph();
-        sumGraph_->setPen(QColor());
-        legend->setVisible(false);
-        plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_] +
-                            " (sum)");
-
-        return;
-    }
-
-    legend->setVisible(true);
-    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
-
-    const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
-    for (const auto& [discType, plotEnabled] : discTypesPlotMap)
-    {
-        if (!plotEnabled)
-            continue;
-
-        QCPGraph* graph = addGraph();
-        graph->setPen(Utility::sfColorToQColor(discType.getColor()));
-        graph->setName(QString::fromStdString(discType.getName()));
-        graphs_[discType] = graph;
-    }
-
-    for (int i = 0; i < legend->itemCount(); ++i)
-        legend->item(i)->setLayer("legend layer");
+        createSumGraph();
+    else
+        createRegularGraphs();
 }
 
 void PlotWidget::replacePlot(const QVector<DiscType::map<double>>& dataPoints)
@@ -133,6 +107,35 @@ void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
         yMin_ = std::min(yMin_, value);
         yMax_ = std::max(yMax_, value);
     }
+}
+
+void PlotWidget::createSumGraph()
+{
+    sumGraph_ = addGraph();
+    sumGraph_->setPen(QColor());
+    legend->setVisible(false);
+    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_] + " (sum)");
+}
+
+void PlotWidget::createRegularGraphs()
+{
+    legend->setVisible(true);
+    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
+
+    const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
+    for (const auto& [discType, plotEnabled] : discTypesPlotMap)
+    {
+        if (!plotEnabled)
+            continue;
+
+        QCPGraph* graph = addGraph();
+        graph->setPen(Utility::sfColorToQColor(discType.getColor()));
+        graph->setName(QString::fromStdString(discType.getName()));
+        graphs_[discType] = graph;
+    }
+
+    for (int i = 0; i < legend->itemCount(); ++i)
+        legend->item(i)->setLayer("legend layer");
 }
 
 void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
