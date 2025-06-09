@@ -4,9 +4,9 @@
 #include <QMouseEvent>
 #include <QStyleOptionButton>
 
-ButtonDelegate::ButtonDelegate(QObject* parent, const QString& text)
+ButtonDelegate::ButtonDelegate(QObject* parent, QString text)
     : QStyledItemDelegate(parent)
-    , text_(text)
+    , text_(std::move(text))
 {
 }
 

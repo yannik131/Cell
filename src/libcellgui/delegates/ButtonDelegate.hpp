@@ -13,7 +13,7 @@ public:
     /**
      * @brief Creates a button delegate of a push button that will display the given text
      */
-    ButtonDelegate(QObject* parent, const QString& text);
+    ButtonDelegate(QObject* parent, QString text);
 
     /**
      * @brief Paints the button with the specified text

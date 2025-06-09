@@ -213,7 +213,7 @@ void ReactionsTableModel::saveSettings()
 {
     const auto reactionsBackup = GlobalSettings::get().getReactions();
 
-    static const auto& setReactions = [this](const std::vector<Reaction>& reactions)
+    static const auto& setReactions = [](const std::vector<Reaction>& reactions)
     {
         GlobalSettings::get().clearReactions();
         for (const auto& reaction : reactions)

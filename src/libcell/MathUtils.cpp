@@ -160,7 +160,9 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
     // initialKineticEnergy - currentKineticEnergy)
 
-    float randomNumber = getRandomFloat() * 0.75;
+    // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
+    // not too much to make it look stupid
+    float randomNumber = getRandomFloat() * 0.75f;
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
 
