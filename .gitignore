@@ -11,3 +11,4 @@ vcpkg_installed
 *.toc
 *.pdf
 CMakeUserPresets.json
+.vscode

@@ -28,6 +28,7 @@ if (-Not (Test-Path "build_release")) {
     cmake .. -DCMAKE_BUILD_TYPE=Release
     cmake --build . --config Release --parallel 4
     Set-Location ..
+    # Move the .dll's to the executable, won't work without this!
     .\build_release\vcpkg_installed\x64-windows\tools\Qt6\bin\windeployqt.exe .\build_release\cell-gui.exe
 }
 
