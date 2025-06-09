@@ -24,11 +24,11 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
 void SimulationControlWidget::setRanges()
 {
     ui->fpsSpinBox->setRange(GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS);
-    ui->numberOfDiscsSpinBox->setRange(SettingsLimits::MinNumberOfDiscs, SettingsLimits::MaxNumberOfDiscs);
-    ui->timeStepSpinBox->setRange(static_cast<int>(SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
-                                  static_cast<int>(SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
-    ui->timeScaleDoubleSpinBox->setRange(SettingsLimits::MinSimulationTimeScale,
-                                         SettingsLimits::MaxSimulationTimeScale);
+    ui->numberOfDiscsSpinBox->setRange(cell::SettingsLimits::MinNumberOfDiscs, cell::SettingsLimits::MaxNumberOfDiscs);
+    ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
+                                  static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
+    ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
+                                         cell::SettingsLimits::MaxSimulationTimeScale);
 }
 
 void SimulationControlWidget::displayGlobalSettings()
@@ -36,7 +36,7 @@ void SimulationControlWidget::displayGlobalSettings()
     const auto& guiSettings = GlobalGUISettings::getGUISettings();
     ui->fpsSpinBox->setValue(guiSettings.guiFPS_);
 
-    const auto& settings = GlobalSettings::getSettings();
+    const auto& settings = cell::GlobalSettings::getSettings();
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
     ui->timeStepSpinBox->setValue(static_cast<int>(settings.simulationTimeStep_.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
@@ -55,7 +55,7 @@ void SimulationControlWidget::setCallbacks()
                 tryExecuteWithExceptionHandling(
                     [value, this]
                     {
-                        GlobalSettings::get().setNumberOfDiscs(value);
+                        cell::GlobalSettings::get().setNumberOfDiscs(value);
                         emit simulationResetTriggered();
                     });
             });
@@ -64,11 +64,11 @@ void SimulationControlWidget::setCallbacks()
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
-                    [=] { GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
+                    [=] { cell::GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
             });
 
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this, [this](float value)
-            { tryExecuteWithExceptionHandling([=] { GlobalSettings::get().setSimulationTimeScale(value); }); });
+            { tryExecuteWithExceptionHandling([=] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });

@@ -13,8 +13,8 @@
  */
 struct FrameDTO
 {
-    std::vector<Disc> discs_;
-    DiscType::map<int> collisionCounts_;
+    std::vector<cell::Disc> discs_;
+    cell::DiscType::map<int> collisionCounts_;
     long long simulationTimeStepUs{};
 };
 

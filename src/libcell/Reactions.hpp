@@ -13,6 +13,9 @@
 
 #include <vector>
 
+namespace cell
+{
+
 class Disc;
 
 /**
@@ -48,5 +51,7 @@ bool exchangeReaction(Disc* d1, Disc* d2);
  * @param discs Discs to transform/decompose
  */
 std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs);
+
+} // namespace cell
 
 #endif /* REACTIONS_HPP */

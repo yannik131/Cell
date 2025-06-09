@@ -48,13 +48,13 @@ public:
     /**
      * @brief Adds a row from the given reaction, filling it with the actual values
      */
-    void addRowFromReaction(const Reaction& reaction);
+    void addRowFromReaction(const cell::Reaction& reaction);
 
     /**
      * @brief Creates a new row with a possibly invalid reaction (educt and product masses may not add up etc.) based on
      * the given type
      */
-    void addEmptyRow(const Reaction::Type& type);
+    void addEmptyRow(const cell::Reaction::Type& type);
 
     /**
      * @brief Removes the reaction from the model at the given row
@@ -81,7 +81,7 @@ signals:
     void reactionsChanged();
 
 private:
-    std::vector<Reaction> rows_;
+    std::vector<cell::Reaction> rows_;
 };
 
 #endif /* REACTIONSTABLEMODEL_HPP */

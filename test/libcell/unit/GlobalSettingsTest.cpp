@@ -8,21 +8,24 @@
 namespace
 {
 
-const Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
-const Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
-const Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};
-const Reaction transformation{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+const cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+const cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+const cell::Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};
+const cell::Reaction transformation{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
 
-const DiscType::map<int> DefaultDistribution{{Mass5, 100}, {Mass10, 0},        {Mass15, 0},         {Mass20, 0},
-                                             {Mass25, 0},  {Mass5Radius10, 0}, {Mass10Radius10, 0}, {Mass10Radius5, 0}};
+const cell::DiscType::map<int> DefaultDistribution{{Mass5, 100},        {Mass10, 0},       {Mass15, 0},
+                                                   {Mass20, 0},         {Mass25, 0},       {Mass5Radius10, 0},
+                                                   {Mass10Radius10, 0}, {Mass10Radius5, 0}};
 
-const Settings& settings = GlobalSettings::getSettings();
-const auto& transformationReactions = GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
-const auto& decompositionReactions = GlobalSettings::getSettings().reactionTable_.getDecompositionReactionLookupMap();
-const auto& combinationReactions = GlobalSettings::getSettings().reactionTable_.getCombinationReactionLookupMap();
-const auto& exchangeReactions = GlobalSettings::getSettings().reactionTable_.getExchangeReactionLookupMap();
+const cell::Settings& settings = cell::GlobalSettings::getSettings();
+const auto& transformationReactions =
+    cell::GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
+const auto& decompositionReactions =
+    cell::GlobalSettings::getSettings().reactionTable_.getDecompositionReactionLookupMap();
+const auto& combinationReactions = cell::GlobalSettings::getSettings().reactionTable_.getCombinationReactionLookupMap();
+const auto& exchangeReactions = cell::GlobalSettings::getSettings().reactionTable_.getExchangeReactionLookupMap();
 
-void insertDefaultReactions(GlobalSettings& target)
+void insertDefaultReactions(cell::GlobalSettings& target)
 {
     target.clearReactions();
     target.setDiscTypeDistribution(DefaultDistribution);
@@ -33,7 +36,7 @@ void insertDefaultReactions(GlobalSettings& target)
     target.addReaction(exchange);
 }
 
-template <typename T> bool isInEductsOrProducts(const T& reactionTable, const DiscType& discType)
+template <typename T> bool isInEductsOrProducts(const T& reactionTable, const cell::DiscType& discType)
 {
     for (const auto& [educt, reactions] : reactionTable)
     {
@@ -49,14 +52,14 @@ template <typename T> bool isInEductsOrProducts(const T& reactionTable, const Di
     return false;
 }
 
-template <typename T> int countDiscTypeInReactionTable(const T& reactionTable, const DiscType& discType)
+template <typename T> int countDiscTypeInReactionTable(const T& reactionTable, const cell::DiscType& discType)
 {
     using KeyType = T::key_type;
 
     int count = 0;
     for (const auto& [educts, reactions] : reactionTable)
     {
-        if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
+        if constexpr (std::is_same_v<KeyType, std::pair<cell::DiscType, cell::DiscType>>)
         {
             if (educts.first == discType)
                 ++count;
@@ -85,7 +88,7 @@ template <typename T> int countDiscTypeInReactionTable(const T& reactionTable, c
     return count;
 }
 
-int countDiscTypeInReactions(const DiscType& discType)
+int countDiscTypeInReactions(const cell::DiscType& discType)
 {
     int count = 0;
     count += countDiscTypeInReactionTable(transformationReactions, discType);
@@ -100,8 +103,8 @@ int countDiscTypeInReactions(const DiscType& discType)
 
 TEST(GlobalSettingsTest, RangeChecksAreCorrect)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
-    using namespace SettingsLimits;
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
+    using namespace cell::SettingsLimits;
 
     auto minTimeUs = MinSimulationTimeStep.asMicroseconds();
     auto maxTimeUs = MaxSimulationTimeStep.asMicroseconds();
@@ -125,30 +128,30 @@ TEST(GlobalSettingsTest, RangeChecksAreCorrect)
 
 TEST(GlobalSettingsTest, CallbackIsExecuted)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
-    SettingID id = SettingID::DiscTypeDistribution;
-    const auto& callback = [&](const SettingID& settingID) { id = settingID; };
+    cell::SettingID id = cell::SettingID::DiscTypeDistribution;
+    const auto& callback = [&](const cell::SettingID& settingID) { id = settingID; };
     globalSettings.setCallback(callback);
 
     globalSettings.setNumberOfDiscs(50);
 
-    EXPECT_EQ(id, SettingID::NumberOfDiscs);
+    EXPECT_EQ(id, cell::SettingID::NumberOfDiscs);
 
     globalSettings.setCallback({});
 }
 
 TEST(GlobalSettingsTest, LockPreventsChanges)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.lock();
     globalSettings.unlock();
 
     // Unlocked: all modification calls succeed.
-    EXPECT_NO_THROW(globalSettings.setSimulationTimeStep(SettingsLimits::MinSimulationTimeStep));
-    EXPECT_NO_THROW(globalSettings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale));
-    EXPECT_NO_THROW(globalSettings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs));
+    EXPECT_NO_THROW(globalSettings.setSimulationTimeStep(cell::SettingsLimits::MinSimulationTimeStep));
+    EXPECT_NO_THROW(globalSettings.setSimulationTimeScale(cell::SettingsLimits::MinSimulationTimeScale));
+    EXPECT_NO_THROW(globalSettings.setNumberOfDiscs(cell::SettingsLimits::MinNumberOfDiscs));
 
     EXPECT_NO_THROW(globalSettings.setDiscTypeDistribution(DefaultDistribution));
 
@@ -159,9 +162,10 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     globalSettings.lock();
 
     // Now all modification calls should throw ExceptionWithLocation.
-    EXPECT_THROW(globalSettings.setSimulationTimeStep(SettingsLimits::MinSimulationTimeStep), std::runtime_error);
-    EXPECT_THROW(globalSettings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale), std::runtime_error);
-    EXPECT_THROW(globalSettings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs), std::runtime_error);
+    EXPECT_THROW(globalSettings.setSimulationTimeStep(cell::SettingsLimits::MinSimulationTimeStep), std::runtime_error);
+    EXPECT_THROW(globalSettings.setSimulationTimeScale(cell::SettingsLimits::MinSimulationTimeScale),
+                 std::runtime_error);
+    EXPECT_THROW(globalSettings.setNumberOfDiscs(cell::SettingsLimits::MinNumberOfDiscs), std::runtime_error);
     EXPECT_THROW(globalSettings.setDiscTypeDistribution(DefaultDistribution), std::runtime_error);
     EXPECT_THROW(globalSettings.addReaction(decomposition), std::runtime_error);
     EXPECT_THROW(globalSettings.clearReactions(), std::runtime_error);
@@ -171,7 +175,7 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
 
 TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     EXPECT_FALSE(globalSettings.isLocked());
 
@@ -184,7 +188,7 @@ TEST(GlobalSettingsTest, IsLockedReturnsCorrectValues)
 
 TEST(GlobalSettingsTest, DiscTypeDistributionCantBeEmpty)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
     auto distribution = settings.discTypeDistribution_;
     distribution.clear();
 
@@ -193,11 +197,11 @@ TEST(GlobalSettingsTest, DiscTypeDistributionCantBeEmpty)
 
 TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     for (int i = -10; i < 200; i += 10)
     {
-        DiscType::map<int> distribution{{Mass5, i}};
+        cell::DiscType::map<int> distribution{{Mass5, i}};
 
         if (i == 100)
             EXPECT_NO_THROW(globalSettings.setDiscTypeDistribution(distribution));
@@ -208,16 +212,16 @@ TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 
 TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
-    DiscType::map<int> distribution{{Mass5, 50}, {Mass5, 50}};
+    cell::DiscType::map<int> distribution{{Mass5, 50}, {Mass5, 50}};
 
     EXPECT_ANY_THROW(globalSettings.setDiscTypeDistribution(distribution));
 }
 
 TEST(GlobalSettingsTest, ClearReactionsClearsReactions)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     insertDefaultReactions(globalSettings);
 
@@ -231,7 +235,7 @@ TEST(GlobalSettingsTest, ClearReactionsClearsReactions)
 
 TEST(GlobalSettingsTest, ReactionsEndUpInTheRightPlace)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.clearReactions();
 
@@ -252,7 +256,7 @@ TEST(GlobalSettingsTest, ReactionsEndUpInTheRightPlace)
 
 TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.clearReactions();
 
@@ -266,13 +270,13 @@ TEST(GlobalSettingsTest, DuplicateReactionsArentAllowed)
 
 TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.clearReactions();
     globalSettings.setDiscTypeDistribution({{Mass5, 50}, {Mass10, 50}, {Mass15, 0}});
 
-    Reaction noDuplicateCombination{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
-    Reaction noDuplicateExchange{Mass5, Mass10, Mass5, Mass10, 0.1f};
+    cell::Reaction noDuplicateCombination{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
+    cell::Reaction noDuplicateExchange{Mass5, Mass10, Mass5, Mass10, 0.1f};
 
     // These reactions should be added twice for keys {A, B} and {B, A} for easier lookup
     globalSettings.addReaction(noDuplicateCombination);
@@ -293,36 +297,36 @@ TEST(GlobalSettingsTest, ReactionsWithIdenticalEductsArentDuplicated)
 
 TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.setDiscTypeDistribution(DefaultDistribution);
 
     // 1 reaction with Mass10 as educt, 1 with Mass10 as product, 1 with Mass10 nowhere, for each reaction type
     // A = Mass10 for notation
 
-    Reaction transformationAEduct{Mass10, std::nullopt, Mass10Radius10, std::nullopt, 0.1f};
-    Reaction transformationAProduct{Mass10Radius10, std::nullopt, Mass10, std::nullopt, 0.1f};
-    Reaction transformationANowhere{Mass10Radius10, std::nullopt, Mass10Radius5, std::nullopt, 0.1f};
+    cell::Reaction transformationAEduct{Mass10, std::nullopt, Mass10Radius10, std::nullopt, 0.1f};
+    cell::Reaction transformationAProduct{Mass10Radius10, std::nullopt, Mass10, std::nullopt, 0.1f};
+    cell::Reaction transformationANowhere{Mass10Radius10, std::nullopt, Mass10Radius5, std::nullopt, 0.1f};
 
-    Reaction decompositionAEduct{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
-    Reaction decompositionAProduct{Mass15, std::nullopt, Mass5, Mass10, 0.1f};
-    Reaction decompositionANowhere{Mass20, std::nullopt, Mass15, Mass5, 0.1f};
+    cell::Reaction decompositionAEduct{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+    cell::Reaction decompositionAProduct{Mass15, std::nullopt, Mass5, Mass10, 0.1f};
+    cell::Reaction decompositionANowhere{Mass20, std::nullopt, Mass15, Mass5, 0.1f};
 
-    Reaction combinationAEduct{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
-    Reaction combinationAProduct{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
-    Reaction combinationANowhere{Mass5, Mass15, Mass20, std::nullopt, 0.1f};
+    cell::Reaction combinationAEduct{Mass5, Mass10, Mass15, std::nullopt, 0.1f};
+    cell::Reaction combinationAProduct{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    cell::Reaction combinationANowhere{Mass5, Mass15, Mass20, std::nullopt, 0.1f};
 
-    Reaction exchangeAEduct{Mass10, Mass15, Mass5, Mass20, 0.1f};
-    Reaction exchangeAProduct{Mass5, Mass20, Mass10, Mass15, 0.1f};
-    Reaction exchangeANowhere{Mass15, Mass15, Mass25, Mass5, 0.1f};
+    cell::Reaction exchangeAEduct{Mass10, Mass15, Mass5, Mass20, 0.1f};
+    cell::Reaction exchangeAProduct{Mass5, Mass20, Mass10, Mass15, 0.1f};
+    cell::Reaction exchangeANowhere{Mass15, Mass15, Mass25, Mass5, 0.1f};
 
     globalSettings.clearReactions();
 
     // Add all these reactions
-    std::vector<Reaction> reactions = {transformationAEduct, transformationAProduct, transformationANowhere,
-                                       decompositionAEduct,  decompositionAProduct,  decompositionANowhere,
-                                       combinationAEduct,    combinationAProduct,    combinationANowhere,
-                                       exchangeAEduct,       exchangeAProduct,       exchangeANowhere};
+    std::vector<cell::Reaction> reactions = {transformationAEduct, transformationAProduct, transformationANowhere,
+                                             decompositionAEduct,  decompositionAProduct,  decompositionANowhere,
+                                             combinationAEduct,    combinationAProduct,    combinationANowhere,
+                                             exchangeAEduct,       exchangeAProduct,       exchangeANowhere};
 
     for (const auto& reaction : reactions)
         globalSettings.addReaction(reaction);
@@ -335,7 +339,7 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
     EXPECT_EQ(exchangeReactions.size(), 5);
 
     // Now remove Mass10 from the distribution
-    DiscType::map<int> distribution = DefaultDistribution;
+    cell::DiscType::map<int> distribution = DefaultDistribution;
     distribution.erase(Mass10);
 
     globalSettings.setDiscTypeDistribution(distribution);
@@ -363,7 +367,7 @@ TEST(GlobalSettingsTest, ReactionWithRemovedDiscTypesAreRemoved)
 
 TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
     globalSettings.setDiscTypeDistribution(DefaultDistribution);
     globalSettings.clearReactions();
@@ -371,9 +375,9 @@ TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 
     int count = countDiscTypeInReactions(Mass5);
 
-    DiscType Mass5Modified = Mass5;
+    cell::DiscType Mass5Modified = Mass5;
     Mass5Modified.setName("Modified");
-    DiscType::map<int> distribution = DefaultDistribution;
+    cell::DiscType::map<int> distribution = DefaultDistribution;
     distribution.erase(Mass5);
     distribution[Mass5Modified] = 100;
     globalSettings.setDiscTypeDistribution(distribution);
@@ -383,14 +387,15 @@ TEST(GlobalSettingsTest, DiscTypesInReactionsAreUpdated)
 
 TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
 {
-    GlobalSettings& globalSettings = GlobalSettings::get();
+    cell::GlobalSettings& globalSettings = cell::GlobalSettings::get();
 
-    DiscType Mass50{"a", sf::Color::Cyan, 2.1f, 50};
-    DiscType Mass50Radius100{"b", sf::Color::Cyan, 100, 50};
-    DiscType Mass100{"LOOL", sf::Color::Cyan, 2.1f, 100};
+    cell::DiscType Mass50{"a", sf::Color::Cyan, 2.1f, 50};
+    cell::DiscType Mass50Radius100{"b", sf::Color::Cyan, 100, 50};
+    cell::DiscType Mass100{"LOOL", sf::Color::Cyan, 2.1f, 100};
 
-    EXPECT_ANY_THROW(globalSettings.addReaction(Reaction{Mass50, std::nullopt, Mass50Radius100, std::nullopt, 0.1f}));
-    EXPECT_ANY_THROW(globalSettings.addReaction(Reaction{Mass100, std::nullopt, Mass50, Mass50, 0.1f}));
-    EXPECT_ANY_THROW(globalSettings.addReaction(Reaction{Mass50, Mass50, Mass100, std::nullopt, 0.1f}));
-    EXPECT_ANY_THROW(globalSettings.addReaction(Reaction{Mass50, Mass50, Mass50, Mass50, 0.1f}));
+    EXPECT_ANY_THROW(
+        globalSettings.addReaction(cell::Reaction{Mass50, std::nullopt, Mass50Radius100, std::nullopt, 0.1f}));
+    EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass100, std::nullopt, Mass50, Mass50, 0.1f}));
+    EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass50, Mass50, Mass100, std::nullopt, 0.1f}));
+    EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass50, Mass50, Mass50, Mass50, 0.1f}));
 }

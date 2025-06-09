@@ -5,6 +5,9 @@
 
 #include <SFML/System/Vector2.hpp>
 
+namespace cell
+{
+
 /**
  * @brief Represents a particle in the simulation that can collide with others and undergo reactions. Physical
  * properties are defined by its DiscType
@@ -130,5 +133,7 @@ private:
      */
     int id_;
 };
+
+} // namespace cell
 
 #endif /* DISC_HPP */

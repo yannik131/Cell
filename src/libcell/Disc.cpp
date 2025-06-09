@@ -5,6 +5,9 @@
 #include <functional>
 #include <stdexcept>
 
+namespace cell
+{
+
 int Disc::instanceCount = 0;
 
 Disc::Disc(const DiscType& discType)
@@ -100,3 +103,5 @@ float Disc::getKineticEnergy() const
 {
     return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }
+
+} // namespace cell

@@ -13,32 +13,8 @@
 #include <unordered_map>
 #include <vector>
 
-/**
- * @brief Struct for the intermediate results of the overlap calculation, since they're useful for the following
- * collision response
- */
-struct OverlapResults
+namespace cell
 {
-    /**
-     * @brief Direction vector from the first disc to the second
-     */
-    sf::Vector2f rVec;
-
-    /**
-     * @brief Normalized direction vector from first disc to second
-     */
-    sf::Vector2f nVec;
-
-    /**
-     * @brief Absolute distance between the 2 discs
-     */
-    float distance{};
-
-    /**
-     * @brief A positive value for the overlap means the discs are overlapping
-     */
-    float overlap{};
-};
 
 /**
  * @brief Entry-wise addition of 2 maps, i. e. {1: 1, 2: 3} + {1: 0, 2: 4} = {1: 1, 2: 7}
@@ -74,8 +50,38 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
  */
 float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
 
-namespace MathUtils
+} // namespace cell
+
+namespace cell::mathutils
 {
+
+/**
+ * @brief Struct for the intermediate results of the overlap calculation, since they're useful for the following
+ * collision response
+ */
+struct OverlapResults
+{
+    /**
+     * @brief Direction vector from the first disc to the second
+     */
+    sf::Vector2f rVec;
+
+    /**
+     * @brief Normalized direction vector from first disc to second
+     */
+    sf::Vector2f nVec;
+
+    /**
+     * @brief Absolute distance between the 2 discs
+     */
+    float distance{};
+
+    /**
+     * @brief A positive value for the overlap means the discs are overlapping
+     */
+    float overlap{};
+};
+
 /**
  * @brief Finds all discs in the vector that overlap and returns them as unique pairs.
  * @param discs The vector of discs
@@ -140,6 +146,6 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
  */
 int calculateHash(int x, int y);
 
-} // namespace MathUtils
+} // namespace cell::mathutils
 
 #endif /* MATHUTILS_HPP */

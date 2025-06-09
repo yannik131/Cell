@@ -33,7 +33,7 @@ private:
     /**
      * @brief Lets the model add an empty row to the table with the given type
      */
-    void requestEmptyRowFromModel(const Reaction::Type& type);
+    void requestEmptyRowFromModel(const cell::Reaction::Type& type);
 
     /**
      * @brief Loads the settings and hides the dialog

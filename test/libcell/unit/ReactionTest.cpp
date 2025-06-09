@@ -7,10 +7,10 @@
 
 TEST(ReactionTest, invalidReactions)
 {
-    Reaction wrongMasses{Mass5, Mass5, Mass10, Mass5, 0.1f};
+    cell::Reaction wrongMasses{Mass5, Mass5, Mass10, Mass5, 0.1f};
     EXPECT_ANY_THROW(wrongMasses.validate());
 
-    Reaction invalidTransformation{Mass5, std::nullopt, Mass5, std::nullopt, 0.1f};
+    cell::Reaction invalidTransformation{Mass5, std::nullopt, Mass5, std::nullopt, 0.1f};
     EXPECT_ANY_THROW(invalidTransformation.validate());
 
     EXPECT_NO_THROW(invalidTransformation.setProbability(0));
@@ -19,18 +19,19 @@ TEST(ReactionTest, invalidReactions)
     EXPECT_ANY_THROW(invalidTransformation.setProbability(std::nextafter(0.f, -1.f)));
 }
 
-void testReactionGettersSetters(Reaction& reaction, std::vector<bool> availableParts)
+void testReactionGettersSetters(cell::Reaction& reaction, std::vector<bool> availableParts)
 {
     auto* reactionPtr = &reaction;
 
-    std::vector<std::function<DiscType()>> getters{
+    std::vector<std::function<cell::DiscType()>> getters{
         [reactionPtr] { return reactionPtr->getEduct1(); }, [reactionPtr] { return reactionPtr->getEduct2(); },
         [reactionPtr] { return reactionPtr->getProduct1(); }, [reactionPtr] { return reactionPtr->getProduct2(); }};
 
-    std::vector<std::function<void(const DiscType&)>> setters{
-        [reactionPtr](const DiscType& value) { reactionPtr->setEduct1(value); }, [reactionPtr](const DiscType& value)
-        { reactionPtr->setEduct2(value); }, [reactionPtr](const DiscType& value) { reactionPtr->setProduct1(value); },
-        [reactionPtr](const DiscType& value) { reactionPtr->setProduct2(value); }};
+    std::vector<std::function<void(const cell::DiscType&)>> setters{
+        [reactionPtr](const cell::DiscType& value) { reactionPtr->setEduct1(value); },
+        [reactionPtr](const cell::DiscType& value) { reactionPtr->setEduct2(value); },
+        [reactionPtr](const cell::DiscType& value) { reactionPtr->setProduct1(value); },
+        [reactionPtr](const cell::DiscType& value) { reactionPtr->setProduct2(value); }};
 
     std::vector<std::function<bool()>> checkers{nullptr, [reactionPtr] { return reactionPtr->hasEduct2(); }, nullptr,
                                                 [reactionPtr] { return reactionPtr->hasProduct2(); }};
@@ -58,15 +59,15 @@ void testReactionGettersSetters(Reaction& reaction, std::vector<bool> availableP
 
 TEST(ReactionTest, gettersSetters)
 {
-    Reaction transformation{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
-    Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
-    Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};
+    cell::Reaction transformation{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    cell::Reaction exchange{Mass5, Mass5, Mass5, Mass5, 0.1f};
 
-    EXPECT_EQ(transformation.getType(), Reaction::Transformation);
-    EXPECT_EQ(decomposition.getType(), Reaction::Decomposition);
-    EXPECT_EQ(combination.getType(), Reaction::Combination);
-    EXPECT_EQ(exchange.getType(), Reaction::Exchange);
+    EXPECT_EQ(transformation.getType(), cell::Reaction::Transformation);
+    EXPECT_EQ(decomposition.getType(), cell::Reaction::Decomposition);
+    EXPECT_EQ(combination.getType(), cell::Reaction::Combination);
+    EXPECT_EQ(exchange.getType(), cell::Reaction::Exchange);
 
     testReactionGettersSetters(transformation, {true, false, true, false});
     testReactionGettersSetters(decomposition, {true, false, true, true});
@@ -76,15 +77,15 @@ TEST(ReactionTest, gettersSetters)
 
 TEST(ReactionTest, testEquality)
 {
-    Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction decomposition1{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
-    Reaction combination1{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
-    Reaction exchange1{Mass5, Mass5, Mass5, Mass5, 0.1f};
+    cell::Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    cell::Reaction decomposition1{Mass10, std::nullopt, Mass5, Mass5, 0.1f};
+    cell::Reaction combination1{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    cell::Reaction exchange1{Mass5, Mass5, Mass5, Mass5, 0.1f};
 
-    Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction decomposition2{Mass5, std::nullopt, Mass5, Mass5, 0.1f};
-    Reaction combination2{Mass10, Mass5, Mass10, std::nullopt, 0.1f};
-    Reaction exchange2{Mass10, Mass5, Mass5, Mass5, 0.1f};
+    cell::Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    cell::Reaction decomposition2{Mass5, std::nullopt, Mass5, Mass5, 0.1f};
+    cell::Reaction combination2{Mass10, Mass5, Mass10, std::nullopt, 0.1f};
+    cell::Reaction exchange2{Mass10, Mass5, Mass5, Mass5, 0.1f};
 
     // Self-equality
     EXPECT_EQ(transformation1, transformation1);

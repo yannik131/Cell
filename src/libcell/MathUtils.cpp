@@ -11,6 +11,9 @@
 #include <ostream>
 #include <random>
 
+namespace cell
+{
+
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";
@@ -21,7 +24,9 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
     return a.x * b.x + a.y * b.y;
 }
 
-namespace MathUtils
+} // namespace cell
+
+namespace cell::mathutils
 {
 
 using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
@@ -162,7 +167,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
 
     // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
     // not too much to make it look stupid
-    float randomNumber = getRandomFloat() * 0.75f;
+    float randomNumber = getRandomFloat() * 0.5f;
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
 
@@ -237,4 +242,4 @@ int calculateHash(int x, int y)
     return (x * prime) ^ y;
 }
 
-} // namespace MathUtils
+} // namespace cell::mathutils

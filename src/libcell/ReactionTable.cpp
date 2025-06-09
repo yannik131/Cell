@@ -1,6 +1,9 @@
 #include "ReactionTable.hpp"
 #include "Reaction.hpp"
 
+namespace cell
+{
+
 ReactionTable::ReactionTable() = default;
 
 const DiscType::map<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
@@ -128,3 +131,5 @@ void ReactionTable::createLookupMaps()
         }
     }
 }
+
+} // namespace cell

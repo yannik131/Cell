@@ -11,10 +11,12 @@
 
 namespace sf
 {
+
 /**
  * @brief Element wise comparison of rgb values for 2 colors
  */
 bool operator<(const sf::Color& a, const sf::Color& b);
+
 } // namespace sf
 
 /**

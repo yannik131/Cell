@@ -8,8 +8,12 @@
 #include <numbers>
 #include <unordered_set>
 
+using namespace cell; // Defines the += and /= operators, shortens cell::mathutils::
+
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
+    using namespace mathutils;
+
     std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
     std::unordered_map<int, double> m2{{1, 2.0}, {2, 3.0}, {3, 3.0}};
 
@@ -21,6 +25,8 @@ TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 
 TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 {
+    using namespace mathutils;
+
     std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
     m1 /= 2.0;
 
@@ -36,23 +42,23 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
 
     std::vector<Disc> discs{d1, d2};
 
-    auto collisions = MathUtils::findCollidingDiscs(discs, 5);
+    auto collisions = mathutils::findCollidingDiscs(discs, 5);
     EXPECT_EQ(collisions.size(), 1);
 
     d2.setPosition({5, 0});
     discs = {d1, d2};
 
-    collisions = MathUtils::findCollidingDiscs(discs, 5);
+    collisions = mathutils::findCollidingDiscs(discs, 5);
     EXPECT_EQ(collisions.size(), 1);
 
-    auto pair = MathUtils::makeOrderedPair(&discs[0], &discs[1]);
+    auto pair = mathutils::makeOrderedPair(&discs[0], &discs[1]);
 
     EXPECT_TRUE(collisions.contains(pair));
 
     d2.setPosition({10, 0});
     discs = {d1, d2};
 
-    collisions = MathUtils::findCollidingDiscs(discs, 5);
+    collisions = mathutils::findCollidingDiscs(discs, 5);
     EXPECT_EQ(collisions.size(), 0);
 
     Disc d3(Mass5);
@@ -60,14 +66,14 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     d3.setPosition({0, 0});
 
     discs = {d1, d2, d3};
-    collisions = MathUtils::findCollidingDiscs(discs, 5);
+    collisions = mathutils::findCollidingDiscs(discs, 5);
 
     // In theory we have: (d1, d2), (d1, d3), (d2, d3)
     // In practice we don't support multiple collisions, so we get just one of the above
 
-    auto pair1 = MathUtils::makeOrderedPair(&discs[0], &discs[1]);
-    auto pair2 = MathUtils::makeOrderedPair(&discs[0], &discs[2]);
-    auto pair3 = MathUtils::makeOrderedPair(&discs[1], &discs[2]);
+    auto pair1 = mathutils::makeOrderedPair(&discs[0], &discs[1]);
+    auto pair2 = mathutils::makeOrderedPair(&discs[0], &discs[2]);
+    auto pair3 = mathutils::makeOrderedPair(&discs[1], &discs[2]);
 
     int collisionCount = 0;
     if (collisions.contains(pair1))
@@ -92,7 +98,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
     d.setPosition(boundsTopLeft);
     d.setVelocity({-1.f, 1.f});
 
-    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
+    mathutils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
 
     // The disc is already R units behind the wall, so the algorithm should move it back to where it should
     // have collided, calculate the new velocity, calculate how long it took the disc to travel R units, and then move
@@ -104,7 +110,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
     d.setPosition(boundsBottomRight);
     d.setVelocity({1.f, -1.f});
 
-    MathUtils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
+    mathutils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
 
     EXPECT_NEAR(d.getPosition().x, boundsBottomRight.x - 2 * R, 1e-4f);
     EXPECT_NEAR(d.getPosition().y, boundsBottomRight.y - 2 * R, 1e-4f);
@@ -112,8 +118,8 @@ TEST(MathUtilsTest, CollisionsWithBounds)
 
 TEST(MathUtilsTest, Abs)
 {
-    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{1, 1}), std::sqrt(2), 1e-4);
-    EXPECT_NEAR(MathUtils::abs(sf::Vector2f{0, 0}), 0, 0);
+    EXPECT_NEAR(mathutils::abs(sf::Vector2f{1, 1}), std::sqrt(2), 1e-4);
+    EXPECT_NEAR(mathutils::abs(sf::Vector2f{0, 0}), 0, 0);
 }
 
 // Kind of a system test that tests the entire collision response
@@ -139,12 +145,12 @@ TEST(MathUtilsTest, CollisionHandling)
     d1.move(dt * d1.getVelocity());
     d2.move(dt * d2.getVelocity());
 
-    const auto& overlapResults = MathUtils::calculateOverlap(d1, d2);
-    const float calculatedDt = MathUtils::calculateTimeBeforeCollision(d1, d2, overlapResults);
+    const auto& overlapResults = mathutils::calculateOverlap(d1, d2);
+    const float calculatedDt = mathutils::calculateTimeBeforeCollision(d1, d2, overlapResults);
 
     EXPECT_FLOAT_EQ(-dt, calculatedDt);
 
-    MathUtils::handleDiscCollisions({std::make_pair(&d1, &d2)});
+    mathutils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
     const float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
 
@@ -161,8 +167,8 @@ TEST(MathUtilsTest, CollisionHandling)
 
 TEST(MathUtilsTest, getRandomFloat)
 {
-    float f1 = MathUtils::getRandomFloat();
-    float f2 = MathUtils::getRandomFloat();
+    float f1 = mathutils::getRandomFloat();
+    float f2 = mathutils::getRandomFloat();
 
     EXPECT_NE(f1, f2); // Maybe
 
@@ -176,10 +182,10 @@ TEST(MathUtilsTest, getRandomFloat)
 TEST(MathUtilsTest, makeOrderedPair)
 {
     int i1 = 0, i2 = 0;
-    auto pair = MathUtils::makeOrderedPair(&i1, &i2);
+    auto pair = mathutils::makeOrderedPair(&i1, &i2);
 
     std::swap(i1, i2);
-    auto pair2 = MathUtils::makeOrderedPair(&i1, &i2);
+    auto pair2 = mathutils::makeOrderedPair(&i1, &i2);
 
     EXPECT_EQ(pair, pair2);
 }
@@ -192,7 +198,7 @@ TEST(MathUtilsTest, calculateHash)
     {
         for (int y = 0; y <= 100; ++y)
         {
-            int hashValue = MathUtils::calculateHash(x, y);
+            int hashValue = mathutils::calculateHash(x, y);
             if (hashSet.find(hashValue) != hashSet.end())
                 FAIL() << "Duplicate hash value for " << x << " " << y;
 

@@ -5,6 +5,9 @@
 #include <functional>
 #include <stdexcept>
 
+namespace cell
+{
+
 bool operator==(const Reaction& reaction1, const Reaction& reaction2)
 {
     return toString(reaction1) == toString(reaction2);
@@ -184,3 +187,5 @@ void Reaction::validate() const
     if (type_ == Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this) + ": Educt 1 and product 1 are identical");
 }
+
+} // namespace cell

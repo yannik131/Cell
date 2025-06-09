@@ -56,7 +56,7 @@ void PlotWidget::reset()
         createRegularGraphs();
 }
 
-void PlotWidget::replacePlot(const QVector<DiscType::map<double>>& dataPoints)
+void PlotWidget::replacePlot(const QVector<cell::DiscType::map<double>>& dataPoints)
 {
     reset();
 
@@ -70,7 +70,7 @@ void PlotWidget::replacePlot(const QVector<DiscType::map<double>>& dataPoints)
         plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
 }
 
-void PlotWidget::plotDataPoint(const DiscType::map<double>& dataPoint, bool doReplot)
+void PlotWidget::plotDataPoint(const cell::DiscType::map<double>& dataPoint, bool doReplot)
 {
     if (GlobalGUISettings::getGUISettings().plotSum_)
         addDataPointSum(dataPoint);
@@ -86,7 +86,7 @@ void PlotWidget::plotDataPoint(const DiscType::map<double>& dataPoint, bool doRe
     }
 }
 
-void PlotWidget::addDataPoint(const DiscType::map<double>& dataPoint)
+void PlotWidget::addDataPoint(const cell::DiscType::map<double>& dataPoint)
 {
     if (graphs_.empty())
         return;
@@ -129,7 +129,7 @@ void PlotWidget::createRegularGraphs()
             continue;
 
         QCPGraph* graph = addGraph();
-        graph->setPen(Utility::sfColorToQColor(discType.getColor()));
+        graph->setPen(utility::sfColorToQColor(discType.getColor()));
         graph->setName(QString::fromStdString(discType.getName()));
         graphs_[discType] = graph;
     }
@@ -138,7 +138,7 @@ void PlotWidget::createRegularGraphs()
         legend->item(i)->setLayer("legend layer");
 }
 
-void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
+void PlotWidget::addDataPointSum(const cell::DiscType::map<double>& dataPoint)
 {
     if (sumGraph_ == nullptr)
         throw ExceptionWithLocation(
@@ -165,6 +165,6 @@ void PlotWidget::addDataPointSum(const DiscType::map<double>& dataPoint)
 void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::dataPointAdded,
-            [this](const DiscType::map<double>& dataPoint) { plotDataPoint(dataPoint); });
+            [this](const cell::DiscType::map<double>& dataPoint) { plotDataPoint(dataPoint); });
     connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
 }

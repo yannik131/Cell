@@ -13,6 +13,9 @@
 #include <random>
 #include <set>
 
+namespace cell
+{
+
 Cell::Cell() = default;
 
 template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
@@ -31,15 +34,15 @@ void Cell::update(const sf::Time& dt)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
         currentKineticEnergy_ +=
-            MathUtils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+            mathutils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
     const auto& newDiscs = unimolecularReactions(discs_);
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
 
-    const auto& collidingDiscs = MathUtils::findCollidingDiscs(discs_, maxRadius_);
-    collisionCounts_ += MathUtils::handleDiscCollisions(collidingDiscs);
+    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, maxRadius_);
+    collisionCounts_ += mathutils::handleDiscCollisions(collidingDiscs);
 
     removeDestroyedDiscs();
 }
@@ -185,3 +188,5 @@ void Cell::removeDestroyedDiscs()
         }
     }
 }
+
+} // namespace cell

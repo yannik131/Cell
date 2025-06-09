@@ -7,12 +7,12 @@
 
 TEST(ReactionTableTest, lookupMapsWork)
 {
-    Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.f};
-    Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.f};
-    Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.f};
-    Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.f};
+    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.f};
+    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.f};
+    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.f};
+    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.f};
 
-    ReactionTable reactionTable;
+    cell::ReactionTable reactionTable;
     reactionTable.setReactions({transformation, decomposition, combination, exchange});
 
     EXPECT_EQ(reactionTable.getTransformationReactionLookupMap().size(), 1);
@@ -31,12 +31,12 @@ TEST(ReactionTableTest, lookupMapsWork)
 
 TEST(ReactionTableTest, probabilitiesAddUp)
 {
-    Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction transformation3{Mass15, std::nullopt, Mass5Radius10, std::nullopt, 0.9f};
-    Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    cell::Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    cell::Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
+    cell::Reaction transformation3{Mass15, std::nullopt, Mass5Radius10, std::nullopt, 0.9f};
+    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
 
-    std::vector<Reaction> transformations;
+    std::vector<cell::Reaction> transformations;
     addReactionToVector(transformations, transformation1);
     addReactionToVector(transformations, transformation2);
 

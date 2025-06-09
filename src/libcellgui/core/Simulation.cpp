@@ -13,8 +13,8 @@ Simulation::Simulation(QObject* parent)
 
 void Simulation::run()
 {
-    GlobalSettings::get().lock();
-    const auto& settings = GlobalSettings::getSettings();
+    cell::GlobalSettings::get().lock();
+    const auto& settings = cell::GlobalSettings::getSettings();
 
     sf::Clock clock;
     sf::Time timeSinceLastUpdate;
@@ -36,7 +36,7 @@ void Simulation::run()
         }
     }
 
-    GlobalSettings::get().unlock();
+    cell::GlobalSettings::get().unlock();
 }
 
 void Simulation::reset()
@@ -54,7 +54,7 @@ void Simulation::emitFrameData()
 {
     FrameDTO frameDTO{.discs_ = cell_.getDiscs(),
                       .collisionCounts_ = cell_.getAndResetCollisionCount(),
-                      .simulationTimeStepUs = GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
+                      .simulationTimeStepUs = cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 
     emit frameData(frameDTO);
 }

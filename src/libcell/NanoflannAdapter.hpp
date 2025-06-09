@@ -5,6 +5,9 @@
 
 #include <nanoflann.hpp>
 
+namespace cell
+{
+
 /**
  * @brief Wrapper around a vector<Disc> for nanoflann
  */
@@ -35,5 +38,7 @@ struct NanoflannAdapter
         return false;
     }
 };
+
+} // namespace cell
 
 #endif /* NANOFLANNADAPTER_HPP */

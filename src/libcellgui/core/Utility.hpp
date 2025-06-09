@@ -4,14 +4,14 @@
 #include "ComboBoxDelegate.hpp"
 #include "DiscType.hpp"
 
-namespace Utility
+namespace utility
 {
 
 /**
  * @brief Iterates all disc types in the current disc type distribution and returns the one with the given name or
  * throws if it can't be found
  */
-DiscType getDiscTypeByName(const QString& name);
+cell::DiscType getDiscTypeByName(const QString& name);
 
 /**
  * @returns a list of all disc type names in the current distribution
@@ -37,6 +37,6 @@ MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
     return inverted;
 }
 
-}; // namespace Utility
+}; // namespace utility
 
 #endif /* UTILITY_HPP */

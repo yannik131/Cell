@@ -11,6 +11,9 @@
 #include <utility>
 #include <vector>
 
+namespace cell
+{
+
 struct Settings
 {
     /**
@@ -64,5 +67,7 @@ const float MaxRadius = 100.f;
 const float MinMass = 1.f;
 const float MaxMass = 10000.f;
 } // namespace DiscTypeLimits
+
+} // namespace cell
 
 #endif /* SETTINGS_HPP */

@@ -7,11 +7,11 @@ GlobalSettingsFunctor& GlobalSettingsFunctor::get()
     return instance;
 }
 
-void GlobalSettingsFunctor::operator()(const SettingID& settingID)
+void GlobalSettingsFunctor::operator()(const cell::SettingID& settingID)
 {
-    if (settingID & SettingID::NumberOfDiscs)
+    if (settingID & cell::SettingID::NumberOfDiscs)
         emit numberOfDiscsChanged();
 
-    if (settingID & SettingID::DiscTypeDistribution)
+    if (settingID & cell::SettingID::DiscTypeDistribution)
         emit discTypeDistributionChanged();
 }

@@ -59,6 +59,6 @@ Qt::ItemFlags DiscDistributionPreviewTableModel::flags(const QModelIndex&) const
 void DiscDistributionPreviewTableModel::loadSettings()
 {
     distribution_.clear();
-    for (const auto& pair : GlobalSettings::getSettings().discTypeDistribution_)
+    for (const auto& pair : cell::GlobalSettings::getSettings().discTypeDistribution_)
         distribution_.push_back(pair);
 }

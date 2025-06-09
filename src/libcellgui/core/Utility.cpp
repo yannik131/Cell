@@ -4,12 +4,12 @@
 
 #include <stdexcept>
 
-namespace Utility
+namespace utility
 {
 
-DiscType getDiscTypeByName(const QString& name)
+cell::DiscType getDiscTypeByName(const QString& name)
 {
-    for (const auto& [discType, frequency] : GlobalSettings::getSettings().discTypeDistribution_)
+    for (const auto& [discType, frequency] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         if (discType.getName() == name.toStdString())
             return discType;
@@ -21,7 +21,7 @@ DiscType getDiscTypeByName(const QString& name)
 QStringList getDiscTypeNames()
 {
     QStringList discTypeNames;
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
         discTypeNames.push_back(QString::fromStdString(discType.getName()));
 
     return discTypeNames;
@@ -32,4 +32,4 @@ QColor sfColorToQColor(const sf::Color& sfColor)
     return {sfColor.r, sfColor.g, sfColor.b, sfColor.a};
 }
 
-} // namespace Utility
+} // namespace utility

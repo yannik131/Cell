@@ -1,10 +1,11 @@
-#include "DiscType.hpp" // Adjust include as needed
+#include "DiscType.hpp"
+
 #include <SFML/Graphics/Color.hpp>
 #include <gtest/gtest.h>
 
 TEST(DiscTypeTest, ConstructorAndGetters)
 {
-    DiscType dt("TestDisc", sf::Color::Blue, 5.0f, 10.0f);
+    cell::DiscType dt("TestDisc", sf::Color::Blue, 5.0f, 10.0f);
     EXPECT_EQ(dt.getName(), "TestDisc");
     EXPECT_EQ(dt.getColor(), sf::Color::Blue);
     EXPECT_FLOAT_EQ(dt.getRadius(), 5.0f);
@@ -13,7 +14,7 @@ TEST(DiscTypeTest, ConstructorAndGetters)
 
 TEST(DiscTypeTest, Setters)
 {
-    DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
+    cell::DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
 
     dt.setName("Updated");
     EXPECT_EQ(dt.getName(), "Updated");
@@ -30,7 +31,7 @@ TEST(DiscTypeTest, Setters)
 
 TEST(DiscTypeTest, SettersThrow)
 {
-    DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
+    cell::DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
 
     EXPECT_ANY_THROW(dt.setColor(sf::Color::Black));
 
@@ -45,8 +46,8 @@ TEST(DiscTypeTest, SettersThrow)
 
 TEST(DiscTypeTest, CopyConstructor)
 {
-    DiscType dt1("CopyTest", sf::Color::Yellow, 2.5f, 5.5f);
-    DiscType dt2(dt1);
+    cell::DiscType dt1("CopyTest", sf::Color::Yellow, 2.5f, 5.5f);
+    cell::DiscType dt2(dt1);
 
     EXPECT_EQ(dt1.getId(), dt2.getId());
     EXPECT_EQ(dt2.getName(), "CopyTest");
@@ -54,8 +55,8 @@ TEST(DiscTypeTest, CopyConstructor)
 
 TEST(DiscTypeTest, AssignmentOperator)
 {
-    DiscType dt1("First", sf::Color::White, 1.0f, 1.0f);
-    DiscType dt2("Second", sf::Color::Blue, 2.0f, 2.0f);
+    cell::DiscType dt1("First", sf::Color::White, 1.0f, 1.0f);
+    cell::DiscType dt2("Second", sf::Color::Blue, 2.0f, 2.0f);
 
     dt2 = dt1;
     EXPECT_EQ(dt1, dt2);
@@ -63,10 +64,10 @@ TEST(DiscTypeTest, AssignmentOperator)
 
 TEST(DiscTypeTest, EqualityOperator)
 {
-    DiscType dt1("Equal", sf::Color::Blue, 3.0f, 6.0f);
-    DiscType dt2("Equal", sf::Color::Blue, 3.0f, 6.0f);
-    DiscType dt3 = dt2;
-    DiscType dt4(dt2);
+    cell::DiscType dt1("Equal", sf::Color::Blue, 3.0f, 6.0f);
+    cell::DiscType dt2("Equal", sf::Color::Blue, 3.0f, 6.0f);
+    cell::DiscType dt3 = dt2;
+    cell::DiscType dt4(dt2);
 
     // Don't have same ID
     EXPECT_FALSE(dt1 == dt2);
@@ -77,8 +78,8 @@ TEST(DiscTypeTest, EqualityOperator)
 
 TEST(DiscTypeTest, MakeOrderedPair)
 {
-    DiscType dt2("Alpha", sf::Color::Magenta, 4.0f, 8.0f);
-    DiscType dt1("Zeta", sf::Color::Cyan, 3.0f, 6.0f);
+    cell::DiscType dt2("Alpha", sf::Color::Magenta, 4.0f, 8.0f);
+    cell::DiscType dt1("Zeta", sf::Color::Cyan, 3.0f, 6.0f);
 
     auto orderedPair = makeOrderedPair(dt1, dt2);
 

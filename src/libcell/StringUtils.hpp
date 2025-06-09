@@ -4,7 +4,7 @@
 #include <SFML/System/Time.hpp>
 #include <string>
 
-namespace StringUtils
+namespace cell::stringutils
 {
 
 /**
@@ -28,6 +28,6 @@ template <> inline std::string toString<sf::Time>(const sf::Time& value)
     return timeString(value.asMicroseconds() * 1000);
 }
 
-} // namespace StringUtils
+} // namespace cell::stringutils
 
 #endif /* STRINGUTILS_HPP */

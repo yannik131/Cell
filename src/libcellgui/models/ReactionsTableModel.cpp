@@ -74,7 +74,7 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
 
     if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
     {
-        DiscType discType = Utility::getDiscTypeByName(value.toString());
+        cell::DiscType discType = utility::getDiscTypeByName(value.toString());
 
         if (index.column() == 0)
             reaction.setEduct1(discType);
@@ -111,19 +111,19 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
     const auto& reaction = rows_.at(index.row());
     switch (reaction.getType())
     {
-    case Reaction::Type::Transformation:
+    case cell::Reaction::Type::Transformation:
         if (!transformationFlags[index.column()])
             return defaultFlags;
         break;
-    case Reaction::Type::Combination:
+    case cell::Reaction::Type::Combination:
         if (!combinationFlags[index.column()])
             return defaultFlags;
         break;
-    case Reaction::Type::Decomposition:
+    case cell::Reaction::Type::Decomposition:
         if (!decompositionFlags[index.column()])
             return defaultFlags;
         break;
-    case Reaction::Type::Exchange:
+    case cell::Reaction::Type::Exchange:
         if (!exchangeFlags[index.column()])
             return defaultFlags;
         break;
@@ -132,16 +132,16 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
     return defaultFlags | Qt::ItemIsEditable;
 }
 
-void ReactionsTableModel::addRowFromReaction(const Reaction& reaction)
+void ReactionsTableModel::addRowFromReaction(const cell::Reaction& reaction)
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back(reaction);
     endInsertRows();
 }
 
-void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
+void ReactionsTableModel::addEmptyRow(const cell::Reaction::Type& type)
 {
-    const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
+    const auto& discTypeDistribution = cell::GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
         throw ExceptionWithLocation("Can't add reaction: There are no available disc types defined");
 
@@ -149,17 +149,17 @@ void ReactionsTableModel::addEmptyRow(const Reaction::Type& type)
 
     switch (type)
     {
-    case Reaction::Type::Transformation:
-        addRowFromReaction(Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.f});
+    case cell::Reaction::Type::Transformation:
+        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.f});
         break;
-    case Reaction::Type::Combination:
-        addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
+    case cell::Reaction::Type::Combination:
+        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
         break;
-    case Reaction::Type::Decomposition:
-        addRowFromReaction(Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.f});
+    case cell::Reaction::Type::Decomposition:
+        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.f});
         break;
-    case Reaction::Type::Exchange:
-        addRowFromReaction(Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.f});
+    case cell::Reaction::Type::Exchange:
+        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.f});
         break;
     }
 }
@@ -178,11 +178,11 @@ void ReactionsTableModel::loadSettings()
 {
     clearRows();
 
-    const auto& settings = GlobalSettings::getSettings();
+    const auto& settings = cell::GlobalSettings::getSettings();
 
     // Reactions for {A, B} are duplicated in the maps with {B, A} for easier lookup
     // Gotta ignore those duplicates here
-    std::unordered_set<Reaction, ReactionHash> reactionSet;
+    std::unordered_set<cell::Reaction, cell::ReactionHash> reactionSet;
 
     auto collectReactions = [&](const auto& reactionsMap)
     {
@@ -211,13 +211,13 @@ void ReactionsTableModel::loadSettings()
 
 void ReactionsTableModel::saveSettings()
 {
-    const auto reactionsBackup = GlobalSettings::get().getReactions();
+    const auto reactionsBackup = cell::GlobalSettings::get().getReactions();
 
-    static const auto& setReactions = [](const std::vector<Reaction>& reactions)
+    static const auto& setReactions = [](const std::vector<cell::Reaction>& reactions)
     {
-        GlobalSettings::get().clearReactions();
+        cell::GlobalSettings::get().clearReactions();
         for (const auto& reaction : reactions)
-            GlobalSettings::get().addReaction(reaction);
+            cell::GlobalSettings::get().addReaction(reaction);
     };
 
     try

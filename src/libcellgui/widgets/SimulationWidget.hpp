@@ -30,7 +30,7 @@ private:
     /**
      * @brief Creates a `sf::CircleShape` from a disc, reflecting its properties like size and color
      */
-    sf::CircleShape circleShapeFromDisc(const Disc& disc);
+    sf::CircleShape circleShapeFromDisc(const cell::Disc& disc);
 
 private:
     std::vector<sf::CircleShape> circles_;

@@ -8,6 +8,9 @@
 #include <type_traits>
 #include <vector>
 
+namespace cell
+{
+
 namespace
 {
 
@@ -241,3 +244,5 @@ void GlobalSettings::useCallback(const SettingID& settingID)
     if (callback_)
         callback_(settingID);
 }
+
+} // namespace cell
