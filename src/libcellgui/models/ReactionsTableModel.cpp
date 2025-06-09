@@ -22,7 +22,6 @@ int ReactionsTableModel::rowCount(const QModelIndex&) const
 
 int ReactionsTableModel::columnCount(const QModelIndex&) const
 {
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     return 9;
 }
 

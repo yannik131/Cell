@@ -17,7 +17,6 @@ int DiscTypeDistributionTableModel::rowCount(const QModelIndex&) const
 
 int DiscTypeDistributionTableModel::columnCount(const QModelIndex&) const
 {
-    // Disc type name, radius, mass, color, frequency, delete button
     return 6;
 }
 

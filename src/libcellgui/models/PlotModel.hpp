@@ -21,15 +21,27 @@ struct DataPoint
     DiscType::map<double> discTypeCountMap_;
 };
 
+/**
+ * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
+ * @todo This is currently very slow: For small time steps, hundreds of data points are stored for a single point in the
+ * plot
+ */
 class PlotModel : public QObject
 {
     Q_OBJECT
 public:
     PlotModel(QObject* parent = nullptr);
 
+    /**
+     * @brief Removes all plot data and emits an empty plot
+     */
     void clear();
 
 public slots:
+    /**
+     * @brief Extracts information from the `frameDTO` relevant for the plot as a `DataPoint` and averages all collected
+     * `DataPoint`s if the plot time interval has elapsed since the last plot, emitting a new plot data point
+     */
     void receiveFrameDTO(const FrameDTO& frameDTO);
 
 signals:
