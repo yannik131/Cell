@@ -94,7 +94,7 @@ Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType)
+void DiscTypeDistributionTableModel::addRowFromDiscType(const cell::DiscType& discType)
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
     rows_.push_back({discType, 0});
@@ -104,7 +104,7 @@ void DiscTypeDistributionTableModel::addRowFromDiscType(const DiscType& discType
 void DiscTypeDistributionTableModel::addEmptyRow()
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
-    rows_.push_back({DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
+    rows_.push_back({cell::DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
     endInsertRows();
 }
 
@@ -122,7 +122,7 @@ void DiscTypeDistributionTableModel::loadSettings()
 {
     clearRows();
 
-    const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
+    const auto& discTypeDistribution = cell::GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
         return;
 
@@ -134,8 +134,8 @@ void DiscTypeDistributionTableModel::loadSettings()
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    DiscType::map<int> result(rows_.begin(), rows_.end());
-    GlobalSettings::get().setDiscTypeDistribution(std::move(result));
+    cell::DiscType::map<int> result(rows_.begin(), rows_.end());
+    cell::GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }
 
 void DiscTypeDistributionTableModel::clearRows()

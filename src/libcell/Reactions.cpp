@@ -6,6 +6,9 @@
 #include <cmath>
 #include <type_traits>
 
+namespace cell
+{
+
 namespace
 {
 const auto& transformationReactionTable =
@@ -32,7 +35,7 @@ template <typename MapType, typename KeyType> const Reaction* selectReaction(con
         return nullptr;
 
     const auto& possibleReactions = iter->second;
-    float randomNumber = MathUtils::getRandomFloat();
+    float randomNumber = mathutils::getRandomFloat();
 
     // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
     if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
@@ -80,7 +83,7 @@ bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         return false;
 
     const auto& vVec = d1->getVelocity();
-    const float v = MathUtils::abs(vVec);
+    const float v = mathutils::abs(vVec);
     const sf::Vector2f n = vVec / v;
 
     // We will let the collision handling in the next time step take care of separation
@@ -150,3 +153,5 @@ std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs)
 
     return newDiscs;
 }
+
+} // namespace cell

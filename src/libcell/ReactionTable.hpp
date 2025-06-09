@@ -5,6 +5,9 @@
 
 #include <vector>
 
+namespace cell
+{
+
 class Reaction;
 
 /**
@@ -91,5 +94,7 @@ private:
  * the given reaction. I. e. if f = 0.2, reaction B would occur. If f = 0.5, no reaction would occur.
  */
 void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
+
+} // namespace cell
 
 #endif /* REACTIONTABLE_HPP */

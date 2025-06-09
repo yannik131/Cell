@@ -29,7 +29,7 @@ GlobalGUISettings::GlobalGUISettings()
 void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
 {
     QStringList selectedDiscTypeNames;
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
         selectedDiscTypeNames.push_back(QString::fromStdString(discType.getName()));
 
     setDiscTypesPlotMap(selectedDiscTypeNames);
@@ -37,14 +37,14 @@ void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
 
 void GlobalGUISettings::setGuiFPS(int guiFPS)
 {
-    throwIfNotInRange(guiFPS, GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS, "GUI FPS");
+    cell::throwIfNotInRange(guiFPS, GUISettingsLimits::MinGuiFPS, GUISettingsLimits::MaxGuiFPS, "GUI FPS");
     guiSettings_.guiFPS_ = guiFPS;
 }
 
 void GlobalGUISettings::setPlotTimeInterval(const sf::Time& plotTimeInterval)
 {
-    throwIfNotInRange(plotTimeInterval, GUISettingsLimits::MinPlotTimeInterval, GUISettingsLimits::MaxPlotTimeInterval,
-                      "Plot time interval");
+    cell::throwIfNotInRange(plotTimeInterval, GUISettingsLimits::MinPlotTimeInterval,
+                            GUISettingsLimits::MaxPlotTimeInterval, "Plot time interval");
     guiSettings_.plotTimeInterval_ = plotTimeInterval;
 
     emit replotRequired();
@@ -59,13 +59,13 @@ void GlobalGUISettings::setCurrentPlotCategory(const PlotCategory& plotCategory)
 
 void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames)
 {
-    QVector<DiscType> activeDiscTypes;
+    QVector<cell::DiscType> activeDiscTypes;
     for (const auto& selectedDiscTypeName : selectedDiscTypeNames)
-        activeDiscTypes.push_back(Utility::getDiscTypeByName(selectedDiscTypeName));
+        activeDiscTypes.push_back(utility::getDiscTypeByName(selectedDiscTypeName));
 
     bool hasTrueValue = false;
-    DiscType::map<bool> discTypePlotMap;
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    cell::DiscType::map<bool> discTypePlotMap;
+    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         auto iter = std::ranges::find(activeDiscTypes, discType);
         discTypePlotMap[discType] = iter != activeDiscTypes.end();
@@ -90,8 +90,8 @@ void GlobalGUISettings::setPlotSum(bool value)
 
 void GlobalGUISettings::updateDiscTypesPlotMap()
 {
-    DiscType::map<bool> updatedDiscTypesPlotMap;
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    cell::DiscType::map<bool> updatedDiscTypesPlotMap;
+    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         if (guiSettings_.discTypesPlotMap_.contains(discType))
             updatedDiscTypesPlotMap[discType] = guiSettings_.discTypesPlotMap_[discType];

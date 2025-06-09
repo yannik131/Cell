@@ -51,7 +51,7 @@ void PlotDataSelectionDialog::loadSettings()
 {
     ui->selectedDiscTypesListWidget->clear();
 
-    for (const auto& [discType, _] : GlobalSettings::getSettings().discTypeDistribution_)
+    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         auto item = new QListWidgetItem(QString::fromStdString(discType.getName()));
         ui->selectedDiscTypesListWidget->addItem(item);

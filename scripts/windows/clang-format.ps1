@@ -1,0 +1,15 @@
+# Change to the script directory and then to the parent directory
+Set-Location (Split-Path -Path $MyInvocation.MyCommand.Path -Parent)
+Set-Location ..
+Set-Location ..
+
+if ($args.Count -gt 0 -and $args[0] -eq "-f") {
+    Write-Host "Formatting files..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, test/ | 
+    ForEach-Object { & clang-format -i $_.FullName }
+}
+else {
+    Write-Host "Checking with clang-format..."
+    Get-ChildItem -Recurse -Include *.h, *.hpp, *.inl, *.cpp -Path src/, test/ | 
+    ForEach-Object { & clang-format --dry-run --Werror $_.FullName }
+}

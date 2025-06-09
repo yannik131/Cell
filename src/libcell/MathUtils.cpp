@@ -11,6 +11,9 @@
 #include <ostream>
 #include <random>
 
+namespace cell
+{
+
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";
@@ -21,7 +24,7 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
     return a.x * b.x + a.y * b.y;
 }
 
-namespace MathUtils
+namespace mathutils
 {
 
 using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
@@ -237,4 +240,6 @@ int calculateHash(int x, int y)
     return (x * prime) ^ y;
 }
 
-} // namespace MathUtils
+} // namespace mathutils
+
+} // namespace cell

@@ -39,14 +39,14 @@ DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent)
 QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(Utility::getDiscTypeNames());
+    editor->addItems(utility::getDiscTypeNames());
     emit editorCreated(editor);
 
     auto connection = connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
                               [editor]()
                               {
                                   editor->clear();
-                                  editor->addItems(Utility::getDiscTypeNames());
+                                  editor->addItems(utility::getDiscTypeNames());
                               });
 
     connect(editor, &QObject::destroyed, [connection]() { QObject::disconnect(connection); });

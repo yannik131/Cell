@@ -3,10 +3,12 @@
 
 namespace sf
 {
+
 bool operator<(const sf::Color& a, const sf::Color& b)
 {
     return std::tie(a.r, a.g, a.b) < std::tie(b.r, b.g, b.b);
 }
+
 } // namespace sf
 
 /**
@@ -23,7 +25,7 @@ const QMap<sf::Color, QString>& getColorNameMapping()
 
 const QMap<QString, sf::Color>& getNameColorMapping()
 {
-    static const QMap<QString, sf::Color> nameColorMapping = Utility::invertMap(getColorNameMapping());
+    static const QMap<QString, sf::Color> nameColorMapping = utility::invertMap(getColorNameMapping());
     return nameColorMapping;
 }
 

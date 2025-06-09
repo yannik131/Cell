@@ -51,7 +51,7 @@ public:
      * @brief Creates a new row in the table with information of the given disc type, used to display existing disc
      * types
      */
-    void addRowFromDiscType(const DiscType& discType);
+    void addRowFromDiscType(const cell::DiscType& discType);
 
     /**
      * @brief Creates a new row with a default disc type, used to add new disc types since we can't make any assumptions
@@ -80,7 +80,7 @@ public:
     void clearRows();
 
 private:
-    QVector<std::pair<DiscType, int>> rows_;
+    QVector<std::pair<cell::DiscType, int>> rows_;
 };
 
 #endif /* DISCTYPEDISTRIBUTIONTABLEMODEL_HPP */

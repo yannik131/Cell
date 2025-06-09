@@ -3,7 +3,7 @@
 #include "GlobalSettingsFunctor.hpp"
 #include "MathUtils.hpp"
 
-const DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
+const cell::DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
 {
     switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
     {
@@ -104,7 +104,7 @@ void PlotModel::emitDataPoint(DataPoint& averagedDataPoint)
 
 void PlotModel::emitPlot()
 {
-    QVector<DiscType::map<double>> fullPlotData;
+    QVector<cell::DiscType::map<double>> fullPlotData;
     QVector<DataPoint> dataPointsToAverage;
     sf::Time elapsedTime = sf::Time::Zero;
 

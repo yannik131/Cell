@@ -13,6 +13,9 @@
 #include <unordered_map>
 #include <vector>
 
+namespace cell
+{
+
 /**
  * @brief Struct for the intermediate results of the overlap calculation, since they're useful for the following
  * collision response
@@ -74,7 +77,7 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
  */
 float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
 
-namespace MathUtils
+namespace mathutils
 {
 /**
  * @brief Finds all discs in the vector that overlap and returns them as unique pairs.
@@ -140,6 +143,8 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
  */
 int calculateHash(int x, int y);
 
-} // namespace MathUtils
+} // namespace mathutils
+
+} // namespace cell
 
 #endif /* MATHUTILS_HPP */

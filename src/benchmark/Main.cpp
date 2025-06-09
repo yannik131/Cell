@@ -11,15 +11,15 @@
 
 void setBenchmarkSettings()
 {
-    GlobalSettings::get().setNumberOfDiscs(800);
+    cell::GlobalSettings::get().setNumberOfDiscs(800);
 }
 
 int main(int argc, char** argv)
 {
-    initLogging(argc, argv);
+    cell::initLogging(argc, argv);
     setBenchmarkSettings();
 
-    Cell world;
+    cell::Cell world;
     world.setBounds(sf::Vector2f(1000, 1000));
     world.reinitialize();
 
@@ -35,6 +35,6 @@ int main(int argc, char** argv)
     LOG(INFO) << "Done";
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
-    LOG(INFO) << "Elapsed time: " << StringUtils::timeString(ns);
-    LOG(INFO) << "Time per update: " << StringUtils::timeString(ns / N);
+    LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
+    LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
 }

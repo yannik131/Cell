@@ -6,6 +6,9 @@
 #include <optional>
 #include <vector>
 
+namespace cell
+{
+
 /**
  * @brief Contains a uni- or bimolecular reaction.
  *
@@ -98,5 +101,7 @@ std::string toString(const Reaction& reaction);
  * @returns `true` if the given disctype is part of the educts or products of the reaction
  */
 bool contains(const Reaction& reaction, const DiscType& discType);
+
+} // namespace cell
 
 #endif /* REACTION_HPP */

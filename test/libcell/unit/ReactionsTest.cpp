@@ -28,7 +28,7 @@ TEST(ReactionsTest, combinationReaction)
 
     EXPECT_TRUE(combinationReaction(&d1, &d2));
     EXPECT_TRUE(d2.isMarkedDestroyed());
-    EXPECT_FLOAT_EQ(MathUtils::abs(d1.getVelocity()), 0);
+    EXPECT_FLOAT_EQ(mathutils::abs(d1.getVelocity()), 0);
     EXPECT_EQ(d1.getType(), Mass10Radius5);
     expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
 }
@@ -66,7 +66,7 @@ TEST(ReactionsTest, decompositionReaction)
 
     // u * v = |u|*|v|*cos(alpha)
     // We expect the new discs to move away perpendicular to the old velocity, so alpha = 180
-    EXPECT_FLOAT_EQ(v1.x * v2.x + v1.y * v2.y, -MathUtils::abs(v1) * MathUtils::abs(v2));
+    EXPECT_FLOAT_EQ(v1.x * v2.x + v1.y * v2.y, -mathutils::abs(v1) * mathutils::abs(v2));
     EXPECT_FLOAT_EQ(v1.x * v.x + v1.y * v.y, 0);
     EXPECT_FLOAT_EQ(v2.x * v.x + v2.y * v.y, 0);
 

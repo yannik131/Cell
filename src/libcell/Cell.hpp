@@ -11,6 +11,9 @@
 #include <unordered_map>
 #include <vector>
 
+namespace cell
+{
+
 /**
  * @brief Represents a single cell with bounds and discs that can move around, collide and react
  * @note Usage:
@@ -93,5 +96,7 @@ private:
 
     std::vector<Disc> newDiscs_;
 };
+
+} // namespace cell
 
 #endif /* CELL_HPP */

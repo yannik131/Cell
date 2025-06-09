@@ -2,7 +2,10 @@
 
 #include <vector>
 
-namespace StringUtils
+namespace cell
+{
+
+namespace stringutils
 {
 
 std::string timeString(long long timeNs)
@@ -20,4 +23,6 @@ std::string timeString(long long timeNs)
     return std::to_string(convertedTime) + timeUnits[i];
 }
 
-} // namespace StringUtils
+} // namespace stringutils
+
+} // namespace cell

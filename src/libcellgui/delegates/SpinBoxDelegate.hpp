@@ -70,4 +70,5 @@ public:
         model->setData(index, spinBox->value(), Qt::EditRole);
     }
 };
+
 #endif /* SPINBOXDELEGATE_HPP */

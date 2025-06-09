@@ -10,11 +10,11 @@
 
 int main(int argc, char* argv[])
 {
-    initLogging(argc, argv);
+    cell::initLogging(argc, argv);
     QApplication app(argc, argv);
 
     auto& functor = GlobalSettingsFunctor::get();
-    GlobalSettings::setCallback([&functor](const SettingID& settingID) { functor(settingID); });
+    cell::GlobalSettings::setCallback([&functor](const cell::SettingID& settingID) { functor(settingID); });
 
     try
     {

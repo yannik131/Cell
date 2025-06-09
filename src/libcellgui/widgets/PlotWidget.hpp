@@ -29,12 +29,12 @@ public:
      * @param doReplot If `true`, redraw the plot visually. Set this to false if a lot of data points are to be added to
      * the plot in a short time to avoid updating it unnecessarily often
      */
-    void plotDataPoint(const DiscType::map<double>& dataPoint, bool doReplot = true);
+    void plotDataPoint(const cell::DiscType::map<double>& dataPoint, bool doReplot = true);
 
     /**
      * @brief Deletes the old plot and plots the given dataPoints
      */
-    void replacePlot(const QVector<DiscType::map<double>>& dataPoints);
+    void replacePlot(const QVector<cell::DiscType::map<double>>& dataPoints);
 
     /**
      * @brief Deletes the current plot and creates either an empty sum plot graph or empty graphs for each disc type
@@ -46,12 +46,12 @@ private:
     /**
      * @brief Given a data point, add a new point to the plot displaying the sum across all disc types
      */
-    void addDataPointSum(const DiscType::map<double>& dataPoint);
+    void addDataPointSum(const cell::DiscType::map<double>& dataPoint);
 
     /**
      * @brief Given a data point, add a new point for each disc type to the respective graph with the given value
      */
-    void addDataPoint(const DiscType::map<double>& dataPoint);
+    void addDataPoint(const cell::DiscType::map<double>& dataPoint);
 
     /**
      * @brief Creates an empty, single sum graph, updating title and legend accordingly
@@ -73,7 +73,7 @@ private:
     double xMax_ = 0;
 
     QVector<QColor> colors_;
-    DiscType::map<QCPGraph*> graphs_;
+    cell::DiscType::map<QCPGraph*> graphs_;
     QCPGraph* sumGraph_{};
 };
 

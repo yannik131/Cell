@@ -4,6 +4,9 @@
 
 #include <stdexcept>
 
+namespace cell
+{
+
 int DiscType::instanceCount = 0;
 
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2)
@@ -99,5 +102,7 @@ int DiscType::IdHasher::operator()(const DiscType& discType) const
 
 int DiscType::PairHasher::operator()(const std::pair<DiscType, DiscType>& pair) const
 {
-    return MathUtils::calculateHash(pair.first.getId(), pair.second.getId());
+    return mathutils::calculateHash(pair.first.getId(), pair.second.getId());
 }
+
+} // namespace cell

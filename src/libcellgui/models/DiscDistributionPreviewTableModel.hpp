@@ -50,7 +50,7 @@ private:
     void loadSettings();
 
 private:
-    QVector<std::pair<DiscType, int>> distribution_;
+    QVector<std::pair<cell::DiscType, int>> distribution_;
 };
 
 #endif /* DISCDISTRIBUTIONPREVIEWTABLEMODEL_HPP */

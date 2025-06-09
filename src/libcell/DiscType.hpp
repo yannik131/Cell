@@ -8,6 +8,9 @@
 #include <unordered_map>
 #include <utility>
 
+namespace cell
+{
+
 /**
  * @brief Contains the physical and visual properties of a disc. Disc types used in the simulation need to be distinct
  * by name
@@ -147,5 +150,7 @@ private:
  * @brief Creates an ordered pair sorted by ID
  */
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2);
+
+} // namespace cell
 
 #endif /* DISCTYPE_HPP */

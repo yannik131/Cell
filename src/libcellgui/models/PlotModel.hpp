@@ -15,10 +15,10 @@
 struct DataPoint
 {
     long long elapsedTimeUs_ = 0;
-    DiscType::map<double> collisionCounts_;
-    DiscType::map<double> totalMomentumMap_;
-    DiscType::map<double> totalKineticEnergyMap_;
-    DiscType::map<double> discTypeCountMap_;
+    cell::DiscType::map<double> collisionCounts_;
+    cell::DiscType::map<double> totalMomentumMap_;
+    cell::DiscType::map<double> totalKineticEnergyMap_;
+    cell::DiscType::map<double> discTypeCountMap_;
 };
 
 /**
@@ -45,8 +45,8 @@ public slots:
     void receiveFrameDTO(const FrameDTO& frameDTO);
 
 signals:
-    void dataPointAdded(const DiscType::map<double>& dataPoint);
-    void newPlotCreated(const QVector<DiscType::map<double>>& dataPoints);
+    void dataPointAdded(const cell::DiscType::map<double>& dataPoint);
+    void newPlotCreated(const QVector<cell::DiscType::map<double>>& dataPoints);
 
 private:
     /**

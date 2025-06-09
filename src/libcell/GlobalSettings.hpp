@@ -13,6 +13,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace cell
+{
+
 /**
  * @brief Unique identifier of available settings. This way the callback for GlobalSettings can inform on which setting
  * was changed
@@ -148,11 +151,13 @@ private:
  */
 template <typename T> void throwIfNotInRange(const T& value, const T& min, const T& max, const std::string& valueName)
 {
-    using StringUtils::toString;
+    using stringutils::toString;
 
     if (value < min || value > max)
         throw ExceptionWithLocation("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
                                     "\" and \"" + toString(max) + "\", but is \"" + toString(value) + "\"");
 }
+
+} // namespace cell
 
 #endif /* GLOBALSETTINGS_HPP */

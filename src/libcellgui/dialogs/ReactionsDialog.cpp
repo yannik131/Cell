@@ -34,13 +34,13 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::cancel);
 
     connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(Reaction::Type::Combination); });
+            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Combination); });
     connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(Reaction::Type::Decomposition); });
+            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Decomposition); });
     connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(Reaction::Type::Exchange); });
+            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Exchange); });
     connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(Reaction::Type::Transformation); });
+            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Transformation); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
@@ -77,7 +77,7 @@ void ReactionsDialog::closeEvent(QCloseEvent*)
     reactionsTableModel_->loadSettings();
 }
 
-void ReactionsDialog::requestEmptyRowFromModel(const Reaction::Type& type)
+void ReactionsDialog::requestEmptyRowFromModel(const cell::Reaction::Type& type)
 {
     try
     {

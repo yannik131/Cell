@@ -11,6 +11,9 @@
 #include <iomanip>
 #include <ostream>
 
+namespace cell
+{
+
 /**
  * @brief Formats the message in the format TIME - source:line LEVEL <message>
  */
@@ -41,5 +44,7 @@ void initLogging(int argc, char** argv)
 
     google::InstallPrefixFormatter(&MyPrefixFormatter);
 }
+
+} // namespace cell
 
 #endif /* LOGGING_HPP */
