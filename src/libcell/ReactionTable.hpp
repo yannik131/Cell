@@ -2,13 +2,28 @@
 #define REACTIONTABLE_HPP
 
 #include "DiscType.hpp"
+#include "Reaction.hpp"
 
 #include <vector>
 
 namespace cell
 {
 
-class Reaction;
+/**
+ * @brief Adds a reaction to vector, making sure that the reactions are sorted by cumulative probability. Let X(p) be a
+ * reaction with probability p:
+ *
+ * - {} + A(0.1) -> {A(0.1)}
+ *
+ * - {A(0.1)} + B(0.2) -> {A(0.1), B(0.3)}
+ *
+ * - {A(0.1), B(0.3)} + C(0.05) -> {A(0.1), B(0.3), C(0.35)}
+ *
+ * Let's say 2 discs collide and a reaction might occur because there is a list of possible reactions for the colliding
+ * disc types. We generate a random number f between 0 and 1 and iterate the vector in order, checking if f is <= p for
+ * the given reaction. I. e. if f = 0.2, reaction B would occur. If f = 0.5, no reaction would occur.
+ */
+void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
 
 /**
  * @brief Maps a `vector<Reaction>` with increasing, cumulative probabilities to `DiscType` or pairs of such:
@@ -78,22 +93,6 @@ private:
     DiscType::pair_map<std::vector<Reaction>> combinationReactionLookupMap_;
     DiscType::pair_map<std::vector<Reaction>> exchangeReactionLookupMap_;
 };
-
-/**
- * @brief Adds a reaction to vector, making sure that the reactions are sorted by cumulative probability. Let X(p) be a
- * reaction with probability p:
- *
- * - {} + A(0.1) -> {A(0.1)}
- *
- * - {A(0.1)} + B(0.2) -> {A(0.1), B(0.3)}
- *
- * - {A(0.1), B(0.3)} + C(0.05) -> {A(0.1), B(0.3), C(0.35)}
- *
- * Let's say 2 discs collide and a reaction might occur because there is a list of possible reactions for the colliding
- * disc types. We generate a random number f between 0 and 1 and iterate the vector in order, checking if f is <= p for
- * the given reaction. I. e. if f = 0.2, reaction B would occur. If f = 0.5, no reaction would occur.
- */
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
 
 } // namespace cell
 

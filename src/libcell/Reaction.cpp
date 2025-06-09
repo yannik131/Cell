@@ -1,10 +1,6 @@
 #include "Reaction.hpp"
 #include "ExceptionWithLocation.hpp"
 
-#include <algorithm>
-#include <functional>
-#include <stdexcept>
-
 namespace cell
 {
 
@@ -32,38 +28,6 @@ bool contains(const Reaction& reaction, const DiscType& discType)
 {
     return reaction.getEduct1() == discType || (reaction.hasEduct2() && reaction.getEduct2() == discType) ||
            reaction.getProduct1() == discType || (reaction.hasProduct2() && reaction.getProduct2() == discType);
-}
-
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
-{
-    if (reactions.empty())
-    {
-        reactions.push_back(reaction);
-        return;
-    }
-
-    for (const auto& r : reactions)
-    {
-        if (r == reaction)
-            throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
-
-        if (r.getType() != reaction.getType())
-            throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r) + " vs. " + toString(reaction));
-    }
-
-    float totalProbability = reactions.front().getProbability();
-
-    for (std::size_t i = 0; i < reactions.size() - 1; ++i)
-        totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
-
-    if (reaction.getProbability() + totalProbability > 1.f)
-        throw ExceptionWithLocation("Can't add reaction to vector: Accumulative probability > 1");
-
-    reaction.setProbability(reaction.getProbability() + totalProbability);
-    reactions.push_back(reaction);
-
-    std::ranges::sort(reactions, [](const auto& reaction1, const auto& reaction2)
-                      { return reaction1.getProbability() < reaction2.getProbability(); });
 }
 
 size_t ReactionHash::operator()(const Reaction& reaction) const
