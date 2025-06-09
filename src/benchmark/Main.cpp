@@ -1,7 +1,9 @@
+// configure using cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. and profile with VerySleepy
+
+#include "Cell.hpp"
 #include "GlobalSettings.hpp"
 #include "Logging.hpp"
 #include "StringUtils.hpp"
-#include "World.hpp"
 
 #include <chrono>
 
@@ -9,7 +11,7 @@
 
 void setBenchmarkSettings()
 {
-    GlobalSettings::get().setNumberOfDiscs(400);
+    GlobalSettings::get().setNumberOfDiscs(800);
 }
 
 int main(int argc, char** argv)
@@ -17,15 +19,16 @@ int main(int argc, char** argv)
     initLogging(argc, argv);
     setBenchmarkSettings();
 
-    World world;
+    Cell world;
     world.setBounds(sf::Vector2f(1000, 1000));
     world.reinitialize();
 
+    const int N = 100000;
     LOG(INFO) << "Starting benchmark";
     auto start = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; i < 1000; ++i)
-        world.update(sf::milliseconds(5));
+    for (int i = 0; i < N; ++i)
+        world.update(sf::milliseconds(1));
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -33,5 +36,5 @@ int main(int argc, char** argv)
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     LOG(INFO) << "Elapsed time: " << StringUtils::timeString(ns);
-    LOG(INFO) << "Time per update: " << StringUtils::timeString(ns / 1000);
+    LOG(INFO) << "Time per update: " << StringUtils::timeString(ns / N);
 }

@@ -6,9 +6,11 @@
 #include <QtCore/QMetaType>
 #include <SFML/System/Vector2.hpp>
 
-#include <map>
 #include <vector>
 
+/**
+ * @brief POD used to transmit information on all discs in the simulation to the widget drawing it and the plot model
+ */
 struct FrameDTO
 {
     std::vector<Disc> discs_;

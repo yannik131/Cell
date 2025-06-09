@@ -18,12 +18,11 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(simulation_, &Simulation::sceneData, ui->simulationWidget, &SimulationWidget::initialize);
-    connect(simulation_, &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_, &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_,
+    connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
+    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_.get(),
             &Simulation::reset);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_,
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_.get(),
             &Simulation::reset);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
@@ -71,7 +70,7 @@ void MainWindow::resetSimulation()
     stopSimulation();
 
     if (simulationThread_ != nullptr)
-        connect(simulationThread_, &QThread::finished, simulation_, &Simulation::reset, Qt::QueuedConnection);
+        connect(simulationThread_, &QThread::finished, simulation_.get(), &Simulation::reset, Qt::QueuedConnection);
     else
         simulation_->reset();
 
@@ -87,11 +86,7 @@ void MainWindow::setSimulationWidgetSize()
     plotModel_->clear();
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-    delete simulation_;
-}
+MainWindow::~MainWindow() = default;
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
@@ -138,6 +133,7 @@ void MainWindow::stopSimulation()
 {
     if (simulationThread_)
         simulationThread_->requestInterruption();
+
     // Revert the fixed size to enable resizing again
     setMinimumSize(QSize(0, 0));
     setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);

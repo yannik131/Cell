@@ -10,6 +10,9 @@ namespace Ui
 class PlotControlWidget;
 }
 
+/**
+ * @brief Widget containing widgets to modify the plot (time interval etc.)
+ */
 class PlotControlWidget : public QWidget
 {
     Q_OBJECT

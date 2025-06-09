@@ -115,22 +115,3 @@ TEST(ReactionTest, testEquality)
     EXPECT_NE(exchange1, decomposition1);
     EXPECT_NE(exchange1, combination1);
 }
-
-TEST(ReactionTest, probabilitiesAddUp)
-{
-    Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    Reaction transformation3{Mass15, std::nullopt, Mass5Radius10, std::nullopt, 0.9f};
-    Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
-
-    std::vector<Reaction> transformations;
-    addReactionToVector(transformations, transformation1);
-    addReactionToVector(transformations, transformation2);
-
-    EXPECT_FLOAT_EQ(transformations[0].getProbability(), 0.1f);
-    EXPECT_FLOAT_EQ(transformations[1].getProbability(), 0.2f);
-
-    EXPECT_ANY_THROW(addReactionToVector(transformations, combination));
-    EXPECT_ANY_THROW(addReactionToVector(transformations, transformation1));
-    EXPECT_ANY_THROW(addReactionToVector(transformations, transformation3));
-}

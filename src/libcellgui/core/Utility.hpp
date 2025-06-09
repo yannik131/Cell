@@ -7,9 +7,20 @@
 namespace Utility
 {
 
+/**
+ * @brief Iterates all disc types in the current disc type distribution and returns the one with the given name or
+ * throws if it can't be found
+ */
 DiscType getDiscTypeByName(const QString& name);
+
+/**
+ * @returns a list of all disc type names in the current distribution
+ */
 QStringList getDiscTypeNames();
 
+/**
+ * @brief Converts a sfml color to a QColor
+ */
 QColor sfColorToQColor(const sf::Color& sfColor);
 
 /**

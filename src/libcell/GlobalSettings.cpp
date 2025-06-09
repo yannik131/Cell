@@ -58,8 +58,10 @@ void GlobalSettings::setCallback(const std::function<void(const SettingID& setti
     GlobalSettings::get().callback_ = functor;
 }
 
-GlobalSettings::GlobalSettings()
+void GlobalSettings::restoreDefault()
 {
+    settings_ = Settings();
+
     // TODO save settings as json, load default
     DiscType A("A", sf::Color::Green, 5, 10);
     DiscType B("B", sf::Color::Red, 10, 5);
@@ -74,6 +76,11 @@ GlobalSettings::GlobalSettings()
     addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
     addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
     addReaction(Reaction{B, A, C, D, 1e-2f});
+}
+
+GlobalSettings::GlobalSettings()
+{
+    restoreDefault();
 }
 
 GlobalSettings& GlobalSettings::get()
@@ -172,17 +179,6 @@ void GlobalSettings::clearReactions()
     useCallback(SettingID::Reactions);
 }
 
-void GlobalSettings::setFrictionCoefficient(float frictionCoefficient)
-{
-    throwIfLocked();
-    throwIfNotInRange(frictionCoefficient, SettingsLimits::MinFrictionCoefficient,
-                      SettingsLimits::MaxFrictionCoefficient, "friction coefficient");
-
-    settings_.frictionCoefficient = frictionCoefficient;
-
-    useCallback(SettingID::FrictionCoefficient);
-}
-
 void GlobalSettings::throwIfLocked()
 {
     if (locked_)
@@ -202,6 +198,11 @@ void GlobalSettings::unlock()
 bool GlobalSettings::isLocked() const
 {
     return locked_;
+}
+
+const std::vector<Reaction>& GlobalSettings::getReactions() const
+{
+    return settings_.reactionTable_.getReactions();
 }
 
 /**

@@ -13,6 +13,9 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
 
     ui->discDistributionPreviewTableView->setModel(discDistributionPreviewTableModel_);
 
+    // The order matters here: If we connect the callbacks to the widgets first, setting them to
+    // the value from the settings would lead to infinite recursion
+
     setRanges();
     displayGlobalSettings();
     setCallbacks();
@@ -43,8 +46,8 @@ void SimulationControlWidget::setCallbacks()
 {
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
-    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { tryExecuteWithExceptionHandling([=] { GlobalGUISettings::get().setGuiFPS(value); }, this); });
+    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
+            [this](int value) { tryExecuteWithExceptionHandling([=] { GlobalGUISettings::get().setGuiFPS(value); }); });
 
     connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
             [this](int value)
@@ -54,19 +57,18 @@ void SimulationControlWidget::setCallbacks()
                     {
                         GlobalSettings::get().setNumberOfDiscs(value);
                         emit simulationResetTriggered();
-                    },
-                    this);
+                    });
             });
 
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this,
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
-                    [=] { GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); }, this);
+                    [=] { GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
             });
 
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this, [this](float value)
-            { tryExecuteWithExceptionHandling([=] { GlobalSettings::get().setSimulationTimeScale(value); }, this); });
+            { tryExecuteWithExceptionHandling([=] { GlobalSettings::get().setSimulationTimeScale(value); }); });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });

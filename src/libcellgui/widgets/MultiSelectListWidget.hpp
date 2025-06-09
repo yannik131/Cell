@@ -25,6 +25,7 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
 
     // The other methods just ignore the event to disable the unwanted deselection behaviour
+
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;

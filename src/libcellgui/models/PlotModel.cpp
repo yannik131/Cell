@@ -7,11 +7,11 @@ const DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
 {
     switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
     {
-    case PlotCategory::TotalAbsoluteImpulse:
+    case PlotCategory::AbsoluteImpulse:
         return dataPoint.totalMomentumMap_;
-    case PlotCategory::TotalCollisionCount:
+    case PlotCategory::CollisionCounts:
         return dataPoint.collisionCounts_;
-    case PlotCategory::TotalKineticEnergy:
+    case PlotCategory::KineticEnergy:
         return dataPoint.totalKineticEnergyMap_;
     case PlotCategory::TypeCounts:
         return dataPoint.discTypeCountMap_;

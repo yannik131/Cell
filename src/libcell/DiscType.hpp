@@ -26,7 +26,14 @@ public:
     };
 
 public:
+    /**
+     * @brief Type to be used for reaction and disc type distribution tables
+     */
     template <typename T> using map = std::unordered_map<DiscType, T, IdHasher>;
+
+    /**
+     * @brief Type for the bimolecular reaction tables
+     */
     template <typename T> using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher>;
 
 public:
@@ -96,11 +103,14 @@ public:
      */
     bool operator==(const DiscType& other) const;
 
+    /**
+     * @brief Comparison by all members
+     */
     bool equalsTo(const DiscType& other) const;
 
 private:
     /**
-     * @brief The name is just a convience property to work with DiscTypes more easily
+     * @brief The name is used to uniquely identify disc types within the disc type distribution
      */
     std::string name_;
 
@@ -111,6 +121,7 @@ private:
 
     /**
      * @brief Radius in px
+     * @todo https://github.com/yannik131/Cell/issues/25
      */
     float radius_ = 0;
 

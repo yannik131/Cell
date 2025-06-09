@@ -103,13 +103,6 @@ TEST(GlobalSettingsTest, RangeChecksAreCorrect)
     GlobalSettings& globalSettings = GlobalSettings::get();
     using namespace SettingsLimits;
 
-    EXPECT_ANY_THROW(
-        globalSettings.setFrictionCoefficient(std::nextafterf(MinFrictionCoefficient, MinFrictionCoefficient - 1)));
-    EXPECT_ANY_THROW(
-        globalSettings.setFrictionCoefficient(std::nextafterf(MaxFrictionCoefficient, MaxFrictionCoefficient + 1)));
-    EXPECT_NO_THROW(globalSettings.setFrictionCoefficient(MinFrictionCoefficient));
-    EXPECT_NO_THROW(globalSettings.setFrictionCoefficient(MaxFrictionCoefficient));
-
     auto minTimeUs = MinSimulationTimeStep.asMicroseconds();
     auto maxTimeUs = MaxSimulationTimeStep.asMicroseconds();
     EXPECT_ANY_THROW(globalSettings.setSimulationTimeStep(sf::microseconds(minTimeUs - 1)));
@@ -138,9 +131,9 @@ TEST(GlobalSettingsTest, CallbackIsExecuted)
     const auto& callback = [&](const SettingID& settingID) { id = settingID; };
     globalSettings.setCallback(callback);
 
-    globalSettings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient);
+    globalSettings.setNumberOfDiscs(50);
 
-    EXPECT_EQ(id, SettingID::FrictionCoefficient);
+    EXPECT_EQ(id, SettingID::NumberOfDiscs);
 
     globalSettings.setCallback({});
 }
@@ -156,7 +149,6 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     EXPECT_NO_THROW(globalSettings.setSimulationTimeStep(SettingsLimits::MinSimulationTimeStep));
     EXPECT_NO_THROW(globalSettings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale));
     EXPECT_NO_THROW(globalSettings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs));
-    EXPECT_NO_THROW(globalSettings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient));
 
     EXPECT_NO_THROW(globalSettings.setDiscTypeDistribution(DefaultDistribution));
 
@@ -170,7 +162,6 @@ TEST(GlobalSettingsTest, LockPreventsChanges)
     EXPECT_THROW(globalSettings.setSimulationTimeStep(SettingsLimits::MinSimulationTimeStep), std::runtime_error);
     EXPECT_THROW(globalSettings.setSimulationTimeScale(SettingsLimits::MinSimulationTimeScale), std::runtime_error);
     EXPECT_THROW(globalSettings.setNumberOfDiscs(SettingsLimits::MinNumberOfDiscs), std::runtime_error);
-    EXPECT_THROW(globalSettings.setFrictionCoefficient(SettingsLimits::MinFrictionCoefficient), std::runtime_error);
     EXPECT_THROW(globalSettings.setDiscTypeDistribution(DefaultDistribution), std::runtime_error);
     EXPECT_THROW(globalSettings.addReaction(decomposition), std::runtime_error);
     EXPECT_THROW(globalSettings.clearReactions(), std::runtime_error);

@@ -34,31 +34,26 @@ struct Settings
     int numberOfDiscs_ = 100;
 
     /**
-     * @brief Global friction coefficient for all disc collisions
-     */
-    float frictionCoefficient = 0.f;
-
-    /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
     DiscType::map<int> discTypeDistribution_;
 
+    /**
+     * @brief Contains all reactions in the simulation
+     */
     ReactionTable reactionTable_;
 };
 
 namespace SettingsLimits
 {
-const sf::Time MinSimulationTimeStep = sf::microseconds(100);
-const sf::Time MaxSimulationTimeStep = sf::microseconds(50000);
+const sf::Time MinSimulationTimeStep = sf::microseconds(1);
+const sf::Time MaxSimulationTimeStep = sf::microseconds(100000);
 
-const float MinSimulationTimeScale = 0.01f;
+const float MinSimulationTimeScale = 0.0001f;
 const float MaxSimulationTimeScale = 10.f;
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
-
-const float MinFrictionCoefficient = 0.f;
-const float MaxFrictionCoefficient = 1.f;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

@@ -119,7 +119,8 @@
         "slist": "cpp",
         "execution": "cpp",
         "*.moc": "cpp",
-        "qstyleditemdelegate": "cpp"
+        "qstyleditemdelegate": "cpp",
+        "qmessagebox": "cpp"
     },
     "terminal.integrated.shellArgs.windows": [
         "-noexit",

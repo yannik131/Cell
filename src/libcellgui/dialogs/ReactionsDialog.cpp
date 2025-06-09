@@ -3,6 +3,7 @@
 #include "ComboBoxDelegate.hpp"
 #include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
+#include "SafeCast.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "Utility.hpp"
 #include "ui_ReactionsDialog.h"
@@ -45,17 +46,18 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
 
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
 
-    auto* deleteButtonDelegate = new ButtonDelegate(this);
-    ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
+    auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
+    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
     auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
-    connect(deleteButtonDelegate, &ButtonDelegate::deleteRow, reactionsTableModel_, &ReactionsTableModel::removeRow);
+    connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, reactionsTableModel_,
+            &ReactionsTableModel::removeRow);
     connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
             [](QWidget* spinBox)
             {
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
-                qobject_cast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
+                safeCast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
+                safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
+                safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
             });
 
     ui->reactionsTableView->setItemDelegateForColumn(0, discTypeComboBoxDelegate);
@@ -70,10 +72,9 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
-void ReactionsDialog::closeEvent(QCloseEvent* event)
+void ReactionsDialog::closeEvent(QCloseEvent*)
 {
-    cancel();
-    event->ignore();
+    reactionsTableModel_->loadSettings();
 }
 
 void ReactionsDialog::requestEmptyRowFromModel(const Reaction::Type& type)

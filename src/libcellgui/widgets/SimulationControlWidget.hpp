@@ -11,6 +11,10 @@ namespace Ui
 class SimulationControlWidget;
 }
 
+/**
+ * @brief Widget containing all the widgets with which simulation settings can be changed by the user (number of discs,
+ * time step, etc.)
+ */
 class SimulationControlWidget : public QWidget
 {
     Q_OBJECT
@@ -25,13 +29,41 @@ signals:
     void editReactionsClicked();
 
 private:
+    /**
+     * @brief Reads the limits for the different settings from the settings and adjusts the widgets accordingly
+     */
     void setRanges();
+
+    /**
+     * @brief Sets the values of all settings widgets to the one currently in the settings
+     */
     void displayGlobalSettings();
+
+    /**
+     * @brief Connects the callbacks to the widgets, making sure that changing values in the GUI will actually change
+     * the settings
+     */
     void setCallbacks();
+
+    /**
+     * @brief Changes the start/stop button text depending on wether the simulation is running or nto
+     */
     void toggleStartStopButtonState();
+
+    /**
+     * @brief Callback for the reset button: Emit the signal for resetting the simulation and update the button text to
+     * "start"
+     */
     void reset();
 
-    template <typename Func> void tryExecuteWithExceptionHandling(Func&& func, QWidget* parent)
+    /**
+     * @brief Theoretically, after setting the limits for the widgets based on the settings, GlobalSettings should never
+     * throw when setting a value with one of those widgets because 1. the main window will disable this widget when the
+     * simulation runs, so changing settings during simulation shouldn't be possible and 2. the values will always be in
+     * the correct range. Anyways, if for whatever reason GlobalSettings does throw after setting a setting, we need to
+     * catch that, which this function is for.
+     */
+    template <typename Func> void tryExecuteWithExceptionHandling(Func&& func)
     {
         try
         {
@@ -39,10 +71,8 @@ private:
         }
         catch (const std::exception& e)
         {
-            if (auto* self = dynamic_cast<SimulationControlWidget*>(parent))
-                self->displayGlobalSettings();
-
-            QMessageBox::critical(parent, "Fehler", e.what());
+            displayGlobalSettings();
+            QMessageBox::critical(this, "Fehler", e.what());
         }
     }
 

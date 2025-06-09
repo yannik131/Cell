@@ -22,7 +22,6 @@ int ReactionsTableModel::rowCount(const QModelIndex&) const
 
 int ReactionsTableModel::columnCount(const QModelIndex&) const
 {
-    // Reminder: "A", "+", "B", "->", "C", "+", "D", "Probability", "Delete"
     return 9;
 }
 
@@ -212,9 +211,24 @@ void ReactionsTableModel::loadSettings()
 
 void ReactionsTableModel::saveSettings()
 {
-    GlobalSettings::get().clearReactions();
-    for (const auto& reaction : rows_)
-        GlobalSettings::get().addReaction(reaction);
+    const auto reactionsBackup = GlobalSettings::get().getReactions();
+
+    static const auto& setReactions = [](const std::vector<Reaction>& reactions)
+    {
+        GlobalSettings::get().clearReactions();
+        for (const auto& reaction : reactions)
+            GlobalSettings::get().addReaction(reaction);
+    };
+
+    try
+    {
+        setReactions(rows_);
+    }
+    catch (const std::exception& e)
+    {
+        setReactions(reactionsBackup);
+        throw e;
+    }
 
     emit reactionsChanged();
 }

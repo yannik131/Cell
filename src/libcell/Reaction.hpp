@@ -6,6 +6,21 @@
 #include <optional>
 #include <vector>
 
+/**
+ * @brief Contains a uni- or bimolecular reaction.
+ *
+ * Given `DiscType`s A, B, C and D, and reaction probability 0 <= p <=
+ * 1, supported reaction types are:
+ * ```cpp
+ * Reaction(A, nullopt, B, nullopt, p); // Transformation reaction: A -> B
+ * Reaction(A, nullopt, B, C, p); // Decomposition reaction: A -> B + C
+ * Reaction(A, B, C, nullopt, p); // Combination reaction: A + B -> C
+ * Reaction(A, B, C, D, p); // Exchange reaction: A + B -> C + D
+ * ```
+ *
+ * For transformation and decomposition reactions, p is interpreted in terms of probability per second for each disc in
+ * the simulation. For combination and exchange reactions, p is the reaction probability for a single collision
+ */
 class Reaction
 {
 public:
@@ -18,8 +33,14 @@ public:
     };
 
 public:
+    /**
+     * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
+     * not in the interval [0, 1]
+     */
     Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
              const std::optional<DiscType>& product2, float probability);
+
+    // Boilerplate getters and setters with no additional documentation
 
     const DiscType& getEduct1() const;
     void setEduct1(const DiscType& educt1);
@@ -40,6 +61,13 @@ public:
 
     const Type& getType() const;
 
+    /**
+     * @brief Validates that
+     *
+     * - educts and products of transformation reactions A -> B are not identical (A must be unequal B)
+     *
+     * - educt and product masses are the same
+     */
     void validate() const;
 
 private:
@@ -60,8 +88,15 @@ struct ReactionHash
  * @brief Checks if all products and educts have identical disc type names
  */
 bool operator==(const Reaction& reaction1, const Reaction& reaction2);
+
+/**
+ * @brief String representation in the form of A + B -> C + D
+ */
 std::string toString(const Reaction& reaction);
+
+/**
+ * @returns `true` if the given disctype is part of the educts or products of the reaction
+ */
 bool contains(const Reaction& reaction, const DiscType& discType);
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
 
 #endif /* REACTION_HPP */

@@ -66,6 +66,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, f
 
                 discsInCollisions.insert(pair.first);
                 discsInCollisions.insert(pair.second);
+
                 break;
             }
         }
@@ -117,7 +118,7 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     const sf::Vector2f& r = disc.getPosition();
 
     bool collided = false;
-    float l = NAN;
+    float l = NAN; // We must satisfy clang-tidy!
     float dx = 0, dy = 0;
 
     if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall
@@ -157,9 +158,11 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
     // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
-    // initialKineticEnergy - currentTotalKineticEnergy)
+    // initialKineticEnergy - currentKineticEnergy)
 
-    float randomNumber = getRandomFloat() / 2.f;
+    // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
+    // not too much to make it look stupid
+    float randomNumber = getRandomFloat() * 0.75f;
     float kineticEnergyBefore = disc.getKineticEnergy();
     disc.scaleVelocity(1.f + randomNumber);
 
