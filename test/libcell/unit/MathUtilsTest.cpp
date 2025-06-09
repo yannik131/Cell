@@ -8,8 +8,12 @@
 #include <numbers>
 #include <unordered_set>
 
+using namespace cell; // Defines the += and /= operators, shortens cell::mathutils::
+
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
+    using namespace mathutils;
+
     std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
     std::unordered_map<int, double> m2{{1, 2.0}, {2, 3.0}, {3, 3.0}};
 
@@ -21,6 +25,8 @@ TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 
 TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 {
+    using namespace mathutils;
+
     std::unordered_map<int, double> m1{{1, 1.0}, {2, 2.0}};
     m1 /= 2.0;
 

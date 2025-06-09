@@ -7,22 +7,22 @@
 
 TEST(WorldTest, EnergyIsConserved)
 {
-    GlobalSettings::get().restoreDefault();
+    cell::GlobalSettings::get().restoreDefault();
 
-    Cell world;
-    world.setBounds(sf::Vector2f{500, 500});
-    world.reinitialize();
+    cell::Cell cell;
+    cell.setBounds(sf::Vector2f{500, 500});
+    cell.reinitialize();
 
-    float initialKineticEnergy = world.getInitialKineticEnergy();
+    float initialKineticEnergy = cell.getInitialKineticEnergy();
     int totalCollisionCount = 0;
     int collisionTarget = 100;
     int updateCount = 0;
 
     while (totalCollisionCount < collisionTarget)
     {
-        world.update(sf::milliseconds(1));
+        cell.update(sf::milliseconds(1));
 
-        for (const auto& [discType, collisionCount] : world.getAndResetCollisionCount())
+        for (const auto& [discType, collisionCount] : cell.getAndResetCollisionCount())
             totalCollisionCount += collisionCount;
 
         if (++updateCount > collisionTarget * 10)
@@ -33,5 +33,5 @@ TEST(WorldTest, EnergyIsConserved)
                << static_cast<float>(collisionTarget) / static_cast<float>(updateCount) << " collisions/s)";
 
     // Currently, combination reactions don't conserve kinetic energy
-    EXPECT_NEAR(world.getCurrentKineticEnergy(), initialKineticEnergy, 0.01f * initialKineticEnergy);
+    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.01f * initialKineticEnergy);
 }

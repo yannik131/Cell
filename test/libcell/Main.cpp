@@ -8,6 +8,6 @@
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    initLogging(argc, argv);
+    cell::initLogging(argc, argv);
     return RUN_ALL_TESTS();
 }
