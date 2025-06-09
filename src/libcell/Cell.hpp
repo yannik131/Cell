@@ -39,7 +39,7 @@ public:
     /**
      * @returns all discs currently part of this cell
      */
-    const std::vector<Disc>& discs() const;
+    const std::vector<Disc>& getDiscs() const;
 
     /**
      * @brief Initializes the starting positions and creates the discs in the cell according to the distribution in the

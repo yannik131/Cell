@@ -26,11 +26,10 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
             &PlotDataSelectionDialog::loadSettings);
 }
 
-void PlotDataSelectionDialog::closeEvent(QCloseEvent* event)
+void PlotDataSelectionDialog::closeEvent(QCloseEvent*)
 {
     hide();
     loadSettings();
-    event->ignore();
 }
 
 void PlotDataSelectionDialog::saveSettings()

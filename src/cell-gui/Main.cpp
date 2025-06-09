@@ -13,7 +13,6 @@ int main(int argc, char* argv[])
     initLogging(argc, argv);
     QApplication app(argc, argv);
 
-    // "Hack" to make the Qt-independent simulation library send signals when a setting is changed
     auto& functor = GlobalSettingsFunctor::get();
     GlobalSettings::setCallback([&functor](const SettingID& settingID) { functor(settingID); });
 

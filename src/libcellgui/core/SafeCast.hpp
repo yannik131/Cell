@@ -5,6 +5,9 @@
 
 #include <QObject>
 
+/**
+ * @brief Performs a qobject_cast with the given type and throws and exception if it returns `nullptr`
+ */
 template <typename T> T safeCast(QWidget* widget)
 {
     T result = qobject_cast<T>(widget);

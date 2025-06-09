@@ -35,6 +35,9 @@ public:
     void setWorldBounds(const sf::Vector2f& bounds);
 
 private:
+    /**
+     * @brief Populates a `FrameDTO` with the current cell state and emits it
+     */
     void emitFrameData();
 
 signals:
@@ -42,7 +45,6 @@ signals:
 
 private:
     Cell cell_;
-    const std::vector<Disc>& worldDiscs_;
 };
 
 #endif /* SIMULATION_HPP */

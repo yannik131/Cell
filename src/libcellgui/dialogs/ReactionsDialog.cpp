@@ -47,7 +47,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
 
     auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
-    ComboBoxDelegate* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
+    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
     auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
     connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, reactionsTableModel_,
@@ -72,10 +72,9 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
-void ReactionsDialog::closeEvent(QCloseEvent* event)
+void ReactionsDialog::closeEvent(QCloseEvent*)
 {
-    cancel();
-    event->ignore();
+    reactionsTableModel_->loadSettings();
 }
 
 void ReactionsDialog::requestEmptyRowFromModel(const Reaction::Type& type)

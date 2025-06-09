@@ -8,7 +8,6 @@
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
-    , worldDiscs_(cell_.discs())
 {
 }
 
@@ -53,7 +52,7 @@ void Simulation::setWorldBounds(const sf::Vector2f& bounds)
 
 void Simulation::emitFrameData()
 {
-    FrameDTO frameDTO{.discs_ = worldDiscs_,
+    FrameDTO frameDTO{.discs_ = cell_.getDiscs(),
                       .collisionCounts_ = cell_.getAndResetCollisionCount(),
                       .simulationTimeStepUs = GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 

@@ -12,7 +12,7 @@ struct NanoflannAdapter
 {
     const std::vector<Disc>& elements;
 
-    NanoflannAdapter(const std::vector<Disc>& elems)
+    explicit NanoflannAdapter(const std::vector<Disc>& elems)
         : elements(elems)
     {
     }

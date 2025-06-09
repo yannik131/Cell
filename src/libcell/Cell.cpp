@@ -52,7 +52,7 @@ DiscType::map<int> Cell::getAndResetCollisionCount()
     return tmp;
 }
 
-const std::vector<Disc>& Cell::discs() const
+const std::vector<Disc>& Cell::getDiscs() const
 {
     return discs_;
 }

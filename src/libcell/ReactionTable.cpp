@@ -1,6 +1,8 @@
 #include "ReactionTable.hpp"
 #include "Reaction.hpp"
 
+ReactionTable::ReactionTable() = default;
+
 const DiscType::map<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
 {
     return transformationReactionLookupMap_;

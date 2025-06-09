@@ -17,6 +17,8 @@ class Reaction;
 class ReactionTable
 {
 public:
+    ReactionTable();
+
     // getters for lookup up maps for reactions with increasing, cumulative probabilities
 
     const DiscType::map<std::vector<Reaction>>& getTransformationReactionLookupMap() const;

@@ -35,8 +35,6 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
             &DiscTypeDistributionTableModel::addEmptyRow);
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
-    connect(this, &DiscTypeDistributionDialog::dialogClosed, discTypeDistributionTableModel_,
-            &DiscTypeDistributionTableModel::loadSettings);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
             discTypeDistributionTableModel_, &DiscTypeDistributionTableModel::loadSettings);
 
@@ -70,7 +68,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
 
 void DiscTypeDistributionDialog::closeEvent(QCloseEvent*)
 {
-    emit dialogClosed();
+    discTypeDistributionTableModel_->loadSettings();
 }
 
 void DiscTypeDistributionDialog::cancel()

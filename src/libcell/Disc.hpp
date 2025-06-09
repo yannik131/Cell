@@ -15,7 +15,7 @@ public:
     /**
      * @brief Copy-ctor that does not affect id
      */
-    Disc(const DiscType& discType);
+    explicit Disc(const DiscType& discType);
 
     /**
      * @brief Sets the velocity of the disc in px/s

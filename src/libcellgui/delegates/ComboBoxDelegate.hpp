@@ -11,7 +11,7 @@ class ComboBoxDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    ComboBoxDelegate(QObject* parent = nullptr);
+    explicit ComboBoxDelegate(QObject* parent = nullptr);
 
     /**
      * @brief Creates a QComboBox widget on demand and emits an `editorCreated` signal
