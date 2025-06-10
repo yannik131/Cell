@@ -6,67 +6,80 @@
 #include "ReactionTable.hpp"
 
 #include <SFML/System/Time.hpp>
+#include <nlohmann/json.hpp>
 
-#include <map>
-#include <utility>
-#include <vector>
+#include <filesystem>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 namespace cell
 {
 
-struct Settings
+class SettingID
 {
-    /**
-     * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
-     * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
-     * able to keep up and start lagging
-     */
-    sf::Time simulationTimeStep_ = sf::microseconds(5000);
+public:
+    SettingID(const std::string& key);
 
-    /**
-     * @brief Defines how many seconds should pass in real time for 1 second in the simulation.
-     *
-     * Example: If set to 2, we will advance the simulation by 2 seconds in 1 real time second, meaning we will (try to)
-     * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
-     */
-    float simulationTimeScale_ = 1.f;
+    const std::string& getKey() const;
 
-    /**
-     * @brief Total number of discs in the simulation
-     */
-    int numberOfDiscs_ = 100;
-
-    /**
-     * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
-     */
-    DiscType::map<int> discTypeDistribution_;
-
-    /**
-     * @brief Contains all reactions in the simulation
-     */
-    ReactionTable reactionTable_;
+private:
+    std::string key_;
 };
 
-namespace SettingsLimits
+class Settings
 {
-const sf::Time MinSimulationTimeStep = sf::microseconds(1);
-const sf::Time MaxSimulationTimeStep = sf::microseconds(100000);
+public:
+    template <typename T> T get(const SettingID& settingID) const
+    {
+        auto iter = jsonData_.find(settingID.getKey());
+        if (iter == jsonData_.end())
+            throw ExceptionWithLocation("No setting found for key " + settingID.getKey());
 
-const float MinSimulationTimeScale = 0.0001f;
-const float MaxSimulationTimeScale = 10.f;
+        return iter->at(settingID.getKey()).get<T>();
+    }
 
-const int MinNumberOfDiscs = 1;
-const int MaxNumberOfDiscs = 10000;
-} // namespace SettingsLimits
+    template <typename T> T getMin(const SettingID& settingID) const
+    {
+        const std::string minKey = settingID.getKey() + "__min";
 
-namespace DiscTypeLimits
-{
-const float MinRadius = 1.f;
-const float MaxRadius = 100.f;
+        auto iter = jsonData_.find(minKey);
+        if (iter == jsonData_.end())
+            throw ExceptionWithLocation("No minimum found for key " + settingID.getKey());
 
-const float MinMass = 1.f;
-const float MaxMass = 10000.f;
-} // namespace DiscTypeLimits
+        return iter->at(minKey).get<T>();
+    }
+
+    template <typename T> T getMax(const SettingID& settingID) const
+    {
+        const std::string maxKey = settingID.getKey() + "__max";
+
+        auto iter = jsonData_.find(maxKey);
+        if (iter == jsonData_.end())
+            throw ExceptionWithLocation("No maximum found for key " + settingID.getKey());
+
+        return iter->at(maxKey).get<T>();
+    }
+
+    template <typename T>
+    void set(const SettingID& settingID, const T& value, std::optional<T> min, std::optional<T> max)
+    {
+        jsonData_[settingID.getKey()] = value;
+
+        if (min.has_value())
+            jsonData_[settingID.getKey() + "__min"] = *min;
+
+        if (max.has_value())
+            jsonData_[settingID.getKey() + "__max"] = *max;
+    }
+
+    void loadFromJson(const fs::path& jsonFile);
+
+    void saveAsJson(const fs::path& jsonFile);
+
+private:
+    nlohmann::json jsonData_;
+};
 
 } // namespace cell
 

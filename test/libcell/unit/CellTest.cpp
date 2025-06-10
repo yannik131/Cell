@@ -5,7 +5,7 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
-TEST(WorldTest, EnergyIsConserved)
+TEST(CellTest, EnergyIsConserved)
 {
     cell::GlobalSettings::get().restoreDefault();
 

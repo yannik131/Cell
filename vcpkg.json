@@ -5,7 +5,8 @@
         "glog",
         "nanoflann",
         "qtbase",
-        "gtest"
+        "gtest",
+        "nlohmann-json"
     ],
     "overrides": [
         {
