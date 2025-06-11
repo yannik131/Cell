@@ -1,7 +1,10 @@
 #ifndef DISCTYPE_HPP
 #define DISCTYPE_HPP
 
+#include "JsonSerializers.hpp"
+
 #include <SFML/Graphics/Color.hpp>
+#include <nlohmann/json.hpp>
 
 #include <string>
 #include <tuple>
@@ -144,6 +147,9 @@ private:
      * @brief Instance counter used for the ID
      */
     static int instanceCount;
+
+public:
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DiscType, name_, color_, radius_, mass_, id_)
 };
 
 /**

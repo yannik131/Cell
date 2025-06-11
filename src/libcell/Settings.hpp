@@ -2,6 +2,7 @@
 #define SETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "JsonSerializers.hpp"
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
 
@@ -27,16 +28,6 @@ public:
 private:
     std::string key_;
 };
-
-inline void to_json(nlohmann::json& j, const sf::Time& time)
-{
-    j = time.asMicroseconds();
-}
-
-inline void from_json(const nlohmann::json& j, sf::Time& time)
-{
-    time = sf::microseconds(j.get<long long>());
-}
 
 class Settings
 {

@@ -2,6 +2,9 @@
 #define REACTION_HPP
 
 #include "DiscType.hpp"
+#include "JsonSerializers.hpp"
+
+#include <nlohmann/json.hpp>
 
 #include <optional>
 #include <vector>
@@ -80,6 +83,9 @@ private:
     std::optional<DiscType> product2_;
     float probability_ = 0;
     Type type_;
+
+public:
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
 };
 
 struct ReactionHash
