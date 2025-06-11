@@ -10,16 +10,17 @@
 
 #include <filesystem>
 #include <fstream>
+#include <type_traits>
 
 namespace fs = std::filesystem;
 
 namespace cell
 {
 
-class SettingID
+template <typename T> class SettingID
 {
 public:
-    SettingID(const std::string& key);
+    explicit SettingID(const std::string& key);
 
     const std::string& getKey() const;
 
@@ -27,42 +28,21 @@ private:
     std::string key_;
 };
 
+inline void to_json(nlohmann::json& j, const sf::Time& time)
+{
+    j = time.asMicroseconds();
+}
+
+inline void from_json(const nlohmann::json& j, sf::Time& time)
+{
+    time = sf::microseconds(j.get<long long>());
+}
+
 class Settings
 {
 public:
-    template <typename T> T get(const SettingID& settingID) const
-    {
-        auto iter = jsonData_.find(settingID.getKey());
-        if (iter == jsonData_.end())
-            throw ExceptionWithLocation("No setting found for key " + settingID.getKey());
-
-        return iter->at(settingID.getKey()).get<T>();
-    }
-
-    template <typename T> T getMin(const SettingID& settingID) const
-    {
-        const std::string minKey = settingID.getKey() + "__min";
-
-        auto iter = jsonData_.find(minKey);
-        if (iter == jsonData_.end())
-            throw ExceptionWithLocation("No minimum found for key " + settingID.getKey());
-
-        return iter->at(minKey).get<T>();
-    }
-
-    template <typename T> T getMax(const SettingID& settingID) const
-    {
-        const std::string maxKey = settingID.getKey() + "__max";
-
-        auto iter = jsonData_.find(maxKey);
-        if (iter == jsonData_.end())
-            throw ExceptionWithLocation("No maximum found for key " + settingID.getKey());
-
-        return iter->at(maxKey).get<T>();
-    }
-
     template <typename T>
-    void set(const SettingID& settingID, const T& value, std::optional<T> min, std::optional<T> max)
+    void set(const SettingID<T>& settingID, const T& value, std::optional<T> min, std::optional<T> max)
     {
         jsonData_[settingID.getKey()] = value;
 
@@ -71,6 +51,24 @@ public:
 
         if (max.has_value())
             jsonData_[settingID.getKey() + "__max"] = *max;
+    }
+
+    template <typename T> T get(const SettingID<T>& settingID) const
+    {
+        return jsonData_.at(settingID.getKey()).get<T>();
+    }
+
+    template <typename T> T getMin(const SettingID<T>& settingID) const
+    {
+        const std::string minKey = settingID.getKey() + "__min";
+        return jsonData_.at(minKey).get<T>();
+    }
+
+    template <typename T> T getMax(const SettingID<T>& settingID) const
+    {
+        const std::string maxKey = settingID.getKey() + "__max";
+
+        return jsonData_.at(maxKey).get<T>();
     }
 
     void loadFromJson(const fs::path& jsonFile);
