@@ -1,12 +1,17 @@
 #include "GlobalSettings.hpp"
 #include "ExceptionWithLocation.hpp"
-
 #include "ReactionTable.hpp"
+
+#include <nlohmann/json.hpp>
+
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <set>
 #include <type_traits>
 #include <vector>
+
+using json = nlohmann::json;
 
 namespace cell
 {
@@ -186,6 +191,25 @@ void GlobalSettings::throwIfLocked()
 {
     if (locked_)
         throw ExceptionWithLocation("Settings are locked");
+}
+
+void GlobalSettings::loadFromJson(const fs::path& jsonFile)
+{
+    std::ifstream in(jsonFile);
+    if (!in)
+        throw ExceptionWithLocation("Couldn't open file: " + jsonFile.string());
+
+    json j;
+    in >> j;
+    settings_ = j.get<Settings>();
+}
+
+void GlobalSettings::saveAsJson(const fs::path& jsonFile)
+{
+    std::ofstream out(jsonFile);
+    json j = settings_;
+
+    out << j.dump(4);
 }
 
 void GlobalSettings::lock()

@@ -2,7 +2,7 @@
 #define REACTION_HPP
 
 #include "DiscType.hpp"
-#include "JsonSerializers.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <nlohmann/json.hpp>
 

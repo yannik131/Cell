@@ -8,10 +8,13 @@
 
 #include <SFML/System/Time.hpp>
 
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <stdexcept>
 #include <string>
+
+namespace fs = std::filesystem;
 
 namespace cell
 {
@@ -127,6 +130,10 @@ private:
      * @brief Helper function that thros an exception if GlobalSettings were locked using lock()
      */
     void throwIfLocked();
+
+    void loadFromJson(const fs::path& jsonFile);
+
+    void saveAsJson(const fs::path& jsonFile);
 
 private:
     /**

@@ -2,8 +2,8 @@
 #define REACTIONTABLE_HPP
 
 #include "DiscType.hpp"
-#include "JsonSerializers.hpp"
 #include "Reaction.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <vector>
 

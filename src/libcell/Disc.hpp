@@ -2,7 +2,7 @@
 #define DISC_HPP
 
 #include "DiscType.hpp"
-#include "JsonSerializers.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <nlohmann/json.hpp>

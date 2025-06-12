@@ -1,7 +1,7 @@
 #ifndef DISCTYPE_HPP
 #define DISCTYPE_HPP
 
-#include "JsonSerializers.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 #include <nlohmann/json.hpp>
