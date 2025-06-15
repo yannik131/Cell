@@ -82,6 +82,17 @@ target_link_libraries(cell-gui libcellgui)
 add_executable(benchmark src/benchmark/Main.cpp)
 target_link_libraries(benchmark libcell)
 
+# target for trying stuff out
+add_executable(playground src/playground/Main.cpp)
+target_link_libraries(playground PRIVATE
+    sfml-system
+    sfml-window
+    sfml-graphics
+    nanoflann::nanoflann
+    glog::glog
+    nlohmann_json::nlohmann_json
+)
+
 # testing
 enable_testing()
 

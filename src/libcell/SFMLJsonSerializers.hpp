@@ -1,3 +1,8 @@
+#ifndef SFMLJSONSERIALIZER_HPP
+#define SFMLJSONSERIALIZER_HPP
+
+#include "DiscType.hpp"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <nlohmann/json.hpp>
@@ -22,7 +27,7 @@ template <> struct adl_serializer<sf::Color>
 {
     static void to_json(json& j, const sf::Color& c)
     {
-        j = std::make_tuple(c.r, c.g, c.b, c.a);
+        j = std::tie(c.r, c.g, c.b, c.a);
     }
 
     static void from_json(const json& j, sf::Color& c)
@@ -46,3 +51,5 @@ template <> struct adl_serializer<sf::Time>
 };
 
 } // namespace nlohmann
+
+#endif

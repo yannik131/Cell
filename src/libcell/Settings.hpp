@@ -47,8 +47,8 @@ struct Settings
      */
     ReactionTable reactionTable_;
 
-    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_,
-                                       discTypeDistribution_, reactionTable_)
+    /*NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_,
+                                       discTypeDistribution_, reactionTable_)*/
 };
 
 namespace SettingsLimits

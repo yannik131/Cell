@@ -31,18 +31,40 @@ public:
         int operator()(const std::pair<DiscType, DiscType>& pair) const;
     };
 
+    struct IdComparator
+    {
+        bool operator()(const DiscType& a, const DiscType& b) const
+        {
+            return a.getId() == b.getId();
+        }
+    };
+
+    struct PairComparator
+    {
+        bool operator()(const std::pair<DiscType, DiscType>& a, const std::pair<DiscType, DiscType>& b) const
+        {
+            return a.first.getId() == b.first.getId() && a.second.getId() == b.second.getId();
+        }
+    };
+
 public:
     /**
      * @brief Type to be used for reaction and disc type distribution tables
      */
-    template <typename T> using map = std::unordered_map<DiscType, T, IdHasher>;
+    template <typename T> using map = std::unordered_map<DiscType, T, IdHasher, IdComparator>;
 
     /**
      * @brief Type for the bimolecular reaction tables
      */
-    template <typename T> using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher>;
+    template <typename T>
+    using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher, PairComparator>;
 
 public:
+    /**
+     * @attention Just here for nlohmann::json
+     */
+    DiscType() = default;
+
     /**
      * @brief Creates a new disc type with unique ID
      */
@@ -101,18 +123,19 @@ public:
 
     /**
      * @returns The unique ID of this DiscType (unless it was copied)
+     * @note This was a mistake. Since there are only a handful of DiscType instances in the lifetime of the simulation,
+     * this class should have been uncopyable with the central instances in the settings and every other class should
+     * have had pointers to those instances. This would have made IDs unnecessary since updating a disc type somewhere
+     * would immediately update it everywhere. Also, with this current ID approach, serialization with nlohmann::json
+     * requires a default constructor that I don't want to have, since the ID cannot be computed from any other property
+     * and has to be saved separately
      */
     int getId() const;
 
     /**
-     * @brief Comparison by ID
-     */
-    bool operator==(const DiscType& other) const;
-
-    /**
      * @brief Comparison by all members
      */
-    bool equalsTo(const DiscType& other) const;
+    bool operator==(const DiscType& other) const;
 
 private:
     /**
@@ -158,5 +181,29 @@ public:
 std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2);
 
 } // namespace cell
+
+/*namespace nlohmann
+{
+
+template <> struct adl_serializer<std::optional<cell::DiscType>>
+{
+    static void to_json(json& j, const std::optional<cell::DiscType>& opt)
+    {
+        if (opt)
+            j = *opt;
+        else
+            j = nullptr;
+    }
+
+    static void from_json(const json& j, std::optional<cell::DiscType>& opt)
+    {
+        if (j.is_null())
+            opt = std::nullopt;
+        else
+            opt = std::make_optional(j.get<cell::DiscType>());
+    }
+};
+
+} // namespace nlohmann */
 
 #endif /* DISCTYPE_HPP */

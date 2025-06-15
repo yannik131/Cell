@@ -89,11 +89,6 @@ public:
     bool isMarkedDestroyed() const;
 
     /**
-     * @brief Id using the instance count. Necessary to map changes in the lib to changes in the GUI
-     */
-    int getId() const;
-
-    /**
      * @returns |mv|
      */
     float getAbsoluteMomentum() const;
@@ -136,7 +131,7 @@ private:
     int id_;
 
 public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Disc, velocity_, position_, destroyed_, type_, id_)
+    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Disc, velocity_, position_, destroyed_, type_, id_)
 };
 
 } // namespace cell

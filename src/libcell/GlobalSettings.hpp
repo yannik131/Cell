@@ -131,9 +131,9 @@ private:
      */
     void throwIfLocked();
 
-    void loadFromJson(const fs::path& jsonFile);
+    /*void loadFromJson(const fs::path& jsonFile);
 
-    void saveAsJson(const fs::path& jsonFile);
+    void saveAsJson(const fs::path& jsonFile);*/
 
 private:
     /**

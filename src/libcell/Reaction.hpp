@@ -85,7 +85,7 @@ private:
     Type type_;
 
 public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
+    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
 };
 
 struct ReactionHash

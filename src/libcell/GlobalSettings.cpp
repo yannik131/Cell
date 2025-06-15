@@ -193,7 +193,7 @@ void GlobalSettings::throwIfLocked()
         throw ExceptionWithLocation("Settings are locked");
 }
 
-void GlobalSettings::loadFromJson(const fs::path& jsonFile)
+/*void GlobalSettings::loadFromJson(const fs::path& jsonFile)
 {
     std::ifstream in(jsonFile);
     if (!in)
@@ -210,7 +210,7 @@ void GlobalSettings::saveAsJson(const fs::path& jsonFile)
     json j = settings_;
 
     out << j.dump(4);
-}
+}*/
 
 void GlobalSettings::lock()
 {
@@ -256,7 +256,7 @@ void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDis
     for (const auto& [oldDiscType, frequency] : settings_.discTypeDistribution_)
     {
         auto iter = newDiscTypeDistribution.find(oldDiscType);
-        if (iter != newDiscTypeDistribution.end() && !iter->first.equalsTo(oldDiscType))
+        if (iter != newDiscTypeDistribution.end() && !(iter->first == oldDiscType))
             updatedDiscTypes.emplace(oldDiscType, iter->first);
     }
 
