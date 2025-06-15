@@ -69,21 +69,6 @@ void GlobalSettings::setCallback(const std::function<void(const SettingID& setti
 void GlobalSettings::restoreDefault()
 {
     settings_ = Settings();
-
-    // TODO save settings as json, load default
-    DiscType A("A", sf::Color::Green, 5, 10);
-    DiscType B("B", sf::Color::Red, 10, 5);
-    DiscType C("C", sf::Color::Blue, 12, 5);
-    DiscType D("D", sf::Color::Magenta, 15, 10);
-
-    settings_.discTypeDistribution_[A] = 100;
-    settings_.discTypeDistribution_[B] = 0;
-    settings_.discTypeDistribution_[C] = 0;
-    settings_.discTypeDistribution_[D] = 0;
-
-    addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
-    addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
-    addReaction(Reaction{B, A, C, D, 1e-2f});
 }
 
 GlobalSettings::GlobalSettings()
@@ -193,7 +178,7 @@ void GlobalSettings::throwIfLocked()
         throw ExceptionWithLocation("Settings are locked");
 }
 
-/*void GlobalSettings::loadFromJson(const fs::path& jsonFile)
+void GlobalSettings::loadFromJson(const fs::path& jsonFile)
 {
     std::ifstream in(jsonFile);
     if (!in)
@@ -207,10 +192,12 @@ void GlobalSettings::throwIfLocked()
 void GlobalSettings::saveAsJson(const fs::path& jsonFile)
 {
     std::ofstream out(jsonFile);
-    json j = settings_;
+    if (!out)
+        throw ExceptionWithLocation("Couldn't open file for writing: " + jsonFile.string());
 
+    json j = settings_;
     out << j.dump(4);
-}*/
+}
 
 void GlobalSettings::lock()
 {

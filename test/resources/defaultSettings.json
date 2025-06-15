@@ -1,0 +1,575 @@
+{
+    "discTypeDistribution_": [
+        [
+            {
+                "color_": [
+                    0,
+                    255,
+                    0,
+                    255
+                ],
+                "id_": 28,
+                "mass_": 10.0,
+                "name_": "A",
+                "radius_": 5.0
+            },
+            100
+        ],
+        [
+            {
+                "color_": [
+                    255,
+                    0,
+                    0,
+                    255
+                ],
+                "id_": 29,
+                "mass_": 5.0,
+                "name_": "B",
+                "radius_": 10.0
+            },
+            0
+        ],
+        [
+            {
+                "color_": [
+                    0,
+                    0,
+                    255,
+                    255
+                ],
+                "id_": 30,
+                "mass_": 5.0,
+                "name_": "C",
+                "radius_": 12.0
+            },
+            0
+        ],
+        [
+            {
+                "color_": [
+                    255,
+                    0,
+                    255,
+                    255
+                ],
+                "id_": 31,
+                "mass_": 10.0,
+                "name_": "D",
+                "radius_": 15.0
+            },
+            0
+        ]
+    ],
+    "numberOfDiscs_": 1,
+    "reactionTable_": {
+        "combinationReactionLookupMap_": [
+            [
+                [
+                    {
+                        "color_": [
+                            255,
+                            0,
+                            0,
+                            255
+                        ],
+                        "id_": 29,
+                        "mass_": 5.0,
+                        "name_": "B",
+                        "radius_": 10.0
+                    },
+                    {
+                        "color_": [
+                            0,
+                            0,
+                            255,
+                            255
+                        ],
+                        "id_": 30,
+                        "mass_": 5.0,
+                        "name_": "C",
+                        "radius_": 12.0
+                    }
+                ],
+                [
+                    {
+                        "educt1_": {
+                            "color_": [
+                                255,
+                                0,
+                                0,
+                                255
+                            ],
+                            "id_": 29,
+                            "mass_": 5.0,
+                            "name_": "B",
+                            "radius_": 10.0
+                        },
+                        "educt2_": {
+                            "color_": [
+                                0,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 30,
+                            "mass_": 5.0,
+                            "name_": "C",
+                            "radius_": 12.0
+                        },
+                        "probability_": 0.009999999776482582,
+                        "product1_": {
+                            "color_": [
+                                255,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 31,
+                            "mass_": 10.0,
+                            "name_": "D",
+                            "radius_": 15.0
+                        },
+                        "product2_": null,
+                        "type_": 4
+                    }
+                ]
+            ],
+            [
+                [
+                    {
+                        "color_": [
+                            0,
+                            0,
+                            255,
+                            255
+                        ],
+                        "id_": 30,
+                        "mass_": 5.0,
+                        "name_": "C",
+                        "radius_": 12.0
+                    },
+                    {
+                        "color_": [
+                            255,
+                            0,
+                            0,
+                            255
+                        ],
+                        "id_": 29,
+                        "mass_": 5.0,
+                        "name_": "B",
+                        "radius_": 10.0
+                    }
+                ],
+                [
+                    {
+                        "educt1_": {
+                            "color_": [
+                                255,
+                                0,
+                                0,
+                                255
+                            ],
+                            "id_": 29,
+                            "mass_": 5.0,
+                            "name_": "B",
+                            "radius_": 10.0
+                        },
+                        "educt2_": {
+                            "color_": [
+                                0,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 30,
+                            "mass_": 5.0,
+                            "name_": "C",
+                            "radius_": 12.0
+                        },
+                        "probability_": 0.009999999776482582,
+                        "product1_": {
+                            "color_": [
+                                255,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 31,
+                            "mass_": 10.0,
+                            "name_": "D",
+                            "radius_": 15.0
+                        },
+                        "product2_": null,
+                        "type_": 4
+                    }
+                ]
+            ]
+        ],
+        "decompositionReactionLookupMap_": [
+            [
+                {
+                    "color_": [
+                        0,
+                        255,
+                        0,
+                        255
+                    ],
+                    "id_": 28,
+                    "mass_": 10.0,
+                    "name_": "A",
+                    "radius_": 5.0
+                },
+                [
+                    {
+                        "educt1_": {
+                            "color_": [
+                                0,
+                                255,
+                                0,
+                                255
+                            ],
+                            "id_": 28,
+                            "mass_": 10.0,
+                            "name_": "A",
+                            "radius_": 5.0
+                        },
+                        "educt2_": null,
+                        "probability_": 0.009999999776482582,
+                        "product1_": {
+                            "color_": [
+                                255,
+                                0,
+                                0,
+                                255
+                            ],
+                            "id_": 29,
+                            "mass_": 5.0,
+                            "name_": "B",
+                            "radius_": 10.0
+                        },
+                        "product2_": {
+                            "color_": [
+                                0,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 30,
+                            "mass_": 5.0,
+                            "name_": "C",
+                            "radius_": 12.0
+                        },
+                        "type_": 2
+                    }
+                ]
+            ]
+        ],
+        "exchangeReactionLookupMap_": [
+            [
+                [
+                    {
+                        "color_": [
+                            255,
+                            0,
+                            0,
+                            255
+                        ],
+                        "id_": 29,
+                        "mass_": 5.0,
+                        "name_": "B",
+                        "radius_": 10.0
+                    },
+                    {
+                        "color_": [
+                            0,
+                            255,
+                            0,
+                            255
+                        ],
+                        "id_": 28,
+                        "mass_": 10.0,
+                        "name_": "A",
+                        "radius_": 5.0
+                    }
+                ],
+                [
+                    {
+                        "educt1_": {
+                            "color_": [
+                                255,
+                                0,
+                                0,
+                                255
+                            ],
+                            "id_": 29,
+                            "mass_": 5.0,
+                            "name_": "B",
+                            "radius_": 10.0
+                        },
+                        "educt2_": {
+                            "color_": [
+                                0,
+                                255,
+                                0,
+                                255
+                            ],
+                            "id_": 28,
+                            "mass_": 10.0,
+                            "name_": "A",
+                            "radius_": 5.0
+                        },
+                        "probability_": 0.009999999776482582,
+                        "product1_": {
+                            "color_": [
+                                0,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 30,
+                            "mass_": 5.0,
+                            "name_": "C",
+                            "radius_": 12.0
+                        },
+                        "product2_": {
+                            "color_": [
+                                255,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 31,
+                            "mass_": 10.0,
+                            "name_": "D",
+                            "radius_": 15.0
+                        },
+                        "type_": 8
+                    }
+                ]
+            ],
+            [
+                [
+                    {
+                        "color_": [
+                            0,
+                            255,
+                            0,
+                            255
+                        ],
+                        "id_": 28,
+                        "mass_": 10.0,
+                        "name_": "A",
+                        "radius_": 5.0
+                    },
+                    {
+                        "color_": [
+                            255,
+                            0,
+                            0,
+                            255
+                        ],
+                        "id_": 29,
+                        "mass_": 5.0,
+                        "name_": "B",
+                        "radius_": 10.0
+                    }
+                ],
+                [
+                    {
+                        "educt1_": {
+                            "color_": [
+                                255,
+                                0,
+                                0,
+                                255
+                            ],
+                            "id_": 29,
+                            "mass_": 5.0,
+                            "name_": "B",
+                            "radius_": 10.0
+                        },
+                        "educt2_": {
+                            "color_": [
+                                0,
+                                255,
+                                0,
+                                255
+                            ],
+                            "id_": 28,
+                            "mass_": 10.0,
+                            "name_": "A",
+                            "radius_": 5.0
+                        },
+                        "probability_": 0.009999999776482582,
+                        "product1_": {
+                            "color_": [
+                                0,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 30,
+                            "mass_": 5.0,
+                            "name_": "C",
+                            "radius_": 12.0
+                        },
+                        "product2_": {
+                            "color_": [
+                                255,
+                                0,
+                                255,
+                                255
+                            ],
+                            "id_": 31,
+                            "mass_": 10.0,
+                            "name_": "D",
+                            "radius_": 15.0
+                        },
+                        "type_": 8
+                    }
+                ]
+            ]
+        ],
+        "reactions_": [
+            {
+                "educt1_": {
+                    "color_": [
+                        0,
+                        255,
+                        0,
+                        255
+                    ],
+                    "id_": 28,
+                    "mass_": 10.0,
+                    "name_": "A",
+                    "radius_": 5.0
+                },
+                "educt2_": null,
+                "probability_": 0.009999999776482582,
+                "product1_": {
+                    "color_": [
+                        255,
+                        0,
+                        0,
+                        255
+                    ],
+                    "id_": 29,
+                    "mass_": 5.0,
+                    "name_": "B",
+                    "radius_": 10.0
+                },
+                "product2_": {
+                    "color_": [
+                        0,
+                        0,
+                        255,
+                        255
+                    ],
+                    "id_": 30,
+                    "mass_": 5.0,
+                    "name_": "C",
+                    "radius_": 12.0
+                },
+                "type_": 2
+            },
+            {
+                "educt1_": {
+                    "color_": [
+                        255,
+                        0,
+                        0,
+                        255
+                    ],
+                    "id_": 29,
+                    "mass_": 5.0,
+                    "name_": "B",
+                    "radius_": 10.0
+                },
+                "educt2_": {
+                    "color_": [
+                        0,
+                        0,
+                        255,
+                        255
+                    ],
+                    "id_": 30,
+                    "mass_": 5.0,
+                    "name_": "C",
+                    "radius_": 12.0
+                },
+                "probability_": 0.009999999776482582,
+                "product1_": {
+                    "color_": [
+                        255,
+                        0,
+                        255,
+                        255
+                    ],
+                    "id_": 31,
+                    "mass_": 10.0,
+                    "name_": "D",
+                    "radius_": 15.0
+                },
+                "product2_": null,
+                "type_": 4
+            },
+            {
+                "educt1_": {
+                    "color_": [
+                        255,
+                        0,
+                        0,
+                        255
+                    ],
+                    "id_": 29,
+                    "mass_": 5.0,
+                    "name_": "B",
+                    "radius_": 10.0
+                },
+                "educt2_": {
+                    "color_": [
+                        0,
+                        255,
+                        0,
+                        255
+                    ],
+                    "id_": 28,
+                    "mass_": 10.0,
+                    "name_": "A",
+                    "radius_": 5.0
+                },
+                "probability_": 0.009999999776482582,
+                "product1_": {
+                    "color_": [
+                        0,
+                        0,
+                        255,
+                        255
+                    ],
+                    "id_": 30,
+                    "mass_": 5.0,
+                    "name_": "C",
+                    "radius_": 12.0
+                },
+                "product2_": {
+                    "color_": [
+                        255,
+                        0,
+                        255,
+                        255
+                    ],
+                    "id_": 31,
+                    "mass_": 10.0,
+                    "name_": "D",
+                    "radius_": 15.0
+                },
+                "type_": 8
+            }
+        ],
+        "transformationReactionLookupMap_": []
+    },
+    "simulationTimeScale_": 9.999999747378752e-05,
+    "simulationTimeStep_": 100000
+}

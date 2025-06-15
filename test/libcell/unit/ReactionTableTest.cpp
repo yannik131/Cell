@@ -7,10 +7,8 @@
 
 TEST(ReactionTableTest, lookupMapsWork)
 {
-    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.f};
-    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.f};
-    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.f};
-    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.f};
+    cell::Reaction transformation, decomposition, combination, exchange;
+    std::tie(transformation, decomposition, combination, exchange) = getDefaultReactions();
 
     cell::ReactionTable reactionTable;
     reactionTable.setReactions({transformation, decomposition, combination, exchange});

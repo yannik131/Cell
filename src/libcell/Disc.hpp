@@ -2,10 +2,8 @@
 #define DISC_HPP
 
 #include "DiscType.hpp"
-#include "SFMLJsonSerializers.hpp"
 
 #include <SFML/System/Vector2.hpp>
-#include <nlohmann/json.hpp>
 
 namespace cell
 {
@@ -129,9 +127,6 @@ private:
      * @brief Unique ID for this disc
      */
     int id_;
-
-public:
-    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Disc, velocity_, position_, destroyed_, type_, id_)
 };
 
 } // namespace cell

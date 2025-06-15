@@ -131,9 +131,15 @@ private:
      */
     void throwIfLocked();
 
-    /*void loadFromJson(const fs::path& jsonFile);
+    /**
+     * @brief Attempts to read in an instance of `Settings` from the json file and sets the settings to that instance
+     */
+    void loadFromJson(const fs::path& jsonFile);
 
-    void saveAsJson(const fs::path& jsonFile);*/
+    /**
+     * @brief Saves the current `Settings` instance to the given json path
+     */
+    void saveAsJson(const fs::path& jsonFile);
 
 private:
     /**

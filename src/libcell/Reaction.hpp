@@ -40,6 +40,10 @@ public:
 
 public:
     /**
+     * @brief Default ctor for json
+     */
+    Reaction() = default;
+    /**
      * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
      * not in the interval [0, 1]
      */
@@ -85,7 +89,7 @@ private:
     Type type_;
 
 public:
-    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
 };
 
 struct ReactionHash
