@@ -7,7 +7,7 @@
 
 TEST(CellTest, EnergyIsConserved)
 {
-    cell::GlobalSettings::get().restoreDefault();
+    cell::GlobalSettings::get().loadFromJson("../resources/defaultSettings.json");
 
     cell::Cell cell;
     cell.setBounds(sf::Vector2f{500, 500});

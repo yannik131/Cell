@@ -79,6 +79,12 @@ void SimulationControlWidget::setCallbacks()
 
 void SimulationControlWidget::toggleStartStopButtonState()
 {
+    if (cell::GlobalSettings::getSettings().discTypeDistribution_.empty())
+    {
+        QMessageBox::information(this, "Can't start simulation",
+                                 "Can't start simulation with an empty disc type distribution");
+        return;
+    }
     if (simulationStarted_)
     {
         emit simulationStopClicked();

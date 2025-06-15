@@ -20,19 +20,8 @@ const GUISettings& GlobalGUISettings::getGUISettings()
 
 GlobalGUISettings::GlobalGUISettings()
 {
-    loadDefaultDiscTypesPlotMap();
-
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
             &GlobalGUISettings::updateDiscTypesPlotMap);
-}
-
-void GlobalGUISettings::loadDefaultDiscTypesPlotMap()
-{
-    QStringList selectedDiscTypeNames;
-    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
-        selectedDiscTypeNames.push_back(QString::fromStdString(discType.getName()));
-
-    setDiscTypesPlotMap(selectedDiscTypeNames);
 }
 
 void GlobalGUISettings::setGuiFPS(int guiFPS)
@@ -59,6 +48,9 @@ void GlobalGUISettings::setCurrentPlotCategory(const PlotCategory& plotCategory)
 
 void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeNames)
 {
+    if (cell::GlobalSettings::getSettings().discTypeDistribution_.empty() && selectedDiscTypeNames.empty())
+        return;
+
     QVector<cell::DiscType> activeDiscTypes;
     for (const auto& selectedDiscTypeName : selectedDiscTypeNames)
         activeDiscTypes.push_back(utility::getDiscTypeByName(selectedDiscTypeName));

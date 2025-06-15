@@ -66,14 +66,8 @@ void GlobalSettings::setCallback(const std::function<void(const SettingID& setti
     GlobalSettings::get().callback_ = functor;
 }
 
-void GlobalSettings::restoreDefault()
-{
-    settings_ = Settings();
-}
-
 GlobalSettings::GlobalSettings()
 {
-    restoreDefault();
 }
 
 GlobalSettings& GlobalSettings::get()

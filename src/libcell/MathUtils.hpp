@@ -13,14 +13,12 @@
 #include <unordered_map>
 #include <vector>
 
-namespace cell
-{
-
 /**
  * @brief Entry-wise addition of 2 maps, i. e. {1: 1, 2: 3} + {1: 0, 2: 4} = {1: 1, 2: 7}
  */
-template <typename T1, typename T2, typename T3>
-std::unordered_map<T1, T2, T3>& operator+=(std::unordered_map<T1, T2, T3>& a, const std::unordered_map<T1, T2, T3>& b)
+template <typename T1, typename T2, typename T3, typename T4>
+std::unordered_map<T1, T2, T3, T4>& operator+=(std::unordered_map<T1, T2, T3, T4>& a,
+                                               const std::unordered_map<T1, T2, T3, T4>& b)
 {
     for (const auto& [key, value] : b)
         a[key] += value;
@@ -31,8 +29,8 @@ std::unordered_map<T1, T2, T3>& operator+=(std::unordered_map<T1, T2, T3>& a, co
 /**
  * @brief Entry-wise division of 2 maps
  */
-template <typename T1, typename T2, typename T3, typename T4>
-std::unordered_map<T1, T2, T3>& operator/=(std::unordered_map<T1, T2, T3>& a, const T4& b)
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+std::unordered_map<T1, T2, T3, T5>& operator/=(std::unordered_map<T1, T2, T3, T5>& a, const T4& b)
 {
     for (const auto& [key, value] : a)
         a[key] /= b;
@@ -49,8 +47,6 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
  * @brief Scalar product of 2 vectors
  */
 float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
-
-} // namespace cell
 
 namespace cell::mathutils
 {

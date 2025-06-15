@@ -55,11 +55,6 @@ public:
      */
     static void setCallback(const std::function<void(const SettingID& settingID)>& functor);
 
-    /**
-     * @brief Until loading settings is supported, this is just a helper to set to a default setting for testing
-     */
-    void restoreDefault();
-
     // All these setters check the limits in SettingsLimits, throw if locked and otherwise don't deserve their own
     // comment
 
@@ -104,6 +99,16 @@ public:
      */
     const std::vector<Reaction>& getReactions() const;
 
+    /**
+     * @brief Attempts to read in an instance of `Settings` from the json file and sets the settings to that instance
+     */
+    void loadFromJson(const fs::path& jsonFile);
+
+    /**
+     * @brief Saves the current `Settings` instance to the given json path
+     */
+    void saveAsJson(const fs::path& jsonFile);
+
 private:
     /**
      * @brief Singleton: Private ctor
@@ -130,16 +135,6 @@ private:
      * @brief Helper function that thros an exception if GlobalSettings were locked using lock()
      */
     void throwIfLocked();
-
-    /**
-     * @brief Attempts to read in an instance of `Settings` from the json file and sets the settings to that instance
-     */
-    void loadFromJson(const fs::path& jsonFile);
-
-    /**
-     * @brief Saves the current `Settings` instance to the given json path
-     */
-    void saveAsJson(const fs::path& jsonFile);
 
 private:
     /**

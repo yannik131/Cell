@@ -21,7 +21,6 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
 
     connect(ui->doneButton, &QPushButton::clicked, this, &PlotDataSelectionDialog::saveSettings);
 
-    loadSettings();
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
             &PlotDataSelectionDialog::loadSettings);
 }

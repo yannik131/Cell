@@ -56,9 +56,6 @@ signals:
 private:
     GlobalGUISettings();
 
-    // TODO remove once loading settings is supported
-    void loadDefaultDiscTypesPlotMap();
-
 private:
     GUISettings guiSettings_;
 };

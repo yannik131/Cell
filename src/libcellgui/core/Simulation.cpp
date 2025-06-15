@@ -41,6 +41,9 @@ void Simulation::run()
 
 void Simulation::reset()
 {
+    if (cell::GlobalSettings::getSettings().discTypeDistribution_.empty())
+        return;
+
     cell_.reinitialize();
     emitFrameData();
 }
