@@ -81,9 +81,12 @@ void SimulationControlWidget::setCallbacks()
             [this]() { ui->numberOfDiscsSpinBox->setValue(cell::GlobalSettings::getSettings().numberOfDiscs_); });
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationTimeScaleChanged, [this]()
             { ui->timeScaleDoubleSpinBox->setValue(cell::GlobalSettings::getSettings().simulationTimeScale_); });
-    connect(
-        &GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationTimeStepChanged, [this]()
-        { ui->timeStepSpinBox->setValue(cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()); });
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationTimeStepChanged,
+            [this]()
+            {
+                ui->timeStepSpinBox->setValue(
+                    static_cast<int>(cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()));
+            });
 }
 
 void SimulationControlWidget::toggleStartStopButtonState()
