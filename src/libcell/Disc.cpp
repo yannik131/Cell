@@ -8,8 +8,6 @@
 namespace cell
 {
 
-int Disc::instanceCount = 0;
-
 Disc::Disc(const DiscType& discType)
     : type_(discType)
 {

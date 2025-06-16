@@ -35,15 +35,16 @@ public:
         Transformation = 1 << 0,
         Decomposition = 1 << 1,
         Combination = 1 << 2,
-        Exchange = 1 << 3
+        Exchange = 1 << 3,
+        None = 0
     };
 
 public:
     /**
      * @brief Default ctor for json, don't use
      */
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     Reaction() = default;
+
     /**
      * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
      * not in the interval [0, 1]
@@ -87,7 +88,7 @@ private:
     DiscType product1_;
     std::optional<DiscType> product2_;
     float probability_ = 0;
-    Type type_;
+    Type type_ = Type::None;
 
 public:
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)

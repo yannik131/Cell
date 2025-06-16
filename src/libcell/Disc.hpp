@@ -117,16 +117,6 @@ private:
      * @brief The properties of this disc (mass, radius, ...)
      */
     DiscType type_;
-
-    /**
-     * @brief Used for the id
-     */
-    static int instanceCount;
-
-    /**
-     * @brief Unique ID for this disc
-     */
-    int id_;
 };
 
 } // namespace cell

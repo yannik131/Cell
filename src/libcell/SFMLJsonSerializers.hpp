@@ -13,19 +13,6 @@
 namespace nlohmann
 {
 
-template <> struct adl_serializer<sf::Vector2f>
-{
-    static void to_json(json& j, const sf::Vector2f& v)
-    {
-        j = std::make_tuple(v.x, v.y);
-    }
-
-    static void from_json(const json& j, sf::Vector2f& v)
-    {
-        std::tie(v.x, v.y) = j.get<std::tuple<float, float>>();
-    }
-};
-
 template <> struct adl_serializer<sf::Color>
 {
     static void to_json(json& j, const sf::Color& c)
