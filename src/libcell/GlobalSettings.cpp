@@ -181,6 +181,11 @@ void GlobalSettings::loadFromJson(const fs::path& jsonFile)
     json j;
     in >> j;
     settings_ = j.get<Settings>();
+
+    useCallback(SettingID::DiscTypeDistribution);
+    useCallback(SettingID::Reactions);
+    useCallback(SettingID::SimulationTimeScale);
+    useCallback(SettingID::SimulationTimeStep);
 }
 
 void GlobalSettings::saveAsJson(const fs::path& jsonFile)

@@ -93,4 +93,5 @@ void GlobalGUISettings::updateDiscTypesPlotMap()
 
     guiSettings_.discTypesPlotMap_ = updatedDiscTypesPlotMap;
     emit replotRequired();
+    emit plotDataMapUpdated();
 }

@@ -1,7 +1,6 @@
 #include "PlotDataSelectionDialog.hpp"
 #include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "MultiSelectListWidget.hpp"
 #include "PlotCategories.hpp"
 #include "ui_PlotDataSelectionDialog.h"
@@ -21,7 +20,7 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent)
 
     connect(ui->doneButton, &QPushButton::clicked, this, &PlotDataSelectionDialog::saveSettings);
 
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
+    connect(&GlobalGUISettings::get(), &GlobalGUISettings::plotDataMapUpdated, this,
             &PlotDataSelectionDialog::loadSettings);
 }
 

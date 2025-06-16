@@ -1,14 +1,10 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#include "DiscDistributionPreviewTableModel.hpp"
 #include "DiscTypeDistributionDialog.hpp"
-#include "DiscTypeDistributionTableModel.hpp"
-#include "FrameDTO.hpp"
 #include "PlotDataSelectionDialog.hpp"
 #include "PlotModel.hpp"
 #include "ReactionsDialog.hpp"
-#include "ReactionsTableModel.hpp"
 #include "Simulation.hpp"
 
 #include <QMainWindow>
@@ -67,6 +63,16 @@ private:
      * @brief Reinitializes the cell and resets the plot
      */
     void setSimulationWidgetSize();
+
+    /**
+     * @brief Opens a file dialog and asks the user where to save the settings
+     */
+    void saveSettingsAsJson();
+
+    /**
+     * @brief Opens a file dialog so the user can select a json file to load the settings from
+     */
+    void loadSettingsFromJson();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

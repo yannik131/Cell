@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
 
+    connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
+    connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
+
     connect(&resizeTimer_, &QTimer::timeout, this, &MainWindow::setSimulationWidgetSize);
     resizeTimer_.setSingleShot(true);
 
@@ -86,10 +89,46 @@ void MainWindow::setSimulationWidgetSize()
     plotModel_->clear();
 }
 
+void MainWindow::saveSettingsAsJson()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save settings", "", "JSON Files (*.json)");
+    if (fileName.isEmpty())
+        return;
+
+    try
+    {
+        cell::GlobalSettings::get().saveAsJson(fileName.toStdString());
+    }
+    catch (const ExceptionWithLocation& e)
+    {
+        QMessageBox::warning(this, "Couldn't save file", e.what());
+    }
+}
+
+void MainWindow::loadSettingsFromJson()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Open settings", "", "JSON Files (*.json)");
+
+    if (fileName.isEmpty())
+        return;
+
+    try
+    {
+        cell::GlobalSettings::get().loadFromJson(fileName.toStdString());
+    }
+    catch (const ExceptionWithLocation& e)
+    {
+        QMessageBox::warning(this, "Couldn't open file", e.what());
+    }
+}
+
 MainWindow::~MainWindow() = default;
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
+    if (simulation_->worldIsEmpty())
+        ui->simulationWidget->render(FrameDTO());
+
     if (!initialSizeSet_)
     {
         event->ignore();

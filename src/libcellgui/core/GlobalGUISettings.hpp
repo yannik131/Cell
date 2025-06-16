@@ -52,6 +52,7 @@ public:
 
 signals:
     void replotRequired();
+    void plotDataMapUpdated();
 
 private:
     GlobalGUISettings();
