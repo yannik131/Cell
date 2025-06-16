@@ -127,6 +127,8 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
         if (!exchangeFlags[index.column()])
             return defaultFlags;
         break;
+    case cell::Reaction::Type::None:
+        throw ExceptionWithLocation("Invalid reaction type");
     }
 
     return defaultFlags | Qt::ItemIsEditable;

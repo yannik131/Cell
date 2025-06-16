@@ -1,10 +1,11 @@
 #include "Logging.hpp"
 
+#include <glog/logging.h>
 #include <gtest/gtest.h>
 
 #include <filesystem>
 
-void cdUpUntilInTestDir()
+bool cdUpUntilInTestDir()
 {
     namespace fs = std::filesystem;
 
@@ -13,12 +14,14 @@ void cdUpUntilInTestDir()
         if (fs::exists("test/output") && fs::is_directory("test/output"))
         {
             fs::current_path("test/output");
-            return;
+            return true;
         }
         fs::current_path("..");
     }
 
-    throw std::runtime_error("Folder 'test/output' not found after 3 attempts.");
+    LOG(ERROR) << "Folder 'test/output' not found after 3 attempts.";
+
+    return false;
 }
 
 /**
@@ -26,8 +29,10 @@ void cdUpUntilInTestDir()
  */
 int main(int argc, char** argv)
 {
-    cdUpUntilInTestDir();
-    testing::InitGoogleTest(&argc, argv);
     cell::initLogging(argc, argv);
+    if (!cdUpUntilInTestDir())
+        return 1;
+
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
