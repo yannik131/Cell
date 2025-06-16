@@ -7,6 +7,9 @@
 #include <SFML/System.hpp>
 #include <nlohmann/json.hpp>
 
+// See https://github.com/nlohmann/json?tab=readme-ov-file#how-do-i-convert-third-party-types for more info on what's
+// happening here and everywhere else where argument dependent lookup (adl) serializers are used
+
 namespace nlohmann
 {
 

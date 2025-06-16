@@ -103,6 +103,9 @@ TEST(SerializationTest, SettingsSerialization)
     discTypeDistribution[D] = 0;
 
     GlobalSettings::get().setDiscTypeDistribution(discTypeDistribution);
+    GlobalSettings::get().setNumberOfDiscs(100);
+    GlobalSettings::get().setSimulationTimeScale(1);
+    GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(1));
 
     GlobalSettings::get().addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
     GlobalSettings::get().addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});

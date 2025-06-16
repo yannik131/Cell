@@ -61,7 +61,7 @@
             0
         ]
     ],
-    "numberOfDiscs_": 1,
+    "numberOfDiscs_": 100,
     "reactionTable_": {
         "combinationReactionLookupMap_": [
             [
@@ -570,6 +570,6 @@
         ],
         "transformationReactionLookupMap_": []
     },
-    "simulationTimeScale_": 9.999999747378752e-05,
-    "simulationTimeStep_": 100000
+    "simulationTimeScale_": 1,
+    "simulationTimeStep_": 1000
 }
