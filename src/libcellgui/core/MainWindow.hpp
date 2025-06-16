@@ -74,6 +74,11 @@ private:
      */
     void loadSettingsFromJson();
 
+    /**
+     * @brief Looks for a file called defaultSettings.json in the cwd and loads it if it's there
+     */
+    void loadDefaultSettings();
+
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QThread* simulationThread_ = nullptr;

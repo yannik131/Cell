@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget* parent)
                        {
                            setSimulationWidgetSize();
                            initialSizeSet_ = true;
+                           loadDefaultSettings();
                        });
 }
 
@@ -120,6 +121,15 @@ void MainWindow::loadSettingsFromJson()
     {
         QMessageBox::warning(this, "Couldn't open file", e.what());
     }
+}
+
+void MainWindow::loadDefaultSettings()
+{
+    fs::path cwd = fs::current_path();
+    fs::path defaultSettingsFile = cwd / "defaultSettings.json";
+
+    if (fs::exists(defaultSettingsFile))
+        cell::GlobalSettings::get().loadFromJson(defaultSettingsFile);
 }
 
 MainWindow::~MainWindow() = default;

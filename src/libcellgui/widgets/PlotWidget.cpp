@@ -129,7 +129,8 @@ void PlotWidget::createRegularGraphs()
             continue;
 
         QCPGraph* graph = addGraph();
-        graph->setPen(utility::sfColorToQColor(discType.getColor()));
+        graph->setPen(
+            utility::sfColorToQColor(discType.getColor() == sf::Color::White ? sf::Color::Black : discType.getColor()));
         graph->setName(QString::fromStdString(discType.getName()));
         graphs_[discType] = graph;
     }
