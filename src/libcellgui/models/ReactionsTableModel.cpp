@@ -163,6 +163,8 @@ void ReactionsTableModel::addEmptyRow(const cell::Reaction::Type& type)
     case cell::Reaction::Type::Exchange:
         addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.f});
         break;
+    case cell::Reaction::Type::None:
+        throw ExceptionWithLocation("Invalid reaction type");
     }
 }
 
