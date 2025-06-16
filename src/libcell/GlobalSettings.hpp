@@ -113,7 +113,7 @@ private:
     /**
      * @brief Singleton: Private ctor
      */
-    GlobalSettings();
+    GlobalSettings() = default;
 
     /**
      * @brief Helper function to remove reactions were removed DiscTypes are in the educts or products ("dangling"

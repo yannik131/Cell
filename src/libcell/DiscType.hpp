@@ -61,7 +61,7 @@ public:
 
 public:
     /**
-     * @attention Just here for nlohmann::json
+     * @attention Just here for nlohmann::json, shouldn't be used
      */
     DiscType() = default;
 
@@ -164,7 +164,7 @@ private:
      * @note Necessary so I can check if a DiscType changed by the user was part of a reaction so that the reaction can
      * be updated accordingly
      */
-    int id_;
+    int id_ = 0;
 
     /**
      * @brief Instance counter used for the ID

@@ -40,8 +40,9 @@ public:
 
 public:
     /**
-     * @brief Default ctor for json
+     * @brief Default ctor for json, don't use
      */
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     Reaction() = default;
     /**
      * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is

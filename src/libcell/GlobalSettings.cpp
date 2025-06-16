@@ -66,10 +66,6 @@ void GlobalSettings::setCallback(const std::function<void(const SettingID& setti
     GlobalSettings::get().callback_ = functor;
 }
 
-GlobalSettings::GlobalSettings()
-{
-}
-
 GlobalSettings& GlobalSettings::get()
 {
     static GlobalSettings instance;
