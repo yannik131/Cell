@@ -11,9 +11,6 @@
 #include <ostream>
 #include <random>
 
-namespace cell
-{
-
 std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";
@@ -23,8 +20,6 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
 {
     return a.x * b.x + a.y * b.y;
 }
-
-} // namespace cell
 
 namespace cell::mathutils
 {

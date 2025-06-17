@@ -53,12 +53,16 @@ QVariant DiscDistributionPreviewTableModel::data(const QModelIndex& index, int r
 
 Qt::ItemFlags DiscDistributionPreviewTableModel::flags(const QModelIndex&) const
 {
-    return Qt::ItemIsSelectable;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 void DiscDistributionPreviewTableModel::loadSettings()
 {
+    beginResetModel();
+
     distribution_.clear();
     for (const auto& pair : cell::GlobalSettings::getSettings().discTypeDistribution_)
         distribution_.push_back(pair);
+
+    endResetModel();
 }

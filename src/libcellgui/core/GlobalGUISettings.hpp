@@ -52,12 +52,10 @@ public:
 
 signals:
     void replotRequired();
+    void plotDataMapUpdated();
 
 private:
     GlobalGUISettings();
-
-    // TODO remove once loading settings is supported
-    void loadDefaultDiscTypesPlotMap();
 
 private:
     GUISettings guiSettings_;

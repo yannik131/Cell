@@ -27,6 +27,7 @@ find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
@@ -41,6 +42,7 @@ target_link_libraries(libcell PUBLIC
     sfml-graphics
     nanoflann::nanoflann
     glog::glog
+    nlohmann_json::nlohmann_json
 )
 
 # qcustomplot
@@ -79,6 +81,17 @@ target_link_libraries(cell-gui libcellgui)
 # benchmark target
 add_executable(benchmark src/benchmark/Main.cpp)
 target_link_libraries(benchmark libcell)
+
+# target for trying stuff out
+add_executable(playground src/playground/Main.cpp)
+target_link_libraries(playground PRIVATE
+    sfml-system
+    sfml-window
+    sfml-graphics
+    nanoflann::nanoflann
+    glog::glog
+    nlohmann_json::nlohmann_json
+)
 
 # testing
 enable_testing()

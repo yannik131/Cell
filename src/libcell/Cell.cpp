@@ -63,6 +63,8 @@ const std::vector<Disc>& Cell::getDiscs() const
 void Cell::reinitialize()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
+    if (discTypeDistribution.empty())
+        throw ExceptionWithLocation("Disc type distribution can't be empty");
 
     maxRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
                                           { return a.first.getRadius() < b.first.getRadius(); })

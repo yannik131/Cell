@@ -8,11 +8,8 @@
 namespace cell
 {
 
-int Disc::instanceCount = 0;
-
 Disc::Disc(const DiscType& discType)
     : type_(discType)
-    , id_(instanceCount++)
 {
 }
 
@@ -87,11 +84,6 @@ const DiscType& Disc::getType() const
 bool Disc::isMarkedDestroyed() const
 {
     return destroyed_;
-}
-
-int Disc::getId() const
-{
-    return id_;
 }
 
 float Disc::getAbsoluteMomentum() const

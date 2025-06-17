@@ -16,7 +16,7 @@ public:
     /**
      * @brief Loads the settings and connects callbacks
      */
-    DiscDistributionPreviewTableModel(QObject* parent = nullptr);
+    explicit DiscDistributionPreviewTableModel(QObject* parent = nullptr);
 
     /**
      * @returns number of disc types in the last loaded disc type distribution

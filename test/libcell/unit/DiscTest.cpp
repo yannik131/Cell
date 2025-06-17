@@ -124,14 +124,6 @@ TEST(DiscTest, MarkDestroyedSetsFlag)
     EXPECT_TRUE(disc.isMarkedDestroyed());
 }
 
-TEST(DiscTest, GetIdReturnsUniqueId)
-{
-    cell::Disc disc1(Type);
-    cell::Disc disc2(Type);
-
-    EXPECT_NE(disc1.getId(), disc2.getId());
-}
-
 TEST(DiscTest, GetAbsoluteMomentumCalculatesCorrectly)
 {
     cell::Disc disc(Type);

@@ -4,8 +4,10 @@
 #include "DiscType.hpp"
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <SFML/System/Time.hpp>
+#include <nlohmann/json.hpp>
 
 #include <map>
 #include <utility>
@@ -46,6 +48,9 @@ struct Settings
      */
     ReactionTable reactionTable_;
 };
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_,
+                                   discTypeDistribution_, reactionTable_)
 
 namespace SettingsLimits
 {

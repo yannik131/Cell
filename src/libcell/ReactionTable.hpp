@@ -3,6 +3,7 @@
 
 #include "DiscType.hpp"
 #include "Reaction.hpp"
+#include "SFMLJsonSerializers.hpp"
 
 #include <vector>
 
@@ -92,6 +93,11 @@ private:
     DiscType::map<std::vector<Reaction>> decompositionReactionLookupMap_;
     DiscType::pair_map<std::vector<Reaction>> combinationReactionLookupMap_;
     DiscType::pair_map<std::vector<Reaction>> exchangeReactionLookupMap_;
+
+public:
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformationReactionLookupMap_,
+                                   decompositionReactionLookupMap_, combinationReactionLookupMap_,
+                                   exchangeReactionLookupMap_)
 };
 
 } // namespace cell

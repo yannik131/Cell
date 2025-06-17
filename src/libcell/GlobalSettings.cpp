@@ -1,12 +1,17 @@
 #include "GlobalSettings.hpp"
 #include "ExceptionWithLocation.hpp"
-
 #include "ReactionTable.hpp"
+
+#include <nlohmann/json.hpp>
+
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <set>
 #include <type_traits>
 #include <vector>
+
+using json = nlohmann::json;
 
 namespace cell
 {
@@ -59,31 +64,6 @@ void throwIfNotInDistribution(const DiscType& discType, const DiscType::map<int>
 void GlobalSettings::setCallback(const std::function<void(const SettingID& settingID)>& functor)
 {
     GlobalSettings::get().callback_ = functor;
-}
-
-void GlobalSettings::restoreDefault()
-{
-    settings_ = Settings();
-
-    // TODO save settings as json, load default
-    DiscType A("A", sf::Color::Green, 5, 10);
-    DiscType B("B", sf::Color::Red, 10, 5);
-    DiscType C("C", sf::Color::Blue, 12, 5);
-    DiscType D("D", sf::Color::Magenta, 15, 10);
-
-    settings_.discTypeDistribution_[A] = 100;
-    settings_.discTypeDistribution_[B] = 0;
-    settings_.discTypeDistribution_[C] = 0;
-    settings_.discTypeDistribution_[D] = 0;
-
-    addReaction(Reaction{A, std::nullopt, B, C, 1e-2f});
-    addReaction(Reaction{B, C, D, std::nullopt, 1e-2f});
-    addReaction(Reaction{B, A, C, D, 1e-2f});
-}
-
-GlobalSettings::GlobalSettings()
-{
-    restoreDefault();
 }
 
 GlobalSettings& GlobalSettings::get()
@@ -188,6 +168,32 @@ void GlobalSettings::throwIfLocked()
         throw ExceptionWithLocation("Settings are locked");
 }
 
+void GlobalSettings::loadFromJson(const fs::path& jsonFile)
+{
+    std::ifstream in(jsonFile);
+    if (!in)
+        throw ExceptionWithLocation("Couldn't open file: " + jsonFile.string());
+
+    json j;
+    in >> j;
+    settings_ = j.get<Settings>();
+
+    useCallback(SettingID::DiscTypeDistribution);
+    useCallback(SettingID::Reactions);
+    useCallback(SettingID::SimulationTimeScale);
+    useCallback(SettingID::SimulationTimeStep);
+}
+
+void GlobalSettings::saveAsJson(const fs::path& jsonFile)
+{
+    std::ofstream out(jsonFile);
+    if (!out)
+        throw ExceptionWithLocation("Couldn't open file for writing: " + jsonFile.string());
+
+    json j = settings_;
+    out << j.dump(4);
+}
+
 void GlobalSettings::lock()
 {
     locked_ = true;
@@ -232,7 +238,7 @@ void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDis
     for (const auto& [oldDiscType, frequency] : settings_.discTypeDistribution_)
     {
         auto iter = newDiscTypeDistribution.find(oldDiscType);
-        if (iter != newDiscTypeDistribution.end() && !iter->first.equalsTo(oldDiscType))
+        if (iter != newDiscTypeDistribution.end() && !(iter->first == oldDiscType))
             updatedDiscTypes.emplace(oldDiscType, iter->first);
     }
 

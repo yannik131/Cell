@@ -58,8 +58,29 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="loadSettingsFromJsonAction"/>
+    <addaction name="saveSettingsAsJsonAction"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="saveSettingsAsJsonAction">
+   <property name="text">
+    <string>Save settings as...</string>
+   </property>
+  </action>
+  <action name="loadSettingsFromJsonAction">
+   <property name="text">
+    <string>Open JSON settings...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

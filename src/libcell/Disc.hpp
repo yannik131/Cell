@@ -87,11 +87,6 @@ public:
     bool isMarkedDestroyed() const;
 
     /**
-     * @brief Id using the instance count. Necessary to map changes in the lib to changes in the GUI
-     */
-    int getId() const;
-
-    /**
      * @returns |mv|
      */
     float getAbsoluteMomentum() const;
@@ -122,16 +117,6 @@ private:
      * @brief The properties of this disc (mass, radius, ...)
      */
     DiscType type_;
-
-    /**
-     * @brief Used for the id
-     */
-    static int instanceCount;
-
-    /**
-     * @brief Unique ID for this disc
-     */
-    int id_;
 };
 
 } // namespace cell

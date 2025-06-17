@@ -1,3 +1,4 @@
+#include "GlobalGUISettings.hpp"
 #include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "Logging.hpp"
@@ -16,6 +17,7 @@ int main(int argc, char* argv[])
     auto& functor = GlobalSettingsFunctor::get();
     cell::GlobalSettings::setCallback([&functor](const cell::SettingID& settingID) { functor(settingID); });
 
+#ifndef DEBUG
     try
     {
         MainWindow mainWindow;
@@ -39,5 +41,13 @@ int main(int argc, char* argv[])
         QMessageBox::critical(nullptr, "Error", QString("An unknown exception occured! Closing down."));
     }
 
+#else
+
+    MainWindow mainWindow;
+    mainWindow.show();
+
+    return app.exec();
+
+#endif
     return 1;
 }

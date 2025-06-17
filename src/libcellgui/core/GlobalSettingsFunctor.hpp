@@ -25,6 +25,8 @@ public:
 signals:
     void numberOfDiscsChanged();
     void discTypeDistributionChanged();
+    void simulationTimeScaleChanged();
+    void simulationTimeStepChanged();
 
 private:
     GlobalSettingsFunctor() = default;

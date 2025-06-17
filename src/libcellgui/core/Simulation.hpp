@@ -34,6 +34,11 @@ public:
      */
     void setWorldBounds(const sf::Vector2f& bounds);
 
+    /**
+     * @returns `true` if there are no discs in the simulation right now
+     */
+    bool worldIsEmpty() const;
+
 private:
     /**
      * @brief Populates a `FrameDTO` with the current cell state and emits it

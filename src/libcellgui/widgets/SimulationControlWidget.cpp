@@ -12,6 +12,7 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     ui->setupUi(this);
 
     ui->discDistributionPreviewTableView->setModel(discDistributionPreviewTableModel_);
+    ui->discDistributionPreviewTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // The order matters here: If we connect the callbacks to the widgets first, setting them to
     // the value from the settings would lead to infinite recursion
@@ -75,10 +76,27 @@ void SimulationControlWidget::setCallbacks()
 
     connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
     connect(ui->resetButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged,
+            [this]() { ui->numberOfDiscsSpinBox->setValue(cell::GlobalSettings::getSettings().numberOfDiscs_); });
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationTimeScaleChanged, [this]()
+            { ui->timeScaleDoubleSpinBox->setValue(cell::GlobalSettings::getSettings().simulationTimeScale_); });
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::simulationTimeStepChanged,
+            [this]()
+            {
+                ui->timeStepSpinBox->setValue(
+                    static_cast<int>(cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()));
+            });
 }
 
 void SimulationControlWidget::toggleStartStopButtonState()
 {
+    if (cell::GlobalSettings::getSettings().discTypeDistribution_.empty())
+    {
+        QMessageBox::information(this, "Can't start simulation",
+                                 "Can't start simulation with an empty disc type distribution");
+        return;
+    }
     if (simulationStarted_)
     {
         emit simulationStopClicked();

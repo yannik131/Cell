@@ -2,6 +2,7 @@
 #define TESTUTILS_HPP
 
 #include "DiscType.hpp"
+#include "Reaction.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>
@@ -32,5 +33,15 @@ inline const cell::DiscType Mass15 = generateDiscType(5, 15);
 inline const cell::DiscType Mass20 = generateDiscType(5, 20);
 inline const cell::DiscType Mass25 = generateDiscType(5, 25);
 inline const cell::DiscType Unused = generateDiscType(5, 5);
+
+inline auto getDefaultReactions()
+{
+    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.f};
+    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.f};
+    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.f};
+    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.f};
+
+    return std::make_tuple(transformation, decomposition, combination, exchange);
+}
 
 #endif /* TESTUTILS_HPP */
