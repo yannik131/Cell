@@ -52,11 +52,6 @@ public:
     void reinitialize();
 
     /**
-     * @brief Sets rectangular bounds for the discs in this cell
-     */
-    void setBounds(const sf::Vector2f& bounds);
-
-    /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
      */
     float getInitialKineticEnergy() const;
@@ -88,7 +83,6 @@ private:
 private:
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
-    sf::Vector2f bounds_;
     float maxRadius_{};
     DiscType::map<int> collisionCounts_;
     float initialKineticEnergy_{};

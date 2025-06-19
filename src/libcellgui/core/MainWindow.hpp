@@ -60,11 +60,6 @@ private:
     void resetSimulation();
 
     /**
-     * @brief Reinitializes the cell and resets the plot
-     */
-    void setSimulationWidgetSize();
-
-    /**
      * @brief Opens a file dialog and asks the user where to save the settings
      */
     void saveSettingsAsJson();
@@ -84,14 +79,13 @@ private:
     QThread* simulationThread_ = nullptr;
     std::unique_ptr<Simulation> simulation_;
 
-    bool initialSizeSet_ = false;
-    QTimer resizeTimer_;
-
     DiscTypeDistributionDialog* discDistributionDialog_;
     ReactionsDialog* reactionsDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 
     PlotModel* plotModel_;
+
+    QTimer resizeTimer_;
 };
 
 #endif /* MAINWINDOW_HPP */

@@ -51,10 +51,10 @@ void SimulationControlWidget::setCallbacks()
 {
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
-    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->fpsSpinBox, &QSpinBox::valueChanged,
             [this](int value) { tryExecuteWithExceptionHandling([=] { GlobalGUISettings::get().setGuiFPS(value); }); });
 
-    connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged,
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
@@ -65,19 +65,36 @@ void SimulationControlWidget::setCallbacks()
                     });
             });
 
-    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged,
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
-                    [=] { cell::GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
+                    [value] { cell::GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
             });
 
-    connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this, [this](float value)
-            { tryExecuteWithExceptionHandling([=] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
-    connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { tryExecuteWithExceptionHandling([=] { cell::GlobalSettings::get().setCellWidth(value); }) });
-    connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged, this, [this](int value)
-            { tryExecuteWithExceptionHandling([=] { cell::GlobalSettings::get().setCellHeight(value); }) });
+    connect(
+        ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, [this](float value)
+        { tryExecuteWithExceptionHandling([value] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
+    connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged,
+            [this](int value)
+            {
+                tryExecuteWithExceptionHandling(
+                    [value, this]
+                    {
+                        cell::GlobalSettings::get().setCellWidth(value);
+                        emit simulationResetTriggered();
+                    });
+            });
+    connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged,
+            [this](int value)
+            {
+                tryExecuteWithExceptionHandling(
+                    [value, this]
+                    {
+                        cell::GlobalSettings::get().setCellHeight(value);
+                        emit simulationResetTriggered();
+                    });
+            });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });

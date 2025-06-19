@@ -56,17 +56,11 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
-    connect(&resizeTimer_, &QTimer::timeout, this, &MainWindow::setSimulationWidgetSize);
     resizeTimer_.setSingleShot(true);
+    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(); });
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this,
-                       [this]()
-                       {
-                           setSimulationWidgetSize();
-                           initialSizeSet_ = true;
-                           loadDefaultSettings();
-                       });
+    QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);
 }
 
 void MainWindow::resetSimulation()
@@ -78,15 +72,6 @@ void MainWindow::resetSimulation()
     else
         simulation_->reset();
 
-    plotModel_->clear();
-}
-
-void MainWindow::setSimulationWidgetSize()
-{
-    const auto& simulationSize = ui->simulationWidget->size();
-    simulation_->setWorldBounds(
-        sf::Vector2f(static_cast<float>(simulationSize.width()), static_cast<float>(simulationSize.height())));
-    simulation_->reset();
     plotModel_->clear();
 }
 
@@ -136,21 +121,10 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-    if (simulation_->worldIsEmpty())
-        ui->simulationWidget->render(FrameDTO());
-
-    if (!initialSizeSet_)
-    {
-        event->ignore();
-        return;
-    }
+    // We don't want to continously redraw while the user is resizing the window because it might be costly
+    resizeTimer_.start(50);
 
     QMainWindow::resizeEvent(event);
-
-    if (resizeTimer_.isActive())
-        resizeTimer_.stop();
-
-    resizeTimer_.start(100);
 }
 
 void MainWindow::startSimulation()

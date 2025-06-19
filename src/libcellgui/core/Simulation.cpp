@@ -48,11 +48,6 @@ void Simulation::reset()
     emitFrameData();
 }
 
-void Simulation::setWorldBounds(const sf::Vector2f& bounds)
-{
-    cell_.setBounds(bounds);
-}
-
 bool Simulation::worldIsEmpty() const
 {
     return cell_.getDiscs().empty();
