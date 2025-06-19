@@ -81,7 +81,7 @@ void SimulationControlWidget::setCallbacks()
                 tryExecuteWithExceptionHandling(
                     [value, this]
                     {
-                        cell::GlobalSettings::get().setCellWidth(value);
+                        cell::GlobalSettings::get().setCellSize(value, ui->cellHeightSpinBox->value());
                         emit simulationResetTriggered();
                     });
             });
@@ -91,7 +91,7 @@ void SimulationControlWidget::setCallbacks()
                 tryExecuteWithExceptionHandling(
                     [value, this]
                     {
-                        cell::GlobalSettings::get().setCellHeight(value);
+                        cell::GlobalSettings::get().setCellSize(ui->cellWidthSpinBox->value(), value);
                         emit simulationResetTriggered();
                     });
             });
@@ -100,7 +100,8 @@ void SimulationControlWidget::setCallbacks()
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });
 
     connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
-    connect(ui->resetButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+    connect(ui->reinitializeButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+    connect(ui->fitIntoViewButton, &QPushButton::clicked, [this]() { emit fitIntoViewRequested(); });
 
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged,
             [this]() { ui->numberOfDiscsSpinBox->setValue(cell::GlobalSettings::getSettings().numberOfDiscs_); });
@@ -112,10 +113,12 @@ void SimulationControlWidget::setCallbacks()
                 ui->timeStepSpinBox->setValue(
                     static_cast<int>(cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()));
             });
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::cellWidthChanged,
-            [this]() { ui->cellWidthSpinBox->setValue(cell::GlobalSettings::getSettings().cellWidth_); });
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::cellHeightChanged,
-            [this]() { ui->cellHeightSpinBox->setValue(cell::GlobalSettings::getSettings().cellHeight_); });
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::cellSizeChanged,
+            [this]()
+            {
+                ui->cellWidthSpinBox->setValue(cell::GlobalSettings::getSettings().cellWidth_);
+                ui->cellHeightSpinBox->setValue(cell::GlobalSettings::getSettings().cellHeight_);
+            });
 }
 
 void SimulationControlWidget::toggleStartStopButtonState()

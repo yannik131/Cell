@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 #include "ExceptionWithLocation.hpp"
+#include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
@@ -58,6 +59,22 @@ MainWindow::MainWindow(QWidget* parent)
 
     resizeTimer_.setSingleShot(true);
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(); });
+
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [this]() { simulation_->emitFrameData(); });
+    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
+            [this]()
+            {
+                if (simulationThread_)
+                {
+                    QMessageBox::information(this, "Simulation is running",
+                                             "Can't resize right now, simulation is running");
+                    return;
+                }
+                const auto& widgetSize = ui->simulationWidget->size();
+
+                cell::GlobalSettings::get().setCellSize(widgetSize.width(), widgetSize.height());
+                ui->simulationWidget->resetView();
+            });
 
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);

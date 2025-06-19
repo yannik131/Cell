@@ -272,7 +272,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="resetButton">
+       <widget class="QPushButton" name="fitIntoViewButton">
         <property name="maximumSize">
          <size>
           <width>75</width>
@@ -280,7 +280,20 @@
          </size>
         </property>
         <property name="text">
-         <string>Reset</string>
+         <string>Fit into view</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reinitializeButton">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Reinitialize</string>
         </property>
        </widget>
       </item>

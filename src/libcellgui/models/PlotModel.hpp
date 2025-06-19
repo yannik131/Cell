@@ -52,7 +52,7 @@ private:
     /**
      * @brief Emits the newest data point to be added to the plot
      */
-    void emitDataPoint(DataPoint& averagedDataPoint);
+    void emitDataPoint(const DataPoint& averagedDataPoint);
 
     /**
      * @brief Emits data for the full plot with all data points

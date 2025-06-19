@@ -96,7 +96,7 @@ void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
     }
 }
 
-void PlotModel::emitDataPoint(DataPoint& averagedDataPoint)
+void PlotModel::emitDataPoint(const DataPoint& averagedDataPoint)
 {
     // https://stackoverflow.com/questions/8455887/stack-object-qt-signal-and-parameter-as-reference
     emit dataPointAdded(getActiveMap(averagedDataPoint));
