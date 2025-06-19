@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>407</width>
-    <height>482</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
        <height>500</height>
       </size>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,0,0,0,0">
       <item>
        <widget class="QWidget" name="widget" native="true">
         <property name="maximumSize">
@@ -138,6 +138,38 @@
             <double>1.000000000000000</double>
            </property>
           </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_6" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Width</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="cellWidthSpinBox"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_9" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Height</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="cellHeightSpinBox"/>
          </item>
         </layout>
        </widget>

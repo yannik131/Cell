@@ -38,6 +38,10 @@ struct Settings
      */
     int numberOfDiscs_ = 100;
 
+    int cellWidth_ = 1000;
+
+    int cellHeight_ = 1000;
+
     /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
@@ -62,6 +66,12 @@ const float MaxSimulationTimeScale = 10.f;
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
+
+const int MinCellWidth = 100;
+const int MaxCellWidth = 100000;
+
+const int MinCellHeight = 100;
+const int MaxCellHeight = 100000;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

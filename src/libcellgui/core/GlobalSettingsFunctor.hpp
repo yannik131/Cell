@@ -27,6 +27,8 @@ signals:
     void discTypeDistributionChanged();
     void simulationTimeScaleChanged();
     void simulationTimeStepChanged();
+    void cellWidthChanged();
+    void cellHeightChanged();
 
 private:
     GlobalSettingsFunctor() = default;

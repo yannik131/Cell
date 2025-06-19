@@ -20,4 +20,10 @@ void GlobalSettingsFunctor::operator()(const cell::SettingID& settingID)
 
     if (settingID & cell::SettingID::SimulationTimeStep)
         emit simulationTimeStepChanged();
+
+    if (settingID & cell::SettingID::CellWidth)
+        emit cellWidthChanged();
+
+    if (settingID & cell::SettingID::CellHeight)
+        emit cellHeightChanged();
 }

@@ -29,7 +29,9 @@ enum SettingID
     SimulationTimeScale = 1 << 1,
     NumberOfDiscs = 1 << 2,
     DiscTypeDistribution = 1 << 3,
-    Reactions = 1 << 4
+    Reactions = 1 << 4,
+    CellWidth = 1 << 5,
+    CellHeight = 1 << 6
 };
 
 /**
@@ -61,6 +63,8 @@ public:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(float simulationTimeScale);
     void setNumberOfDiscs(int numberOfDiscs);
+    void setCellWidth(int width);
+    void setCellHeight(int height);
 
     /**
      * @brief Sets the current disc type distribution and automatically removes all currently set reactions with
