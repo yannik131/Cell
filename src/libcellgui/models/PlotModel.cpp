@@ -60,7 +60,6 @@ PlotModel::PlotModel(QObject* parent)
 
 void PlotModel::clear()
 {
-    dataPointsToAverage_.clear();
     dataPoints_.clear();
     elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
 
@@ -82,17 +81,16 @@ void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
         dataPoint.totalMomentumMap_[disc.getType()] += disc.getAbsoluteMomentum();
     }
 
-    dataPointsToAverage_.push_back(dataPoint);
+    dataPointBeingAveraged_ = averageDataPoints({dataPoint, dataPointBeingAveraged_});
+    dataPoints_.push_back(std::move(dataPoint));
 
     elapsedWorldTimeSinceLastPlot_ += sf::microseconds(frameDTO.simulationTimeStepUs);
     if (elapsedWorldTimeSinceLastPlot_ >= PlotTimeInterval)
     {
-        auto averagedDataPoint = averageDataPoints(dataPointsToAverage_);
-        dataPoints_.append(std::move(dataPointsToAverage_));
-        dataPointsToAverage_.clear();
         elapsedWorldTimeSinceLastPlot_ -= PlotTimeInterval;
+        emitDataPoint(dataPointBeingAveraged_);
 
-        emitDataPoint(averagedDataPoint);
+        dataPointBeingAveraged_ = DataPoint();
     }
 }
 

@@ -116,8 +116,16 @@ void SimulationControlWidget::setCallbacks()
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::cellSizeChanged,
             [this]()
             {
+                // This would trigger 2 simulationResetTriggered signals, the first of which would send a signal with
+                // the wrong height So we block them and then emit the signal ourselves here
+
+                QSignalBlocker blocker1(ui->cellWidthSpinBox);
+                QSignalBlocker blocker2(ui->cellHeightSpinBox);
+
                 ui->cellWidthSpinBox->setValue(cell::GlobalSettings::getSettings().cellWidth_);
                 ui->cellHeightSpinBox->setValue(cell::GlobalSettings::getSettings().cellHeight_);
+
+                emit simulationResetTriggered();
             });
 }
 

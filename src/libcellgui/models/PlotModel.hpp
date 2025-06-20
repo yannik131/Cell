@@ -61,14 +61,14 @@ private:
 
 private:
     /**
-     * @brief Recently received DataPoints where sum of DataPoint::elapsedTimeUs_ < plotTimeInterval_
-     */
-    QVector<DataPoint> dataPointsToAverage_;
-
-    /**
      * @brief All data points received from the simulation
      */
     QVector<DataPoint> dataPoints_;
+
+    /**
+     * @brief If we collect all data points and average them all at once, visual stutter might be the result
+     */
+    DataPoint dataPointBeingAveraged_;
 
     /**
      * @brief Accumulated time of the received FrameDTOs since the last data point was emitted
