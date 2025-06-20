@@ -28,8 +28,8 @@ template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const Dis
 
 void Cell::update(const sf::Time& dt)
 {
-    float width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
-    float height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
+    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
 
     newDiscs_.clear();
 
@@ -151,8 +151,8 @@ void Cell::buildScene()
 
 void Cell::initializeStartPositions()
 {
-    const auto& width = GlobalSettings::getSettings().cellWidth_;
-    const auto& height = GlobalSettings::getSettings().cellHeight_;
+    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
 
     startPositions_.reserve(static_cast<std::size_t>((width / maxRadius_) * (height / maxRadius_)));
     float spacing = maxRadius_ + 1;

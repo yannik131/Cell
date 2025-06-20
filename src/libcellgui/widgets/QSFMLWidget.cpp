@@ -24,7 +24,7 @@ void QSFMLWidget::resizeEvent(QResizeEvent* event)
     RenderWindow::setSize(newSize);
     // The old Views position would now be wrong, simply place a new view with the correct size
     view_ = sf::View(sf::FloatRect(0, 0, static_cast<float>(newSize.x), static_cast<float>(newSize.y)));
-    view_.move(offset_.x(), offset_.y());
+    view_.move(static_cast<float>(offset_.x()), static_cast<float>(offset_.y()));
     view_.zoom(static_cast<float>(currentZoom_));
 
     RenderWindow::setView(view_);
@@ -67,7 +67,7 @@ void QSFMLWidget::mouseReleaseEvent(QMouseEvent*)
 
 void QSFMLWidget::wheelEvent(QWheelEvent* event)
 {
-    float delta = event->angleDelta().y();
+    float delta = static_cast<float>(event->angleDelta().y());
 
     float zoomFactor = (delta > 0) ? 0.9f : 1.1f;
     currentZoom_ *= zoomFactor;
