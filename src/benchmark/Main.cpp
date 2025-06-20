@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     setBenchmarkSettings();
 
     cell::Cell world;
-    world.setBounds(sf::Vector2f(1000, 1000));
+    cell::GlobalSettings::get().setCellSize(1000, 1000);
     world.reinitialize();
 
     const int N = 100000;

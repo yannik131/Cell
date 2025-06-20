@@ -1,4 +1,6 @@
 {
+    "cellHeight_": 500,
+    "cellWidth_": 500,
     "discTypeDistribution_": [
         [
             {
@@ -570,6 +572,6 @@
         ],
         "transformationReactionLookupMap_": []
     },
-    "simulationTimeScale_": 1,
+    "simulationTimeScale_": 1.0,
     "simulationTimeStep_": 1000
 }

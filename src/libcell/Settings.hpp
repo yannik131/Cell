@@ -38,8 +38,14 @@ struct Settings
      */
     int numberOfDiscs_ = 100;
 
+    /**
+     * @brief Width of the cell, arbitrary unit
+     */
     int cellWidth_ = 1000;
 
+    /**
+     * @brief Height of the cell, arbitrary unit
+     */
     int cellHeight_ = 1000;
 
     /**
@@ -53,8 +59,8 @@ struct Settings
     ReactionTable reactionTable_;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_,
-                                   discTypeDistribution_, reactionTable_)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_, cellWidth_,
+                                   cellHeight_, discTypeDistribution_, reactionTable_)
 
 namespace SettingsLimits
 {
