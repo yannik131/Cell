@@ -104,6 +104,7 @@ TEST(SerializationTest, SettingsSerialization)
 
     GlobalSettings::get().setDiscTypeDistribution(discTypeDistribution);
     GlobalSettings::get().setNumberOfDiscs(100);
+    GlobalSettings::get().setCellSize(500, 500);
     GlobalSettings::get().setSimulationTimeScale(1);
     GlobalSettings::get().setSimulationTimeStep(sf::milliseconds(1));
 
@@ -126,7 +127,9 @@ TEST(SerializationTest, SettingsSerialization)
 
         EXPECT_EQ(settings.discTypeDistribution_, settingsRead.discTypeDistribution_);
         EXPECT_EQ(settings.numberOfDiscs_, settingsRead.numberOfDiscs_);
-        EXPECT_EQ(settings.simulationTimeScale_, settingsRead.simulationTimeScale_);
+        EXPECT_FLOAT_EQ(settings.simulationTimeScale_, settingsRead.simulationTimeScale_);
         EXPECT_EQ(settings.simulationTimeStep_, settingsRead.simulationTimeStep_);
+        EXPECT_EQ(settings.cellWidth_, settingsRead.cellWidth_);
+        EXPECT_EQ(settings.cellHeight_, settingsRead.cellHeight_);
     }
 }

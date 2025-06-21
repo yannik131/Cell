@@ -25,6 +25,39 @@ public:
      */
     void resizeEvent(QResizeEvent* event) override;
 
+    /**
+     * @brief Starts dragging by setting the initial position
+     */
+    void mousePressEvent(QMouseEvent* event) override;
+
+    /**
+     * @brief Drags the world according to the mouse offset, taking zoom into account
+     */
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+    /**
+     * @brief Stops dragging
+     */
+    void mouseReleaseEvent(QMouseEvent* event) override;
+
+    /**
+     * @brief Increases/Decreases the zoom
+     */
+    void wheelEvent(QWheelEvent* event) override;
+
+    /**
+     * @brief Creates a new view without zoom and translation and resets zoom and translation offset
+     */
+    void resetView();
+
+    /**
+     * @returns the accumulative zoom of the view
+     */
+    double getCurrentZoom() const;
+
+signals:
+    void renderRequired();
+
 private:
     /**
      * @brief No paint engine is used here since we use SFML directly for drawing
@@ -37,7 +70,12 @@ private:
     void showEvent(QShowEvent*) override;
 
 private:
-    bool initialized_{false};
+    bool initialized_ = false;
+    sf::View view_;
+    QPoint offset_;
+    QPoint startPosition_;
+    bool dragging_ = false;
+    double currentZoom_ = 1;
 };
 
 #endif /* QSFMLWIDGET_HPP */

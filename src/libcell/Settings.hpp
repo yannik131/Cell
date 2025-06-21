@@ -39,6 +39,16 @@ struct Settings
     int numberOfDiscs_ = 100;
 
     /**
+     * @brief Width of the cell, arbitrary unit
+     */
+    int cellWidth_ = 1000;
+
+    /**
+     * @brief Height of the cell, arbitrary unit
+     */
+    int cellHeight_ = 1000;
+
+    /**
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
     DiscType::map<int> discTypeDistribution_;
@@ -49,8 +59,8 @@ struct Settings
     ReactionTable reactionTable_;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_,
-                                   discTypeDistribution_, reactionTable_)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_, cellWidth_,
+                                   cellHeight_, discTypeDistribution_, reactionTable_)
 
 namespace SettingsLimits
 {
@@ -62,6 +72,12 @@ const float MaxSimulationTimeScale = 10.f;
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
+
+const int MinCellWidth = 100;
+const int MaxCellWidth = 100000;
+
+const int MinCellHeight = 100;
+const int MaxCellHeight = 100000;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

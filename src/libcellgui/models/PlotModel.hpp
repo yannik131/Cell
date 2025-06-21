@@ -21,6 +21,8 @@ struct DataPoint
     cell::DiscType::map<double> discTypeCountMap_;
 };
 
+DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
+
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
  * @todo This is currently very slow: For small time steps, hundreds of data points are stored for a single point in the
@@ -42,7 +44,7 @@ public slots:
      * @brief Extracts information from the `frameDTO` relevant for the plot as a `DataPoint` and averages all collected
      * `DataPoint`s if the plot time interval has elapsed since the last plot, emitting a new plot data point
      */
-    void receiveFrameDTO(const FrameDTO& frameDTO);
+    void addDataPointFromFrameDTO(const FrameDTO& frameDTO);
 
 signals:
     void dataPointAdded(const cell::DiscType::map<double>& dataPoint);
@@ -52,28 +54,40 @@ private:
     /**
      * @brief Emits the newest data point to be added to the plot
      */
-    void emitDataPoint(DataPoint& averagedDataPoint);
+    void emitDataPoint(const DataPoint& averagedDataPoint);
 
     /**
      * @brief Emits data for the full plot with all data points
      */
     void emitPlot();
 
-private:
     /**
-     * @brief Recently received DataPoints where sum of DataPoint::elapsedTimeUs_ < plotTimeInterval_
+     * @brief Turns a given FrameDTO into a DataPoint by summing up all relevant properties of all discs in the given
+     * frame
      */
-    QVector<DataPoint> dataPointsToAverage_;
+    DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
 
+    /**
+     * @brief
+     */
+    void plotAveragedDataPoint();
+
+private:
     /**
      * @brief All data points received from the simulation
      */
     QVector<DataPoint> dataPoints_;
 
     /**
-     * @brief Accumulated time of the received FrameDTOs since the last data point was emitted
+     * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
+     * continously add data points to this one
      */
-    sf::Time elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
+    DataPoint dataPointBeingAveraged_;
+
+    /**
+     * @brief Number of data points already added to the dataPointBeingAveraged_
+     */
+    int averagingCount_ = 0;
 
     /**
      * @brief Alias for frequently accessed setting

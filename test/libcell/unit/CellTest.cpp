@@ -10,7 +10,7 @@ TEST(CellTest, EnergyIsConserved)
     cell::GlobalSettings::get().loadFromJson("../resources/defaultSettings.json");
 
     cell::Cell cell;
-    cell.setBounds(sf::Vector2f{500, 500});
+    cell::GlobalSettings::get().setCellSize(500, 500);
     cell.reinitialize();
 
     float initialKineticEnergy = cell.getInitialKineticEnergy();

@@ -92,6 +92,11 @@ public:
     float getAbsoluteMomentum() const;
 
     /**
+     * @returns mv
+     */
+    sf::Vector2f getMomentum() const;
+
+    /**
      * @returns 1/2*m*v^2
      */
     float getKineticEnergy() const;

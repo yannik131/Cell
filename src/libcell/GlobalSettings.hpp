@@ -29,7 +29,8 @@ enum SettingID
     SimulationTimeScale = 1 << 1,
     NumberOfDiscs = 1 << 2,
     DiscTypeDistribution = 1 << 3,
-    Reactions = 1 << 4
+    Reactions = 1 << 4,
+    CellSize = 1 << 5
 };
 
 /**
@@ -61,6 +62,7 @@ public:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(float simulationTimeScale);
     void setNumberOfDiscs(int numberOfDiscs);
+    void setCellSize(int width, int height);
 
     /**
      * @brief Sets the current disc type distribution and automatically removes all currently set reactions with
@@ -90,7 +92,7 @@ public:
     void unlock();
 
     /**
-     * @returns Current lock state of the settings (typically, settings are locked during simulation)
+     * @returns Current lock state of the settings (settings are locked during simulation)
      */
     bool isLocked() const;
 

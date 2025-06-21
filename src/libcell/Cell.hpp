@@ -19,7 +19,7 @@ namespace cell
  * @note Usage:
  * ```cpp
  * Cell cell;
- * cell.setBounds(sf::Vector2f{500, 500});
+ * GlobalSettings::get().setCellSize(500, 500);
  * cell.reinitialize(); // Populate the cell
  * cell.update(sf::milliseconds(1)); // Advance the simulation
  * // Do whatever
@@ -50,11 +50,6 @@ public:
      * @note Has to be called at least once before calling `update()`
      */
     void reinitialize();
-
-    /**
-     * @brief Sets rectangular bounds for the discs in this cell
-     */
-    void setBounds(const sf::Vector2f& bounds);
 
     /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
@@ -88,7 +83,6 @@ private:
 private:
     std::vector<sf::Vector2f> startPositions_;
     std::vector<Disc> discs_;
-    sf::Vector2f bounds_;
     float maxRadius_{};
     DiscType::map<int> collisionCounts_;
     float initialKineticEnergy_{};

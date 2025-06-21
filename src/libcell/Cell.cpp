@@ -28,13 +28,16 @@ template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const Dis
 
 void Cell::update(const sf::Time& dt)
 {
+    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
+
     newDiscs_.clear();
 
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * dt.asSeconds());
-        currentKineticEnergy_ +=
-            mathutils::handleWorldBoundCollision(disc, {0, 0}, bounds_, initialKineticEnergy_ - currentKineticEnergy_);
+        currentKineticEnergy_ += mathutils::handleWorldBoundCollision(disc, {0, 0}, {width, height},
+                                                                      initialKineticEnergy_ - currentKineticEnergy_);
     }
 
     const auto& newDiscs = unimolecularReactions(discs_);
@@ -75,14 +78,6 @@ void Cell::reinitialize()
 
     initializeStartPositions();
     buildScene();
-}
-
-void Cell::setBounds(const sf::Vector2f& bounds)
-{
-    if (bounds.x <= 0 || bounds.y <= 0)
-        throw ExceptionWithLocation("Bounds must be > 0");
-
-    bounds_ = bounds;
 }
 
 float Cell::getInitialKineticEnergy() const
@@ -156,23 +151,23 @@ void Cell::buildScene()
 
 void Cell::initializeStartPositions()
 {
-    if (bounds_.x == 0 || bounds_.y == 0)
-        throw ExceptionWithLocation("Can't initialize world: Bounds not set");
+    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
 
-    startPositions_.reserve(static_cast<std::size_t>((bounds_.x / maxRadius_) * (bounds_.y / maxRadius_)));
+    startPositions_.reserve(static_cast<std::size_t>((width / maxRadius_) * (height / maxRadius_)));
     float spacing = maxRadius_ + 1;
 
-    for (int i = 0; i < static_cast<int>(bounds_.x / (2 * spacing)); ++i)
+    for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
     {
-        for (int j = 0; j < static_cast<int>(bounds_.y / (2 * spacing)); ++j)
+        for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
         {
             startPositions_.emplace_back(spacing * static_cast<float>(2 * i + 1),
                                          spacing * static_cast<float>(2 * j + 1));
         }
     }
 
-    std::random_device rd;
-    std::mt19937 g(rd());
+    static std::random_device rd;
+    static std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 

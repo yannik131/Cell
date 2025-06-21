@@ -38,6 +38,15 @@ std::unordered_map<T1, T2, T3, T5>& operator/=(std::unordered_map<T1, T2, T3, T5
     return a;
 }
 
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+std::unordered_map<T1, T2, T3, T5> operator*(std::unordered_map<T1, T2, T3, T5> a, const T4& b)
+{
+    for (const auto& [key, value] : a)
+        a[key] *= b;
+
+    return a;
+}
+
 /**
  * @brief Prints the x and y coordinates to the given stream
  */

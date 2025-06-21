@@ -30,6 +30,8 @@ void SimulationControlWidget::setRanges()
                                   static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
                                          cell::SettingsLimits::MaxSimulationTimeScale);
+    ui->cellWidthSpinBox->setRange(cell::SettingsLimits::MinCellWidth, cell::SettingsLimits::MaxCellWidth);
+    ui->cellHeightSpinBox->setRange(cell::SettingsLimits::MinCellHeight, cell::SettingsLimits::MaxCellHeight);
 }
 
 void SimulationControlWidget::displayGlobalSettings()
@@ -41,16 +43,18 @@ void SimulationControlWidget::displayGlobalSettings()
     ui->numberOfDiscsSpinBox->setValue(settings.numberOfDiscs_);
     ui->timeStepSpinBox->setValue(static_cast<int>(settings.simulationTimeStep_.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setValue(settings.simulationTimeScale_);
+    ui->cellWidthSpinBox->setValue(settings.cellWidth_);
+    ui->cellHeightSpinBox->setValue(settings.cellHeight_);
 }
 
 void SimulationControlWidget::setCallbacks()
 {
     // Connect callback for changed settings (after displaying the global settings, otherwise we
     // will trigger a world reset without having set the bounds first)
-    connect(ui->fpsSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->fpsSpinBox, &QSpinBox::valueChanged,
             [this](int value) { tryExecuteWithExceptionHandling([=] { GlobalGUISettings::get().setGuiFPS(value); }); });
 
-    connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged,
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
@@ -61,21 +65,43 @@ void SimulationControlWidget::setCallbacks()
                     });
             });
 
-    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, this,
+    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged,
             [this](int value)
             {
                 tryExecuteWithExceptionHandling(
-                    [=] { cell::GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
+                    [value] { cell::GlobalSettings::get().setSimulationTimeStep(sf::microseconds(value)); });
             });
 
-    connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, this, [this](float value)
-            { tryExecuteWithExceptionHandling([=] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
+    connect(
+        ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, [this](float value)
+        { tryExecuteWithExceptionHandling([value] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
+    connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged,
+            [this](int value)
+            {
+                tryExecuteWithExceptionHandling(
+                    [value, this]
+                    {
+                        cell::GlobalSettings::get().setCellSize(value, ui->cellHeightSpinBox->value());
+                        emit simulationResetTriggered();
+                    });
+            });
+    connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged,
+            [this](int value)
+            {
+                tryExecuteWithExceptionHandling(
+                    [value, this]
+                    {
+                        cell::GlobalSettings::get().setCellSize(ui->cellWidthSpinBox->value(), value);
+                        emit simulationResetTriggered();
+                    });
+            });
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [this]() { emit editDiscTypesClicked(); });
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [this]() { emit editReactionsClicked(); });
 
     connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
-    connect(ui->resetButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+    connect(ui->reinitializeButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
+    connect(ui->fitIntoViewButton, &QPushButton::clicked, [this]() { emit fitIntoViewRequested(); });
 
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged,
             [this]() { ui->numberOfDiscsSpinBox->setValue(cell::GlobalSettings::getSettings().numberOfDiscs_); });
@@ -86,6 +112,20 @@ void SimulationControlWidget::setCallbacks()
             {
                 ui->timeStepSpinBox->setValue(
                     static_cast<int>(cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()));
+            });
+    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::cellSizeChanged,
+            [this]()
+            {
+                // This would trigger 2 simulationResetTriggered signals, the first of which would send a signal with
+                // the wrong height So we block them and then emit the signal ourselves here
+
+                QSignalBlocker blocker1(ui->cellWidthSpinBox);
+                QSignalBlocker blocker2(ui->cellHeightSpinBox);
+
+                ui->cellWidthSpinBox->setValue(cell::GlobalSettings::getSettings().cellWidth_);
+                ui->cellHeightSpinBox->setValue(cell::GlobalSettings::getSettings().cellHeight_);
+
+                emit simulationResetTriggered();
             });
 }
 

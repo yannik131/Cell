@@ -111,6 +111,18 @@ void GlobalSettings::setNumberOfDiscs(int numberOfDiscs)
     useCallback(SettingID::NumberOfDiscs);
 }
 
+void GlobalSettings::setCellSize(int width, int height)
+{
+    throwIfLocked();
+    throwIfNotInRange(width, SettingsLimits::MinCellWidth, SettingsLimits::MaxCellWidth, "cell width");
+    throwIfNotInRange(height, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
+
+    settings_.cellWidth_ = width;
+    settings_.cellHeight_ = height;
+
+    useCallback(SettingID::CellSize);
+}
+
 void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution)
 {
     throwIfLocked();

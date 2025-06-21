@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 #include "ExceptionWithLocation.hpp"
+#include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
+    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_.get(),
             &Simulation::reset);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_.get(),
@@ -56,17 +57,27 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
-    connect(&resizeTimer_, &QTimer::timeout, this, &MainWindow::setSimulationWidgetSize);
     resizeTimer_.setSingleShot(true);
+    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(true); });
+
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [this]() { simulation_->emitFrameData(true); });
+    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
+            [this]()
+            {
+                if (simulationThread_)
+                {
+                    QMessageBox::information(this, "Simulation is running",
+                                             "Can't resize right now, simulation is running");
+                    return;
+                }
+                const auto& widgetSize = ui->simulationWidget->size();
+
+                cell::GlobalSettings::get().setCellSize(widgetSize.width(), widgetSize.height());
+                ui->simulationWidget->resetView();
+            });
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this,
-                       [this]()
-                       {
-                           setSimulationWidgetSize();
-                           initialSizeSet_ = true;
-                           loadDefaultSettings();
-                       });
+    QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);
 }
 
 void MainWindow::resetSimulation()
@@ -78,15 +89,6 @@ void MainWindow::resetSimulation()
     else
         simulation_->reset();
 
-    plotModel_->clear();
-}
-
-void MainWindow::setSimulationWidgetSize()
-{
-    const auto& simulationSize = ui->simulationWidget->size();
-    simulation_->setWorldBounds(
-        sf::Vector2f(static_cast<float>(simulationSize.width()), static_cast<float>(simulationSize.height())));
-    simulation_->reset();
     plotModel_->clear();
 }
 
@@ -132,25 +134,21 @@ void MainWindow::loadDefaultSettings()
         cell::GlobalSettings::get().loadFromJson(defaultSettingsFile);
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow()
+{
+    if (simulationThread_ != nullptr)
+    {
+        simulationThread_->requestInterruption();
+        simulationThread_->wait();
+    }
+}
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-    if (simulation_->worldIsEmpty())
-        ui->simulationWidget->render(FrameDTO());
-
-    if (!initialSizeSet_)
-    {
-        event->ignore();
-        return;
-    }
+    // We don't want to continously redraw while the user is resizing the window because it might be costly
+    resizeTimer_.start(50);
 
     QMainWindow::resizeEvent(event);
-
-    if (resizeTimer_.isActive())
-        resizeTimer_.stop();
-
-    resizeTimer_.start(100);
 }
 
 void MainWindow::startSimulation()

@@ -63,6 +63,11 @@ private:
      */
     void createRegularGraphs();
 
+    /**
+     * @brief Create labels using correct units depending on the current plot type
+     */
+    void setAxisLabels();
+
 private:
     QCPTextElement* plotTitle_;
 

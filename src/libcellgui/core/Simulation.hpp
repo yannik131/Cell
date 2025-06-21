@@ -30,20 +30,16 @@ public:
     void reset();
 
     /**
-     * @brief Sets bounds of the cell without any additional checks
-     */
-    void setWorldBounds(const sf::Vector2f& bounds);
-
-    /**
      * @returns `true` if there are no discs in the simulation right now
      */
     bool worldIsEmpty() const;
 
-private:
     /**
      * @brief Populates a `FrameDTO` with the current cell state and emits it
+     * @param noTimeElapsed If `true`, set the elapsed time information for the emitted `FrameDTO` to 0, indicating that
+     * the DTO is just to be used for redrawing
      */
-    void emitFrameData();
+    void emitFrameData(bool noTimeElapsed = false);
 
 signals:
     void frameData(const FrameDTO& data);
