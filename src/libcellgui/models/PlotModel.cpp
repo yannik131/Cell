@@ -3,6 +3,9 @@
 #include "GlobalSettingsFunctor.hpp"
 #include "MathUtils.hpp"
 
+namespace
+{
+
 const cell::DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
 {
     switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
@@ -20,37 +23,29 @@ const cell::DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
     }
 }
 
-/**
- * @brief Calculates the average of a list of data points
- * @todo maybe use a map<PlotCategory, map<DiscType, double>> to avoid duplication?
- */
-DataPoint averageDataPoints(const QVector<DataPoint>& dataPoints)
+void averageDataPoint(DataPoint& dataPoint, int length)
 {
-    DataPoint average;
-    for (const auto& dataPoint : dataPoints)
-    {
-        average.collisionCounts_ += dataPoint.collisionCounts_;
-        average.totalKineticEnergyMap_ += dataPoint.totalKineticEnergyMap_;
-        average.totalMomentumMap_ += dataPoint.totalMomentumMap_;
-        average.discTypeCountMap_ += dataPoint.discTypeCountMap_;
-    }
+    float dt = sf::microseconds(dataPoint.elapsedTimeUs_).asSeconds();
 
-    const auto dt = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
+    // Collisions per second = All registered collisions / dt
+    dataPoint.collisionCounts_ /= dt;
 
-    average.collisionCounts_ /= dt;
-    average.totalKineticEnergyMap_ /= dataPoints.size();
-    average.totalMomentumMap_ /= dataPoints.size();
-    average.discTypeCountMap_ /= dataPoints.size();
+    dataPoint.totalKineticEnergyMap_ /= dt;
+    dataPoint.totalMomentumMap_ /= dt;
 
-    return average;
+    // This is time-independent, divide by just number of data points to get average number of disc types for each data
+    // point
+    dataPoint.discTypeCountMap_ /= length;
 }
+
+} // namespace
 
 PlotModel::PlotModel(QObject* parent)
     : QObject(parent)
 {
-    // With a simulation time step of 5ms, we get 200 data points each second
-    // We'll reserve enough space for 5 minutes of plotting, 5*60*200
-    dataPoints_.reserve(60000);
+    // With a simulation time step of 1ms, we get 1000 data points each second
+    // We'll reserve enough space for 5 minutes of plotting, 5*60*1000
+    dataPoints_.reserve(300000);
 
     connect(&GlobalGUISettings::get(), &GlobalGUISettings::replotRequired, this, &PlotModel::emitPlot);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, this, &PlotModel::clear);
@@ -61,37 +56,22 @@ PlotModel::PlotModel(QObject* parent)
 void PlotModel::clear()
 {
     dataPoints_.clear();
-    elapsedWorldTimeSinceLastPlot_ = sf::Time::Zero;
+    dataPointBeingAveraged_ = DataPoint();
+    averagingCount_ = 0;
 
     emitPlot();
 }
 
-void PlotModel::receiveFrameDTO(const FrameDTO& frameDTO)
+void PlotModel::addDataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
-    DataPoint dataPoint;
+    DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
 
-    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
-    dataPoint.elapsedTimeUs_ = frameDTO.simulationTimeStepUs;
+    dataPointBeingAveraged_ += dataPoint;
+    ++averagingCount_;
 
-    for (const auto& disc : frameDTO.discs_)
-    {
-        ++dataPoint.discTypeCountMap_[disc.getType()];
-        dataPoint.totalKineticEnergyMap_[disc.getType()] += disc.getKineticEnergy();
-        dataPoint.totalMomentumMap_[disc.getType()] += disc.getAbsoluteMomentum();
-    }
-
-    dataPointBeingAveraged_ = averageDataPoints({dataPoint, dataPointBeingAveraged_});
     dataPoints_.push_back(std::move(dataPoint));
 
-    elapsedWorldTimeSinceLastPlot_ += sf::microseconds(frameDTO.simulationTimeStepUs);
-    if (elapsedWorldTimeSinceLastPlot_ >= PlotTimeInterval)
-    {
-        elapsedWorldTimeSinceLastPlot_ -= PlotTimeInterval;
-        emitDataPoint(dataPointBeingAveraged_);
-
-        dataPointBeingAveraged_ = DataPoint();
-    }
+    plotAveragedDataPoint();
 }
 
 void PlotModel::emitDataPoint(const DataPoint& averagedDataPoint)
@@ -103,22 +83,74 @@ void PlotModel::emitDataPoint(const DataPoint& averagedDataPoint)
 void PlotModel::emitPlot()
 {
     QVector<cell::DiscType::map<double>> fullPlotData;
-    QVector<DataPoint> dataPointsToAverage;
-    sf::Time elapsedTime = sf::Time::Zero;
+    DataPoint dataPointToAverage;
+    int averagingCount = 0;
 
     for (const auto& dataPoint : dataPoints_)
     {
-        dataPointsToAverage.push_back(dataPoint);
+        dataPointToAverage += dataPoint;
+        ++averagingCount;
 
-        elapsedTime += sf::microseconds(dataPoint.elapsedTimeUs_);
-        if (elapsedTime >= PlotTimeInterval)
+        if (dataPointToAverage.elapsedTimeUs_ >= PlotTimeInterval.asMicroseconds())
         {
-            DataPoint averagedDataPoint = averageDataPoints(dataPointsToAverage);
-            fullPlotData.append(getActiveMap(averagedDataPoint));
-            dataPointsToAverage.clear();
-            elapsedTime -= PlotTimeInterval;
+            averageDataPoint(dataPointToAverage, averagingCount);
+            fullPlotData.append(getActiveMap(dataPointToAverage));
+
+            dataPointToAverage = DataPoint();
+            averagingCount = 0;
         }
     }
 
     emit newPlotCreated(fullPlotData);
+}
+
+DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
+{
+    DataPoint dataPoint;
+
+    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
+        dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
+    dataPoint.elapsedTimeUs_ = frameDTO.simulationTimeStepUs;
+
+    cell::DiscType::map<sf::Vector2f> totalMomentums;
+
+    for (const auto& disc : frameDTO.discs_)
+    {
+        ++dataPoint.discTypeCountMap_[disc.getType()];
+        dataPoint.totalKineticEnergyMap_[disc.getType()] += disc.getKineticEnergy();
+        totalMomentums[disc.getType()] += disc.getMomentum();
+    }
+
+    for (const auto& [discType, totalMomentum] : totalMomentums)
+        dataPoint.totalMomentumMap_[discType] = std::hypot(totalMomentum.x, totalMomentum.y);
+
+    return dataPoint;
+}
+
+void PlotModel::plotAveragedDataPoint()
+{
+    if (dataPointBeingAveraged_.elapsedTimeUs_ < PlotTimeInterval.asMicroseconds())
+        return;
+
+    averageDataPoint(dataPointBeingAveraged_, averagingCount_);
+
+    emitDataPoint(dataPointBeingAveraged_);
+
+    dataPointBeingAveraged_ = DataPoint();
+    averagingCount_ = 0;
+}
+
+DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
+{
+    auto dt = static_cast<double>(rhs.elapsedTimeUs_) / 1'000'000.0;
+
+    lhs.elapsedTimeUs_ += rhs.elapsedTimeUs_;
+    lhs.collisionCounts_ += rhs.collisionCounts_;
+    lhs.discTypeCountMap_ += rhs.discTypeCountMap_;
+
+    // To get values per second, we multiply by elapsed time in seconds
+    lhs.totalKineticEnergyMap_ += (rhs.totalKineticEnergyMap_ * dt);
+    lhs.totalMomentumMap_ += (rhs.totalMomentumMap_ * dt);
+
+    return lhs;
 }

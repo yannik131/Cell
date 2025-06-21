@@ -91,6 +91,11 @@ float Disc::getAbsoluteMomentum() const
     return type_.getMass() * std::hypot(velocity_.x, velocity_.y);
 }
 
+sf::Vector2f Disc::getMomentum() const
+{
+    return type_.getMass() * velocity_;
+}
+
 float Disc::getKineticEnergy() const
 {
     return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);

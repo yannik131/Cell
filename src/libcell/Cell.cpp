@@ -166,8 +166,8 @@ void Cell::initializeStartPositions()
         }
     }
 
-    std::random_device rd;
-    std::mt19937 g(rd());
+    static std::random_device rd;
+    static std::mt19937 g(rd());
     std::shuffle(startPositions_.begin(), startPositions_.end(), g);
 }
 

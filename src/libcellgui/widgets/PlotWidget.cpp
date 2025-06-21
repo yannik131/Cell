@@ -18,7 +18,6 @@ PlotWidget::PlotWidget(QWidget* parent)
     plotLayout()->addElement(0, 0, plotTitle_);
 
     xAxis->setLabel("t [s]");
-    yAxis->setLabel("N");
 
     addLayer("legend layer");
     legend->setLayer("legend layer");
@@ -54,6 +53,8 @@ void PlotWidget::reset()
         createSumGraph();
     else
         createRegularGraphs();
+
+    setAxisLabels();
 }
 
 void PlotWidget::replacePlot(const QVector<cell::DiscType::map<double>>& dataPoints)
@@ -137,6 +138,23 @@ void PlotWidget::createRegularGraphs()
 
     for (int i = 0; i < legend->itemCount(); ++i)
         legend->item(i)->setLayer("legend layer");
+}
+
+void PlotWidget::setAxisLabels()
+{
+    switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
+    {
+    case CollisionCounts:
+    case TypeCounts:
+        yAxis->setLabel("N");
+        break;
+    case KineticEnergy:
+        yAxis->setLabel("Kinetic energy");
+        break;
+    case AbsoluteImpulse:
+        yAxis->setLabel("|Total impulse|");
+        break;
+    }
 }
 
 void PlotWidget::addDataPointSum(const cell::DiscType::map<double>& dataPoint)

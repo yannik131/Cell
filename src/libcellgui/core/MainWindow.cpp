@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::receiveFrameDTO);
+    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_.get(),
             &Simulation::reset);
     connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_.get(),
