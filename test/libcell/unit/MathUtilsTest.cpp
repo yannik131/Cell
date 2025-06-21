@@ -162,6 +162,9 @@ TEST(MathUtilsTest, CollisionHandling)
     expectNear(d1.getVelocity(), {0.15f, -0.05f}, 1e-4f);
     expectNear(d2.getVelocity(), {2.15f, 0.05f}, 1e-4f);
 
+    // For the small velocities, this should be about equal
+    // For higher velocities (in the hundreds), we'd expect a diff of 1 or 2
+
     EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
 }
 

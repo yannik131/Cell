@@ -19,7 +19,7 @@ namespace cell
  * @note Usage:
  * ```cpp
  * Cell cell;
- * cell.setBounds(sf::Vector2f{500, 500});
+ * GlobalSettings::get().setCellSize(500, 500);
  * cell.reinitialize(); // Populate the cell
  * cell.update(sf::milliseconds(1)); // Advance the simulation
  * // Do whatever
