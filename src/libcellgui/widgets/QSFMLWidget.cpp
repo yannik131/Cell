@@ -48,8 +48,11 @@ void QSFMLWidget::mouseMoveEvent(QMouseEvent* event)
     QPointF delta = event->pos() - startPosition_;
     startPosition_ = event->pos();
 
-    sf::Vector2f worldDelta = RenderWindow::mapPixelToCoords(sf::Vector2i(0, 0)) -
-                              RenderWindow::mapPixelToCoords(sf::Vector2i(delta.x(), delta.y()));
+    sf::Vector2i sfDelta(static_cast<int>(delta.x()), static_cast<int>(delta.y()));
+
+    // The view could have zoom, so we need to take that into account by scaling the delta appropriately
+    sf::Vector2f worldDelta =
+        RenderWindow::mapPixelToCoords(sf::Vector2i(0, 0)) - RenderWindow::mapPixelToCoords(sfDelta);
 
     view_.move(worldDelta);
     RenderWindow::setView(view_);

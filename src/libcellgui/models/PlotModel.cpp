@@ -1,5 +1,6 @@
 #include "PlotModel.hpp"
 #include "GlobalGUISettings.hpp"
+#include "GlobalSettings.hpp"
 #include "GlobalSettingsFunctor.hpp"
 #include "MathUtils.hpp"
 
@@ -64,6 +65,10 @@ void PlotModel::clear()
 
 void PlotModel::addDataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
+    // Elapsed time 0 means this DTO was only emitted for a redraw
+    if (frameDTO.elapsedSimulationTimeUs == 0)
+        return;
+
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
 
     dataPointBeingAveraged_ += dataPoint;
@@ -110,7 +115,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
         dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
-    dataPoint.elapsedTimeUs_ = frameDTO.simulationTimeStepUs;
+    dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
 
     cell::DiscType::map<sf::Vector2f> totalMomentums;
 

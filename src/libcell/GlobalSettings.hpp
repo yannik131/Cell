@@ -92,7 +92,7 @@ public:
     void unlock();
 
     /**
-     * @returns Current lock state of the settings (typically, settings are locked during simulation)
+     * @returns Current lock state of the settings (settings are locked during simulation)
      */
     bool isLocked() const;
 

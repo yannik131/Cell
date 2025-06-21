@@ -58,9 +58,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
     resizeTimer_.setSingleShot(true);
-    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(); });
+    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(true); });
 
-    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [this]() { simulation_->emitFrameData(); });
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [this]() { simulation_->emitFrameData(true); });
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
             [this]()
             {
@@ -134,7 +134,14 @@ void MainWindow::loadDefaultSettings()
         cell::GlobalSettings::get().loadFromJson(defaultSettingsFile);
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow()
+{
+    if (simulationThread_ != nullptr)
+    {
+        simulationThread_->requestInterruption();
+        simulationThread_->wait();
+    }
+}
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {

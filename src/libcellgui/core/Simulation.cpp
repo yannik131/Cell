@@ -53,11 +53,12 @@ bool Simulation::worldIsEmpty() const
     return cell_.getDiscs().empty();
 }
 
-void Simulation::emitFrameData()
+void Simulation::emitFrameData(bool noTimeElapsed)
 {
     FrameDTO frameDTO{.discs_ = cell_.getDiscs(),
                       .collisionCounts_ = cell_.getAndResetCollisionCount(),
-                      .simulationTimeStepUs = cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
+                      .elapsedSimulationTimeUs =
+                          noTimeElapsed ? 0 : cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 
     emit frameData(frameDTO);
 }
