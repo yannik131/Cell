@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{cleveref}
 
 \lstset{
 	language=Python,
@@ -90,7 +91,7 @@ solution = solve(eq, t)
 simplified = [simplify(sol) for sol in solution]
 
 for sol in simplified:
-print(sol)
+    print(sol)
 	\end{lstlisting}
 
 	\subsection{Collision handling}
@@ -138,16 +139,80 @@ print(sol)
 	Here, $\vec{v}_{1-}$ and $\vec{v}_{2-}$ are the full velocities before the collision, not just the projection along the normal.
 
 	\section{Reactions}
-	
+
+    \subsection{Overview}
+    Every disc has internal energy $U$ and kinetic energy $E_k$. Every disc type has a user-defined enthalpy of formation $H_f$. This results in all reactions having a reaction enthalphy $H = H_f(\text{products}) - H_f(\text{educts})$. Every collision has a fixed probability $p$ to exchange a random small fraction $f$ of kinetic and inner energy between each other. All user-defined reactions must satisfy conservation of mass.\\
+    An overview of the 4 reaction types is given in \cref{tab_reactions}.
+
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{|l|l|l|}
+            \hline
+            \textbf{Reaction Type} & \textbf{Requirements} & \textbf{Energy Changes} \\
+            \hline
+            \begin{tabular}[c]{@{}l@{}}Transformation:\\ A $\rightarrow$ B\end{tabular} & $U(A) \geq H$ & 
+            \begin{tabular}[c]{@{}l@{}}Reduce $U(A)$ by $H$;\\ then turn A into B\end{tabular} \\
+            \hline
+            \begin{tabular}[c]{@{}l@{}}Decomposition:\\A $\rightarrow$ B + C\end{tabular} & $U(A) \geq H$ & 
+            \begin{tabular}[c]{@{}l@{}}Reduce $U(A)$ by $H$;\\ divide remaining $U$ and $E_k$\\ proportionally to masses of B and C\end{tabular} \\
+            \hline
+            \begin{tabular}[c]{@{}l@{}}Combination:\\A + B $\rightarrow$ C\end{tabular} & $U(A) + U(B) + E_k(A) + E_k(B) \geq H$ & 
+            \begin{tabular}[c]{@{}l@{}}Create C by inelastic collision;\\ turn lost $E_k$ into $U(C)$;\\ reduce random portions of $U(C)$\\ and $E_k(C)$ by $H$ total\end{tabular} \\
+            \hline
+            \begin{tabular}[c]{@{}l@{}}Exchange:\\A + B $\rightarrow$ C + D\end{tabular} & 
+            \begin{tabular}[c]{@{}l@{}}\\ $U(A) + U(B) + E_k(A) + E_k(B) \geq H$\end{tabular} & 
+            \begin{tabular}[c]{@{}l@{}}Reduce $U$ and $E_k$ of educts by $H$\\ (random portions for each);\\ divide remaining $U$ and $E_k$\\ proportionally to masses of C and D\\ Choose products closest in mass\end{tabular} \\
+            \hline
+        \end{tabular}
+        \caption{Reaction types, requirements, and energy changes.}
+        \label{tab_reactions}
+    \end{table}
+
+    Each forward reaction automatically creates a backward reaction with $H_b = -H_f$. Reaction probabilities are still required to be calculated (see below). The system checks if there are any unimolecular reactions without defined pre-exponential factors.
+
 	\subsection{Transformation $A \rightarrow B$}
 	
-	We just require that $m$ won't change. 
+	No additional thoughts.
 	
 	\subsection{Decomposition: $A \rightarrow B + C$}
+    We don't conserve momentum here, maybe fix later.\\
+	B and C should move in opposite directions perpendicular to $\vec{v}$ after the decomposition:
 	
-	\subsubsection*{Probability}
+	\begin{align*}
+		\vec{v}_1 = \begin{pmatrix} -v_y\\ v_x\end{pmatrix} \hspace{20px} \vec{v}_2 = \begin{pmatrix} v_y\\ -v_x\end{pmatrix}
+	\end{align*}
 	
-	The decomposition reaction probability is given in $\frac{\%}{s}$. Let's say the user specified probability $p$ and simulation time step $\Delta t$ in s. The reaction chance is $1 - (1 - p')^N$ and we want a reaction chance of $p$ after $N = \frac{1}{\Delta t}$:
+	\subsection{Combination: $A + B \rightarrow C$}
+	This is just a classical inelastic collision:
+	
+	\begin{align*}
+		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2}
+	\end{align*}
+
+	Note that after this collision, $C$ gained internal energy (see wikipedia for derivation):
+	
+	\begin{align*}
+		\Delta U_C = \frac{1}{2}\frac{m_1 m_2}{m_1 + m_2}(v_1 - v_2)^2
+	\end{align*}
+	
+	\subsection{Exchange: $A + B \rightarrow C + D$}
+	\Cref{tab_reactions} states to choose products closest in mass. Meaning: If $A + B \rightarrow C + D$ with $m(A) = 100$, $m(B) = 5$, $m(C) = 101$ and $m(D) = 4$, turn $A \rightarrow C$ and $B \rightarrow D$ because they are closer in mass.
+
+    \subsubsection{Probability}
+    \subsubsection*{Unimolecular reactions}
+    We can use Arrhenius law for the rate constant of reactions:
+
+    \begin{equation*}
+        k = A\exp{\left(-\frac{E_a}{k_BT}\right)},
+    \end{equation*}
+
+    where $k$ is the rate constant, $A$ is the attempt frequency (pre-exponential factor) and depends on the disc type, $E_a$ is the activation energy and $k_BT$ is the average energy of the particles. Note that $A$ is user-defined and translates to reactions per second (if enough energy is available). Also, for exothermic reactions the e-function should be replaced by 1. In this simulation, the activation energy is the reaction enthalpy $H$ and the energy of the particles relevant for reactions is their internal energy $U$. The rate constant can already be viewed as the frequency of collisions resulting in a reaction which is precisely the reaction probability $p$:
+
+    \begin{equation*}
+        p = A\exp{\left(-\frac{H}{U}\right)}.
+    \end{equation*}
+
+	Now we need to calculate the probability based on the simulation time step $\Delta t$ in s. The reaction chance is $1 - (1 - p')^N$ and we want it to be equal to $p$ after $N = \frac{1}{\Delta t}$:
 	
 	\begin{align*}
 		&p = 1 - (1 - p')^{\Delta t^{-1}}\\
@@ -155,49 +220,11 @@ print(sol)
 		&\Leftrightarrow p' = 1 - \sqrt[\Delta t^{-1}]{1 - p} = 1 - (1 - p)^{\frac{1}{\Delta t^{-1}}}\\
 		&\Rightarrow p' = 1 - (1 - p)^{\Delta t}
 	\end{align*}
-	
-	\subsubsection*{Physics}
-	
-	Let A have $\vec{p} = (m_1 + m_2)\vec{v}$. B and C should move in opposite directions perpendicular to $\vec{v}$ after the decomposition, conserving energy and momentum. We only need conservation of momentum to see:
-	
-	\begin{align*}
-		(m_1 + m_2)v = m_1v_1 + m_2v_2 \Rightarrow v_1 = v_2 = v
-	\end{align*}
 
-	Since we want B and C to move away perpendicular from the previous direction, we'll just multiply $v$ with 2 perpendicular unit vectors:
-	
-	\begin{align*}
-		\vec{n} = \frac{\vec{v}}{v} \hspace{20px} \vec{v}_1 = v\begin{pmatrix} -n_y\\ n_x\end{pmatrix} \hspace{20px} \vec{v}_2 = v\begin{pmatrix} n_y\\ -n_x\end{pmatrix}
-	\end{align*}
-	
-	\subsection{Combination: $A + B \rightarrow C$}
-	This is just a classical inelastic collision (see wikipedia for derivation):
-	
-	\begin{align*}
-		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2}
-	\end{align*}
+    \subsubsection*{Bimolecular reactions}
+    In a realistic model, reactions can only occur if the reacting interface of the colliding particles are actually close to another. This can be modelled by defining how much of a disc's circumference is "reactive". With the circumference $C_A = 2\pi r_A$ and the reactive arc length $s_A$, the probability of a reaction for colliding discs A and B is given by 
 
-	Note that after this collision, $C$ gained internal energy:
-	
-	\begin{align*}
-		\Delta U_C = \frac{1}{2}\frac{m_1 m_2}{m_1 + m_2}(v_1 - v_2)^2
-	\end{align*}
-
-	This internal energy will lead to the reverse reaction $C \rightarrow A + B$ if $U_C > E_a$, where $E_a$ is the activation energy required for the forward reaction.
-	
-	\subsection{Exchange: $A + B \rightarrow C + D$}
-	This is handled like a normal collision, we just change the types after. We handle this in terms of 2 separate transformations $A \rightarrow C$ and $B \rightarrow D$, conserving energy:
-	
-	\begin{align*}
-		m_A v_A^2 = m_C v_C^2 \Leftrightarrow v_C = \sqrt{\frac{m_A}{m_C}}v_A
-	\end{align*}
-
-	and mass
-	
-	\begin{align*}
-		m_A + m_B = m_C + m_D
-	\end{align*}
-	
-	This does not conserve momentum and is wrong until internal and activation energies are taken into account (TODO).
-
+    \begin{equation*}
+        p = \frac{s_A}{C_A}\cdot\frac{s_B}{C_B}.
+    \end{equation*}
 \end{document}

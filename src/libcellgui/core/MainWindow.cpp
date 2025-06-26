@@ -171,17 +171,10 @@ void MainWindow::startSimulation()
     connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
 
     simulationThread_->start();
-
-    // Resizing the window would change the world (haha) so we can't allow it during simulation
-    setFixedSize(size());
 }
 
 void MainWindow::stopSimulation()
 {
     if (simulationThread_)
         simulationThread_->requestInterruption();
-
-    // Revert the fixed size to enable resizing again
-    setMinimumSize(QSize(0, 0));
-    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 }
