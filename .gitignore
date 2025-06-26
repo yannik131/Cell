@@ -13,3 +13,5 @@ vcpkg_installed
 CMakeUserPresets.json
 .vscode
 test/output/
+*.fls
+*latexmk
