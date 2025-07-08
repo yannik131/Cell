@@ -2,6 +2,7 @@
 #define DISC_HPP
 
 #include "DiscType.hpp"
+#include "PhysicalObject.hpp"
 
 #include <SFML/System/Vector2.hpp>
 
@@ -9,52 +10,15 @@ namespace cell
 {
 
 /**
- * @brief Represents a particle in the simulation that can collide with others and undergo reactions. Physical
- * properties are defined by its DiscType
+ * @brief Represents a particle in the simulation that can collide with others and undergo reactions.
  */
-class Disc
+class Disc : public PhysicalObject
 {
 public:
     /**
-     * @brief Copy-ctor that does not affect id
+     * @brief Creates a new disc with the given discType and default coordinates
      */
     explicit Disc(const DiscType& discType);
-
-    /**
-     * @brief Sets the velocity of the disc in px/s
-     */
-    void setVelocity(const sf::Vector2f& velocity);
-
-    /**
-     * @brief Multiplies both velocity components with `factor`
-     */
-    void scaleVelocity(float factor);
-
-    /**
-     * @brief Adds `acceleration` to the velocity of the disc
-     */
-    void accelerate(const sf::Vector2f& acceleration);
-
-    /**
-     * @brief Negates the x-component of the velocity
-     */
-    void negateXVelocity();
-
-    /**
-     * @brief Negates the y-component of the velocity
-     */
-    void negateYVelocity();
-
-    /**
-     * @brief Sets the position with no checks.
-     * @note In debug mode, checks for invalid values (nan, inf)
-     */
-    void setPosition(const sf::Vector2f& position);
-
-    /**
-     * @brief Changes the disc's position by the given `distance`
-     */
-    void move(const sf::Vector2f& distance);
 
     /**
      * @brief Assigns a new disc type (no checks)
@@ -67,16 +31,6 @@ public:
     void markDestroyed();
 
     /**
-     * @returns Velocity of the disc (px/s)
-     */
-    const sf::Vector2f& getVelocity() const;
-
-    /**
-     * @returns Position of the disc (px)
-     */
-    const sf::Vector2f& getPosition() const;
-
-    /**
      * @returns DiscType of the disc
      */
     const DiscType& getType() const;
@@ -86,35 +40,10 @@ public:
      */
     bool isMarkedDestroyed() const;
 
-    /**
-     * @returns |mv|
-     */
-    float getAbsoluteMomentum() const;
-
-    /**
-     * @returns mv
-     */
-    sf::Vector2f getMomentum() const;
-
-    /**
-     * @returns 1/2*m*v^2
-     */
-    float getKineticEnergy() const;
-
 private:
     /**
-     * @brief Velocity in px/s
-     */
-    sf::Vector2f velocity_;
-
-    /**
-     * @brief Position in px
-     */
-    sf::Vector2f position_;
-
-    /**
      * @brief Reactions of type A + B -> C require B to be removed (A can be changed to C). This flag
-     * is set during the reaction processing and the world removed flagged discs after the update step
+     * is set during the reaction processing and the world removes flagged discs after the update step
      */
     bool destroyed_ = false;
 

@@ -24,57 +24,6 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
 namespace cell::mathutils
 {
 
-using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
-using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2>;
-
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius)
-{
-    NanoflannAdapter adapter(discs);
-    KDTree kdtree(2, adapter);
-    const nanoflann::SearchParameters searchParams(0, false);
-
-    std::set<std::pair<Disc*, Disc*>> collidingDiscs;
-    static std::vector<nanoflann::ResultItem<uint32_t, float>> discsInRadius;
-    std::set<Disc*> discsInCollisions;
-
-    for (auto& disc : discs)
-    {
-        // We do not support multiple simultaneous collisions
-        if (disc.isMarkedDestroyed() || discsInCollisions.contains(&disc))
-            continue;
-
-        discsInRadius.clear();
-        const float maxCollisionDistance = disc.getType().getRadius() + maxRadius;
-
-        // This is the most time consuming part of the whole application, next to the index build in the KDTree
-        // constructor
-        kdtree.radiusSearch(&disc.getPosition().x, maxCollisionDistance * maxCollisionDistance, discsInRadius,
-                            searchParams);
-
-        for (const auto& result : discsInRadius)
-        {
-            auto& otherDisc = discs[result.first];
-            if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
-                continue;
-
-            const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
-
-            if (result.second <= radiusSum * radiusSum)
-            {
-                const auto& pair = makeOrderedPair(&disc, &otherDisc);
-                collidingDiscs.insert(pair);
-
-                discsInCollisions.insert(pair.first);
-                discsInCollisions.insert(pair.second);
-
-                break;
-            }
-        }
-    }
-
-    return collidingDiscs;
-}
-
 DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
     DiscType::map<int> collisionCounts;
