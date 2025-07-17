@@ -7,7 +7,8 @@
 
 /**
  * @brief This is really just an experiment to see if giving additional information for exceptions is useful when
- * debugging because typically I just copy-paste the exception message and strg-f for it in the project
+ * debugging because typically I just copy-paste the exception message and strg-f for it in the project to see where it
+ * came from
  * @note So far not really a big difference
  */
 class ExceptionWithLocation : public std::runtime_error

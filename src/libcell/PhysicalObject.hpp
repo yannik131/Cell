@@ -10,6 +10,10 @@ typedef Vector2<double> Vector2d;
 
 namespace cell
 {
+
+/**
+ * @brief A physical object with mass, position, velocity etc.
+ */
 class PhysicalObject
 {
 public:

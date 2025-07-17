@@ -2,6 +2,7 @@
 #include "ExceptionWithLocation.hpp"
 #include "MathUtils.hpp"
 
+#include "Membrane.hpp"
 #include <stdexcept>
 
 namespace cell

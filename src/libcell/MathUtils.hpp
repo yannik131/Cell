@@ -88,14 +88,6 @@ struct OverlapResults
 };
 
 /**
- * @brief Finds all discs in the vector that overlap and returns them as unique pairs.
- * @param discs The vector of discs
- * @param maxRadius The largest radius of all discs in the simulation. Used for the radius search in the kd tree to find
- * candidates for collision
- */
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius);
-
-/**
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
  * appropriate functions to handle combination and exchange reactions
  */
