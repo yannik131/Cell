@@ -94,14 +94,6 @@ struct OverlapResults
 DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 
 /**
- * @brief Makes the disc bounce back from the walls. Gives additional kinetic energy to the disc if
- * `kineticEnergyDeficiency > 0`
- * @returns the kinetic energy added to the disc, if any
- */
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
-                                float kineticEnergyDeficiency);
-
-/**
  * @returns |vec|
  */
 float abs(const sf::Vector2f& vec);

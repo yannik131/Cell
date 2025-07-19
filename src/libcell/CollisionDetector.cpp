@@ -28,6 +28,30 @@ void CollisionDetector::detectCollisions(std::vector<Disc>& discs, std::vector<M
     discMembraneCollisions_ = detectDiscMembraneCollisions(discs, membranes);
 }
 
+CollisionDetector::RectangleCollision CollisionDetector::detectDiscRectangleCollision(const Disc& disc,
+                                                                                      const sf::Vector2d& topLeft,
+                                                                                      const sf::Vector2d& bottomRight)
+{
+    using Wall = RectangleCollision::Wall;
+
+    const double& R = disc.getType().getRadius();
+    const sf::Vector2d& r = disc.getPosition();
+    RectangleCollision rectangleCollision;
+    double l;
+
+    if (l = R + topLeft.x - r.x; l > 0)
+        rectangleCollision.xCollision_ = {Wall::Left, l};
+    else if (l = R - bottomRight.x + r.x; l > 0)
+        rectangleCollision.xCollision_ = {Wall::Right, l};
+
+    if (l = R + topLeft.y - r.y; l > 0)
+        rectangleCollision.yCollision_ = {Wall::Top, l};
+    else if (l = R - bottomRight.y + r.y; l > 0)
+        rectangleCollision.yCollision_ = {Wall::Bottom, l};
+
+    return rectangleCollision;
+} // namespace cell
+
 void CollisionDetector::updateMaxDiscRadius()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;

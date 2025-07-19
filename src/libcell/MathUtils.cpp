@@ -60,64 +60,6 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
     return collisionCounts;
 }
 
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
-                                float kineticEnergyDeficiency)
-{
-    const float& R = disc.getType().getRadius();
-    const sf::Vector2f& r = disc.getPosition();
-
-    bool collided = false;
-    float l = NAN; // We must satisfy clang-tidy!
-    float dx = 0, dy = 0;
-
-    if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall
-    {
-        dx = 2 * l;
-        disc.negateXVelocity();
-        collided = true;
-    }
-    else if (l = R - boundsBottomRight.x + r.x; l > 0) // Right wall
-    {
-        dx = -2 * l;
-        disc.negateXVelocity();
-        collided = true;
-    }
-
-    if (l = R + boundsTopLeft.y - r.y; l > 0) // Top wall
-    {
-        dy = 2 * l;
-        disc.negateYVelocity();
-        collided = true;
-    }
-    else if (l = R - boundsBottomRight.y + r.y; l > 0) // Bottom wall
-    {
-        dy = -2 * l;
-        disc.negateYVelocity();
-        collided = true;
-    }
-
-    if (!collided)
-        return 0.f;
-
-    disc.move({dx, dy});
-
-    if (kineticEnergyDeficiency <= 0)
-        return 0.f;
-
-    // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
-    // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
-    // kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
-    // initialKineticEnergy - currentKineticEnergy)
-
-    // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
-    // not too much to make it look stupid
-    float randomNumber = getRandomFloat() * 0.05f;
-    float kineticEnergyBefore = disc.getKineticEnergy();
-    disc.scaleVelocity(1.f + randomNumber);
-
-    return disc.getKineticEnergy() - kineticEnergyBefore;
-}
-
 float abs(const sf::Vector2f& vec)
 {
     return std::hypot(vec.x, vec.y);

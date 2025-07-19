@@ -1,12 +1,7 @@
 #ifndef PHYSICALOBJECT_HPP
 #define PHYSICALOBJECT_HPP
 
-#include <SFML/System/Vector2.hpp>
-
-namespace sf
-{
-typedef Vector2<double> Vector2d;
-}
+#include "Vector2d.hpp"
 
 namespace cell
 {
