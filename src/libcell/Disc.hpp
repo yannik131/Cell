@@ -16,7 +16,7 @@ class Disc : public PhysicalObject
 {
 public:
     /**
-     * @brief Creates a new disc with the given discType and default coordinates
+     * @brief Creates a new disc with the given discType and default coordinates/velocity of {0, 0}
      */
     explicit Disc(const DiscType& discType);
 

@@ -46,7 +46,6 @@ public:
 
     static RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                            const sf::Vector2d& bottomRight);
-    static bool detectDiscMembraneCollision(const Disc& disc, const Membrane& membrane);
 
     void updateMaxDiscRadius();
 

@@ -1,7 +1,7 @@
-#ifndef NANOFLANNADAPTER_HPP
-#define NANOFLANNADAPTER_HPP
+#ifndef PHYSICALOBJECTNANOFLANNADAPTER_HPP
+#define PHYSICALOBJECTNANOFLANNADAPTER_HPP
 
-#include "Disc.hpp"
+#include "PhysicalObject.hpp"
 
 #include <nanoflann.hpp>
 
@@ -9,13 +9,15 @@ namespace cell
 {
 
 /**
- * @brief Wrapper around a vector<Disc> for nanoflann
+ * @brief Wrapper around a vector<PhysicalObject> for nanoflann
  */
-struct NanoflannAdapter
+template <typename T>
+    requires std::is_base_of_v<PhysicalObject, T>
+struct PhysicalObjectNanoflannAdapter
 {
-    const std::vector<Disc>& elements;
+    const std::vector<T>& elements;
 
-    explicit NanoflannAdapter(const std::vector<Disc>& elems)
+    explicit PhysicalObjectNanoflannAdapter(const std::vector<T>& elems)
         : elements(elems)
     {
     }
@@ -41,4 +43,4 @@ struct NanoflannAdapter
 
 } // namespace cell
 
-#endif /* NANOFLANNADAPTER_HPP */
+#endif /* PHYSICALOBJECTNANOFLANNADAPTER_HPP */

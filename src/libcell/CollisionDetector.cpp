@@ -2,7 +2,7 @@
 #include "ExceptionWithLocation.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
-#include "NanoflannAdapter.hpp"
+#include "PhysicalObjectNanoflannAdapter.hpp"
 
 #include <nanoflann.hpp>
 
@@ -13,8 +13,10 @@ namespace cell
 
 namespace
 {
-using AdapterType = nanoflann::L2_Simple_Adaptor<double, NanoflannAdapter>;
-using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2>;
+template <typename T> using AdapterType = nanoflann::L2_Simple_Adaptor<double, PhysicalObjectNanoflannAdapter<T>>;
+
+template <typename T>
+using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType<T>, PhysicalObjectNanoflannAdapter<T>, 2>;
 } // namespace
 
 CollisionDetector::CollisionDetector()
@@ -50,7 +52,7 @@ CollisionDetector::RectangleCollision CollisionDetector::detectDiscRectangleColl
         rectangleCollision.yCollision_ = {Wall::Bottom, l};
 
     return rectangleCollision;
-} // namespace cell
+}
 
 void CollisionDetector::updateMaxDiscRadius()
 {
@@ -80,8 +82,8 @@ std::set<std::pair<Disc*, Membrane*>> CollisionDetector::getDiscMembraneCollisio
 
 std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
-    NanoflannAdapter adapter(discs);
-    KDTree kdtree(2, adapter);
+    PhysicalObjectNanoflannAdapter<Disc> adapter(discs);
+    KDTree<Disc> kdtree(2, adapter);
     const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
@@ -129,7 +131,21 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
 std::set<std::pair<Disc*, Membrane*>> CollisionDetector::detectDiscMembraneCollisions(std::vector<Disc>& discs,
                                                                                       std::vector<Membrane>& membranes)
 {
-    return std::set<std::pair<Disc*, Membrane*>>();
+    PhysicalObjectNanoflannAdapter<Membrane> adapter(membranes);
+    KDTree<Membrane> kdtree(2, adapter);
+
+    std::set<std::pair<Disc*, Membrane*>> collisions;
+
+    static std::vector<nanoflann::ResultItem<uint32_t, double>> nearbyMembranes;
+    const nanoflann::SearchParameters searchParams(0, false);
+
+    for (auto& disc : discs)
+    {
+        if (disc.isMarkedDestroyed())
+            continue;
+
+        const double maxSearchRadius = maxMembraneRadius_ - disc.getType().getRadius();
+    }
 }
 
 } // namespace cell

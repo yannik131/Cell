@@ -6,6 +6,27 @@
 
 #include <gtest/gtest.h>
 
+using Wall = cell::CollisionDetector::RectangleCollision::Wall;
+
+namespace
+{
+/**
+ * @brief Tests if a given `RectangleCollision` contains a collision with the specified wall and penetration
+ */
+void testRectangleCollision(const cell::CollisionDetector::RectangleCollision& collision, Wall wall, double penetration)
+{
+    const std::optional<std::pair<Wall, double>>* collisionInfo;
+    if (wall == Wall::Left || wall == Wall::Right)
+        collisionInfo = &collision.xCollision_;
+    else
+        collisionInfo = &collision.yCollision_;
+
+    ASSERT_TRUE(collisionInfo->has_value());
+    EXPECT_EQ((*collisionInfo)->first, wall);
+    EXPECT_DOUBLE_EQ((*collisionInfo)->second, penetration);
+}
+} // namespace
+
 TEST(CollisionDetectorTest, CanDetectDiscDiscCollisions)
 {
     cell::GlobalSettings::get().setDiscTypeDistribution({{Mass5, 100}});
@@ -65,4 +86,19 @@ TEST(CollisionDetectorTest, CanDetectDiscDiscCollisions)
         ++collisionCount;
 
     EXPECT_EQ(collisionCount, 1);
+}
+
+TEST(CollisionDetectorTest, CanDetectDiscRectangleCollisions)
+{
+    cell::Disc topLeftDisc(Mass5);
+    cell::Disc bottomRightDisc(Mass5);
+    sf::Vector2d topLeft{0, 0};
+    sf::Vector2d bottomRight{100, 100};
+
+    auto topLeftCollision = cell::CollisionDetector::detectDiscRectangleCollision(topLeftDisc, topLeft, bottomRight);
+    auto bottomRightCollision =
+        cell::CollisionDetector::detectDiscRectangleCollision(bottomRightDisc, topLeft, bottomRight);
+
+    testRectangleCollision(topLeftCollision, Wall::Left, topLeftDisc.getType().getRadius());
+    testRectangleCollision(bottomRightCollision, Wall::Bottom, bottomRightDisc.getType().getRadius());
 }
