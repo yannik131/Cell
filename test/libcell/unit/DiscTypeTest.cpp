@@ -1,4 +1,4 @@
-#include "DiscType.hpp"
+#include "types/DiscType.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 #include <gtest/gtest.h>
@@ -74,15 +74,4 @@ TEST(DiscTypeTest, EqualityOperator)
 
     EXPECT_TRUE(dt3 == dt2);
     EXPECT_TRUE(dt4 == dt2);
-}
-
-TEST(DiscTypeTest, MakeOrderedPair)
-{
-    cell::DiscType dt2("Alpha", sf::Color::Magenta, 4.0f, 8.0f);
-    cell::DiscType dt1("Zeta", sf::Color::Cyan, 3.0f, 6.0f);
-
-    auto orderedPair = makeOrderedPair(dt1, dt2);
-
-    EXPECT_EQ(orderedPair.first.getName(), "Alpha");
-    EXPECT_EQ(orderedPair.second.getName(), "Zeta");
 }

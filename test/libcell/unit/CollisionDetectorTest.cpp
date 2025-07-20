@@ -99,6 +99,6 @@ TEST(CollisionDetectorTest, CanDetectDiscRectangleCollisions)
     auto bottomRightCollision =
         cell::CollisionDetector::detectDiscRectangleCollision(bottomRightDisc, topLeft, bottomRight);
 
-    testRectangleCollision(topLeftCollision, Wall::Left, topLeftDisc.getType().getRadius());
-    testRectangleCollision(bottomRightCollision, Wall::Bottom, bottomRightDisc.getType().getRadius());
+    testRectangleCollision(topLeftCollision, Wall::Left, topLeftDisc.getType()->getRadius());
+    testRectangleCollision(bottomRightCollision, Wall::Bottom, bottomRightDisc.getType()->getRadius());
 }

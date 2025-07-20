@@ -8,15 +8,15 @@
 namespace cell
 {
 
-Disc::Disc(const DiscType& discType)
+Disc::Disc(const DiscType* discType)
 {
     setType(discType);
 }
 
-void Disc::setType(const DiscType& discType)
+void Disc::setType(const DiscType* discType)
 {
     type_ = discType;
-    setMass(discType.getMass());
+    setMass(discType->getMass());
 }
 
 void Disc::markDestroyed()
@@ -24,7 +24,7 @@ void Disc::markDestroyed()
     destroyed_ = true;
 }
 
-const DiscType& Disc::getType() const
+const DiscType* Disc::getType() const
 {
     return type_;
 }

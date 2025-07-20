@@ -1,16 +1,20 @@
 #ifndef MEMBRANE_HPP
 #define MEMBRANE_HPP
 
-#include "MembraneType.hpp"
 #include "PhysicalObject.hpp"
+#include "types/MembraneType.hpp"
 
 namespace cell
 {
 class Membrane : public PhysicalObject
 {
 public:
+    void setType(const MembraneType* membraneType);
+
+    const MembraneType* getType() const;
+
 private:
-    MembraneType membraneType_;
+    const MembraneType* membraneType_;
 };
 
 } // namespace cell

@@ -1,8 +1,8 @@
 #ifndef TESTUTILS_HPP
 #define TESTUTILS_HPP
 
-#include "DiscType.hpp"
 #include "Reaction.hpp"
+#include "types/DiscType.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>

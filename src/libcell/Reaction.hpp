@@ -1,8 +1,8 @@
 #ifndef REACTION_HPP
 #define REACTION_HPP
 
-#include "DiscType.hpp"
 #include "SFMLJsonSerializers.hpp"
+#include "types/DiscType.hpp"
 
 #include <nlohmann/json.hpp>
 

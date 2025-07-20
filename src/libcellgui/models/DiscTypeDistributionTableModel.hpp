@@ -1,7 +1,7 @@
 #ifndef DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
 #define DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
 
-#include "DiscType.hpp"
+#include "types/DiscType.hpp"
 
 #include <QAbstractTableModel>
 #include <QVector>

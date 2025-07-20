@@ -22,43 +22,15 @@ namespace cell
 class DiscType : public TypeBase
 {
 public:
-    struct IdHasher
-    {
-        int operator()(const DiscType& discType) const;
-    };
-
-    struct PairHasher
-    {
-        int operator()(const std::pair<DiscType, DiscType>& pair) const;
-    };
-
-    struct IdComparator
-    {
-        bool operator()(const DiscType& a, const DiscType& b) const
-        {
-            return a.getId() == b.getId();
-        }
-    };
-
-    struct PairComparator
-    {
-        bool operator()(const std::pair<DiscType, DiscType>& a, const std::pair<DiscType, DiscType>& b) const
-        {
-            return a.first.getId() == b.first.getId() && a.second.getId() == b.second.getId();
-        }
-    };
-
-public:
     /**
      * @brief Type to be used for reaction and disc type distribution tables
      */
-    template <typename T> using map = std::unordered_map<DiscType, T, IdHasher, IdComparator>;
+    template <typename T> using map = std::unordered_map<const DiscType*, T>;
 
     /**
      * @brief Type for the bimolecular reaction tables
      */
-    template <typename T>
-    using pair_map = std::unordered_map<std::pair<DiscType, DiscType>, T, PairHasher, PairComparator>;
+    template <typename T> using pair_map = std::unordered_map<std::pair<const DiscType*, const DiscType*>>;
 
 public:
     /**
@@ -70,11 +42,6 @@ public:
      * @brief Creates a new disc type with unique ID
      */
     DiscType(const std::string& name, const sf::Color& color, double radius, double mass);
-
-    /**
-     * @brief Assignment operator, copies the ID
-     */
-    DiscType& operator=(const DiscType& other);
 
     /**
      * @returns The radius of this DiscType in px
@@ -95,11 +62,6 @@ public:
      * @brief Sets the mass of this DiscType (must be > 0, arbitrary unit)
      */
     void setMass(double mass);
-
-    /**
-     * @brief Comparison by all members
-     */
-    bool operator==(const DiscType& other) const;
 
 private:
     /**
@@ -124,13 +86,8 @@ private:
     double mass_ = 0;
 
 public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DiscType, name_, color_, radius_, mass_, id_)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DiscType, name_, color_, radius_, mass_)
 };
-
-/**
- * @brief Creates an ordered pair sorted by ID
- */
-std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType& d2);
 
 } // namespace cell
 

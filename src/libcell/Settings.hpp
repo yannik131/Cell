@@ -1,12 +1,12 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
-#include "DiscType.hpp"
 #include "Membrane.hpp"
-#include "MembraneType.hpp"
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
 #include "SFMLJsonSerializers.hpp"
+#include "types/DiscType.hpp"
+#include "types/MembraneType.hpp"
 
 #include <SFML/System/Time.hpp>
 #include <nlohmann/json.hpp>
@@ -50,9 +50,8 @@ struct Settings
      */
     int cellHeight_ = 1000;
 
-    /**
-     * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
-     */
+    std::vector<DiscType> discTypes_;
+
     DiscType::map<int> discTypeDistribution_;
 
     std::vector<MembraneType> membraneTypes_;

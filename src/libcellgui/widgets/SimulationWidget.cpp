@@ -44,9 +44,9 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
 
 sf::CircleShape SimulationWidget::circleShapeFromDisc(const cell::Disc& disc)
 {
-    sf::CircleShape shape(disc.getType().getRadius());
-    shape.setFillColor(disc.getType().getColor());
-    shape.setOrigin(sf::Vector2f(disc.getType().getRadius(), disc.getType().getRadius()));
+    sf::CircleShape shape(disc.getType()->getRadius());
+    shape.setFillColor(disc.getType()->getColor());
+    shape.setOrigin(sf::Vector2f(disc.getType()->getRadius(), disc.getType()->getRadius()));
     shape.setPosition(disc.getPosition());
 
     return shape;

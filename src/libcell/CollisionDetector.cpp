@@ -36,7 +36,7 @@ CollisionDetector::RectangleCollision CollisionDetector::detectDiscRectangleColl
 {
     using Wall = RectangleCollision::Wall;
 
-    const double& R = disc.getType().getRadius();
+    const double& R = disc.getType()->getRadius();
     const sf::Vector2d& r = disc.getPosition();
     RectangleCollision rectangleCollision;
     double l;
@@ -61,7 +61,7 @@ void CollisionDetector::updateMaxRadii()
         throw ExceptionWithLocation("Disc type distribution can't be empty");
 
     maxDiscRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
-                                              { return a.first.getRadius() < b.first.getRadius(); })
+                                              { return a.first->getRadius() < b.first->getRadius(); })
                          ->first.getRadius();
 
     const auto& membraneTypeDistribution = GlobalSettings::getSettings().membraneTypeDistribution_;
@@ -69,7 +69,8 @@ void CollisionDetector::updateMaxRadii()
         throw ExceptionWithLocation("Membrane type distribution can't be empty");
 
     maxMembraneRadius_ = std::ranges::max_element(membraneTypeDistribution, [](const auto& a, const auto& b)
-                                                  { return a.first.getRadius() < b.first.getRadius(); });
+                                                  { return a.first->getRadius() < b.first->getRadius(); })
+                             ->first.getRadius();
 }
 
 double CollisionDetector::getMaxDiscRadius() const
@@ -104,7 +105,7 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
             continue;
 
         discsInRadius.clear();
-        const double maxCollisionDistance = disc.getType().getRadius() + maxDiscRadius_;
+        const double maxCollisionDistance = disc.getType()->getRadius() + maxDiscRadius_;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
         // constructor
@@ -117,15 +118,14 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
             if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
                 continue;
 
-            const double radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
+            const double radiusSum = disc.getType()->getRadius() + otherDisc.getType()->getRadius();
 
             if (result.second <= radiusSum * radiusSum)
             {
-                const auto& pair = mathutils::makeOrderedPair(&disc, &otherDisc);
-                collidingDiscs.insert(pair);
-
-                discsInCollisions.insert(pair.first);
-                discsInCollisions.insert(pair.second);
+                // Since all collisions are unique, the order doesn't really matter here
+                collidingDiscs.insert({&disc, &otherDisc});
+                discsInCollisions.insert(&disc);
+                discsInCollisions.insert(&otherDisc);
 
                 break;
             }
@@ -143,7 +143,7 @@ std::set<std::pair<Disc*, Membrane*>> CollisionDetector::detectDiscMembraneColli
 
     std::set<std::pair<Disc*, Membrane*>> collisions;
 
-    static std::vector<nanoflann::ResultItem<uint32_t, double>> nearbyMembranes;
+    static std::vector<nanoflann::ResultItem<uint32_t, double>> membranesInRadius;
     const nanoflann::SearchParameters searchParams(0, false);
 
     for (auto& disc : discs)
@@ -151,8 +151,25 @@ std::set<std::pair<Disc*, Membrane*>> CollisionDetector::detectDiscMembraneColli
         if (disc.isMarkedDestroyed())
             continue;
 
-        const double maxSearchRadius = maxMembraneRadius_ - disc.getType().getRadius();
+        membranesInRadius.clear();
+        const double maxSearchRadius = maxMembraneRadius_ - disc.getType()->getRadius();
+
+        kdtree.radiusSearch(&disc.getPosition().x, maxSearchRadius * maxSearchRadius, membranesInRadius, searchParams);
+
+        for (const auto& result : membranesInRadius)
+        {
+            Membrane* membrane = &membranes[result.first];
+            const double radiusSum = disc.getType()->getRadius() + membrane->getType()->getRadius();
+
+            if (result.second <= radiusSum * radiusSum)
+            {
+                collisions.insert({&disc, membrane});
+                break;
+            }
+        }
     }
+
+    return collisions;
 }
 
 } // namespace cell

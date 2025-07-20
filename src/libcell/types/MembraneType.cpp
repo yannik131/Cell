@@ -1,4 +1,4 @@
-#include "MembraneType.hpp"
+#include "types/MembraneType.hpp"
 #include "ExceptionWithLocation.hpp"
 
 namespace cell

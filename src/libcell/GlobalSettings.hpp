@@ -1,10 +1,10 @@
 #ifndef GLOBALSETTINGS_HPP
 #define GLOBALSETTINGS_HPP
 
-#include "DiscType.hpp"
 #include "ExceptionWithLocation.hpp"
 #include "Settings.hpp"
 #include "StringUtils.hpp"
+#include "types/DiscType.hpp"
 
 #include <SFML/System/Time.hpp>
 

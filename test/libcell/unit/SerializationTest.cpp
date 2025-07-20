@@ -1,12 +1,12 @@
 // Using nlohmann::json to serialize the settings turned out to be a little challenging, so this test suite makes sure
 // that each individual class can be properly serialized
 
-#include "DiscType.hpp"
 #include "GlobalSettings.hpp"
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
 #include "Settings.hpp"
 #include "TestUtils.hpp"
+#include "types/DiscType.hpp"
 
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>

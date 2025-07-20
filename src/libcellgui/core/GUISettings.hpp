@@ -1,8 +1,8 @@
 #ifndef GUISETTINGS_HPP
 #define GUISETTINGS_HPP
 
-#include "DiscType.hpp"
 #include "PlotCategories.hpp"
+#include "types/DiscType.hpp"
 
 #include <SFML/System/Time.hpp>
 

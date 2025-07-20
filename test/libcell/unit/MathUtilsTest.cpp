@@ -40,7 +40,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
     const sf::Vector2f boundsBottomRight{100, 100};
 
     Disc d(Mass5);
-    const float R = d.getType().getRadius();
+    const float R = d.getType()->getRadius();
 
     // Collision with top and right wall
     d.setPosition(boundsTopLeft);

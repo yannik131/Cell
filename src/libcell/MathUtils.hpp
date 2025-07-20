@@ -50,42 +50,15 @@ std::unordered_map<T1, T2, T3, T5> operator*(std::unordered_map<T1, T2, T3, T5> 
 /**
  * @brief Prints the x and y coordinates to the given stream
  */
-std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
+std::ostream& operator<<(std::ostream& os, const sf::Vector2d& v);
 
 /**
  * @brief Scalar product of 2 vectors
  */
-float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
+double operator*(const sf::Vector2d& a, const sf::Vector2d& b);
 
 namespace cell::mathutils
 {
-
-/**
- * @brief Struct for the intermediate results of the overlap calculation, since they're useful for the following
- * collision response
- */
-struct OverlapResults
-{
-    /**
-     * @brief Direction vector from the first disc to the second
-     */
-    sf::Vector2f rVec;
-
-    /**
-     * @brief Normalized direction vector from first disc to second
-     */
-    sf::Vector2f nVec;
-
-    /**
-     * @brief Absolute distance between the 2 discs
-     */
-    float distance{};
-
-    /**
-     * @brief A positive value for the overlap means the discs are overlapping
-     */
-    float overlap{};
-};
 
 /**
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
@@ -96,7 +69,7 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
 /**
  * @returns |vec|
  */
-float abs(const sf::Vector2f& vec);
+double abs(const sf::Vector2d& vec);
 
 /**
  * @returns Instance of `OverlapResults` with appropriate values if the positions of the 2 discs aren't identical,
@@ -107,7 +80,7 @@ OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
 /**
  * @brief Given 2 discs, returns the earlier of the 2 times where they just started touching
  */
-float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
+double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
 
 /**
  * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
@@ -115,9 +88,9 @@ float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overlap
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
 
 /**
- * @brief Returns a random float within [0, 1)
+ * @brief Returns a random double within [0, 1)
  */
-float getRandomFloat();
+double getRandomFloat();
 
 /**
  * @return pair where pair.first <= pair.second

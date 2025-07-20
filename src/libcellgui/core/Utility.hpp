@@ -2,7 +2,7 @@
 #define UTILITY_HPP
 
 #include "ComboBoxDelegate.hpp"
-#include "DiscType.hpp"
+#include "types/DiscType.hpp"
 
 namespace utility
 {

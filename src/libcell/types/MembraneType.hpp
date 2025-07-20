@@ -1,8 +1,8 @@
 #ifndef MEMBRANETYPE_HPP
 #define MEMBRANETYPE_HPP
 
-#include "DiscType.hpp"
 #include "TypeBase.hpp"
+#include "types/DiscType.hpp"
 
 #include <unordered_map>
 

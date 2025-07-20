@@ -1,9 +1,9 @@
 #ifndef REACTIONTABLE_HPP
 #define REACTIONTABLE_HPP
 
-#include "DiscType.hpp"
 #include "Reaction.hpp"
 #include "SFMLJsonSerializers.hpp"
+#include "types/DiscType.hpp"
 
 #include <vector>
 

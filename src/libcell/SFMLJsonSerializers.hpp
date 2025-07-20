@@ -1,7 +1,7 @@
 #ifndef SFMLJSONSERIALIZER_HPP
 #define SFMLJSONSERIALIZER_HPP
 
-#include "DiscType.hpp"
+#include "types/DiscType.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>

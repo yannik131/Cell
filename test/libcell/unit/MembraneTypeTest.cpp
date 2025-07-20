@@ -2,8 +2,8 @@
 
 #include "Disc.hpp"
 #include "MathUtils.hpp"
-#include "MembraneType.hpp"
 #include "TestUtils.hpp"
+#include "types/MembraneType.hpp"
 
 using namespace cell;
 

@@ -2,8 +2,8 @@
 #define REACTIONSDIALOG_HPP
 
 #include "ComboBoxDelegate.hpp"
-#include "DiscType.hpp"
 #include "ReactionsTableModel.hpp"
+#include "types/DiscType.hpp"
 
 #include <QDialog>
 

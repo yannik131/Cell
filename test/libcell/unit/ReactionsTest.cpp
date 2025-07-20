@@ -1,10 +1,10 @@
 #include "Reactions.hpp"
 #include "Disc.hpp"
-#include "DiscType.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "Reaction.hpp"
 #include "TestUtils.hpp"
+#include "types/DiscType.hpp"
 
 #include <gtest/gtest.h>
 
