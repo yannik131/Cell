@@ -30,7 +30,8 @@ enum SettingID
     NumberOfDiscs = 1 << 2,
     DiscTypeDistribution = 1 << 3,
     Reactions = 1 << 4,
-    CellSize = 1 << 5
+    CellSize = 1 << 5,
+    MembraneTypeDistribution = 1 << 6
 };
 
 /**

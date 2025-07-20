@@ -47,7 +47,7 @@ public:
     static RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                            const sf::Vector2d& bottomRight);
 
-    void updateMaxDiscRadius();
+    void updateMaxRadii();
 
     double getMaxDiscRadius() const;
 
@@ -63,6 +63,7 @@ private:
     std::set<std::pair<Disc*, Disc*>> discDiscCollisions_;
     std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions_;
     double maxDiscRadius_ = 0;
+    double maxMembraneRadius_ = 0;
 };
 
 } // namespace cell

@@ -2,6 +2,8 @@
 #define SETTINGS_HPP
 
 #include "DiscType.hpp"
+#include "Membrane.hpp"
+#include "MembraneType.hpp"
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
 #include "SFMLJsonSerializers.hpp"
@@ -52,6 +54,10 @@ struct Settings
      * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
      */
     DiscType::map<int> discTypeDistribution_;
+
+    std::vector<MembraneType> membraneTypes_;
+
+    std::vector<Membrane> membranes_;
 
     /**
      * @brief Contains all reactions in the simulation

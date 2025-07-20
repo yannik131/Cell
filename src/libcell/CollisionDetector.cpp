@@ -21,7 +21,7 @@ using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType<T>, PhysicalObjec
 
 CollisionDetector::CollisionDetector()
 {
-    updateMaxDiscRadius();
+    updateMaxRadii();
 }
 
 void CollisionDetector::detectCollisions(std::vector<Disc>& discs, std::vector<Membrane>& membranes)
@@ -54,7 +54,7 @@ CollisionDetector::RectangleCollision CollisionDetector::detectDiscRectangleColl
     return rectangleCollision;
 }
 
-void CollisionDetector::updateMaxDiscRadius()
+void CollisionDetector::updateMaxRadii()
 {
     const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
     if (discTypeDistribution.empty())
@@ -63,6 +63,13 @@ void CollisionDetector::updateMaxDiscRadius()
     maxDiscRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
                                               { return a.first.getRadius() < b.first.getRadius(); })
                          ->first.getRadius();
+
+    const auto& membraneTypeDistribution = GlobalSettings::getSettings().membraneTypeDistribution_;
+    if (membraneTypeDistribution.empty())
+        throw ExceptionWithLocation("Membrane type distribution can't be empty");
+
+    maxMembraneRadius_ = std::ranges::max_element(membraneTypeDistribution, [](const auto& a, const auto& b)
+                                                  { return a.first.getRadius() < b.first.getRadius(); });
 }
 
 double CollisionDetector::getMaxDiscRadius() const

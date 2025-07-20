@@ -1,8 +1,8 @@
 #include "DiscType.hpp"
 #include "ExceptionWithLocation.hpp"
 #include "MathUtils.hpp"
+#include "MembraneType.hpp"
 
-#include "Membrane.hpp"
 #include <stdexcept>
 
 namespace cell
@@ -27,32 +27,6 @@ DiscType::DiscType(const std::string& name, const sf::Color& color, double radiu
 
 DiscType::DiscType(const DiscType& other) = default;
 DiscType& DiscType::operator=(const DiscType& other) = default;
-
-const std::string& DiscType::getName() const
-{
-    return name_;
-}
-
-void DiscType::setName(const std::string& name)
-{
-    if (name.empty())
-        throw ExceptionWithLocation("Disc type name cannot be empty");
-
-    name_ = name;
-}
-
-const sf::Color& DiscType::getColor() const
-{
-    return color_;
-}
-
-void DiscType::setColor(const sf::Color& color)
-{
-    if (color == sf::Color())
-        throw ExceptionWithLocation("Disc type must have a valid color");
-
-    color_ = color;
-}
 
 double DiscType::getRadius() const
 {

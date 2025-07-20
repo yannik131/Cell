@@ -1,24 +1,24 @@
-#include "Membrane.hpp"
+#include "MembraneType.hpp"
 #include "ExceptionWithLocation.hpp"
 
 namespace cell
 {
 
-void Membrane::setPermeability(const DiscType& discType, PermeabilityType permeabilityType)
+void MembraneType::setPermeability(const DiscType& discType, PermeabilityType permeabilityType)
 {
 }
 
-Membrane::PermeabilityType Membrane::getPermeability(const DiscType& discType)
+MembraneType::PermeabilityType MembraneType::getPermeability(const DiscType& discType)
 {
     return PermeabilityType();
 }
 
-double Membrane::getThickness() const
+double MembraneType::getThickness() const
 {
     return thickness_;
 }
 
-void Membrane::setThickness(double thickness)
+void MembraneType::setThickness(double thickness)
 {
     if (thickness <= 0)
         throw ExceptionWithLocation("Invalid thickness: " + std::to_string(thickness));
@@ -26,12 +26,12 @@ void Membrane::setThickness(double thickness)
     thickness_ = thickness;
 }
 
-double Membrane::getRadius() const
+double MembraneType::getRadius() const
 {
     return radius_;
 }
 
-void Membrane::setRadius(double radius)
+void MembraneType::setRadius(double radius)
 {
     if (radius <= 0)
         throw ExceptionWithLocation("Invalid radius: " + std::to_string(radius));
