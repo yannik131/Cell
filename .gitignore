@@ -15,3 +15,4 @@ CMakeUserPresets.json
 test/output/
 *.fls
 *.fdb_latexmk
+**/.DS_Store

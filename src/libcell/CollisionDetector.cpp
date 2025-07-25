@@ -2,26 +2,45 @@
 #include "ExceptionWithLocation.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
-#include "PhysicalObjectNanoflannAdapter.hpp"
-
-#include <nanoflann.hpp>
+#include "Membrane.hpp"
+#include "PositionNanoflannAdapter.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <memory>
+#include <numbers>
 
 namespace cell
 {
 
-namespace
-{
-template <typename T> using AdapterType = nanoflann::L2_Simple_Adaptor<double, PhysicalObjectNanoflannAdapter<T>>;
-
-template <typename T>
-using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType<T>, PhysicalObjectNanoflannAdapter<T>, 2>;
-} // namespace
-
 CollisionDetector::CollisionDetector()
 {
     updateMaxRadii();
+}
+
+void CollisionDetector::buildMembraneKdTree(const std::vector<Membrane>& membranes)
+{
+    membranePolygonPoints_.reserve(membranes.size() * 100);
+    membranePolygonPoints_.clear();
+
+    for (const auto& membrane : membranes)
+    {
+        // We'll approximate the membrane circle with points on the circle that have a distance of the minimal disc
+        // radius in the simulation
+        const double R = membrane.getType()->getRadius();
+        const double dphi = 2 * std::asin(minDiscRadius_ / (2 * R));
+
+        for (double angle = 0; angle < 2 * std::numbers::pi; angle += dphi)
+        {
+            MembranePolygonPoint point{.membrane_ = &membrane, .position_ = {R * std::cos(angle), R * std::sin(angle)}};
+            membranePolygonPoints_.push_back(std::move(point));
+        }
+    }
+
+    static const PositionNanoflannAdapter<MembranePolygonPoint> adapter(membranePolygonPoints_);
+    static std::unique_ptr<KDTree<MembranePolygonPoint>> membranesKDTree;
+
+    membranesKDTree = std::make_unique<KDTree<MembranePolygonPoint>>(2, adapter);
 }
 
 void CollisionDetector::detectCollisions(std::vector<Disc>& discs, std::vector<Membrane>& membranes)
@@ -56,21 +75,18 @@ CollisionDetector::RectangleCollision CollisionDetector::detectDiscRectangleColl
 
 void CollisionDetector::updateMaxRadii()
 {
-    const auto& discTypeDistribution = GlobalSettings::getSettings().discTypeDistribution_;
-    if (discTypeDistribution.empty())
-        throw ExceptionWithLocation("Disc type distribution can't be empty");
+    const auto& compareRadius = [](const auto& a, const auto& b) { return a.getRadius() < b.getRadius(); };
 
-    maxDiscRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
-                                              { return a.first->getRadius() < b.first->getRadius(); })
-                         ->first.getRadius();
+    const auto& discTypes = GlobalSettings::getSettings().discTypes_;
+    if (discTypes.empty())
+        throw ExceptionWithLocation("Can't determine max disc type radius: No disc types available");
+    maxDiscRadius_ = std::ranges::max_element(discTypes, compareRadius)->getRadius();
+    minDiscRadius_ = std::ranges::min_element(discTypes, compareRadius)->getRadius();
 
-    const auto& membraneTypeDistribution = GlobalSettings::getSettings().membraneTypeDistribution_;
-    if (membraneTypeDistribution.empty())
-        throw ExceptionWithLocation("Membrane type distribution can't be empty");
-
-    maxMembraneRadius_ = std::ranges::max_element(membraneTypeDistribution, [](const auto& a, const auto& b)
-                                                  { return a.first->getRadius() < b.first->getRadius(); })
-                             ->first.getRadius();
+    const auto& membraneTypes = GlobalSettings::getSettings().membraneTypes_;
+    if (membraneTypes.empty())
+        throw ExceptionWithLocation("Can't determine max membrane type radius: No membrane types available");
+    maxMembraneRadius_ = std::ranges::max_element(membraneTypes, compareRadius)->getRadius();
 }
 
 double CollisionDetector::getMaxDiscRadius() const
@@ -90,9 +106,11 @@ std::set<std::pair<Disc*, Membrane*>> CollisionDetector::getDiscMembraneCollisio
 
 std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
-    PhysicalObjectNanoflannAdapter<Disc> adapter(discs);
+    PositionNanoflannAdapter<Disc> adapter(discs);
     KDTree<Disc> kdtree(2, adapter);
-    const nanoflann::SearchParameters searchParams(0, false);
+    // 0: Don't approximate neighbors during search
+    // false: Don't sort results by distance
+    static const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
     static std::vector<nanoflann::ResultItem<uint32_t, double>> discsInRadius;
@@ -138,25 +156,20 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
 std::set<std::pair<Disc*, Membrane*>> CollisionDetector::detectDiscMembraneCollisions(std::vector<Disc>& discs,
                                                                                       std::vector<Membrane>& membranes)
 {
-    PhysicalObjectNanoflannAdapter<Membrane> adapter(membranes);
-    KDTree<Membrane> kdtree(2, adapter);
-
     std::set<std::pair<Disc*, Membrane*>> collisions;
 
-    static std::vector<nanoflann::ResultItem<uint32_t, double>> membranesInRadius;
-    const nanoflann::SearchParameters searchParams(0, false);
+    static std::vector<nanoflann::ResultItem<uint32_t, double>> polygonPointsInRadius;
+    static const nanoflann::SearchParameters searchParams(0, false);
 
     for (auto& disc : discs)
     {
         if (disc.isMarkedDestroyed())
             continue;
 
-        membranesInRadius.clear();
-        const double maxSearchRadius = maxMembraneRadius_ - disc.getType()->getRadius();
+        polygonPointsInRadius.clear();
+        .radiusSearch(&disc.getPosition().x, maxSearchRadius * maxSearchRadius, polygonPointsInRadius, searchParams);
 
-        kdtree.radiusSearch(&disc.getPosition().x, maxSearchRadius * maxSearchRadius, membranesInRadius, searchParams);
-
-        for (const auto& result : membranesInRadius)
+        for (const auto& result : polygonPointsInRadius)
         {
             Membrane* membrane = &membranes[result.first];
             const double radiusSum = disc.getType()->getRadius() + membrane->getType()->getRadius();

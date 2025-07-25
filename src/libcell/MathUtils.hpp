@@ -71,21 +71,13 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
  */
 double abs(const sf::Vector2d& vec);
 
-/**
- * @returns Instance of `OverlapResults` with appropriate values if the positions of the 2 discs aren't identical,
- * otherwise every entry of the return `OverlapResults` is 0.
- */
-OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
+double distance(const sf::Vector2d& v1, const sf::Vector2d& v2);
 
 /**
- * @brief Given 2 discs, returns the earlier of the 2 times where they just started touching
+ * @returns `true` if the circle described with `pos1` and `radius1` intersects with or contains the second circle
+ * described with `pos2` and `radius2`
  */
-double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
-
-/**
- * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
- */
-void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
+bool contains(const sf::Vector2d& pos1, double radius1, const sf::Vector2d& pos2, double radius2);
 
 /**
  * @brief Returns a random double within [0, 1)

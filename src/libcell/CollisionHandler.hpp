@@ -14,9 +14,9 @@ class Membrane;
 class CollisionHandler
 {
 public:
-    void calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
+    DiscType::map<int> calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
 
-    void calculateDiscMembraneCollisionResponse(std::set<std::pair<Disc*, Membrane*>>) const;
+    void calculateDiscMembraneCollisionResponse(std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions) const;
 
     void calculateDiscRectangleCollisionResponse(Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision);
 };

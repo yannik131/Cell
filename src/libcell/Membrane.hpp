@@ -13,6 +13,8 @@ public:
 
     const MembraneType* getType() const;
 
+    bool contains(const Disc& disc) const;
+
 private:
     const MembraneType* membraneType_;
 };

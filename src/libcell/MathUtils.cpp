@@ -29,6 +29,16 @@ double abs(const sf::Vector2d& vec)
     return std::hypot(vec.x, vec.y);
 }
 
+double distance(const sf::Vector2d& v1, const sf::Vector2d& v2)
+{
+    return abs(v1 - v2);
+}
+
+bool contains(const sf::Vector2d& pos1, double radius1, const sf::Vector2d& pos2, double radius2)
+{
+    return distance(pos1, pos2) < radius1 + radius2;
+}
+
 double getRandomFloat()
 {
     static std::random_device rd;

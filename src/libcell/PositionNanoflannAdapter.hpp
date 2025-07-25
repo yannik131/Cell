@@ -1,5 +1,5 @@
-#ifndef PHYSICALOBJECTNANOFLANNADAPTER_HPP
-#define PHYSICALOBJECTNANOFLANNADAPTER_HPP
+#ifndef POSITIONNANOFLANNADAPTER_HPP
+#define POSITIONNANOFLANNADAPTER_HPP
 
 #include "PhysicalObject.hpp"
 
@@ -8,16 +8,21 @@
 namespace cell
 {
 
+template <typename T>
+concept HasGetPosition = requires(T t) {
+    { t.getPosition() } -> std::same_as<const sf::Vector2d&>;
+};
+
 /**
- * @brief Wrapper around a vector<PhysicalObject> for nanoflann
+ * @brief Wrapper around objects providing a `getPosition()` method for nanoflann
  */
 template <typename T>
-    requires std::is_base_of_v<PhysicalObject, T>
-struct PhysicalObjectNanoflannAdapter
+    requires HasGetPosition<T>
+struct PositionNanoflannAdapter
 {
     const std::vector<T>& elements;
 
-    explicit PhysicalObjectNanoflannAdapter(const std::vector<T>& elems)
+    explicit PositionNanoflannAdapter(const std::vector<T>& elems)
         : elements(elems)
     {
     }
@@ -43,4 +48,4 @@ struct PhysicalObjectNanoflannAdapter
 
 } // namespace cell
 
-#endif /* PHYSICALOBJECTNANOFLANNADAPTER_HPP */
+#endif /* POSITIONNANOFLANNADAPTER_HPP */

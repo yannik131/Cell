@@ -1,6 +1,8 @@
 #include "CollisionHandler.hpp"
 #include "Disc.hpp"
+#include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
+#include "Membrane.hpp"
 #include "Vector2d.hpp"
 
 namespace cell
@@ -36,6 +38,10 @@ struct OverlapResults
     double overlap = 0;
 };
 
+/**
+ * @returns Instance of `OverlapResults` with appropriate values if the positions of the 2 discs aren't identical,
+ * otherwise every entry of the return `OverlapResults` is 0.
+ */
 OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
 {
     sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
@@ -50,6 +56,9 @@ OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
     return OverlapResults{.rVec = rVec, .nVec = nVec, .distance = distance, .overlap = overlap};
 }
 
+/**
+ * @brief Given 2 discs, returns the earlier of the 2 times where they just started touching
+ */
 double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults)
 {
     const auto& r = overlapResults.rVec;
@@ -63,6 +72,9 @@ double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overla
            (v.x * v.x + v.y * v.y);
 }
 
+/**
+ * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
+ */
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 {
     static const double e = 1.f;
@@ -82,7 +94,8 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 
 } // namespace
 
-void CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
+DiscType::map<int>
+CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
 {
     DiscType::map<int> collisionCounts;
 
@@ -97,12 +110,6 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Dis
         ++collisionCounts[p1->getType()];
         ++collisionCounts[p2->getType()];
 
-        // Don't handle collision if reaction occured
-        // TODO Handle overlap after collision (or just ignore it and let it be handled in the next time step)
-        // TODO break this function down into 2 steps so that the reactions can be applied outside of this function here
-        if (combinationReaction(p1, p2))
-            continue;
-
         double dt = calculateTimeBeforeCollision(*p1, *p2, overlapResults);
 
         p1->move(dt * p1->getVelocity());
@@ -112,15 +119,34 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Dis
 
         p1->move(-dt * p1->getVelocity());
         p2->move(-dt * p2->getVelocity());
-
-        exchangeReaction(p1, p2);
     }
 
     return collisionCounts;
 }
 
-void CollisionHandler::calculateDiscMembraneCollisionResponse(std::set<std::pair<Disc*, Membrane*>>) const
+void CollisionHandler::calculateDiscMembraneCollisionResponse(
+    std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions) const
 {
+    const auto& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+
+    for (const auto& [disc, membrane] : discMembraneCollisions)
+    {
+        const auto& permeability = membrane->getType()->getPermeability(*disc->getType());
+        if (permeability == MembraneType::PermeableBidirectional)
+            continue;
+
+        const sf::Vector2d& positionBefore = disc->getPosition() - dt * disc->getVelocity();
+        bool containedBefore = mathutils::contains(membrane->getPosition(), membrane->getType()->getRadius(),
+                                                   positionBefore, disc->getType()->getRadius());
+        bool containedNow = mathutils::contains(membrane->getPosition(), membrane->getType()->getRadius(),
+                                                disc->getPosition(), disc->getType()->getRadius());
+
+        if (permeability == MembraneType::PermeableInward && !containedBefore ||
+            permeability == MembraneType::PermeableOutward && containedBefore)
+            continue;
+
+        // TODO collision response between circle and outside/inside of another circle
+    }
 }
 
 void CollisionHandler::calculateDiscRectangleCollisionResponse(

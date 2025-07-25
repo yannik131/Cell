@@ -8,9 +8,9 @@ void MembraneType::setPermeability(const DiscType& discType, PermeabilityType pe
 {
 }
 
-MembraneType::PermeabilityType MembraneType::getPermeability(const DiscType& discType)
+MembraneType::PermeabilityType MembraneType::getPermeability(const DiscType& discType) const
 {
-    return PermeabilityType();
+    return permeabilityMap_.at(discType);
 }
 
 double MembraneType::getThickness() const

@@ -26,7 +26,7 @@ public:
 
     void setPermeability(const DiscType& discType, PermeabilityType permeabilityType);
 
-    PermeabilityType getPermeability(const DiscType& discType);
+    PermeabilityType getPermeability(const DiscType& discType) const;
 
     double getRadius() const;
     void setRadius(double radius);
