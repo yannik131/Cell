@@ -129,7 +129,7 @@ void CollisionHandler::calculateDiscMembraneCollisionResponse(
 {
     const auto& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
-    for (const auto& [disc, membrane] : discMembraneCollisions)
+    for (auto& [disc, membrane] : discMembraneCollisions)
     {
         const auto& permeability = membrane->getType()->getPermeability(*disc->getType());
         if (permeability == MembraneType::PermeableBidirectional)
@@ -141,11 +141,10 @@ void CollisionHandler::calculateDiscMembraneCollisionResponse(
         bool containedNow = mathutils::contains(membrane->getPosition(), membrane->getType()->getRadius(),
                                                 disc->getPosition(), disc->getType()->getRadius());
 
-        if (permeability == MembraneType::PermeableInward && !containedBefore ||
-            permeability == MembraneType::PermeableOutward && containedBefore)
-            continue;
-
-        // TODO collision response between circle and outside/inside of another circle
+        if (!containedBefore && containedNow && permeability == MembraneType::PermeableOutward)
+            discMembraneOutsideCollision(disc, membrane);
+        else if (containedBefore && !containedNow && permeability == MembraneType::PermeableInward)
+            discMembraneInsideCollision(disc, membrane);
     }
 }
 
@@ -179,6 +178,14 @@ void CollisionHandler::calculateDiscRectangleCollisionResponse(
     disc.move(dr);
 
     // TODO Handle energy expletion over time somewhere, but not here
+}
+
+void CollisionHandler::discMembraneInsideCollision(Disc* disc, Membrane* membrane) const
+{
+}
+
+void CollisionHandler::discMembraneOutsideCollision(Disc* disc, Membrane* membrane) const
+{
 }
 
 } // namespace cell

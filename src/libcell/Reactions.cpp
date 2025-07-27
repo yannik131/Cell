@@ -62,6 +62,9 @@ template <typename MapType, typename KeyType> const Reaction* selectReaction(con
 
 } // namespace
 
+namespace reactions
+{
+
 bool transformationReaction(Disc* disc)
 {
     const Reaction* reaction = selectReaction(transformationReactionTable, disc->getType());
@@ -150,5 +153,7 @@ std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs)
 
     return newDiscs;
 }
+
+} // namespace reactions
 
 } // namespace cell

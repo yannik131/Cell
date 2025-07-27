@@ -19,6 +19,10 @@ public:
     void calculateDiscMembraneCollisionResponse(std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions) const;
 
     void calculateDiscRectangleCollisionResponse(Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision);
+
+private:
+    void discMembraneInsideCollision(Disc* disc, Membrane* membrane) const;
+    void discMembraneOutsideCollision(Disc* disc, Membrane* membrane) const;
 };
 
 } // namespace cell

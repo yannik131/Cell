@@ -18,6 +18,9 @@ namespace cell
 
 class Disc;
 
+namespace reactions
+{
+
 /**
  * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
  * @param d1 The disc to transform
@@ -51,6 +54,8 @@ bool exchangeReaction(Disc* d1, Disc* d2);
  * @param discs Discs to transform/decompose
  */
 std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs);
+
+} // namespace reactions
 
 } // namespace cell
 
