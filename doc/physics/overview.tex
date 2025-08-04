@@ -3,6 +3,23 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{graphicx}
+\usepackage{float}
+
+% #1: path to the image
+% #2: caption for the figure
+% #3: label for the figure
+\newcommand{\insertfigure}[3]{
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{#1}
+\caption{#2}
+\label{#3}
+\end{figure}
+}
 
 \lstset{
 	language=Python,
@@ -94,6 +111,8 @@ print(sol)
 	\end{lstlisting}
 
 	\subsection{Collision handling}
+
+    \subsubsection{Disc-Disc Collision}
 		
 	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
 	
@@ -136,6 +155,22 @@ print(sol)
 	\end{align*}
 
 	Here, $\vec{v}_{1-}$ and $\vec{v}_{2-}$ are the full velocities before the collision, not just the projection along the normal.
+
+    \subsubsection{Disc Membrane Collision}
+    Membranes are treated as rigid, immovable circles with position $\vec{r}_m$, radius $R_m$ and thickness $d$. Membranes can be permeable for certain disc types in inward direction, outward direction or both (bidirectional permeability). If  a disc with velocity $\vec{v}$ and position $\vec{r}_d$ intersects with a membrane at position $\vec{v}_m$, we get the situation displayed in \cref{fig_circle_intersections}.
+
+    \insertfigure{images/circles_intersecting.png}{If a circle with velocity $\vec{v}$ is intersecting with a stationary circle, the circle is moving towards the stationary one if $\vec{v}\cdot(\vec{r}_d - \vec{r}_m) > 0$ because $\cos{(0^\circ \le \alpha < 90^\circ \text{ and } 270^\circ \le \alpha < 360^\circ)} > 0$}{fig_circle_intersections}
+
+    To keep calculations simple, $\vec{v}\cdot(\vec{r}_d - \vec{r}_m) > 0$ is checked to see if the disc is moving towards the circle or not. If it is/isn't and the membrane is permeable inwards/outwards (or bidirectionally), the disc can simply pass through the membrane. If it's not, it will be reflected on the surface normal:
+
+    \begin{enumerate}
+        \item Move the disc by $-\Delta t \vec{v}$, determining $\Delta t$ using the overlap method
+        \item Mirror $\vec{v}$ using the connecting vector $\vec{d} = \vec{r}_d - \vec{r}_m$ with the reflection formula\footnote{See \url{https://en.wikipedia.org/wiki/Reflection_(mathematics)\#Reflection_across_a_line_in_the_plane}} 
+        \begin{align*}
+            \vec{v}' = \vec{v} - 2\frac{\vec{v}\cdot\vec{d}}{\vec{d}\cdot\vec{d}}\cdot\vec{d}
+        \end{align*}
+        \item Move the disc by $\Delta t \vec{v}'$
+    \end{enumerate}
 
 	\section{Reactions}
 	
