@@ -1,8 +1,9 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
+#include "CellState.hpp"
+#include "CollisionDetector.hpp"
 #include "Disc.hpp"
-#include "NanoflannAdapter.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -81,13 +82,7 @@ private:
     void removeDestroyedDiscs();
 
 private:
-    std::vector<sf::Vector2d> startPositions_;
-    std::vector<Disc> discs_;
-    DiscType::map<int> collisionCounts_;
-    double initialKineticEnergy_{};
-    double currentKineticEnergy_{};
-
-    std::vector<Disc> newDiscs_;
+    CellState cellState_;
 };
 
 } // namespace cell

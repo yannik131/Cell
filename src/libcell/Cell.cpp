@@ -1,7 +1,7 @@
 #include "Cell.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
-#include "NanoflannAdapter.hpp"
+#include "PositionNanoflannAdapter.hpp"
 #include "Reactions.hpp"
 
 #include <glog/logging.h>

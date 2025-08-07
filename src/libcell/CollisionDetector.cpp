@@ -14,6 +14,8 @@ namespace cell
 {
 
 CollisionDetector::CollisionDetector()
+    : membranesKDTreeAdapter_(membranePolygonPoints_)
+    , membranesKDTree_(2, membranesKDTreeAdapter_)
 {
     updateMaxRadii();
 }
@@ -37,10 +39,7 @@ void CollisionDetector::buildMembraneKdTree(const std::vector<Membrane>& membran
         }
     }
 
-    static const PositionNanoflannAdapter<MembranePolygonPoint> adapter(membranePolygonPoints_);
-    static std::unique_ptr<KDTree<MembranePolygonPoint>> membranesKDTree;
-
-    membranesKDTree = std::make_unique<KDTree<MembranePolygonPoint>>(2, adapter);
+    membranesKDTree_.buildIndex();
 }
 
 void CollisionDetector::detectCollisions(std::vector<Disc>& discs, std::vector<Membrane>& membranes)
@@ -96,20 +95,22 @@ double CollisionDetector::getMaxDiscRadius() const
 
 std::set<std::pair<Disc*, Disc*>> CollisionDetector::getDiscDiscCollisions() const
 {
-    return std::set<std::pair<Disc*, Disc*>>();
+    return discDiscCollisions_;
 }
 
 std::set<std::pair<Disc*, Membrane*>> CollisionDetector::getDiscMembraneCollisions() const
 {
-    return std::set<std::pair<Disc*, Membrane*>>();
+    return discMembraneCollisions_;
 }
 
 std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
     PositionNanoflannAdapter<Disc> adapter(discs);
     KDTree<Disc> kdtree(2, adapter);
+
     // 0: Don't approximate neighbors during search
     // false: Don't sort results by distance
+
     static const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
@@ -122,7 +123,6 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
         if (disc.isMarkedDestroyed() || discsInCollisions.contains(&disc))
             continue;
 
-        discsInRadius.clear();
         const double maxCollisionDistance = disc.getType()->getRadius() + maxDiscRadius_;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
@@ -166,8 +166,9 @@ std::set<std::pair<Disc*, Membrane*>> CollisionDetector::detectDiscMembraneColli
         if (disc.isMarkedDestroyed())
             continue;
 
-        polygonPointsInRadius.clear();
-        .radiusSearch(&disc.getPosition().x, maxSearchRadius * maxSearchRadius, polygonPointsInRadius, searchParams);
+        // TODO Make sure polygonPointsInRadius.clear() is actually called (but I think it is)
+        membranesKDTree_.radiusSearch(&disc.getPosition().x, disc.getType()->getRadius() * disc.getType()->getRadius(),
+                                      polygonPointsInRadius, searchParams);
 
         for (const auto& result : polygonPointsInRadius)
         {
