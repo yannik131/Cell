@@ -26,7 +26,7 @@ const cell::DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
 
 void averageDataPoint(DataPoint& dataPoint, int length)
 {
-    float dt = sf::microseconds(dataPoint.elapsedTimeUs_).asSeconds();
+    double dt = sf::microseconds(dataPoint.elapsedTimeUs_).asSeconds();
 
     // Collisions per second = All registered collisions / dt
     dataPoint.collisionCounts_ /= dt;
@@ -117,7 +117,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
     dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
 
-    cell::DiscType::map<sf::Vector2f> totalMomentums;
+    cell::DiscType::map<sf::Vector2d> totalMomentums;
 
     for (const auto& disc : frameDTO.discs_)
     {

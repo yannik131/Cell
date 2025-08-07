@@ -13,7 +13,7 @@ TEST(CellTest, EnergyIsConserved)
     cell::GlobalSettings::get().setCellSize(500, 500);
     cell.reinitialize();
 
-    float initialKineticEnergy = cell.getInitialKineticEnergy();
+    double initialKineticEnergy = cell.getInitialKineticEnergy();
     int totalCollisionCount = 0;
     int collisionTarget = 100;
     int updateCount = 0;

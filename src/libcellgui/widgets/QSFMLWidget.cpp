@@ -51,7 +51,7 @@ void QSFMLWidget::mouseMoveEvent(QMouseEvent* event)
     sf::Vector2i sfDelta(static_cast<int>(delta.x()), static_cast<int>(delta.y()));
 
     // The view could have zoom, so we need to take that into account by scaling the delta appropriately
-    sf::Vector2f worldDelta =
+    sf::Vector2d worldDelta =
         RenderWindow::mapPixelToCoords(sf::Vector2i(0, 0)) - RenderWindow::mapPixelToCoords(sfDelta);
 
     view_.move(worldDelta);
@@ -70,9 +70,9 @@ void QSFMLWidget::mouseReleaseEvent(QMouseEvent*)
 
 void QSFMLWidget::wheelEvent(QWheelEvent* event)
 {
-    float delta = static_cast<float>(event->angleDelta().y());
+    double delta = static_cast<float>(event->angleDelta().y());
 
-    float zoomFactor = (delta > 0) ? 0.9f : 1.1f;
+    double zoomFactor = (delta > 0) ? 0.9f : 1.1f;
     currentZoom_ *= zoomFactor;
     view_.zoom(zoomFactor);
 

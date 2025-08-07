@@ -16,7 +16,7 @@ TEST(PhysicalObjectTest, SetVelocityUpdatesVelocity)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d vel{3.f, 4.f};
+    sf::Vector2d vel{3., 4.};
     physicalObject.setVelocity(vel);
     EXPECT_EQ(physicalObject.getVelocity(), vel);
 }
@@ -25,9 +25,9 @@ TEST(PhysicalObjectTest, ScaleVelocityScalesVelocity)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d vel{2.f, 3.f};
+    sf::Vector2d vel{2., 3.};
     physicalObject.setVelocity(vel);
-    float factor = 2.0f;
+    double factor = 2.0f;
     physicalObject.scaleVelocity(factor);
 
     EXPECT_DOUBLE_EQ(physicalObject.getVelocity().x, vel.x * factor);
@@ -38,10 +38,10 @@ TEST(PhysicalObjectTest, AccelerateAddsAccelerationToVelocity)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d initialVel{1.f, 1.f};
+    sf::Vector2d initialVel{1., 1.};
     physicalObject.setVelocity(initialVel);
 
-    sf::Vector2d accel{2.f, 3.f};
+    sf::Vector2d accel{2., 3.};
     physicalObject.accelerate(accel);
 
     EXPECT_DOUBLE_EQ(physicalObject.getVelocity().x, initialVel.x + accel.x);
@@ -52,7 +52,7 @@ TEST(PhysicalObjectTest, NegateXVelocityReversesXComponent)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d vel{5.f, 3.f};
+    sf::Vector2d vel{5., 3.};
     physicalObject.setVelocity(vel);
     physicalObject.negateXVelocity();
 
@@ -64,7 +64,7 @@ TEST(PhysicalObjectTest, NegateYVelocityReversesYComponent)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d vel{5.f, 3.f};
+    sf::Vector2d vel{5., 3.};
     physicalObject.setVelocity(vel);
     physicalObject.negateYVelocity();
 
@@ -76,7 +76,7 @@ TEST(PhysicalObjectTest, SetPositionUpdatesPosition)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d pos{100.f, 200.f};
+    sf::Vector2d pos{100., 200.};
     physicalObject.setPosition(pos);
 
     EXPECT_DOUBLE_EQ(physicalObject.getPosition().x, pos.x);
@@ -87,10 +87,10 @@ TEST(PhysicalObjectTest, MoveAdjustsPosition)
 {
     cell::PhysicalObject physicalObject;
 
-    sf::Vector2d initialPos{50.f, 50.f};
+    sf::Vector2d initialPos{50., 50.};
     physicalObject.setPosition(initialPos);
 
-    sf::Vector2d distance{10.f, 15.f};
+    sf::Vector2d distance{10., 15.};
     physicalObject.move(distance);
 
     EXPECT_DOUBLE_EQ(physicalObject.getPosition().x, initialPos.x + distance.x);
@@ -104,10 +104,10 @@ TEST(PhysicalObjectTest, GetAbsoluteMomentumCalculatesCorrectly)
 
     physicalObject.setMass(mass);
 
-    sf::Vector2d vel{3.f, 4.f}; // magnitude = sqrt(9 + 16) = 5
+    sf::Vector2d vel{3., 4.}; // magnitude = sqrt(9 + 16) = 5
     physicalObject.setVelocity(vel);
 
-    double expectedMomentum = mass * 5.f;
+    double expectedMomentum = mass * 5.;
 
     EXPECT_DOUBLE_EQ(physicalObject.getAbsoluteMomentum(), expectedMomentum);
 }
@@ -119,9 +119,9 @@ TEST(PhysicalObjectTest, GetKineticEnergyCalculatesCorrectly)
 
     physicalObject.setMass(mass);
 
-    sf::Vector2d vel{3.f, 4.f}; // speed = 5, v^2 = 25
+    sf::Vector2d vel{3., 4.}; // speed = 5, v^2 = 25
     physicalObject.setVelocity(vel);
 
-    float expectedKE = 0.5f * mass * 25.f;
+    double expectedKE = 0.5f * mass * 25.;
     EXPECT_DOUBLE_EQ(physicalObject.getKineticEnergy(), expectedKE);
 }

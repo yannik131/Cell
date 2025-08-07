@@ -32,7 +32,7 @@ template <typename MapType, typename KeyType> const Reaction* selectReaction(con
         return nullptr;
 
     const auto& possibleReactions = iter->second;
-    float randomNumber = mathutils::getRandomFloat();
+    double randomNumber = mathutils::getRandomFloat();
 
     // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
     if constexpr (std::is_same_v<KeyType, std::pair<DiscType, DiscType>>)
@@ -83,19 +83,19 @@ bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
         return false;
 
     const auto& vVec = d1->getVelocity();
-    const float v = mathutils::abs(vVec);
-    const sf::Vector2f n = vVec / v;
+    const double v = mathutils::abs(vVec);
+    const sf::Vector2d n = vVec / v;
 
     // We will let the collision handling in the next time step take care of separation
     // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
     // handling
     Disc product1(reaction->getProduct1());
     product1.setPosition(d1->getPosition());
-    product1.setVelocity(v * sf::Vector2f{-n.y, n.x});
+    product1.setVelocity(v * sf::Vector2d{-n.y, n.x});
 
     Disc product2(reaction->getProduct2());
     product2.setPosition(d1->getPosition());
-    product2.setVelocity(v * sf::Vector2f{n.y, -n.x});
+    product2.setVelocity(v * sf::Vector2d{n.y, -n.x});
 
     newDiscs.push_back(std::move(product1));
     newDiscs.push_back(std::move(product2));
