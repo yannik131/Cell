@@ -80,7 +80,7 @@ double calculateTimeBeforeCollision(const sf::Vector2d& v1, double r1, const sf:
  */
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 {
-    static const double e = 1.f;
+    static const double e = 1.;
 
     sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
     sf::Vector2d nVec = rVec / mathutils::abs(rVec);
@@ -89,7 +89,7 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
     const auto& m1 = d1.getType()->getMass();
     const auto& m2 = d2.getType()->getMass();
 
-    double impulse = -vrN * (e + 1) / (1.f / m1 + 1.f / m2);
+    double impulse = -vrN * (e + 1) / (1. / m1 + 1. / m2);
 
     d1.accelerate(impulse / m1 * nVec);
     d2.accelerate(-impulse / m2 * nVec);

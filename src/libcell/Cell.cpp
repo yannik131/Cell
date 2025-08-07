@@ -72,12 +72,12 @@ void Cell::reinitialize()
     buildScene();
 }
 
-float Cell::getInitialKineticEnergy() const
+double Cell::getInitialKineticEnergy() const
 {
     return initialKineticEnergy_;
 }
 
-float Cell::getCurrentKineticEnergy() const
+double Cell::getCurrentKineticEnergy() const
 {
     return currentKineticEnergy_;
 }
@@ -87,7 +87,7 @@ void Cell::buildScene()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution(0, 100);
-    std::uniform_real_distribution<float> velocityDistribution(-600.f, 600.f);
+    std::uniform_real_distribution<double> velocityDistribution(-600., 600.);
     const auto& settings = GlobalSettings::getSettings();
 
     discs_.reserve(settings.numberOfDiscs_);
@@ -107,7 +107,7 @@ void Cell::buildScene()
 
     std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
 
-    initialKineticEnergy_ = 0.f;
+    initialKineticEnergy_ = 0.;
     for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
     {
         int randomNumber = distribution(gen);
@@ -119,7 +119,7 @@ void Cell::buildScene()
                 counts[discType]++;
                 Disc newDisc(discType);
                 newDisc.setPosition(startPositions_.back());
-                newDisc.setVelocity(sf::Vector2f(velocityDistribution(gen), velocityDistribution(gen)));
+                newDisc.setVelocity(sf::Vector2d(velocityDistribution(gen), velocityDistribution(gen)));
                 initialKineticEnergy_ += newDisc.getKineticEnergy();
 
                 discs_.push_back(newDisc);
@@ -147,7 +147,7 @@ void Cell::initializeStartPositions()
     auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
 
     startPositions_.reserve(static_cast<std::size_t>((width / maxRadius_) * (height / maxRadius_)));
-    float spacing = maxRadius_ + 1;
+    double spacing = maxRadius_ + 1;
 
     for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
     {
@@ -165,7 +165,7 @@ void Cell::initializeStartPositions()
 
 void Cell::removeDestroyedDiscs()
 {
-    currentKineticEnergy_ = 0.f;
+    currentKineticEnergy_ = 0.;
     for (auto iter = discs_.begin(); iter != discs_.end();)
     {
         if (iter->isMarkedDestroyed())

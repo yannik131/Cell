@@ -152,16 +152,16 @@ void ReactionsTableModel::addEmptyRow(const cell::Reaction::Type& type)
     switch (type)
     {
     case cell::Reaction::Type::Transformation:
-        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.f});
+        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.});
         break;
     case cell::Reaction::Type::Combination:
-        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.f});
+        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.});
         break;
     case cell::Reaction::Type::Decomposition:
-        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.f});
+        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.});
         break;
     case cell::Reaction::Type::Exchange:
-        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.f});
+        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.});
         break;
     case cell::Reaction::Type::None:
         throw ExceptionWithLocation("Invalid reaction type");

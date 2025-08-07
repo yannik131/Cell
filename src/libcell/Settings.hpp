@@ -33,7 +33,7 @@ struct Settings
      * Example: If set to 2, we will advance the simulation by 2 seconds in 1 real time second, meaning we will (try to)
      * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
-    float simulationTimeScale_ = 1.f;
+    double simulationTimeScale_ = 1.;
 
     /**
      * @brief Total number of discs in the simulation
@@ -72,8 +72,8 @@ namespace SettingsLimits
 const sf::Time MinSimulationTimeStep = sf::microseconds(1);
 const sf::Time MaxSimulationTimeStep = sf::microseconds(100000);
 
-const float MinSimulationTimeScale = 0.0001f;
-const float MaxSimulationTimeScale = 10.f;
+const double MinSimulationTimeScale = 0.0001f;
+const double MaxSimulationTimeScale = 10.;
 
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
@@ -87,11 +87,11 @@ const int MaxCellHeight = 100000;
 
 namespace DiscTypeLimits
 {
-const float MinRadius = 1.f;
-const float MaxRadius = 100.f;
+const double MinRadius = 1.;
+const double MaxRadius = 100.;
 
-const float MinMass = 1.f;
-const float MaxMass = 10000.f;
+const double MinMass = 1.;
+const double MaxMass = 10000.;
 } // namespace DiscTypeLimits
 
 } // namespace cell

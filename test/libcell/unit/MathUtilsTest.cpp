@@ -36,15 +36,15 @@ TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 
 TEST(MathUtilsTest, CollisionsWithBounds)
 {
-    const sf::Vector2f boundsTopLeft{0, 0};
-    const sf::Vector2f boundsBottomRight{100, 100};
+    const sf::Vector2d boundsTopLeft{0, 0};
+    const sf::Vector2d boundsBottomRight{100, 100};
 
     Disc d(Mass5);
-    const float R = d.getType()->getRadius();
+    const double R = d.getType()->getRadius();
 
     // Collision with top and right wall
     d.setPosition(boundsTopLeft);
-    d.setVelocity({-1.f, 1.f});
+    d.setVelocity({-1., 1.});
 
     mathutils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
 
@@ -56,7 +56,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
 
     // Collision with bottom and left wall
     d.setPosition(boundsBottomRight);
-    d.setVelocity({1.f, -1.f});
+    d.setVelocity({1., -1.});
 
     mathutils::handleWorldBoundCollision(d, boundsTopLeft, boundsBottomRight, 0);
 
@@ -66,41 +66,41 @@ TEST(MathUtilsTest, CollisionsWithBounds)
 
 TEST(MathUtilsTest, Abs)
 {
-    EXPECT_NEAR(mathutils::abs(sf::Vector2f{1, 1}), std::sqrt(2), 1e-4);
-    EXPECT_NEAR(mathutils::abs(sf::Vector2f{0, 0}), 0, 0);
+    EXPECT_NEAR(mathutils::abs(sf::Vector2d{1, 1}), std::sqrt(2), 1e-4);
+    EXPECT_NEAR(mathutils::abs(sf::Vector2d{0, 0}), 0, 0);
 }
 
 // Kind of a system test that tests the entire collision response
 TEST(MathUtilsTest, CollisionHandling)
 {
-    DiscType discType("B", sf::Color::Red, 1.f, 1.f);
+    DiscType discType("B", sf::Color::Red, 1., 1.);
     Disc d1(discType), d2(discType);
 
-    sf::Vector2f d1InitialPosition{0, 0};
+    sf::Vector2d d1InitialPosition{0, 0};
     d1.setPosition(d1InitialPosition);
     d1.setVelocity({1.1f, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
     const auto sqrt2 = static_cast<float>(std::numbers::sqrt2);
-    sf::Vector2f d2InitialPosition{sqrt2, -sqrt2};
+    sf::Vector2d d2InitialPosition{sqrt2, -sqrt2};
     d2.setPosition(d2InitialPosition);
     d2.setVelocity({1.2f, 1});
 
-    const float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const double kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
 
-    const float dt = 0.15f;
+    const double dt = 0.15f;
 
     d1.move(dt * d1.getVelocity());
     d2.move(dt * d2.getVelocity());
 
     const auto& overlapResults = mathutils::calculateOverlap(d1, d2);
-    const float calculatedDt = mathutils::calculateTimeBeforeCollision(d1, d2, overlapResults);
+    const double calculatedDt = mathutils::calculateTimeBeforeCollision(d1, d2, overlapResults);
 
     EXPECT_FLOAT_EQ(-dt, calculatedDt);
 
     mathutils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
-    const float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const double kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     // Values calculated once for regression testing
 
@@ -118,8 +118,8 @@ TEST(MathUtilsTest, CollisionHandling)
 
 TEST(MathUtilsTest, getRandomFloat)
 {
-    float f1 = mathutils::getRandomFloat();
-    float f2 = mathutils::getRandomFloat();
+    double f1 = mathutils::getRandomFloat();
+    double f2 = mathutils::getRandomFloat();
 
     EXPECT_NE(f1, f2); // Maybe
 

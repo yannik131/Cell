@@ -54,12 +54,12 @@ public:
     /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
      */
-    float getInitialKineticEnergy() const;
+    double getInitialKineticEnergy() const;
 
     /**
      * @brief The current kinetc energy of all discs in this cell
      */
-    float getCurrentKineticEnergy() const;
+    double getCurrentKineticEnergy() const;
 
 private:
     /**
@@ -81,11 +81,11 @@ private:
     void removeDestroyedDiscs();
 
 private:
-    std::vector<sf::Vector2f> startPositions_;
+    std::vector<sf::Vector2d> startPositions_;
     std::vector<Disc> discs_;
     DiscType::map<int> collisionCounts_;
-    float initialKineticEnergy_{};
-    float currentKineticEnergy_{};
+    double initialKineticEnergy_{};
+    double currentKineticEnergy_{};
 
     std::vector<Disc> newDiscs_;
 };
