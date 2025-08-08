@@ -199,12 +199,4 @@ void CollisionHandler::calculateDiscRectangleCollisionResponse(
     // TODO Handle energy expletion over time somewhere, but not here
 }
 
-void CollisionHandler::discMembraneInsideCollision(Disc* disc, Membrane* membrane) const
-{
-}
-
-void CollisionHandler::discMembraneOutsideCollision(Disc* disc, Membrane* membrane) const
-{
-}
-
 } // namespace cell

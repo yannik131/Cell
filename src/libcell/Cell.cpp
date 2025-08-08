@@ -143,8 +143,8 @@ void Cell::buildScene()
 
 void Cell::initializeStartPositions()
 {
-    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
-    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
+    auto width = static_cast<double>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<double>(GlobalSettings::getSettings().cellHeight_);
 
     startPositions_.reserve(static_cast<std::size_t>((width / maxRadius_) * (height / maxRadius_)));
     double spacing = maxRadius_ + 1;
@@ -153,8 +153,8 @@ void Cell::initializeStartPositions()
     {
         for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
         {
-            startPositions_.emplace_back(spacing * static_cast<float>(2 * i + 1),
-                                         spacing * static_cast<float>(2 * j + 1));
+            startPositions_.emplace_back(spacing * static_cast<double>(2 * i + 1),
+                                         spacing * static_cast<double>(2 * j + 1));
         }
     }
 

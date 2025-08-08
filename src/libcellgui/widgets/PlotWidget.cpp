@@ -102,7 +102,7 @@ void PlotWidget::addDataPoint(const cell::DiscType::map<double>& dataPoint)
 
         auto value = dataPoint.contains(discType) ? dataPoint.at(discType) : 0;
 
-        xMax_ = timeStep * static_cast<float>(size);
+        xMax_ = timeStep * static_cast<double>(size);
         graphs_[discType]->addData(xMax_, value);
 
         yMin_ = std::min(yMin_, value);
@@ -172,7 +172,7 @@ void PlotWidget::addDataPointSum(const cell::DiscType::map<double>& dataPoint)
         if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
             continue;
 
-        xMax_ = timeStep * static_cast<float>(size);
+        xMax_ = timeStep * static_cast<double>(size);
         sum += value;
     }
 

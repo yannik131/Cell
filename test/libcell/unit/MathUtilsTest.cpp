@@ -81,7 +81,7 @@ TEST(MathUtilsTest, CollisionHandling)
     d1.setVelocity({1.1f, -1});
 
     // d2 touches d1 at time t = 0, but no collision yet
-    const auto sqrt2 = static_cast<float>(std::numbers::sqrt2);
+    const auto sqrt2 = std::numbers::sqrt2;
     sf::Vector2d d2InitialPosition{sqrt2, -sqrt2};
     d2.setPosition(d2InitialPosition);
     d2.setVelocity({1.2f, 1});

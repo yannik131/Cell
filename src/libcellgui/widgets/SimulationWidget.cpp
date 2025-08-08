@@ -34,7 +34,7 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
         sf::RenderWindow::draw(circleShape);
     }
 
-    boundingRect_.setSize(sf::Vector2d{static_cast<float>(cell::GlobalSettings::getSettings().cellWidth_),
+    boundingRect_.setSize(sf::Vector2f{static_cast<float>(cell::GlobalSettings::getSettings().cellWidth_),
                                        static_cast<float>(cell::GlobalSettings::getSettings().cellHeight_)});
     boundingRect_.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
 

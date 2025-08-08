@@ -32,7 +32,8 @@ public:
         };
 
         // A disc can either collide with 1 wall at a time or with both top/left, top/right, bottom/left and
-        // bottom/right We track the penetration into each wall in px
+        // bottom/right
+        // We track the penetration into each wall in px
         std::optional<std::pair<Wall, double>> xCollision_;
         std::optional<std::pair<Wall, double>> yCollision_;
     };

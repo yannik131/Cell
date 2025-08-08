@@ -108,13 +108,14 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
 {
     PositionNanoflannAdapter<Disc> adapter(discs);
     KDTree<Disc> kdtree(2, adapter);
+
     // 0: Don't approximate neighbors during search
     // false: Don't sort results by distance
     static const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
     static std::vector<nanoflann::ResultItem<uint32_t, double>> discsInRadius;
-    std::set<Disc*> discsInCollisions;
+    std::unordered_set<Disc*> discsInCollisions;
 
     for (auto& disc : discs)
     {

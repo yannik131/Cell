@@ -70,7 +70,7 @@ void QSFMLWidget::mouseReleaseEvent(QMouseEvent*)
 
 void QSFMLWidget::wheelEvent(QWheelEvent* event)
 {
-    double delta = static_cast<float>(event->angleDelta().y());
+    double delta = static_cast<double>(event->angleDelta().y());
 
     double zoomFactor = (delta > 0) ? 0.9f : 1.1f;
     currentZoom_ *= zoomFactor;
