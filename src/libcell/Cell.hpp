@@ -64,18 +64,6 @@ public:
 
 private:
     /**
-     * @brief Creates discs within the boundaries at the starting positions
-     */
-    void buildScene();
-
-    /**
-     * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the
-     * settings. Doesn't check if the disc type with the largest radius can actually be created with the currently
-     * defined set of reactions, though.
-     */
-    void initializeStartPositions();
-
-    /**
      * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
      * calculates the current kinetic energy based on the discs that are still in the cell
      */
