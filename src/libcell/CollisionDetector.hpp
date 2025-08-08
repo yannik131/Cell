@@ -88,8 +88,8 @@ private:
     double minDiscRadius_ = 0;
     double maxMembraneRadius_ = 0;
     std::vector<MembranePolygonPoint> membranePolygonPoints_;
-    KDTree<MembranePolygonPoint> membranesKDTree;                  // naming
-    const PositionNanoflannAdapter<MembranePolygonPoint> adapter_; // naming
+    KDTree<MembranePolygonPoint> membranesKDTree_;
+    const PositionNanoflannAdapter<MembranePolygonPoint> membranesKDTreeAdapter_;
 };
 
 } // namespace cell

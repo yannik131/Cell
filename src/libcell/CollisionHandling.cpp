@@ -1,11 +1,11 @@
-#include "CollisionHandler.hpp"
+#include "CollisionHandling.hpp"
 #include "Disc.hpp"
 #include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "Membrane.hpp"
 #include "Vector2d.hpp"
 
-namespace cell
+namespace cell::collisions
 {
 
 namespace
@@ -97,8 +97,7 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 
 } // namespace
 
-DiscType::map<int>
-CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
+DiscType::map<int> calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions)
 {
     DiscType::map<int> collisionCounts;
 
@@ -129,8 +128,7 @@ CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, D
     return collisionCounts;
 }
 
-void CollisionHandler::calculateDiscMembraneCollisionResponse(
-    std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions) const
+void calculateDiscMembraneCollisionResponse(std::set<std::pair<Disc*, Membrane*>> discMembraneCollisions)
 {
     const auto& dt = GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
 
@@ -167,8 +165,7 @@ void CollisionHandler::calculateDiscMembraneCollisionResponse(
     }
 }
 
-void CollisionHandler::calculateDiscRectangleCollisionResponse(
-    Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision)
+void calculateDiscRectangleCollisionResponse(Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision)
 {
     using Wall = CollisionDetector::RectangleCollision::Wall;
 
@@ -199,4 +196,4 @@ void CollisionHandler::calculateDiscRectangleCollisionResponse(
     // TODO Handle energy expletion over time somewhere, but not here
 }
 
-} // namespace cell
+} // namespace cell::collisions
