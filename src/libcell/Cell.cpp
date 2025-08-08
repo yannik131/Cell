@@ -18,6 +18,30 @@ namespace cell
 
 Cell::Cell() = default;
 
+void Cell::update(const sf::Time& dt)
+{
+    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
+    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
+
+    newDiscs_.clear();
+
+    for (auto& disc : discs_)
+    {
+        disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
+        currentKineticEnergy_ += mathutils::handleWorldBoundCollision(disc, {0, 0}, {width, height},
+                                                                      initialKineticEnergy_ - currentKineticEnergy_);
+    }
+
+    const auto& newDiscs = unimolecularReactions(discs_);
+    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
+    discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+
+    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, maxRadius_);
+    collisionCounts_ += mathutils::handleDiscCollisions(collidingDiscs);
+
+    removeDestroyedDiscs();
+}
+
 template <typename T> DiscType::map<T> operator+=(DiscType::map<T>& a, const DiscType::map<T>& b)
 {
     for (const auto& [key, value] : b)

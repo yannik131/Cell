@@ -71,6 +71,10 @@ private:
 
 private:
     CellState cellState_;
+    DiscType::map<int> collisionCounts_;
+    double initialKineticEnergy_ = 0;
+    double currentKineticEnergy_ = 0;
+    std::vector<Disc> newDiscs_;
 };
 
 } // namespace cell

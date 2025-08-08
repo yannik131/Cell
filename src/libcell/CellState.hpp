@@ -22,8 +22,6 @@ class CellState
 public:
     CellState() = default;
 
-    void update(const sf::Time& dt);
-
     void addDisc(const Disc& disc);
     void addMembrane(const Membrane& membrane);
 
@@ -34,14 +32,12 @@ public:
      */
     void randomize();
 
+    std::vector<Disc>& getDiscs();
+    std::vector<Membrane>& getMembranes();
+
 private:
-    std::vector<sf::Vector2d> startPositions_;
     std::vector<Disc> discs_;
     std::vector<Membrane> membranes_;
-    DiscType::map<int> collisionCounts_;
-    double initialKineticEnergy_ = 0;
-    double currentKineticEnergy_ = 0;
-    std::vector<Disc> newDiscs_;
 };
 
 } // namespace cell

@@ -12,6 +12,16 @@ namespace cell
 
 namespace
 {
+
+double findMaxDiscRadiusInSettings()
+{
+    const auto& discTypes = GlobalSettings::getSettings().discTypes_;
+    if (discTypes.empty())
+        throw ExceptionWithLocation("Can't find max disc radius: No disc types in settings.");
+
+    return std::ranges::max_element(GlobalSettings::getSettings().discTypes_, {}, &DiscType::getRadius)->getRadius();
+}
+
 std::vector<sf::Vector2d> calculateGridStartPositions(int width, int height, int gridSize)
 {
     std::vector<sf::Vector2d> startPositions;
@@ -34,30 +44,29 @@ std::vector<sf::Vector2d> calculateGridStartPositions(int width, int height, int
     return startPositions;
 }
 
-} // namespace
-
-void CellState::update(const sf::Time& dt)
+// We need the accumulated percentages sorted in ascending order for the random number approach to work
+DiscType::map<int> getAccumulatedPercentagesFromSettings()
 {
-    auto width = static_cast<float>(GlobalSettings::getSettings().cellWidth_);
-    auto height = static_cast<float>(GlobalSettings::getSettings().cellHeight_);
-
-    newDiscs_.clear();
-
-    for (auto& disc : discs_)
+    std::vector<std::pair<DiscType*, int>> discTypes;
+    for (const auto& pair : GlobalSettings::getSettings().discTypeDistribution_)
     {
-        disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
-        currentKineticEnergy_ += mathutils::handleWorldBoundCollision(disc, {0, 0}, {width, height},
-                                                                      initialKineticEnergy_ - currentKineticEnergy_);
+        int accumulatedPercentage = discTypes.empty() ? 0 : discTypes.back().second;
+        discTypes.emplace_back(pair.first, pair.second + accumulatedPercentage);
     }
 
-    const auto& newDiscs = unimolecularReactions(discs_);
-    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-    discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
+}
 
-    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, maxRadius_);
-    collisionCounts_ += mathutils::handleDiscCollisions(collidingDiscs);
+} // namespace
 
-    removeDestroyedDiscs();
+void CellState::addDisc(const Disc& disc)
+{
+    discs_.push_back(disc);
+}
+
+void CellState::addMembrane(const Membrane& membrane)
+{
+    membranes_.push_back(membrane);
 }
 
 void CellState::randomize()
@@ -72,24 +81,22 @@ void CellState::randomize()
     discs_.reserve(settings.numberOfDiscs_);
     DiscType::map<int> counts;
 
-    if (settings.numberOfDiscs_ > static_cast<int>(startPositions_.size()))
+    double maxDiscRadius = findMaxDiscRadiusInSettings();
+    std::vector<sf::Vector2d> startPositions =
+        calculateGridStartPositions(settings.cellWidth_, settings.cellHeight_, maxDiscRadius);
+
+    if (settings.numberOfDiscs_ > static_cast<int>(startPositions.size()))
     {
         LOG(WARNING) << "According to the settings, " << std::to_string(settings.numberOfDiscs_)
                      << " discs should be created, but the start positions can only fit "
-                     << std::to_string(startPositions_.size()) << ". "
-                     << std::to_string(settings.numberOfDiscs_ - startPositions_.size())
+                     << std::to_string(startPositions.size()) << ". "
+                     << std::to_string(settings.numberOfDiscs_ - startPositions.size())
                      << " discs will not be created.";
     }
 
-    // We need the accumulated percentages sorted in ascending order for the random number approach to work
-    std::vector<std::pair<DiscType, int>> discTypes;
-    for (const auto& pair : settings.discTypeDistribution_)
-        discTypes.emplace_back(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
+    DiscType::map<int> discTypes = getAccumulatedPercentagesFromSettings();
 
-    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    initialKineticEnergy_ = 0.;
-    for (int i = 0; i < settings.numberOfDiscs_ && !startPositions_.empty(); ++i)
+    for (int i = 0; i < settings.numberOfDiscs_ && !startPositions.empty(); ++i)
     {
         int randomNumber = distribution(gen);
 
@@ -99,27 +106,26 @@ void CellState::randomize()
             {
                 counts[discType]++;
                 Disc newDisc(discType);
-                newDisc.setPosition(startPositions_.back());
+                newDisc.setPosition(startPositions.back());
                 newDisc.setVelocity(sf::Vector2d(velocityDistribution(gen), velocityDistribution(gen)));
-                initialKineticEnergy_ += newDisc.getKineticEnergy();
 
                 discs_.push_back(newDisc);
-                startPositions_.pop_back();
+                startPositions.pop_back();
 
                 break;
             }
         }
     }
+}
 
-    currentKineticEnergy_ = initialKineticEnergy_;
+std::vector<Disc>& CellState::getDiscs()
+{
+    return discs_;
+}
 
-    DLOG(INFO) << "Radius distribution";
-    for (const auto& [discType, count] : counts)
-    {
-        DLOG(INFO) << discType.getName() << " (" + std::to_string(discType.getRadius()) + "px): " << count << "/"
-                   << settings.numberOfDiscs_ << " ("
-                   << static_cast<float>(count) / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
-    }
+std::vector<Membrane>& CellState::getMembranes()
+{
+    return membranes_;
 }
 
 } // namespace cell
