@@ -44,7 +44,7 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
 
 sf::CircleShape SimulationWidget::circleShapeFromDisc(const cell::Disc& disc)
 {
-    sf::CircleShape shape(disc.getType().getRadius());
+    sf::CircleShape shape(static_cast<float>(disc.getType().getRadius()));
     shape.setFillColor(disc.getType().getColor());
     auto radius = static_cast<float>(disc.getType().getRadius());
     shape.setOrigin(sf::Vector2f(radius, radius));
