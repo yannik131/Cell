@@ -5,7 +5,7 @@
 
 namespace sf
 {
-typedef Vector2<double> Vector2d;
+using Vector2d = Vector2<double>;
 }
 
 #endif /* VECTOR2D_HPP */

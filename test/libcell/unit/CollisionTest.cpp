@@ -22,11 +22,11 @@ TEST(Collision, ConservesEnergy)
     d2.setPosition(d1InitialPosition + sf::Vector2d{0.1f, 0.1f});
     d2.setVelocity({-400, 300});
 
-    const float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const double kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     mathutils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
-    const float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
+    const double kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     EXPECT_NEAR(kineticEnergyBefore, kineticEnergyAfter, 1e-4);
 }

@@ -98,7 +98,7 @@ sf::Vector2d Disc::getMomentum() const
 
 double Disc::getKineticEnergy() const
 {
-    return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+    return 0.5 * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }
 
 } // namespace cell

@@ -21,7 +21,7 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
     // The settings are only locked if the simulation is running
     // If it is not running, we have no frame limit
     if (cell::GlobalSettings::get().isLocked() &&
-        clock_.getElapsedTime() < sf::seconds(1.0 / static_cast<float>(GlobalGUISettings::getGUISettings().guiFPS_)))
+        clock_.getElapsedTime() < sf::seconds(1.0f / static_cast<float>(GlobalGUISettings::getGUISettings().guiFPS_)))
         return;
 
     clock_.restart();
@@ -46,7 +46,7 @@ sf::CircleShape SimulationWidget::circleShapeFromDisc(const cell::Disc& disc)
 {
     sf::CircleShape shape(disc.getType().getRadius());
     shape.setFillColor(disc.getType().getColor());
-    float radius = static_cast<float>(disc.getType().getRadius());
+    auto radius = static_cast<float>(disc.getType().getRadius());
     shape.setOrigin(sf::Vector2f(radius, radius));
     shape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
 
