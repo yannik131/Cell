@@ -89,7 +89,7 @@ void GlobalSettings::setSimulationTimeStep(const sf::Time& simulationTimeStep)
     useCallback(SettingID::SimulationTimeStep);
 }
 
-void GlobalSettings::setSimulationTimeScale(float simulationTimeScale)
+void GlobalSettings::setSimulationTimeScale(double simulationTimeScale)
 {
     throwIfLocked();
     throwIfNotInRange(simulationTimeScale, SettingsLimits::MinSimulationTimeScale,

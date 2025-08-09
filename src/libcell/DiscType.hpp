@@ -68,7 +68,7 @@ public:
     /**
      * @brief Creates a new disc type with unique ID
      */
-    DiscType(const std::string& name, const sf::Color& color, float radius, float mass);
+    DiscType(const std::string& name, const sf::Color& color, double radius, double mass);
 
     /**
      * @brief Copy-ctor, copies the ID
@@ -104,22 +104,22 @@ public:
     /**
      * @returns The radius of this DiscType in px
      */
-    float getRadius() const;
+    double getRadius() const;
 
     /**
      * @brief Sets the radius of this DiscType in px (must be > 0)
      */
-    void setRadius(float radius);
+    void setRadius(double radius);
 
     /**
      * @returns The mass of this DiscType (arbitrary unit right now)
      */
-    float getMass() const;
+    double getMass() const;
 
     /**
      * @brief Sets the mass of this DiscType (must be > 0, arbitrary unit)
      */
-    void setMass(float mass);
+    void setMass(double mass);
 
     /**
      * @returns The unique ID of this DiscType (unless it was copied)
@@ -152,12 +152,12 @@ private:
      * @brief Radius in px
      * @todo https://github.com/yannik131/Cell/issues/25
      */
-    float radius_ = 0;
+    double radius_ = 0;
 
     /**
      * @brief Mass in arbitrary unit
      */
-    float mass_ = 0;
+    double mass_ = 0;
 
     /**
      * @brief A unique identifier of this object that is copied by the copy-ctor and operator=

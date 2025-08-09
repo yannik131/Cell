@@ -13,7 +13,7 @@ Disc::Disc(const DiscType& discType)
 {
 }
 
-void Disc::setVelocity(const sf::Vector2f& velocity)
+void Disc::setVelocity(const sf::Vector2d& velocity)
 {
 #ifdef DEBUG
     if (std::isnan(velocity.x) || std::isnan(velocity.y) || std::isinf(velocity.x) || std::isinf(velocity.y))
@@ -22,12 +22,12 @@ void Disc::setVelocity(const sf::Vector2f& velocity)
     velocity_ = velocity;
 }
 
-void Disc::scaleVelocity(float factor)
+void Disc::scaleVelocity(double factor)
 {
     setVelocity(velocity_ * factor);
 }
 
-void Disc::accelerate(const sf::Vector2f& acceleration)
+void Disc::accelerate(const sf::Vector2d& acceleration)
 {
     velocity_ += acceleration;
 }
@@ -42,7 +42,7 @@ void Disc::negateYVelocity()
     velocity_.y = -velocity_.y;
 }
 
-void Disc::setPosition(const sf::Vector2f& position)
+void Disc::setPosition(const sf::Vector2d& position)
 {
 #ifdef DEBUG
     if (std::isnan(position.x) || std::isnan(position.y) || std::isinf(position.x) || std::isinf(position.y))
@@ -51,7 +51,7 @@ void Disc::setPosition(const sf::Vector2f& position)
     position_ = position;
 }
 
-void Disc::move(const sf::Vector2f& distance)
+void Disc::move(const sf::Vector2d& distance)
 {
     setPosition(position_ + distance);
 }
@@ -66,12 +66,12 @@ void Disc::markDestroyed()
     destroyed_ = true;
 }
 
-const sf::Vector2f& Disc::getVelocity() const
+const sf::Vector2d& Disc::getVelocity() const
 {
     return velocity_;
 }
 
-const sf::Vector2f& Disc::getPosition() const
+const sf::Vector2d& Disc::getPosition() const
 {
     return position_;
 }
@@ -86,17 +86,17 @@ bool Disc::isMarkedDestroyed() const
     return destroyed_;
 }
 
-float Disc::getAbsoluteMomentum() const
+double Disc::getAbsoluteMomentum() const
 {
     return type_.getMass() * std::hypot(velocity_.x, velocity_.y);
 }
 
-sf::Vector2f Disc::getMomentum() const
+sf::Vector2d Disc::getMomentum() const
 {
     return type_.getMass() * velocity_;
 }
 
-float Disc::getKineticEnergy() const
+double Disc::getKineticEnergy() const
 {
     return 0.5f * type_.getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }

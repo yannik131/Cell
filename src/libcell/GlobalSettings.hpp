@@ -60,7 +60,7 @@ public:
     // comment
 
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
-    void setSimulationTimeScale(float simulationTimeScale);
+    void setSimulationTimeScale(double simulationTimeScale);
     void setNumberOfDiscs(int numberOfDiscs);
     void setCellSize(int width, int height);
 

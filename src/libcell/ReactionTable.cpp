@@ -24,12 +24,12 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
             throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r) + " vs. " + toString(reaction));
     }
 
-    float totalProbability = reactions.front().getProbability();
+    double totalProbability = reactions.front().getProbability();
 
     for (std::size_t i = 0; i < reactions.size() - 1; ++i)
         totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
 
-    if (reaction.getProbability() + totalProbability > 1.f)
+    if (reaction.getProbability() + totalProbability > 1.0)
         throw ExceptionWithLocation("Can't add reaction to vector: Accumulative probability > 1");
 
     reaction.setProbability(reaction.getProbability() + totalProbability);

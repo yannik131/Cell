@@ -2,6 +2,7 @@
 #define DISC_HPP
 
 #include "DiscType.hpp"
+#include "Vector2d.hpp"
 
 #include <SFML/System/Vector2.hpp>
 
@@ -23,17 +24,17 @@ public:
     /**
      * @brief Sets the velocity of the disc in px/s
      */
-    void setVelocity(const sf::Vector2f& velocity);
+    void setVelocity(const sf::Vector2d& velocity);
 
     /**
      * @brief Multiplies both velocity components with `factor`
      */
-    void scaleVelocity(float factor);
+    void scaleVelocity(double factor);
 
     /**
      * @brief Adds `acceleration` to the velocity of the disc
      */
-    void accelerate(const sf::Vector2f& acceleration);
+    void accelerate(const sf::Vector2d& acceleration);
 
     /**
      * @brief Negates the x-component of the velocity
@@ -49,12 +50,12 @@ public:
      * @brief Sets the position with no checks.
      * @note In debug mode, checks for invalid values (nan, inf)
      */
-    void setPosition(const sf::Vector2f& position);
+    void setPosition(const sf::Vector2d& position);
 
     /**
      * @brief Changes the disc's position by the given `distance`
      */
-    void move(const sf::Vector2f& distance);
+    void move(const sf::Vector2d& distance);
 
     /**
      * @brief Assigns a new disc type (no checks)
@@ -69,12 +70,12 @@ public:
     /**
      * @returns Velocity of the disc (px/s)
      */
-    const sf::Vector2f& getVelocity() const;
+    const sf::Vector2d& getVelocity() const;
 
     /**
      * @returns Position of the disc (px)
      */
-    const sf::Vector2f& getPosition() const;
+    const sf::Vector2d& getPosition() const;
 
     /**
      * @returns DiscType of the disc
@@ -89,28 +90,28 @@ public:
     /**
      * @returns |mv|
      */
-    float getAbsoluteMomentum() const;
+    double getAbsoluteMomentum() const;
 
     /**
      * @returns mv
      */
-    sf::Vector2f getMomentum() const;
+    sf::Vector2d getMomentum() const;
 
     /**
      * @returns 1/2*m*v^2
      */
-    float getKineticEnergy() const;
+    double getKineticEnergy() const;
 
 private:
     /**
      * @brief Velocity in px/s
      */
-    sf::Vector2f velocity_;
+    sf::Vector2d velocity_;
 
     /**
      * @brief Position in px
      */
-    sf::Vector2f position_;
+    sf::Vector2d position_;
 
     /**
      * @brief Reactions of type A + B -> C require B to be removed (A can be changed to C). This flag

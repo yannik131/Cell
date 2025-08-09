@@ -11,12 +11,12 @@
 #include <ostream>
 #include <random>
 
-std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v)
+std::ostream& operator<<(std::ostream& os, const sf::Vector2d& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";
 }
 
-float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
+double operator*(const sf::Vector2d& a, const sf::Vector2d& b)
 {
     return a.x * b.x + a.y * b.y;
 }
@@ -24,17 +24,17 @@ float operator*(const sf::Vector2f& a, const sf::Vector2f& b)
 namespace cell::mathutils
 {
 
-using AdapterType = nanoflann::L2_Simple_Adaptor<float, NanoflannAdapter>;
+using AdapterType = nanoflann::L2_Simple_Adaptor<double, NanoflannAdapter>;
 using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType, NanoflannAdapter, 2>;
 
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius)
+std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, double maxRadius)
 {
     NanoflannAdapter adapter(discs);
     KDTree kdtree(2, adapter);
     const nanoflann::SearchParameters searchParams(0, false);
 
     std::set<std::pair<Disc*, Disc*>> collidingDiscs;
-    static std::vector<nanoflann::ResultItem<uint32_t, float>> discsInRadius;
+    static std::vector<nanoflann::ResultItem<uint32_t, double>> discsInRadius;
     std::set<Disc*> discsInCollisions;
 
     for (auto& disc : discs)
@@ -44,7 +44,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, f
             continue;
 
         discsInRadius.clear();
-        const float maxCollisionDistance = disc.getType().getRadius() + maxRadius;
+        const double maxCollisionDistance = disc.getType().getRadius() + maxRadius;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
         // constructor
@@ -57,7 +57,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, f
             if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
                 continue;
 
-            const float radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
+            const double radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
 
             if (result.second <= radiusSum * radiusSum)
             {
@@ -95,7 +95,7 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
         if (combinationReaction(p1, p2))
             continue;
 
-        float dt = calculateTimeBeforeCollision(*p1, *p2, overlapResults);
+        double dt = calculateTimeBeforeCollision(*p1, *p2, overlapResults);
 
         p1->move(dt * p1->getVelocity());
         p2->move(dt * p2->getVelocity());
@@ -111,15 +111,15 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
     return collisionCounts;
 }
 
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
-                                float kineticEnergyDeficiency)
+double handleWorldBoundCollision(Disc& disc, const sf::Vector2d& boundsTopLeft, const sf::Vector2d& boundsBottomRight,
+                                 double kineticEnergyDeficiency)
 {
-    const float& R = disc.getType().getRadius();
-    const sf::Vector2f& r = disc.getPosition();
+    const double& R = disc.getType().getRadius();
+    const sf::Vector2d& r = disc.getPosition();
 
     bool collided = false;
-    float l = NAN; // We must satisfy clang-tidy!
-    float dx = 0, dy = 0;
+    double l = NAN; // We must satisfy clang-tidy!
+    double dx = 0, dy = 0;
 
     if (l = R + boundsTopLeft.x - r.x; l > 0) // Left wall
     {
@@ -148,12 +148,12 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
     }
 
     if (!collided)
-        return 0.f;
+        return 0.0;
 
     disc.move({dx, dy});
 
     if (kineticEnergyDeficiency <= 0)
-        return 0.f;
+        return 0.0;
 
     // Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
     // simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
@@ -162,22 +162,22 @@ float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, c
 
     // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
     // not too much to make it look stupid
-    float randomNumber = getRandomFloat() * 0.05f;
-    float kineticEnergyBefore = disc.getKineticEnergy();
-    disc.scaleVelocity(1.f + randomNumber);
+    double randomNumber = getRandomFloat() * 0.05f;
+    double kineticEnergyBefore = disc.getKineticEnergy();
+    disc.scaleVelocity(1.0 + randomNumber);
 
     return disc.getKineticEnergy() - kineticEnergyBefore;
 }
 
-float abs(const sf::Vector2f& vec)
+double abs(const sf::Vector2d& vec)
 {
     return std::hypot(vec.x, vec.y);
 }
 
 OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
 {
-    sf::Vector2f rVec = d2.getPosition() - d1.getPosition();
-    float distance = abs(rVec);
+    sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
+    double distance = abs(rVec);
 
     if (distance == 0)
     {
@@ -186,16 +186,16 @@ OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
         return badResult;
     }
 
-    sf::Vector2f nVec = rVec / distance;
-    float overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
+    sf::Vector2d nVec = rVec / distance;
+    double overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
 
     return OverlapResults{.rVec = rVec, .nVec = nVec, .distance = distance, .overlap = overlap};
 }
 
-float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults)
+double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults)
 {
     const auto& r = overlapResults.rVec;
-    sf::Vector2f v = d2.getVelocity() - d1.getVelocity();
+    sf::Vector2d v = d2.getVelocity() - d1.getVelocity();
     const auto& R1 = d1.getType().getRadius();
     const auto& R2 = d2.getType().getRadius();
 
@@ -207,26 +207,26 @@ float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overlap
 
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
 {
-    static const float e = 1.f;
+    static const double e = 1.0;
 
-    sf::Vector2f rVec = d2.getPosition() - d1.getPosition();
-    sf::Vector2f nVec = rVec / abs(rVec);
+    sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
+    sf::Vector2d nVec = rVec / abs(rVec);
 
-    float vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
+    double vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
     const auto& m1 = d1.getType().getMass();
     const auto& m2 = d2.getType().getMass();
 
-    float impulse = -vrN * (e + 1) / (1.f / m1 + 1.f / m2);
+    double impulse = -vrN * (e + 1) / (1.0 / m1 + 1.0 / m2);
 
     d1.accelerate(impulse / m1 * nVec);
     d2.accelerate(-impulse / m2 * nVec);
 }
 
-float getRandomFloat()
+double getRandomFloat()
 {
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    static std::uniform_real_distribution<float> distribution(0, 1);
+    static std::uniform_real_distribution<double> distribution(0, 1);
 
     return distribution(gen);
 }

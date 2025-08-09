@@ -15,7 +15,7 @@ std::pair<DiscType, DiscType> makeOrderedPair(const DiscType& d1, const DiscType
 }
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-DiscType::DiscType(const std::string& name, const sf::Color& color, float radius, float mass)
+DiscType::DiscType(const std::string& name, const sf::Color& color, double radius, double mass)
     : id_(instanceCount++)
 {
     setName(name);
@@ -53,12 +53,12 @@ void DiscType::setColor(const sf::Color& color)
     color_ = color;
 }
 
-float DiscType::getRadius() const
+double DiscType::getRadius() const
 {
     return radius_;
 }
 
-void DiscType::setRadius(float radius)
+void DiscType::setRadius(double radius)
 {
     if (radius <= 0)
         throw ExceptionWithLocation("Disc type radius must be positive");
@@ -66,12 +66,12 @@ void DiscType::setRadius(float radius)
     radius_ = radius;
 }
 
-float DiscType::getMass() const
+double DiscType::getMass() const
 {
     return mass_;
 }
 
-void DiscType::setMass(float mass)
+void DiscType::setMass(double mass)
 {
     if (mass <= 0)
         throw ExceptionWithLocation("Disc type mass must be positive");

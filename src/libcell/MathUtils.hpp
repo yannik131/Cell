@@ -6,6 +6,7 @@
  */
 
 #include "Disc.hpp"
+#include "Vector2d.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -50,12 +51,12 @@ std::unordered_map<T1, T2, T3, T5> operator*(std::unordered_map<T1, T2, T3, T5> 
 /**
  * @brief Prints the x and y coordinates to the given stream
  */
-std::ostream& operator<<(std::ostream& os, const sf::Vector2f& v);
+std::ostream& operator<<(std::ostream& os, const sf::Vector2d& v);
 
 /**
  * @brief Scalar product of 2 vectors
  */
-float operator*(const sf::Vector2f& a, const sf::Vector2f& b);
+double operator*(const sf::Vector2d& a, const sf::Vector2d& b);
 
 namespace cell::mathutils
 {
@@ -69,22 +70,22 @@ struct OverlapResults
     /**
      * @brief Direction vector from the first disc to the second
      */
-    sf::Vector2f rVec;
+    sf::Vector2d rVec;
 
     /**
      * @brief Normalized direction vector from first disc to second
      */
-    sf::Vector2f nVec;
+    sf::Vector2d nVec;
 
     /**
      * @brief Absolute distance between the 2 discs
      */
-    float distance{};
+    double distance{};
 
     /**
      * @brief A positive value for the overlap means the discs are overlapping
      */
-    float overlap{};
+    double overlap{};
 };
 
 /**
@@ -93,7 +94,7 @@ struct OverlapResults
  * @param maxRadius The largest radius of all discs in the simulation. Used for the radius search in the kd tree to find
  * candidates for collision
  */
-std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, float maxRadius);
+std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, double maxRadius);
 
 /**
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
@@ -106,13 +107,13 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
  * `kineticEnergyDeficiency > 0`
  * @returns the kinetic energy added to the disc, if any
  */
-float handleWorldBoundCollision(Disc& disc, const sf::Vector2f& boundsTopLeft, const sf::Vector2f& boundsBottomRight,
-                                float kineticEnergyDeficiency);
+double handleWorldBoundCollision(Disc& disc, const sf::Vector2d& boundsTopLeft, const sf::Vector2d& boundsBottomRight,
+                                 double kineticEnergyDeficiency);
 
 /**
  * @returns |vec|
  */
-float abs(const sf::Vector2f& vec);
+double abs(const sf::Vector2d& vec);
 
 /**
  * @returns Instance of `OverlapResults` with appropriate values if the positions of the 2 discs aren't identical,
@@ -123,7 +124,7 @@ OverlapResults calculateOverlap(const Disc& d1, const Disc& d2);
 /**
  * @brief Given 2 discs, returns the earlier of the 2 times where they just started touching
  */
-float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
+double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const OverlapResults& overlapResults);
 
 /**
  * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
@@ -131,9 +132,9 @@ float calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overlap
 void updateVelocitiesAtCollision(Disc& d1, Disc& d2);
 
 /**
- * @brief Returns a random float within [0, 1)
+ * @brief Returns a random double within [0, 1)
  */
-float getRandomFloat();
+double getRandomFloat();
 
 /**
  * @return pair where pair.first <= pair.second

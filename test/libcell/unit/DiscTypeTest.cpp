@@ -37,8 +37,8 @@ TEST(DiscTypeTest, SettersThrow)
 
     for (int i = -1; i <= 0; ++i)
     {
-        EXPECT_ANY_THROW(dt.setMass(static_cast<float>(i)));
-        EXPECT_ANY_THROW(dt.setRadius(static_cast<float>(i)));
+        EXPECT_ANY_THROW(dt.setMass(static_cast<double>(i)));
+        EXPECT_ANY_THROW(dt.setRadius(static_cast<double>(i)));
     }
 
     EXPECT_ANY_THROW(dt.setName(""));

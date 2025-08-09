@@ -30,7 +30,7 @@ TEST(ReactionsTest, combinationReaction)
     EXPECT_TRUE(d2.isMarkedDestroyed());
     EXPECT_FLOAT_EQ(cell::mathutils::abs(d1.getVelocity()), 0);
     EXPECT_EQ(d1.getType(), Mass10Radius5);
-    expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
+    expectNear(d1.getPosition(), {2.0, 2.0}, 1e-4f);
 }
 
 TEST(ReactionsTest, decompositionReaction)
@@ -50,8 +50,8 @@ TEST(ReactionsTest, decompositionReaction)
 
     // Since the reaction has a chance of 100% in 1 second, we need 1/dt tries where dt is the simulation time step in
     // seconds
-    float dt = cell::GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
-    int N = static_cast<int>(1.f / dt) + 1;
+    double dt = cell::GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    int N = static_cast<int>(1.0 / dt) + 1;
     std::vector<cell::Disc> newDiscs;
 
     for (int i = 0; i < N && newDiscs.empty(); ++i)
@@ -91,19 +91,19 @@ TEST(ReactionsTest, exchangeReaction)
     d1.setVelocity({1, 1});
     d2.setVelocity({1.2f, 1.3f});
 
-    float kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
+    double kineticEnergyBefore = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     ASSERT_TRUE(exchangeReaction(&d1, &d2));
 
-    float kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
+    double kineticEnergyAfter = d1.getKineticEnergy() + d2.getKineticEnergy();
 
     EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
 
     EXPECT_EQ(d1.getType(), exchange.getProduct1());
     EXPECT_EQ(d2.getType(), exchange.getProduct2());
 
-    expectNear(d1.getPosition(), {2.f, 2.f}, 1e-4f);
-    expectNear(d2.getPosition(), {2.f, 2.f}, 1e-4f);
+    expectNear(d1.getPosition(), {2.0, 2.0}, 1e-4f);
+    expectNear(d2.getPosition(), {2.0, 2.0}, 1e-4f);
 
     // TODO: Make sure that total momentum is also conserved (need to fix exchange reaction physics)
 }
@@ -121,8 +121,8 @@ TEST(ReactionsTest, transformationReaction)
     d1.setPosition({10, 10});
     d1.setVelocity({1, 1});
 
-    float dt = cell::GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
-    int N = static_cast<int>(1.f / dt) + 1;
+    double dt = cell::GlobalSettings::getSettings().simulationTimeStep_.asSeconds();
+    int N = static_cast<int>(1.0 / dt) + 1;
 
     for (int i = 0; i < N; ++i)
     {

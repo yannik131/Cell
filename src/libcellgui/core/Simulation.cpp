@@ -27,9 +27,9 @@ void Simulation::run()
         const sf::Time& dt = clock.restart();
         timeSinceLastUpdate += dt;
 
-        while (timeSinceLastUpdate / settings.simulationTimeScale_ > settings.simulationTimeStep_)
+        while (timeSinceLastUpdate / static_cast<float>(settings.simulationTimeScale_) > settings.simulationTimeStep_)
         {
-            timeSinceLastUpdate -= settings.simulationTimeStep_ / settings.simulationTimeScale_;
+            timeSinceLastUpdate -= settings.simulationTimeStep_ / static_cast<float>(settings.simulationTimeScale_);
 
             cell_.update(settings.simulationTimeStep_);
             emitFrameData();
