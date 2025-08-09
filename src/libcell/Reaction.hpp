@@ -50,7 +50,7 @@ public:
      * not in the interval [0, 1]
      */
     Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
-             const std::optional<DiscType>& product2, float probability);
+             const std::optional<DiscType>& product2, double probability);
 
     // Boilerplate getters and setters with no additional documentation
 
@@ -68,8 +68,8 @@ public:
     bool hasProduct2() const;
     void setProduct2(const DiscType& product2);
 
-    float getProbability() const;
-    void setProbability(float probability);
+    double getProbability() const;
+    void setProbability(double probability);
 
     const Type& getType() const;
 
@@ -87,7 +87,7 @@ private:
     std::optional<DiscType> educt2_;
     DiscType product1_;
     std::optional<DiscType> product2_;
-    float probability_ = 0;
+    double probability_ = 0;
     Type type_ = Type::None;
 
 public:

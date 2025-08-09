@@ -13,7 +13,7 @@ TEST(CellTest, EnergyIsConserved)
     cell::GlobalSettings::get().setCellSize(500, 500);
     cell.reinitialize();
 
-    float initialKineticEnergy = cell.getInitialKineticEnergy();
+    double initialKineticEnergy = cell.getInitialKineticEnergy();
     int totalCollisionCount = 0;
     int collisionTarget = 100;
     int updateCount = 0;
@@ -33,5 +33,5 @@ TEST(CellTest, EnergyIsConserved)
                << static_cast<float>(collisionTarget) / static_cast<float>(updateCount) << " collisions/s)";
 
     // Currently, combination reactions don't conserve kinetic energy
-    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.1f * initialKineticEnergy);
+    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.1 * initialKineticEnergy);
 }

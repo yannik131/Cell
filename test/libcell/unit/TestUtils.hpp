@@ -3,17 +3,18 @@
 
 #include "DiscType.hpp"
 #include "Reaction.hpp"
+#include "Vector2d.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>
 
-inline void expectNear(const sf::Vector2f& actual, const sf::Vector2f& expected, float epsilon)
+inline void expectNear(const sf::Vector2d& actual, const sf::Vector2d& expected, double epsilon)
 {
     EXPECT_NEAR(actual.x, expected.x, epsilon);
     EXPECT_NEAR(actual.y, expected.y, epsilon);
 }
 
-inline cell::DiscType generateDiscType(float radius, float mass)
+inline cell::DiscType generateDiscType(double radius, double mass)
 {
     static int count = 0;
 
@@ -36,10 +37,10 @@ inline const cell::DiscType Unused = generateDiscType(5, 5);
 
 inline auto getDefaultReactions()
 {
-    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.f};
-    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.f};
-    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.f};
-    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.f};
+    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.0};
+    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.0};
+    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.0};
+    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.0};
 
     return std::make_tuple(transformation, decomposition, combination, exchange);
 }

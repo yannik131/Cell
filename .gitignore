@@ -10,6 +10,8 @@ vcpkg_installed
 *.gz
 *.toc
 *.pdf
+*fls
+*latexmk
 CMakeUserPresets.json
 .vscode
 test/output/

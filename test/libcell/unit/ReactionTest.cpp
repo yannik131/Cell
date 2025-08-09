@@ -15,8 +15,8 @@ TEST(ReactionTest, invalidReactions)
 
     EXPECT_NO_THROW(invalidTransformation.setProbability(0));
     EXPECT_NO_THROW(invalidTransformation.setProbability(1));
-    EXPECT_ANY_THROW(invalidTransformation.setProbability(std::nextafter(1.f, 2.f)));
-    EXPECT_ANY_THROW(invalidTransformation.setProbability(std::nextafter(0.f, -1.f)));
+    EXPECT_ANY_THROW(invalidTransformation.setProbability(std::nextafter(1.0, 2.0)));
+    EXPECT_ANY_THROW(invalidTransformation.setProbability(std::nextafter(0.0, -1.0)));
 }
 
 void testReactionGettersSetters(cell::Reaction& reaction, std::vector<bool> availableParts)

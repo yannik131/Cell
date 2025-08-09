@@ -4,7 +4,7 @@
 
 static cell::DiscType defaultType()
 {
-    return {"A", sf::Color::White, 5.f, 5.f};
+    return {"A", sf::Color::White, 5.0, 5.0};
 }
 
 static const cell::DiscType Type = defaultType();
@@ -15,9 +15,9 @@ TEST(DiscTest, DefaultValuesMakeSense)
 
     EXPECT_EQ(disc.getAbsoluteMomentum(), 0);
     EXPECT_EQ(disc.getKineticEnergy(), 0);
-    EXPECT_EQ(disc.getPosition(), (sf::Vector2f{0, 0}));
+    EXPECT_EQ(disc.getPosition(), (sf::Vector2d{0, 0}));
     EXPECT_EQ(disc.getType(), Type);
-    EXPECT_EQ(disc.getVelocity(), (sf::Vector2f{0, 0}));
+    EXPECT_EQ(disc.getVelocity(), (sf::Vector2d{0, 0}));
     EXPECT_EQ(disc.isMarkedDestroyed(), false);
 }
 
@@ -25,7 +25,7 @@ TEST(DiscTest, SetVelocityUpdatesVelocity)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{3.f, 4.f};
+    sf::Vector2d vel{3.0, 4.0};
     disc.setVelocity(vel);
     EXPECT_EQ(disc.getVelocity(), vel);
 }
@@ -34,9 +34,9 @@ TEST(DiscTest, ScaleVelocityScalesVelocity)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{2.f, 3.f};
+    sf::Vector2d vel{2.0, 3.0};
     disc.setVelocity(vel);
-    float factor = 2.0f;
+    double factor = 2.0f;
     disc.scaleVelocity(factor);
 
     EXPECT_FLOAT_EQ(disc.getVelocity().x, vel.x * factor);
@@ -47,10 +47,10 @@ TEST(DiscTest, AccelerateAddsAccelerationToVelocity)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f initialVel{1.f, 1.f};
+    sf::Vector2d initialVel{1.0, 1.0};
     disc.setVelocity(initialVel);
 
-    sf::Vector2f accel{2.f, 3.f};
+    sf::Vector2d accel{2.0, 3.0};
     disc.accelerate(accel);
 
     EXPECT_FLOAT_EQ(disc.getVelocity().x, initialVel.x + accel.x);
@@ -61,7 +61,7 @@ TEST(DiscTest, NegateXVelocityReversesXComponent)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{5.f, 3.f};
+    sf::Vector2d vel{5.0, 3.0};
     disc.setVelocity(vel);
     disc.negateXVelocity();
 
@@ -73,7 +73,7 @@ TEST(DiscTest, NegateYVelocityReversesYComponent)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{5.f, 3.f};
+    sf::Vector2d vel{5.0, 3.0};
     disc.setVelocity(vel);
     disc.negateYVelocity();
 
@@ -85,7 +85,7 @@ TEST(DiscTest, SetPositionUpdatesPosition)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f pos{100.f, 200.f};
+    sf::Vector2d pos{100.0, 200.0};
     disc.setPosition(pos);
 
     EXPECT_FLOAT_EQ(disc.getPosition().x, pos.x);
@@ -96,10 +96,10 @@ TEST(DiscTest, MoveAdjustsPosition)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f initialPos{50.f, 50.f};
+    sf::Vector2d initialPos{50.0, 50.0};
     disc.setPosition(initialPos);
 
-    sf::Vector2f distance{10.f, 15.f};
+    sf::Vector2d distance{10.0, 15.0};
     disc.move(distance);
 
     EXPECT_FLOAT_EQ(disc.getPosition().x, initialPos.x + distance.x);
@@ -108,7 +108,7 @@ TEST(DiscTest, MoveAdjustsPosition)
 
 TEST(DiscTest, SetTypeUpdatesDiscType)
 {
-    cell::DiscType newType{"B", sf::Color::Green, 4.f, 4.f};
+    cell::DiscType newType{"B", sf::Color::Green, 4.0, 4.0};
 
     cell::Disc disc(Type);
     disc.setType(newType);
@@ -128,10 +128,10 @@ TEST(DiscTest, GetAbsoluteMomentumCalculatesCorrectly)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{3.f, 4.f}; // magnitude = sqrt(9 + 16) = 5
+    sf::Vector2d vel{3.0, 4.0}; // magnitude = sqrt(9 + 16) = 5
     disc.setVelocity(vel);
 
-    float expectedMomentum = Type.getMass() * 5.f;
+    double expectedMomentum = Type.getMass() * 5.0;
 
     EXPECT_FLOAT_EQ(disc.getAbsoluteMomentum(), expectedMomentum);
 }
@@ -140,9 +140,9 @@ TEST(DiscTest, GetKineticEnergyCalculatesCorrectly)
 {
     cell::Disc disc(Type);
 
-    sf::Vector2f vel{3.f, 4.f}; // speed = 5, v^2 = 25
+    sf::Vector2d vel{3.0, 4.0}; // speed = 5, v^2 = 25
     disc.setVelocity(vel);
 
-    float expectedKE = 0.5f * Type.getMass() * 25.f;
+    double expectedKE = 0.5f * Type.getMass() * 25.0;
     EXPECT_FLOAT_EQ(disc.getKineticEnergy(), expectedKE);
 }

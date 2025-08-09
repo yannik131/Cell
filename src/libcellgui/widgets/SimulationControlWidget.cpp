@@ -73,7 +73,7 @@ void SimulationControlWidget::setCallbacks()
             });
 
     connect(
-        ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, [this](float value)
+        ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, [this](double value)
         { tryExecuteWithExceptionHandling([value] { cell::GlobalSettings::get().setSimulationTimeScale(value); }); });
     connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged,
             [this](int value)

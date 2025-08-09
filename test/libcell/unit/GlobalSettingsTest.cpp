@@ -114,9 +114,9 @@ TEST(GlobalSettingsTest, RangeChecksAreCorrect)
     EXPECT_NO_THROW(globalSettings.setSimulationTimeStep(sf::microseconds(maxTimeUs)));
 
     EXPECT_ANY_THROW(
-        globalSettings.setSimulationTimeScale(std::nextafterf(MinSimulationTimeScale, MinSimulationTimeScale - 1)));
+        globalSettings.setSimulationTimeScale(std::nextafter(MinSimulationTimeScale, MinSimulationTimeScale - 1)));
     EXPECT_ANY_THROW(
-        globalSettings.setSimulationTimeScale(std::nextafterf(MaxSimulationTimeScale, MaxSimulationTimeScale + 1)));
+        globalSettings.setSimulationTimeScale(std::nextafter(MaxSimulationTimeScale, MaxSimulationTimeScale + 1)));
     EXPECT_NO_THROW(globalSettings.setSimulationTimeScale(MinSimulationTimeScale));
     EXPECT_NO_THROW(globalSettings.setSimulationTimeScale(MaxSimulationTimeScale));
 
