@@ -1,9 +1,12 @@
 #include "GlobalSettings.hpp"
 #include "TestUtils.hpp"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <cmath>
+
+using namespace testing;
 
 namespace
 {
@@ -398,4 +401,21 @@ TEST(GlobalSettingsTest, CantAddReactionsWithDiscTypesThatArentInDistribution)
     EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass100, std::nullopt, Mass50, Mass50, 0.1f}));
     EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass50, Mass50, Mass100, std::nullopt, 0.1f}));
     EXPECT_ANY_THROW(globalSettings.addReaction(cell::Reaction{Mass50, Mass50, Mass50, Mass50, 0.1f}));
+}
+
+TEST(GlobalSettings, HaveNoDiscTypesIfNoneWereAdded)
+{
+    ASSERT_THAT(cell::GlobalSettings::getSettings().discTypes_.empty(), Eq(true));
+}
+
+TEST(GlobalSettings, HaveDiscTypesAfterOneWasAdded)
+{
+    cell::GlobalSettings::get().addDiscType(Mass5);
+    ASSERT_THAT(cell::GlobalSettings::getSettings().discTypes_.size(), Eq(1));
+}
+
+TEST(GlobalSettings, WontAllowAddingDuplicateDiscTypes)
+{
+    cell::GlobalSettings::get().addDiscType(Mass5);
+    ASSERT_ANY_THROW(cell::GlobalSettings::get().addDiscType(Mass5));
 }

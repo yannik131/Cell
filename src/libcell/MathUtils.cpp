@@ -233,7 +233,7 @@ double getRandomFloat()
 
 int calculateHash(int x, int y)
 {
-    int prime = 100003;
+    static const int prime = 100003;
     return (x * prime) ^ y;
 }
 

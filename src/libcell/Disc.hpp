@@ -17,9 +17,9 @@ class Disc
 {
 public:
     /**
-     * @brief Copy-ctor that does not affect id
+     * @brief Creates a new disc with the given type
      */
-    explicit Disc(const DiscType& discType);
+    explicit Disc(const DiscType* discType);
 
     /**
      * @brief Sets the velocity of the disc in px/s
@@ -60,7 +60,7 @@ public:
     /**
      * @brief Assigns a new disc type (no checks)
      */
-    void setType(const DiscType& discType);
+    void setType(const DiscType* discType);
 
     /**
      * @brief Sets the internal destroyed flag (used for removing discs in the simulation)
@@ -80,7 +80,7 @@ public:
     /**
      * @returns DiscType of the disc
      */
-    const DiscType& getType() const;
+    const DiscType* getType() const;
 
     /**
      * @returns `true` if `markDestroyed()` has been called
@@ -122,7 +122,7 @@ private:
     /**
      * @brief The properties of this disc (mass, radius, ...)
      */
-    DiscType type_;
+    const DiscType* type_;
 };
 
 } // namespace cell

@@ -61,13 +61,14 @@ public:
 
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(double simulationTimeScale);
-    void setNumberOfDiscs(int numberOfDiscs);
-    void setCellSize(int width, int height);
+    void setNumberOfDiscs(int numberOfDiscs); // TODO Move this to the cell
+    void setCellSize(int width, int height);  // TODO Move this to the cell
+
+    template <typename... Args> void addDiscType(Args&&... args);
 
     /**
-     * @brief Sets the current disc type distribution and automatically removes all currently set reactions with
-     * a DiscType as an educt or product that is not contained in the new distribution. Also updates all reactions if an
-     * existent DiscType was changed. Validates that the distribution isn't empty and percentages add up to 100
+     * @brief Sets the disc type distribution used to randomly initialize cells
+     * @todo Move this to the cell
      */
     void setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution);
 
@@ -166,6 +167,11 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
     if (value < min || value > max)
         throw ExceptionWithLocation("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
                                     "\" and \"" + toString(max) + "\", but is \"" + toString(value) + "\"");
+}
+
+template <typename... Args> inline void GlobalSettings::addDiscType(Args&&... args)
+{
+    settings_.discTypes_.emplace_back(std::forward<Args>(args)...);
 }
 
 } // namespace cell

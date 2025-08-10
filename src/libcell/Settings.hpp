@@ -49,9 +49,15 @@ struct Settings
     int cellHeight_ = 1000;
 
     /**
-     * @brief Contains all disc types used for the simulation and their corresponding probabilities in percent
+     * @brief Stores the percentage of each disc type for the start of the simulation
      */
     DiscType::map<int> discTypeDistribution_;
+
+    /**
+     * @brief The central storage for all disc types in the simulation
+     *
+     */
+    std::vector<DiscType> discTypes_;
 
     /**
      * @brief Contains all reactions in the simulation

@@ -3,6 +3,8 @@
 #include <SFML/Graphics/Color.hpp>
 #include <gtest/gtest.h>
 
+#include <type_traits>
+
 TEST(DiscTypeTest, ConstructorAndGetters)
 {
     cell::DiscType dt("TestDisc", sf::Color::Blue, 5.0f, 10.0f);
@@ -85,4 +87,10 @@ TEST(DiscTypeTest, MakeOrderedPair)
 
     EXPECT_EQ(orderedPair.first.getName(), "Alpha");
     EXPECT_EQ(orderedPair.second.getName(), "Zeta");
+}
+
+TEST(ADiscType, IsNoncopyable)
+{
+    static_assert(!std::is_copy_constructible_v<cell::DiscType>);
+    static_assert(!std::is_copy_assignable_v<cell::DiscType>);
 }
