@@ -56,19 +56,11 @@ public:
     void setReactions(const std::vector<Reaction>& reactions);
 
     /**
-     * @brief Updates the given disc types in all existing reactions, keeping probabilities and other disc types
-     * unchanged
-     * @param updatedDiscsTypes A map mapping old disc types to their updated counterparts. Requires both old and
-     * updates disc types to have the same ID, otherwise updating won't work.
-     */
-    void updateDiscTypes(const DiscType::map<DiscType>& updatedDiscTypes);
-
-    /**
      * @brief Removes all reactions where the given disc types are part of the educts or products
      * @param discTypesToRemove A vector containing disc types that are to be removed. Their IDs must match with the
      * disc types already in the table.
      */
-    void removeDiscTypes(const std::vector<DiscType>& discTypesToRemove);
+    void removeDiscTypes(const std::vector<const DiscType*>& discTypesToRemove);
 
     /**
      * @brief Clears the reaction vector and all reaction lookup tables

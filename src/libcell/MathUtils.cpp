@@ -44,7 +44,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, d
             continue;
 
         discsInRadius.clear();
-        const double maxCollisionDistance = disc.getType().getRadius() + maxRadius;
+        const double maxCollisionDistance = disc.getType()->getRadius() + maxRadius;
 
         // This is the most time consuming part of the whole application, next to the index build in the KDTree
         // constructor
@@ -57,7 +57,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, d
             if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
                 continue;
 
-            const double radiusSum = disc.getType().getRadius() + otherDisc.getType().getRadius();
+            const double radiusSum = disc.getType()->getRadius() + otherDisc.getType()->getRadius();
 
             if (result.second <= radiusSum * radiusSum)
             {
@@ -114,7 +114,7 @@ DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>&
 double handleWorldBoundCollision(Disc& disc, const sf::Vector2d& boundsTopLeft, const sf::Vector2d& boundsBottomRight,
                                  double kineticEnergyDeficiency)
 {
-    const double& R = disc.getType().getRadius();
+    const double& R = disc.getType()->getRadius();
     const sf::Vector2d& r = disc.getPosition();
 
     bool collided = false;
@@ -187,7 +187,7 @@ OverlapResults calculateOverlap(const Disc& d1, const Disc& d2)
     }
 
     sf::Vector2d nVec = rVec / distance;
-    double overlap = d1.getType().getRadius() + d2.getType().getRadius() - distance;
+    double overlap = d1.getType()->getRadius() + d2.getType()->getRadius() - distance;
 
     return OverlapResults{.rVec = rVec, .nVec = nVec, .distance = distance, .overlap = overlap};
 }
@@ -196,8 +196,8 @@ double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2, const Overla
 {
     const auto& r = overlapResults.rVec;
     sf::Vector2d v = d2.getVelocity() - d1.getVelocity();
-    const auto& R1 = d1.getType().getRadius();
-    const auto& R2 = d2.getType().getRadius();
+    const auto& R1 = d1.getType()->getRadius();
+    const auto& R2 = d2.getType()->getRadius();
 
     return (-r.x * v.x - r.y * v.y -
             std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
@@ -213,8 +213,8 @@ void updateVelocitiesAtCollision(Disc& d1, Disc& d2)
     sf::Vector2d nVec = rVec / abs(rVec);
 
     double vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
-    const auto& m1 = d1.getType().getMass();
-    const auto& m2 = d2.getType().getMass();
+    const auto& m1 = d1.getType()->getMass();
+    const auto& m2 = d2.getType()->getMass();
 
     double impulse = -vrN * (e + 1) / (1.0 / m1 + 1.0 / m2);
 

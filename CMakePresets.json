@@ -41,7 +41,8 @@
             "targets": [
                 "cell-gui",
                 "benchmark",
-                "tests-libcell"
+                "tests-libcell",
+                "playground"
             ]
         },
         {

@@ -49,24 +49,24 @@ public:
      * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
      * not in the interval [0, 1]
      */
-    Reaction(const DiscType& educt1, const std::optional<DiscType>& educt2, const DiscType& product1,
-             const std::optional<DiscType>& product2, double probability);
+    Reaction(const DiscType* educt1, const DiscType* educt2, const DiscType* product1, const DiscType* product2,
+             double probability);
 
     // Boilerplate getters and setters with no additional documentation
 
-    const DiscType& getEduct1() const;
-    void setEduct1(const DiscType& educt1);
+    const DiscType* getEduct1() const;
+    void setEduct1(const DiscType* educt1);
 
-    const DiscType& getEduct2() const;
+    const DiscType* getEduct2() const;
     bool hasEduct2() const;
-    void setEduct2(const DiscType& educt2);
+    void setEduct2(const DiscType* educt2);
 
-    const DiscType& getProduct1() const;
-    void setProduct1(const DiscType& product1);
+    const DiscType* getProduct1() const;
+    void setProduct1(const DiscType* product1);
 
-    const DiscType& getProduct2() const;
+    const DiscType* getProduct2() const;
     bool hasProduct2() const;
-    void setProduct2(const DiscType& product2);
+    void setProduct2(const DiscType* product2);
 
     double getProbability() const;
     void setProbability(double probability);
@@ -83,10 +83,10 @@ public:
     void validate() const;
 
 private:
-    DiscType educt1_;
-    std::optional<DiscType> educt2_;
-    DiscType product1_;
-    std::optional<DiscType> product2_;
+    const DiscType* educt1_;
+    const DiscType* educt2_;
+    const DiscType* product1_;
+    const DiscType* product2_;
     double probability_ = 0;
     Type type_ = Type::None;
 
@@ -112,7 +112,7 @@ std::string toString(const Reaction& reaction);
 /**
  * @returns `true` if the given disctype is part of the educts or products of the reaction
  */
-bool contains(const Reaction& reaction, const DiscType& discType);
+bool contains(const Reaction& reaction, const DiscType* discType);
 
 } // namespace cell
 
