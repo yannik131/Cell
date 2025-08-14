@@ -66,6 +66,9 @@ public:
 
     template <typename... Args> void addDiscType(Args&&... args);
 
+    // TODO
+    void removeDiscType(const DiscType* discType);
+
     /**
      * @brief Sets the disc type distribution used to randomly initialize cells
      * @todo Move this to the cell
@@ -123,11 +126,6 @@ private:
      * reactions)
      */
     void removeDanglingReactions(const DiscType::map<int>& newDiscTypeDistribution);
-
-    /**
-     * @brief Helper function to update reactions were updated DiscTypes are in the educts or products
-     */
-    void updateDiscTypesInReactions(const DiscType::map<int>& newDiscTypeDistribution);
 
     /**
      * @brief Calls the custom callback if it exists on the SettingID

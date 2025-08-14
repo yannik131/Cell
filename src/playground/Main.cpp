@@ -26,17 +26,6 @@ public:
     }
 };
 
-// Serialize/deserialize UncopyableStuff
-void to_json(json& j, const UncopyableStuff& u)
-{
-    j = json{{"information", u.getInformation()}};
-}
-
-void from_json(const json& j, UncopyableStuff& u)
-{
-    u = UncopyableStuff(j.at("information").get<std::string>());
-}
-
 class Item
 {
 private:

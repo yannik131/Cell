@@ -111,9 +111,6 @@ private:
      * @brief Mass in arbitrary unit
      */
     double mass_ = 0;
-
-public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DiscType, name_, color_, radius_, mass_)
 };
 
 } // namespace cell
@@ -121,22 +118,17 @@ public:
 namespace nlohmann
 {
 
-template <> struct adl_serializer<std::optional<cell::DiscType>>
+template <> struct adl_serializer<cell::DiscType>
 {
-    static void to_json(json& j, const std::optional<cell::DiscType>& opt)
+    static void to_json(json& j, const cell::DiscType& d)
     {
-        if (opt.has_value())
-            j = *opt;
-        else
-            j = nullptr;
+        j = json{{"name", d.getName()}, {"color", d.getColor()}, {"radius", d.getRadius()}, {"mass", d.getMass()}};
     }
 
-    static void from_json(const json& j, std::optional<cell::DiscType>& opt)
+    static cell::DiscType from_json(const json& j, const cell::DiscType& d)
     {
-        if (j.is_null())
-            opt = std::nullopt;
-        else
-            opt = std::make_optional(j.get<cell::DiscType>());
+        return cell::DiscType{j.at("name").get<std::string>(), j.at("color").get<sf::Color>(),
+                              j.at("radius").get<double>(), j.at("mass").get<double>()};
     }
 };
 

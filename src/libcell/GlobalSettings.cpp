@@ -27,10 +27,22 @@ std::optional<std::string> getFirstDuplicateByName(const DiscType::map<int>& dis
     std::set<std::string> uniqueNames;
     for (const auto& [discType, frequency] : discTypeDistribution)
     {
-        if (uniqueNames.contains(discType.getName()))
-            return discType.getName();
+        if (uniqueNames.contains(discType->getName()))
+            return discType->getName();
 
-        uniqueNames.insert(discType.getName());
+        uniqueNames.insert(discType->getName());
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::string> getFirstInvalidByName(const DiscType::map<int>& discTypeDistribution,
+                                                 const std::vector<DiscType>& discTypes)
+{
+    for (const auto& [discType, frequency] : discTypeDistribution)
+    {
+        if (std::find(discTypes.begin(), discTypes.end(), *discType) != discTypes.end())
+            return discType->getName();
     }
 
     return std::nullopt;
@@ -48,15 +60,10 @@ int calculateFrequencySum(const DiscType::map<int>& discTypeDistribution)
     return totalPercent;
 }
 
-void throwIfNotInDistribution(const DiscType& discType, const DiscType::map<int>& distribution)
+void throwIfNotInDiscTypes(const DiscType& discType, const std::vector<DiscType> discTypes)
 {
-    for (const auto& [other, frequency] : distribution)
-    {
-        if (other == discType)
-            return;
-    }
-
-    throw ExceptionWithLocation("DiscType \"" + discType.getName() + "\" not found in distribution");
+    if (std::find(discTypes.begin(), discTypes.end(), discType) != discTypes.end())
+        throw ExceptionWithLocation("DiscType \"" + discType.getName() + "\" not found in distribution");
 }
 
 } // namespace
@@ -133,12 +140,14 @@ void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeD
     if (const auto& duplicateName = getFirstDuplicateByName(discTypeDistribution))
         throw ExceptionWithLocation("Duplicate disc type found: " + *duplicateName);
 
+    if (const auto& invalidDiscTypeName = getFirstInvalidByName(discTypeDistribution, settings_.discTypes_))
+        throw ExceptionWithLocation("Disc type not in available disc types: " + *invalidDiscTypeName);
+
     if (int totalPercent = calculateFrequencySum(discTypeDistribution); totalPercent != 100)
         throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100. They add up to " +
                                     std::to_string(totalPercent));
 
     removeDanglingReactions(discTypeDistribution);
-    updateDiscTypesInReactions(discTypeDistribution);
 
     settings_.discTypeDistribution_ = discTypeDistribution;
 
@@ -149,14 +158,14 @@ void GlobalSettings::addReaction(const Reaction& reaction)
 {
     throwIfLocked();
 
-    throwIfNotInDistribution(reaction.getEduct1(), settings_.discTypeDistribution_);
-    throwIfNotInDistribution(reaction.getProduct1(), settings_.discTypeDistribution_);
+    throwIfNotInDiscTypes(*reaction.getEduct1(), settings_.discTypes_);
+    throwIfNotInDiscTypes(*reaction.getProduct1(), settings_.discTypes_);
 
     if (reaction.hasEduct2())
-        throwIfNotInDistribution(reaction.getEduct2(), settings_.discTypeDistribution_);
+        throwIfNotInDiscTypes(*reaction.getEduct2(), settings_.discTypes_);
 
     if (reaction.hasProduct2())
-        throwIfNotInDistribution(reaction.getProduct2(), settings_.discTypeDistribution_);
+        throwIfNotInDiscTypes(*reaction.getProduct2(), settings_.discTypes_);
 
     reaction.validate();
 
@@ -242,19 +251,6 @@ void GlobalSettings::removeDanglingReactions(const DiscType::map<int>& newDiscTy
 
     if (!removedDiscTypes.empty())
         settings_.reactionTable_.removeDiscTypes(removedDiscTypes);
-}
-
-void GlobalSettings::updateDiscTypesInReactions(const DiscType::map<int>& newDiscTypeDistribution)
-{
-    DiscType::map<DiscType> updatedDiscTypes;
-    for (const auto& [oldDiscType, frequency] : settings_.discTypeDistribution_)
-    {
-        auto iter = newDiscTypeDistribution.find(oldDiscType);
-        if (iter != newDiscTypeDistribution.end() && !(iter->first == oldDiscType))
-            updatedDiscTypes.emplace(oldDiscType, iter->first);
-    }
-
-    settings_.reactionTable_.updateDiscTypes(updatedDiscTypes);
 }
 
 void GlobalSettings::useCallback(const SettingID& settingID)
