@@ -122,12 +122,6 @@ private:
     GlobalSettings() = default;
 
     /**
-     * @brief Helper function to remove reactions were removed DiscTypes are in the educts or products ("dangling"
-     * reactions)
-     */
-    void removeDanglingReactions(const DiscType::map<int>& newDiscTypeDistribution);
-
-    /**
      * @brief Calls the custom callback if it exists on the SettingID
      */
     void useCallback(const SettingID& settingID);

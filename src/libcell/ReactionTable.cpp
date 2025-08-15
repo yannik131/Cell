@@ -73,26 +73,18 @@ void ReactionTable::setReactions(const std::vector<Reaction>& reactions)
     createLookupMaps();
 }
 
-void ReactionTable::removeDiscTypes(const std::vector<const DiscType*>& discTypesToRemove)
+void ReactionTable::removeDiscType(const DiscType* discTypeToRemove)
 {
     std::vector<Reaction> remainingReactions;
     for (const auto& reaction : reactions_)
     {
-        bool affected = false;
-        for (const auto& removedDiscType : discTypesToRemove)
-        {
-            if (reaction.getEduct1() == removedDiscType ||
-                (reaction.hasEduct2() && reaction.getEduct2() == removedDiscType) ||
-                reaction.getProduct1() == removedDiscType ||
-                (reaction.hasProduct2() && reaction.getProduct2() == removedDiscType))
-            {
-                affected = true;
-                break;
-            }
-        }
+        if (reaction.getEduct1() == discTypeToRemove ||
+            (reaction.hasEduct2() && reaction.getEduct2() == discTypeToRemove) ||
+            reaction.getProduct1() == discTypeToRemove ||
+            (reaction.hasProduct2() && reaction.getProduct2() == discTypeToRemove))
+            continue;
 
-        if (!affected)
-            remainingReactions.push_back(reaction);
+        remainingReactions.push_back(reaction);
     }
 
     reactions_ = remainingReactions;

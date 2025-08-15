@@ -60,7 +60,7 @@ public:
      * @param discTypesToRemove A vector containing disc types that are to be removed. Their IDs must match with the
      * disc types already in the table.
      */
-    void removeDiscTypes(const std::vector<const DiscType*>& discTypesToRemove);
+    void removeDiscType(const DiscType* discTypeToRemove);
 
     /**
      * @brief Clears the reaction vector and all reaction lookup tables

@@ -130,6 +130,11 @@ void GlobalSettings::setCellSize(int width, int height)
     useCallback(SettingID::CellSize);
 }
 
+void GlobalSettings::removeDiscType(const DiscType* discType)
+{
+    settings_.reactionTable_.removeDiscType(discType);
+}
+
 void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution)
 {
     throwIfLocked();
@@ -146,8 +151,6 @@ void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeD
     if (int totalPercent = calculateFrequencySum(discTypeDistribution); totalPercent != 100)
         throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100. They add up to " +
                                     std::to_string(totalPercent));
-
-    removeDanglingReactions(discTypeDistribution);
 
     settings_.discTypeDistribution_ = discTypeDistribution;
 
@@ -233,24 +236,6 @@ bool GlobalSettings::isLocked() const
 const std::vector<Reaction>& GlobalSettings::getReactions() const
 {
     return settings_.reactionTable_.getReactions();
-}
-
-/**
- * @brief Given a reaction map, remove all entries where a removed DiscType is either in the educts or products of any
- * of the reactions
- */
-void GlobalSettings::removeDanglingReactions(const DiscType::map<int>& newDiscTypeDistribution)
-{
-    std::vector<DiscType> removedDiscTypes;
-
-    for (const auto& [type, percent] : settings_.discTypeDistribution_)
-    {
-        if (newDiscTypeDistribution.find(type) == newDiscTypeDistribution.end())
-            removedDiscTypes.push_back(type);
-    }
-
-    if (!removedDiscTypes.empty())
-        settings_.reactionTable_.removeDiscTypes(removedDiscTypes);
 }
 
 void GlobalSettings::useCallback(const SettingID& settingID)
