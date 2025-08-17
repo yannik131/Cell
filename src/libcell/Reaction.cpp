@@ -77,6 +77,9 @@ Reaction::Reaction(const DiscType* educt1, const DiscType* educt2, const DiscTyp
     , product2_(product2)
     , type_(inferType(educt2, product2))
 {
+    if (!educt1 || !product1)
+        throw ExceptionWithLocation("Reactions require educt1 and product1 to be set");
+
     setProbability(probability);
 }
 

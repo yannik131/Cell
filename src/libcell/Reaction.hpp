@@ -90,8 +90,15 @@ private:
     double probability_ = 0;
     Type type_ = Type::None;
 
-public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Reaction, educt1_, educt2_, product1_, product2_, probability_, type_)
+    // temporary
+    friend void setEductsAndProducts(Reaction& reaction, const DiscType* educt1, const DiscType* educt2,
+                                     const DiscType* product1, const DiscType* product2)
+    {
+        reaction.educt1_ = educt1;
+        reaction.educt2_ = educt2;
+        reaction.product1_ = product1;
+        reaction.product2_ = product2;
+    }
 };
 
 struct ReactionHash
@@ -115,5 +122,26 @@ std::string toString(const Reaction& reaction);
 bool contains(const Reaction& reaction, const DiscType* discType);
 
 } // namespace cell
+
+namespace nlohmann
+{
+template <> struct adl_serializer<cell::Reaction>
+{
+    static void to_json(json& j, const cell::Reaction& reaction)
+    {
+        j = {};
+        j["educt1"] = reaction.getEduct1()->getName();
+        j["educt2"] = reaction.hasEduct2() ? reaction.getEduct2()->getName() : nullptr;
+        j["product1"] = reaction.getProduct1()->getName();
+        j["product2"] = reaction.hasProduct2() ? reaction.getProduct2()->getName() : nullptr;
+        j["probability"] = reaction.getProbability();
+    }
+
+    static cell::Reaction from_json(const json& j)
+    {
+        return cell::Reaction();
+    }
+};
+} // namespace nlohmann
 
 #endif /* REACTION_HPP */

@@ -146,6 +146,10 @@ private:
      * @brief The callback which is called whenever a setting was changed
      */
     std::function<void(const SettingID& settingID)> callback_;
+
+    // TODO use a set<const DiscType*, Cmp> for faster name-based lookup
+    // TODO Move discTypes to a DiscTypeStorage singleton, make ReactionTable singleton, serialize discTypes first, then
+    // reactions
 };
 
 /**
@@ -163,7 +167,12 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
 
 template <typename... Args> inline void GlobalSettings::addDiscType(Args&&... args)
 {
-    settings_.discTypes_.emplace_back(std::forward<Args>(args)...);
+    DiscType newDiscType(std::forward<Args>(args)...);
+    if (std::find_if(settings_.discTypes_.begin(), settings_.discTypes_.end(), [&newDiscType](const DiscType& d)
+                     { return d.getName() == newDiscType.getName(); }) != settings_.discTypes_.end())
+        throw ExceptionWithLocation("A disc type with the name \"" + newDiscType.getName() + "\" already exists");
+
+    settings_.discTypes_.push_back(std::move(newDiscType));
 }
 
 } // namespace cell
