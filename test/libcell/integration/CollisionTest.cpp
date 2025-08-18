@@ -12,7 +12,7 @@ using namespace cell;
 TEST(Collision, ConservesEnergy)
 {
     DiscType discType("B", sf::Color::Red, 1.0, 1.0);
-    Disc d1(discType), d2(discType);
+    Disc d1(&discType), d2(&discType);
 
     sf::Vector2d d1InitialPosition{0, 0};
     d1.setPosition(d1InitialPosition);

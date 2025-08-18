@@ -1,51 +1,84 @@
 #include "Disc.hpp"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-static cell::DiscType defaultType()
+using namespace testing;
+using namespace cell;
+
+static DiscType defaultType()
 {
     return {"A", sf::Color::White, 5.0, 5.0};
 }
 
-static const cell::DiscType Type = defaultType();
-
-TEST(DiscTest, DefaultValuesMakeSense)
+class ADisc : public Test
 {
-    cell::Disc disc(Type);
+protected:
+    static const DiscType Type;
+    Disc disc{&Type};
+};
 
-    EXPECT_EQ(disc.getAbsoluteMomentum(), 0);
-    EXPECT_EQ(disc.getKineticEnergy(), 0);
-    EXPECT_EQ(disc.getPosition(), (sf::Vector2d{0, 0}));
-    EXPECT_EQ(disc.getType(), Type);
-    EXPECT_EQ(disc.getVelocity(), (sf::Vector2d{0, 0}));
-    EXPECT_EQ(disc.isMarkedDestroyed(), false);
+const DiscType ADisc::Type = defaultType();
+
+TEST_F(ADisc, HasNoMomentumByDefault)
+{
+    ASSERT_THAT(disc.getAbsoluteMomentum(), DoubleEq(0.0));
+    ASSERT_THAT(disc.getMomentum(), Eq(sf::Vector2d{}));
 }
 
-TEST(DiscTest, SetVelocityUpdatesVelocity)
+TEST_F(ADisc, HasNoKineticEnergyByDefault)
 {
-    cell::Disc disc(Type);
-
-    sf::Vector2d vel{3.0, 4.0};
-    disc.setVelocity(vel);
-    EXPECT_EQ(disc.getVelocity(), vel);
+    ASSERT_THAT(disc.getKineticEnergy(), DoubleEq(0.0));
 }
 
-TEST(DiscTest, ScaleVelocityScalesVelocity)
+TEST_F(ADisc, IsPositionedAtOriginByDefault)
 {
-    cell::Disc disc(Type);
+    ASSERT_THAT(disc.getPosition(), Eq(sf::Vector2d{}));
+}
 
-    sf::Vector2d vel{2.0, 3.0};
-    disc.setVelocity(vel);
-    double factor = 2.0f;
-    disc.scaleVelocity(factor);
+TEST_F(ADisc, HasNoVelocityByDefault)
+{
+    ASSERT_THAT(disc.getVelocity(), Eq(sf::Vector2d{}));
+}
 
-    EXPECT_FLOAT_EQ(disc.getVelocity().x, vel.x * factor);
-    EXPECT_FLOAT_EQ(disc.getVelocity().y, vel.y * factor);
+TEST_F(ADisc, IsNotMarkedDestroyedByDefault)
+{
+    ASSERT_THAT(disc.isMarkedDestroyed(), Eq(false));
+}
+
+TEST_F(ADisc, HasTheTypeItWasInitializedWith)
+{
+    ASSERT_THAT(disc.getType(), Eq(&Type));
+}
+
+class ADiscWithVelocity : public ADisc
+{
+protected:
+    const sf::Vector2d Velocity{3.0, 4.0};
+
+    void SetUp() override
+    {
+        disc.setVelocity(Velocity);
+    }
+};
+
+TEST_F(ADiscWithVelocity, HasAVelocity)
+{
+    ASSERT_THAT(disc.getVelocity(), Eq(Velocity));
+}
+
+TEST_F(ADiscWithVelocity, VelocityCanBeScaled)
+{
+    const double Factor = 2.0;
+
+    disc.scaleVelocity(Factor);
+
+    ASSERT_THAT(disc.getVelocity(), Eq(Velocity * Factor));
 }
 
 TEST(DiscTest, AccelerateAddsAccelerationToVelocity)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d initialVel{1.0, 1.0};
     disc.setVelocity(initialVel);
@@ -59,7 +92,7 @@ TEST(DiscTest, AccelerateAddsAccelerationToVelocity)
 
 TEST(DiscTest, NegateXVelocityReversesXComponent)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d vel{5.0, 3.0};
     disc.setVelocity(vel);
@@ -71,7 +104,7 @@ TEST(DiscTest, NegateXVelocityReversesXComponent)
 
 TEST(DiscTest, NegateYVelocityReversesYComponent)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d vel{5.0, 3.0};
     disc.setVelocity(vel);
@@ -83,7 +116,7 @@ TEST(DiscTest, NegateYVelocityReversesYComponent)
 
 TEST(DiscTest, SetPositionUpdatesPosition)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d pos{100.0, 200.0};
     disc.setPosition(pos);
@@ -94,7 +127,7 @@ TEST(DiscTest, SetPositionUpdatesPosition)
 
 TEST(DiscTest, MoveAdjustsPosition)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d initialPos{50.0, 50.0};
     disc.setPosition(initialPos);
@@ -108,9 +141,9 @@ TEST(DiscTest, MoveAdjustsPosition)
 
 TEST(DiscTest, SetTypeUpdatesDiscType)
 {
-    cell::DiscType newType{"B", sf::Color::Green, 4.0, 4.0};
+    DiscType newType{"B", sf::Color::Green, 4.0, 4.0};
 
-    cell::Disc disc(Type);
+    Disc disc(Type);
     disc.setType(newType);
 
     EXPECT_EQ(disc.getType(), newType);
@@ -118,7 +151,7 @@ TEST(DiscTest, SetTypeUpdatesDiscType)
 
 TEST(DiscTest, MarkDestroyedSetsFlag)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
     disc.markDestroyed();
 
     EXPECT_TRUE(disc.isMarkedDestroyed());
@@ -126,7 +159,7 @@ TEST(DiscTest, MarkDestroyedSetsFlag)
 
 TEST(DiscTest, GetAbsoluteMomentumCalculatesCorrectly)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d vel{3.0, 4.0}; // magnitude = sqrt(9 + 16) = 5
     disc.setVelocity(vel);
@@ -138,7 +171,7 @@ TEST(DiscTest, GetAbsoluteMomentumCalculatesCorrectly)
 
 TEST(DiscTest, GetKineticEnergyCalculatesCorrectly)
 {
-    cell::Disc disc(Type);
+    Disc disc(Type);
 
     sf::Vector2d vel{3.0, 4.0}; // speed = 5, v^2 = 25
     disc.setVelocity(vel);

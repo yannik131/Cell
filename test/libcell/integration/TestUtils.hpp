@@ -37,10 +37,10 @@ inline const cell::DiscType Unused = generateDiscType(5, 5);
 
 inline auto getDefaultReactions()
 {
-    cell::Reaction transformation{Mass5Radius5, std::nullopt, Mass5Radius10, std::nullopt, 1.0};
-    cell::Reaction decomposition{Mass10, std::nullopt, Mass5, Mass5, 1.0};
-    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 1.0};
-    cell::Reaction exchange{Mass5, Mass15, Mass10, Mass10, 1.0};
+    cell::Reaction transformation{&Mass5Radius5, nullptr, &Mass5Radius10, nullptr, 1.0};
+    cell::Reaction decomposition{&Mass10, nullptr, &Mass5, &Mass5, 1.0};
+    cell::Reaction combination{&Mass5, &Mass5, &Mass10, nullptr, 1.0};
+    cell::Reaction exchange{&Mass5, &Mass15, &Mass10, &Mass10, 1.0};
 
     return std::make_tuple(transformation, decomposition, combination, exchange);
 }
