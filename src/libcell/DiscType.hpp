@@ -1,6 +1,7 @@
 #ifndef DISCTYPE_HPP
 #define DISCTYPE_HPP
 
+#include "Hashing.hpp"
 #include "SFMLJsonSerializers.hpp"
 
 #include <SFML/Graphics/Color.hpp>
@@ -29,7 +30,8 @@ public:
     /**
      * @brief Type for the bimolecular reaction tables
      */
-    template <typename T> using pair_map = std::unordered_map<std::pair<const DiscType*, const DiscType*>, T>;
+    template <typename T>
+    using pair_map = std::unordered_map<std::pair<const DiscType*, const DiscType*>, T, PairHasher>;
 
 public:
     /**
@@ -115,7 +117,7 @@ private:
 
 } // namespace cell
 
-namespace nlohmann
+/* namespace nlohmann
 {
 
 template <> struct adl_serializer<cell::DiscType>
@@ -132,6 +134,6 @@ template <> struct adl_serializer<cell::DiscType>
     }
 };
 
-} // namespace nlohmann
+} // namespace nlohmann */
 
 #endif /* DISCTYPE_HPP */

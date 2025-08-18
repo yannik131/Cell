@@ -5,11 +5,12 @@
  * @brief The math utilities here are partly explained in the physics part of the documentation
  */
 
-#include "Disc.hpp"
+#include "DiscType.hpp"
 #include "Vector2d.hpp"
 
 #include <SFML/System/Time.hpp>
 
+#include <ostream>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -57,6 +58,11 @@ std::ostream& operator<<(std::ostream& os, const sf::Vector2d& v);
  * @brief Scalar product of 2 vectors
  */
 double operator*(const sf::Vector2d& a, const sf::Vector2d& b);
+
+namespace cell
+{
+class Disc;
+}
 
 namespace cell::mathutils
 {
@@ -146,11 +152,6 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
 
     return std::make_pair(b, a);
 }
-
-/**
- * @returns Unique integer for the given arguments
- */
-int calculateHash(int x, int y);
 
 } // namespace cell::mathutils
 

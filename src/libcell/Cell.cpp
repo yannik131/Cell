@@ -70,8 +70,8 @@ void Cell::reinitialize()
         throw ExceptionWithLocation("Disc type distribution can't be empty");
 
     maxRadius_ = std::ranges::max_element(discTypeDistribution, [](const auto& a, const auto& b)
-                                          { return a.first.getRadius() < b.first.getRadius(); })
-                     ->first.getRadius();
+                                          { return a.first->getRadius() < b.first->getRadius(); })
+                     ->first->getRadius();
 
     discs_.clear();
     startPositions_.clear();
@@ -109,7 +109,7 @@ void Cell::buildScene()
                      << " discs will not be created.";
 
     // We need the accumulated percentages sorted in ascending order for the random number approach to work
-    std::vector<std::pair<DiscType, int>> discTypes;
+    std::vector<std::pair<const DiscType*, int>> discTypes;
     for (const auto& pair : settings.discTypeDistribution_)
         discTypes.emplace_back(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
 
@@ -143,7 +143,7 @@ void Cell::buildScene()
     DLOG(INFO) << "Radius distribution";
     for (const auto& [discType, count] : counts)
     {
-        DLOG(INFO) << discType.getName() << " (" + std::to_string(discType.getRadius()) + "px): " << count << "/"
+        DLOG(INFO) << discType->getName() << " (" + std::to_string(discType->getRadius()) + "px): " << count << "/"
                    << settings.numberOfDiscs_ << " ("
                    << static_cast<float>(count) / static_cast<float>(settings.numberOfDiscs_) * 100 << "%)\n";
     }

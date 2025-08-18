@@ -39,6 +39,7 @@
             "configuration": "Debug",
             "jobs": 16,
             "targets": [
+                "libcell",
                 "cell-gui",
                 "benchmark",
                 "tests-libcell",

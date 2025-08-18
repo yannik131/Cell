@@ -87,9 +87,9 @@ private:
     DiscType::pair_map<std::vector<Reaction>> exchangeReactionLookupMap_;
 
 public:
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformationReactionLookupMap_,
-                                   decompositionReactionLookupMap_, combinationReactionLookupMap_,
-                                   exchangeReactionLookupMap_)
+    /*     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformationReactionLookupMap_,
+                                       decompositionReactionLookupMap_, combinationReactionLookupMap_,
+                                       exchangeReactionLookupMap_) */
 };
 
 } // namespace cell

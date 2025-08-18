@@ -60,7 +60,7 @@ int calculateFrequencySum(const DiscType::map<int>& discTypeDistribution)
     return totalPercent;
 }
 
-void throwIfNotInDiscTypes(const DiscType& discType, const std::vector<DiscType> discTypes)
+void throwIfNotInDiscTypes(const DiscType& discType, const std::vector<DiscType>& discTypes)
 {
     if (std::find(discTypes.begin(), discTypes.end(), discType) != discTypes.end())
         throw ExceptionWithLocation("DiscType \"" + discType.getName() + "\" not found in distribution");
@@ -192,7 +192,7 @@ void GlobalSettings::throwIfLocked()
         throw ExceptionWithLocation("Settings are locked");
 }
 
-void GlobalSettings::loadFromJson(const fs::path& jsonFile)
+/* void GlobalSettings::loadFromJson(const fs::path& jsonFile)
 {
     std::ifstream in(jsonFile);
     if (!in)
@@ -217,7 +217,7 @@ void GlobalSettings::saveAsJson(const fs::path& jsonFile)
     json j = settings_;
     out << j.dump(4);
 }
-
+ */
 void GlobalSettings::lock()
 {
     locked_ = true;

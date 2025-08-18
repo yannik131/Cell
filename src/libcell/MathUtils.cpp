@@ -1,10 +1,11 @@
 #include "MathUtils.hpp"
+#include "Disc.hpp"
 #include "GlobalSettings.hpp"
 #include "NanoflannAdapter.hpp"
 #include "Reactions.hpp"
 
-#include "nanoflann.hpp"
 #include <glog/logging.h>
+#include <nanoflann.hpp>
 
 #include <cmath>
 #include <numeric>

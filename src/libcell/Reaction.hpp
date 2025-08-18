@@ -123,7 +123,7 @@ bool contains(const Reaction& reaction, const DiscType* discType);
 
 } // namespace cell
 
-namespace nlohmann
+/* namespace nlohmann
 {
 template <> struct adl_serializer<cell::Reaction>
 {
@@ -142,6 +142,6 @@ template <> struct adl_serializer<cell::Reaction>
         return cell::Reaction();
     }
 };
-} // namespace nlohmann
+} // namespace nlohmann */
 
 #endif /* REACTION_HPP */

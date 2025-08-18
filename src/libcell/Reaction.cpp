@@ -20,6 +20,8 @@ std::string toString(Reaction::Type type)
         return "Exchange";
     case Reaction::None:
         return "None";
+    default:
+        throw ExceptionWithLocation("Invalid reaction type");
     }
 }
 } // namespace
