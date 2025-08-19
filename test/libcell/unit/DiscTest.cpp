@@ -1,4 +1,5 @@
 #include "Disc.hpp"
+#include "MathUtils.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -51,6 +52,42 @@ TEST_F(ADisc, HasTheTypeItWasInitializedWith)
     ASSERT_THAT(disc.getType(), Eq(&Type));
 }
 
+TEST_F(ADisc, CanBeSetToADifferentPosition)
+{
+    sf::Vector2d newPosition{10, 10};
+
+    disc.setPosition(newPosition);
+
+    ASSERT_THAT(disc.getPosition(), Eq(newPosition));
+}
+
+TEST_F(ADisc, CanBeMoved)
+{
+    sf::Vector2d dPosition{5, 5};
+
+    disc.setPosition(
+        dPosition); // Make sure move is not equal to setPosition by having an initial position unequal the origin
+    disc.move(dPosition);
+
+    ASSERT_THAT(disc.getPosition(), Eq(2.0 * dPosition));
+}
+
+TEST_F(ADisc, CanBeAssignedANewDiscType)
+{
+    DiscType B{"B", sf::Color::Blue, 5.0, 3.0};
+
+    disc.setType(&B);
+
+    ASSERT_THAT(disc.getType(), Eq(&B));
+}
+
+TEST_F(ADisc, CanBeMarkedDestroyed)
+{
+    disc.markDestroyed();
+
+    ASSERT_THAT(disc.isMarkedDestroyed(), Eq(true));
+}
+
 class ADiscWithVelocity : public ADisc
 {
 protected:
@@ -76,106 +113,40 @@ TEST_F(ADiscWithVelocity, VelocityCanBeScaled)
     ASSERT_THAT(disc.getVelocity(), Eq(Velocity * Factor));
 }
 
-TEST(DiscTest, AccelerateAddsAccelerationToVelocity)
+TEST_F(ADiscWithVelocity, CanBeAccelerated)
 {
-    Disc disc(Type);
-
-    sf::Vector2d initialVel{1.0, 1.0};
-    disc.setVelocity(initialVel);
-
     sf::Vector2d accel{2.0, 3.0};
+
     disc.accelerate(accel);
 
-    EXPECT_FLOAT_EQ(disc.getVelocity().x, initialVel.x + accel.x);
-    EXPECT_FLOAT_EQ(disc.getVelocity().y, initialVel.y + accel.y);
+    ASSERT_THAT(disc.getVelocity(), Eq(Velocity + accel));
 }
 
-TEST(DiscTest, NegateXVelocityReversesXComponent)
+TEST_F(ADiscWithVelocity, CanHaveItsXVelocityNegated)
 {
-    Disc disc(Type);
-
-    sf::Vector2d vel{5.0, 3.0};
-    disc.setVelocity(vel);
     disc.negateXVelocity();
 
-    EXPECT_FLOAT_EQ(disc.getVelocity().x, -vel.x);
-    EXPECT_FLOAT_EQ(disc.getVelocity().y, vel.y);
+    EXPECT_THAT(disc.getVelocity(), Eq(sf::Vector2d{-Velocity.x, Velocity.y}));
 }
 
-TEST(DiscTest, NegateYVelocityReversesYComponent)
+TEST_F(ADiscWithVelocity, CanHaveItsYVelocityNegated)
 {
-    Disc disc(Type);
-
-    sf::Vector2d vel{5.0, 3.0};
-    disc.setVelocity(vel);
     disc.negateYVelocity();
 
-    EXPECT_FLOAT_EQ(disc.getVelocity().x, vel.x);
-    EXPECT_FLOAT_EQ(disc.getVelocity().y, -vel.y);
+    EXPECT_THAT(disc.getVelocity(), Eq(sf::Vector2d{Velocity.x, -Velocity.y}));
 }
 
-TEST(DiscTest, SetPositionUpdatesPosition)
+TEST_F(ADiscWithVelocity, CalculatesTheCorrectMomentum)
 {
-    Disc disc(Type);
-
-    sf::Vector2d pos{100.0, 200.0};
-    disc.setPosition(pos);
-
-    EXPECT_FLOAT_EQ(disc.getPosition().x, pos.x);
-    EXPECT_FLOAT_EQ(disc.getPosition().y, pos.y);
+    ASSERT_THAT(disc.getMomentum(), Eq(sf::Vector2d{9.0, 15.0}));
 }
 
-TEST(DiscTest, MoveAdjustsPosition)
+TEST_F(ADiscWithVelocity, CalculatesTheCorrectAbsoluteMomentum)
 {
-    Disc disc(Type);
-
-    sf::Vector2d initialPos{50.0, 50.0};
-    disc.setPosition(initialPos);
-
-    sf::Vector2d distance{10.0, 15.0};
-    disc.move(distance);
-
-    EXPECT_FLOAT_EQ(disc.getPosition().x, initialPos.x + distance.x);
-    EXPECT_FLOAT_EQ(disc.getPosition().y, initialPos.y + distance.y);
+    ASSERT_THAT(disc.getAbsoluteMomentum(), DoubleEq(25.0));
 }
 
-TEST(DiscTest, SetTypeUpdatesDiscType)
+TEST_F(ADiscWithVelocity, CalculatesTheCorrectKineticEnergy)
 {
-    DiscType newType{"B", sf::Color::Green, 4.0, 4.0};
-
-    Disc disc(Type);
-    disc.setType(newType);
-
-    EXPECT_EQ(disc.getType(), newType);
-}
-
-TEST(DiscTest, MarkDestroyedSetsFlag)
-{
-    Disc disc(Type);
-    disc.markDestroyed();
-
-    EXPECT_TRUE(disc.isMarkedDestroyed());
-}
-
-TEST(DiscTest, GetAbsoluteMomentumCalculatesCorrectly)
-{
-    Disc disc(Type);
-
-    sf::Vector2d vel{3.0, 4.0}; // magnitude = sqrt(9 + 16) = 5
-    disc.setVelocity(vel);
-
-    double expectedMomentum = Type.getMass() * 5.0;
-
-    EXPECT_FLOAT_EQ(disc.getAbsoluteMomentum(), expectedMomentum);
-}
-
-TEST(DiscTest, GetKineticEnergyCalculatesCorrectly)
-{
-    Disc disc(Type);
-
-    sf::Vector2d vel{3.0, 4.0}; // speed = 5, v^2 = 25
-    disc.setVelocity(vel);
-
-    double expectedKE = 0.5f * Type.getMass() * 25.0;
-    EXPECT_FLOAT_EQ(disc.getKineticEnergy(), expectedKE);
+    ASSERT_THAT(disc.getKineticEnergy(), 0.5 * 5.0 * 5.0);
 }

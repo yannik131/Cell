@@ -87,6 +87,7 @@ public:
      */
     bool isMarkedDestroyed() const;
 
+    // TODO Move physics stuff into own base class PhysicalObject
     /**
      * @returns |mv|
      */
