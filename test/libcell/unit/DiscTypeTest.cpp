@@ -1,92 +1,95 @@
 #include "DiscType.hpp"
 
 #include <SFML/Graphics/Color.hpp>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <type_traits>
 
-TEST(DiscTypeTest, ConstructorAndGetters)
+using namespace testing;
+using namespace cell;
+
+class ADiscType : public Test
 {
-    cell::DiscType dt("TestDisc", sf::Color::Blue, 5.0f, 10.0f);
-    EXPECT_EQ(dt.getName(), "TestDisc");
-    EXPECT_EQ(dt.getColor(), sf::Color::Blue);
-    EXPECT_FLOAT_EQ(dt.getRadius(), 5.0f);
-    EXPECT_FLOAT_EQ(dt.getMass(), 10.0f);
+protected:
+    DiscType discType{"Test", sf::Color::Red, 1.0, 2.0};
+};
+
+TEST_F(ADiscType, IsConstructedCorrectly)
+{
+    EXPECT_THAT(discType.getName(), Eq("Test"));
+    EXPECT_THAT(discType.getColor(), Eq(sf::Color::Red));
+    EXPECT_THAT(discType.getRadius(), DoubleEq(1.0));
+    EXPECT_THAT(discType.getMass(), DoubleEq(2.0));
 }
 
-TEST(DiscTypeTest, Setters)
+TEST_F(ADiscType, CanHaveItsNameChanged)
 {
-    cell::DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
+    discType.setName("Hello");
 
-    dt.setName("Updated");
-    EXPECT_EQ(dt.getName(), "Updated");
-
-    dt.setColor(sf::Color::Green);
-    EXPECT_EQ(dt.getColor(), sf::Color::Green);
-
-    dt.setRadius(3.3f);
-    EXPECT_FLOAT_EQ(dt.getRadius(), 3.3f);
-
-    dt.setMass(4.4f);
-    EXPECT_FLOAT_EQ(dt.getMass(), 4.4f);
+    ASSERT_THAT(discType.getName(), Eq("Hello"));
 }
 
-TEST(DiscTypeTest, SettersThrow)
+TEST_F(ADiscType, CantHaveAnEmptyName)
 {
-    cell::DiscType dt("Test", sf::Color::Red, 1.0f, 2.0f);
-
-    EXPECT_ANY_THROW(dt.setColor(sf::Color::Black));
-
-    for (int i = -1; i <= 0; ++i)
-    {
-        EXPECT_ANY_THROW(dt.setMass(static_cast<double>(i)));
-        EXPECT_ANY_THROW(dt.setRadius(static_cast<double>(i)));
-    }
-
-    EXPECT_ANY_THROW(dt.setName(""));
+    ASSERT_ANY_THROW(discType.setName(""));
 }
 
-TEST(DiscTypeTest, CopyConstructor)
+TEST_F(ADiscType, CanHaveItsColorChanged)
 {
-    cell::DiscType dt1("CopyTest", sf::Color::Yellow, 2.5f, 5.5f);
-    cell::DiscType dt2(dt1);
+    discType.setColor(sf::Color::Green);
 
-    EXPECT_EQ(dt1.getId(), dt2.getId());
-    EXPECT_EQ(dt2.getName(), "CopyTest");
+    ASSERT_THAT(discType.getColor(), Eq(sf::Color::Green));
 }
 
-TEST(DiscTypeTest, AssignmentOperator)
+TEST_F(ADiscType, CantHaveAnEmptyColor)
 {
-    cell::DiscType dt1("First", sf::Color::White, 1.0f, 1.0f);
-    cell::DiscType dt2("Second", sf::Color::Blue, 2.0f, 2.0f);
-
-    dt2 = dt1;
-    EXPECT_EQ(dt1, dt2);
+    ASSERT_ANY_THROW(discType.setColor(sf::Color()));
 }
 
-TEST(DiscTypeTest, EqualityOperator)
+TEST_F(ADiscType, CantBeBlack)
 {
-    cell::DiscType dt1("Equal", sf::Color::Blue, 3.0f, 6.0f);
-    cell::DiscType dt2("Equal", sf::Color::Blue, 3.0f, 6.0f);
-    cell::DiscType dt3 = dt2;
-    cell::DiscType dt4(dt2);
-
-    // Don't have same ID
-    EXPECT_FALSE(dt1 == dt2);
-
-    EXPECT_TRUE(dt3 == dt2);
-    EXPECT_TRUE(dt4 == dt2);
+    ASSERT_ANY_THROW(discType.setColor(sf::Color::Black));
 }
 
-TEST(DiscTypeTest, MakeOrderedPair)
+TEST_F(ADiscType, CanHaveItsRadiusChanged)
 {
-    cell::DiscType dt2("Alpha", sf::Color::Magenta, 4.0f, 8.0f);
-    cell::DiscType dt1("Zeta", sf::Color::Cyan, 3.0f, 6.0f);
+    discType.setRadius(10.0);
 
-    auto orderedPair = makeOrderedPair(dt1, dt2);
+    ASSERT_THAT(discType.getRadius(), DoubleEq(10.0));
+}
 
-    EXPECT_EQ(orderedPair.first.getName(), "Alpha");
-    EXPECT_EQ(orderedPair.second.getName(), "Zeta");
+TEST_F(ADiscType, MustHaveAPositiveRadius)
+{
+    ASSERT_ANY_THROW(discType.setRadius(0));
+    ASSERT_ANY_THROW(discType.setRadius(-1.0));
+}
+
+TEST_F(ADiscType, CanHaveItsMassChanged)
+{
+    discType.setMass(10.0);
+
+    ASSERT_THAT(discType.getMass(), DoubleEq(10.0));
+}
+
+TEST_F(ADiscType, MustHaveAPositiveMass)
+{
+    ASSERT_ANY_THROW(discType.setMass(0));
+    ASSERT_ANY_THROW(discType.setMass(-1.0));
+}
+
+TEST_F(ADiscType, CanBeEqual)
+{
+    DiscType other{"Test", sf::Color::Red, 1.0, 2.0};
+
+    ASSERT_TRUE(discType == other);
+}
+
+TEST_F(ADiscType, CanBeUnequal)
+{
+    DiscType other{"Fest", sf::Color::Red, 1.0, 2.0};
+
+    ASSERT_FALSE(discType == other);
 }
 
 TEST(ADiscType, IsNoncopyable)

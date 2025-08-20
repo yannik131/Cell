@@ -126,14 +126,14 @@ TEST_F(ADiscWithVelocity, CanHaveItsXVelocityNegated)
 {
     disc.negateXVelocity();
 
-    EXPECT_THAT(disc.getVelocity(), Eq(sf::Vector2d{-Velocity.x, Velocity.y}));
+    ASSERT_THAT(disc.getVelocity(), Eq(sf::Vector2d{-Velocity.x, Velocity.y}));
 }
 
 TEST_F(ADiscWithVelocity, CanHaveItsYVelocityNegated)
 {
     disc.negateYVelocity();
 
-    EXPECT_THAT(disc.getVelocity(), Eq(sf::Vector2d{Velocity.x, -Velocity.y}));
+    ASSERT_THAT(disc.getVelocity(), Eq(sf::Vector2d{Velocity.x, -Velocity.y}));
 }
 
 TEST_F(ADiscWithVelocity, CalculatesTheCorrectMomentum)
