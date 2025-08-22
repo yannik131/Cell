@@ -133,6 +133,7 @@ void GlobalSettings::setCellSize(int width, int height)
 void GlobalSettings::removeDiscType(const DiscType* discType)
 {
     settings_.reactionTable_.removeDiscType(discType);
+    // TODO This makes no sense since removing would also lead to reallocation
 }
 
 void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution)
@@ -236,6 +237,11 @@ bool GlobalSettings::isLocked() const
 const std::vector<Reaction>& GlobalSettings::getReactions() const
 {
     return settings_.reactionTable_.getReactions();
+}
+
+GlobalSettings::GlobalSettings()
+{
+    settings_.discTypes_.reserve(100);
 }
 
 void GlobalSettings::useCallback(const SettingID& settingID)

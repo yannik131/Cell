@@ -102,7 +102,7 @@ file(GLOB_RECURSE LIBCELL_TEST_SRC ${PROJECT_SOURCE_DIR}/test/libcell/*.cpp)
 
 add_executable(tests-libcell ${LIBCELL_TEST_SRC})
 
-set_target_properties(tests-libcell PROPERTIES 
+set_target_properties(libcell tests-libcell libcellgui PROPERTIES 
     SKIP_BUILD_RPATH TRUE
     # Explicitly tell CMake not to watch these files for reconfigure
     CMAKE_CONFIGURE_DEPENDS ""
@@ -112,6 +112,8 @@ target_link_libraries(tests-libcell
     libcell
     GTest::gtest
 )
+
+target_include_directories(tests-libcell PUBLIC ${PROJECT_SOURCE_DIR}/test/libcell/common)
 
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)

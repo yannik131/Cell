@@ -64,6 +64,8 @@ public:
     void setNumberOfDiscs(int numberOfDiscs); // TODO Move this to the cell
     void setCellSize(int width, int height);  // TODO Move this to the cell
 
+    // TODO Return pointer to created disc type, set capacity before, throw exception if size() == capacity() before
+    // emplace_back call
     template <typename... Args> void addDiscType(Args&&... args);
 
     // TODO
@@ -77,6 +79,7 @@ public:
 
     /**
      * @brief Determines the type of reaction and automatically adds it to the correct reaction map
+     * @todo Move to ReactionTable singleton
      */
     void addReaction(const Reaction& reaction);
 
@@ -119,7 +122,7 @@ private:
     /**
      * @brief Singleton: Private ctor
      */
-    GlobalSettings() = default;
+    GlobalSettings();
 
     /**
      * @brief Calls the custom callback if it exists on the SettingID
@@ -167,6 +170,9 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
 
 template <typename... Args> inline void GlobalSettings::addDiscType(Args&&... args)
 {
+    if (settings_.discTypes_.size() == settings_.discTypes_.capacity())
+        throw ExceptionWithLocation("Can't add another disc type, vector is at capacity (would invalidate pointers");
+
     DiscType newDiscType(std::forward<Args>(args)...);
     if (std::find_if(settings_.discTypes_.begin(), settings_.discTypes_.end(), [&newDiscType](const DiscType& d)
                      { return d.getName() == newDiscType.getName(); }) != settings_.discTypes_.end())

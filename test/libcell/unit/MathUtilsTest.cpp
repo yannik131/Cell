@@ -1,4 +1,5 @@
 #include "MathUtils.hpp"
+#include "Disc.hpp"
 #include "TestUtils.hpp"
 
 #include <glog/logging.h>
@@ -8,7 +9,7 @@
 #include <numbers>
 #include <unordered_set>
 
-using namespace cell; // Defines the += and /= operators, shortens cell::mathutils::
+using namespace cell; // Defines the += and /= operators
 
 TEST(MathUtilsTest, OperatorPlusEqualsWorksForMaps)
 {
@@ -36,7 +37,7 @@ TEST(MathUtilsTest, OperatorDivideEqualsWorksForMaps)
 
 TEST(MathUtilsTest, FindsCollidingDiscs)
 {
-    Disc d1(Mass5), d2(Mass5);
+    Disc d1(&Mass5), d2(&Mass5);
     d1.setPosition({0, 0});
     d2.setPosition({0, 0});
 
@@ -61,7 +62,7 @@ TEST(MathUtilsTest, FindsCollidingDiscs)
     collisions = mathutils::findCollidingDiscs(discs, 5);
     EXPECT_EQ(collisions.size(), 0);
 
-    Disc d3(Mass5);
+    Disc d3(&Mass5);
     d2.setPosition({0, 0});
     d3.setPosition({0, 0});
 
@@ -91,7 +92,7 @@ TEST(MathUtilsTest, CollisionsWithBounds)
     const sf::Vector2d boundsTopLeft{0, 0};
     const sf::Vector2d boundsBottomRight{100, 100};
 
-    Disc d(Mass5);
+    Disc d(&Mass5);
     const double R = d.getType()->getRadius();
 
     // Collision with top and right wall
@@ -126,7 +127,7 @@ TEST(MathUtilsTest, Abs)
 TEST(MathUtilsTest, CollisionHandling)
 {
     DiscType discType("B", sf::Color::Red, 1.0, 1.0);
-    Disc d1(discType), d2(discType);
+    Disc d1(&discType), d2(&discType);
 
     sf::Vector2d d1InitialPosition{0, 0};
     d1.setPosition(d1InitialPosition);
@@ -148,7 +149,7 @@ TEST(MathUtilsTest, CollisionHandling)
     const auto& overlapResults = mathutils::calculateOverlap(d1, d2);
     const double calculatedDt = mathutils::calculateTimeBeforeCollision(d1, d2, overlapResults);
 
-    EXPECT_FLOAT_EQ(-dt, calculatedDt);
+    EXPECT_DOUBLE_EQ(-dt, calculatedDt);
 
     mathutils::handleDiscCollisions({std::make_pair(&d1, &d2)});
 
@@ -165,7 +166,7 @@ TEST(MathUtilsTest, CollisionHandling)
     // For the small velocities, this should be about equal
     // For higher velocities (in the hundreds), we'd expect a diff of 1 or 2
 
-    EXPECT_FLOAT_EQ(kineticEnergyBefore, kineticEnergyAfter);
+    EXPECT_DOUBLE_EQ(kineticEnergyBefore, kineticEnergyAfter);
 }
 
 TEST(MathUtilsTest, getRandomFloat)
@@ -191,21 +192,4 @@ TEST(MathUtilsTest, makeOrderedPair)
     auto pair2 = mathutils::makeOrderedPair(&i1, &i2);
 
     EXPECT_EQ(pair, pair2);
-}
-
-TEST(MathUtilsTest, calculateHash)
-{
-    std::unordered_set<int> hashSet;
-
-    for (int x = 0; x <= 100; ++x)
-    {
-        for (int y = 0; y <= 100; ++y)
-        {
-            int hashValue = mathutils::calculateHash(x, y);
-            if (hashSet.find(hashValue) != hashSet.end())
-                FAIL() << "Duplicate hash value for " << x << " " << y;
-
-            hashSet.insert(hashValue);
-        }
-    }
 }

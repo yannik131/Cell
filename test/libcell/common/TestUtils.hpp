@@ -33,7 +33,7 @@ inline const cell::DiscType Mass10 = generateDiscType(5, 10);
 inline const cell::DiscType Mass15 = generateDiscType(5, 15);
 inline const cell::DiscType Mass20 = generateDiscType(5, 20);
 inline const cell::DiscType Mass25 = generateDiscType(5, 25);
-inline const cell::DiscType Unused = generateDiscType(5, 5);
+inline const cell::DiscType Reserved = generateDiscType(5, 5);
 
 inline auto getDefaultReactions()
 {

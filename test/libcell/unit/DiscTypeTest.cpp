@@ -92,7 +92,7 @@ TEST_F(ADiscType, CanBeUnequal)
     ASSERT_FALSE(discType == other);
 }
 
-TEST(ADiscType, IsNoncopyable)
+TEST_F(ADiscType, IsNoncopyable)
 {
     static_assert(!std::is_copy_constructible_v<cell::DiscType>);
     static_assert(!std::is_copy_assignable_v<cell::DiscType>);
