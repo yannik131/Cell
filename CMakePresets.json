@@ -10,7 +10,8 @@
                 "CMAKE_C_COMPILER": "cl",
                 "CMAKE_CXX_COMPILER": "cl",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "VCPKG_MANIFEST_INSTALL": false
+                "VCPKG_MANIFEST_INSTALL": false,
+                "CMAKE_SUPPRESS_REGENERATION": "ON"
             }
         },
         {

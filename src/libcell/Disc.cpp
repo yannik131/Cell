@@ -8,8 +8,8 @@
 namespace cell
 {
 
-Disc::Disc(const DiscType* discType)
-    : type_(discType)
+Disc::Disc(DiscTypeID discTypeID)
+    : discTypeID_(discTypeID)
 {
 }
 
@@ -56,9 +56,9 @@ void Disc::move(const sf::Vector2d& distance)
     setPosition(position_ + distance);
 }
 
-void Disc::setType(const DiscType* discType)
+void Disc::setType(DiscTypeID discTypeID)
 {
-    type_ = discType;
+    discTypeID_ = discTypeID;
 }
 
 void Disc::markDestroyed()
@@ -76,9 +76,9 @@ const sf::Vector2d& Disc::getPosition() const
     return position_;
 }
 
-const DiscType* Disc::getType() const
+DiscTypeID Disc::getDiscTypeID() const
 {
-    return type_;
+    return discTypeID_;
 }
 
 bool Disc::isMarkedDestroyed() const
@@ -86,19 +86,20 @@ bool Disc::isMarkedDestroyed() const
     return destroyed_;
 }
 
-double Disc::getAbsoluteMomentum() const
+double Disc::getAbsoluteMomentum(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return type_->getMass() * std::hypot(velocity_.x, velocity_.y);
+    return discTypeRegistry.getByID(discTypeID_).getMass() * std::hypot(velocity_.x, velocity_.y);
 }
 
-sf::Vector2d Disc::getMomentum() const
+sf::Vector2d Disc::getMomentum(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return type_->getMass() * velocity_;
+    return discTypeRegistry.getByID(discTypeID_).getMass() * velocity_;
 }
 
-double Disc::getKineticEnergy() const
+double Disc::getKineticEnergy(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return 0.5 * type_->getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+    return 0.5 * discTypeRegistry.getByID(discTypeID_).getMass() *
+           (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }
 
 } // namespace cell

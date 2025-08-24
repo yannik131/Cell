@@ -2,6 +2,7 @@
 #define DISC_HPP
 
 #include "DiscType.hpp"
+#include "DiscTypeRegistry.hpp"
 #include "Vector2d.hpp"
 
 #include <SFML/System/Vector2.hpp>
@@ -19,7 +20,7 @@ public:
     /**
      * @brief Creates a new disc with the given type
      */
-    explicit Disc(const DiscType* discType);
+    explicit Disc(DiscTypeID discTypeID);
 
     /**
      * @brief Sets the velocity of the disc in px/s
@@ -60,7 +61,7 @@ public:
     /**
      * @brief Assigns a new disc type (no checks)
      */
-    void setType(const DiscType* discType);
+    void setType(DiscTypeID discTypeID);
 
     /**
      * @brief Sets the internal destroyed flag (used for removing discs in the simulation)
@@ -80,7 +81,7 @@ public:
     /**
      * @returns DiscType of the disc
      */
-    const DiscType* getType() const;
+    DiscTypeID getDiscTypeID() const;
 
     /**
      * @returns `true` if `markDestroyed()` has been called
@@ -91,17 +92,17 @@ public:
     /**
      * @returns |mv|
      */
-    double getAbsoluteMomentum() const;
+    double getAbsoluteMomentum(const DiscTypeRegistry& discTypeRegistry) const;
 
     /**
      * @returns mv
      */
-    sf::Vector2d getMomentum() const;
+    sf::Vector2d getMomentum(const DiscTypeRegistry& discTypeRegistry) const;
 
     /**
      * @returns 1/2*m*v^2
      */
-    double getKineticEnergy() const;
+    double getKineticEnergy(const DiscTypeRegistry& discTypeRegistry) const;
 
 private:
     /**
@@ -123,7 +124,7 @@ private:
     /**
      * @brief The properties of this disc (mass, radius, ...)
      */
-    const DiscType* type_;
+    DiscTypeID discTypeID_;
 };
 
 } // namespace cell
