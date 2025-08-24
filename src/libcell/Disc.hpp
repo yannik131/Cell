@@ -92,17 +92,17 @@ public:
     /**
      * @returns |mv|
      */
-    double getAbsoluteMomentum(const DiscTypeRegistry& discTypeRegistry) const;
+    double getAbsoluteMomentum(const DiscTypeResolver& discTypeResolver) const;
 
     /**
      * @returns mv
      */
-    sf::Vector2d getMomentum(const DiscTypeRegistry& discTypeRegistry) const;
+    sf::Vector2d getMomentum(const DiscTypeResolver& discTypeResolver) const;
 
     /**
      * @returns 1/2*m*v^2
      */
-    double getKineticEnergy(const DiscTypeRegistry& discTypeRegistry) const;
+    double getKineticEnergy(const DiscTypeResolver& discTypeResolver) const;
 
 private:
     /**

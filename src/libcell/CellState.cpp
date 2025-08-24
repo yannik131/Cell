@@ -95,11 +95,11 @@ void CellState::randomizeUsingDiscTypeDistribution()
                           { return discTypeResolver_(a.first).getRadius() < discTypeResolver_(b.first).getRadius(); })
                           ->first;
 
-    double maxRadius = discTypeResolver_(discTypeID).getRadius();
+    maxRadius_ = discTypeResolver_(discTypeID).getRadius();
 
     discs_.clear();
 
-    auto gridPositions = calculateGrid(cellWidth_, cellHeight_, maxRadius);
+    auto gridPositions = calculateGrid(cellWidth_, cellHeight_, maxRadius_);
 
     build(std::move(gridPositions));
 }
@@ -138,7 +138,7 @@ void CellState::build(std::vector<sf::Vector2d> discPositions)
                 Disc newDisc(discType);
                 newDisc.setPosition(discPositions.back());
                 newDisc.setVelocity(sf::Vector2d(velocityDistribution(gen), velocityDistribution(gen)));
-                initialKineticEnergy_ += newDisc.getKineticEnergy();
+                initialKineticEnergy_ += newDisc.getKineticEnergy(discTypeResolver_);
 
                 discs_.push_back(newDisc);
                 discPositions.pop_back();

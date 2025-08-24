@@ -61,7 +61,7 @@ ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, const SingleLo
 {
 }
 
-bool ReactionEngine::transformationReaction(Disc* disc)
+bool ReactionEngine::transformationReaction(Disc* disc) const
 {
     const Reaction* reaction = selectReaction(*transformations_, disc->getDiscTypeID());
     if (!reaction)
@@ -72,7 +72,7 @@ bool ReactionEngine::transformationReaction(Disc* disc)
     return true;
 }
 
-bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
+bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs) const
 {
     const Reaction* reaction = selectReaction(*decompositions_, d1->getDiscTypeID());
     if (!reaction)
@@ -100,7 +100,7 @@ bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs
     return true;
 }
 
-bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2)
+bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction = selectReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
@@ -123,7 +123,7 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2)
     return true;
 }
 
-bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2)
+bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction = selectReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
@@ -143,7 +143,7 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2)
     return true;
 }
 
-std::vector<Disc> ReactionEngine::unimolecularReactions(std::vector<Disc>& discs)
+std::vector<Disc> ReactionEngine::unimolecularReactions(std::vector<Disc>& discs) const
 {
     std::vector<Disc> newDiscs;
 

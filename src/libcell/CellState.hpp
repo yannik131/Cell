@@ -58,6 +58,8 @@ private:
     double initialKineticEnergy_ = 0;
     double currentKineticEnergy_ = 0;
 
+    double maxRadius_ = 0;
+
     friend class Cell;
 };
 

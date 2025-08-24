@@ -15,7 +15,15 @@
 namespace cell
 {
 
-Cell::Cell() = default;
+Cell::Cell(const ReactionEngine& reactionEngine)
+    : reactionEngine_(&reactionEngine)
+{
+}
+
+void Cell::setState(CellState&& state)
+{
+    state_ = std::make_unique<CellState>(std::move(state));
+}
 
 template <typename T> DiscTypeMap<T> operator+=(DiscTypeMap<T>& a, const DiscTypeMap<T>& b)
 {
@@ -32,16 +40,16 @@ void Cell::update(const sf::Time& dt)
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
-        state_.currentKineticEnergy_ +=
-            mathutils::handleWorldBoundCollision(disc, {0, 0}, {state_.cellWidth_, state_.cellHeight_},
-                                                 state_.initialKineticEnergy_ - state_.currentKineticEnergy_);
+        state_->currentKineticEnergy_ +=
+            mathutils::handleWorldBoundCollision(disc, {0, 0}, {state_->cellWidth_, state_->cellHeight_},
+                                                 state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
     }
 
-    const auto& newDiscs = unimolecularReactions(discs_);
+    const auto& newDiscs = reactionEngine_->unimolecularReactions(discs_);
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
 
-    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, maxRadius_);
+    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, state_->maxRadius_);
     collisionCounts_ += mathutils::handleDiscCollisions(collidingDiscs);
 
     removeDestroyedDiscs();
@@ -62,24 +70,24 @@ const std::vector<Disc>& Cell::getDiscs() const
 
 double Cell::getInitialKineticEnergy() const
 {
-    return initialKineticEnergy_;
+    return state_->initialKineticEnergy_;
 }
 
 double Cell::getCurrentKineticEnergy() const
 {
-    return currentKineticEnergy_;
+    return state_->currentKineticEnergy_;
 }
 
 void Cell::removeDestroyedDiscs()
 {
-    currentKineticEnergy_ = 0.0;
+    state_->currentKineticEnergy_ = 0.0;
     for (auto iter = discs_.begin(); iter != discs_.end();)
     {
         if (iter->isMarkedDestroyed())
             iter = discs_.erase(iter);
         else
         {
-            currentKineticEnergy_ += iter->getKineticEnergy();
+            state_->currentKineticEnergy_ += iter->getKineticEnergy(state_->discTypeResolver_);
             ++iter;
         }
     }

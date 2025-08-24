@@ -1,6 +1,5 @@
 #include "MathUtils.hpp"
 #include "Disc.hpp"
-#include "GlobalSettings.hpp"
 #include "NanoflannAdapter.hpp"
 #include "Reactions.hpp"
 

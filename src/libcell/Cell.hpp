@@ -29,7 +29,9 @@ namespace cell
 class Cell
 {
 public:
-    Cell();
+    Cell(const ReactionEngine& reactionEngine);
+
+    void setState(CellState&& state);
 
     /**
      * @brief Advances the simulation by a single time step
@@ -69,7 +71,9 @@ private:
 
     std::vector<Disc> newDiscs_;
 
-    CellState state_;
+    std::unique_ptr<CellState> state_;
+
+    const ReactionEngine* reactionEngine_;
 };
 
 } // namespace cell
