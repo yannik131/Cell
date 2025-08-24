@@ -130,10 +130,9 @@ void GlobalSettings::setCellSize(int width, int height)
     useCallback(SettingID::CellSize);
 }
 
-void GlobalSettings::removeDiscType(const DiscType* discType)
+void GlobalSettings::setDiscTypes(std::vector<DiscType>&& discTypes)
 {
-    settings_.reactionTable_.removeDiscType(discType);
-    // TODO This makes no sense since removing would also lead to reallocation
+    settings_.discTypes_ = std::move(discTypes);
 }
 
 void GlobalSettings::setDiscTypeDistribution(const DiscType::map<int>& discTypeDistribution)

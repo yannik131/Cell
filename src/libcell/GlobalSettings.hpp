@@ -64,12 +64,7 @@ public:
     void setNumberOfDiscs(int numberOfDiscs); // TODO Move this to the cell
     void setCellSize(int width, int height);  // TODO Move this to the cell
 
-    // TODO Return pointer to created disc type, set capacity before, throw exception if size() == capacity() before
-    // emplace_back call
-    template <typename... Args> void addDiscType(Args&&... args);
-
-    // TODO
-    void removeDiscType(const DiscType* discType);
+    void setDiscTypes(std::vector<DiscType>&& discTypes);
 
     /**
      * @brief Sets the disc type distribution used to randomly initialize cells
@@ -150,7 +145,7 @@ private:
      */
     std::function<void(const SettingID& settingID)> callback_;
 
-    // TODO use a set<const DiscType*, Cmp> for faster name-based lookup
+    // TODO use a set<const DiscType*, Cmp> separately for faster name-based lookup
     // TODO Move discTypes to a DiscTypeStorage singleton, make ReactionTable singleton, serialize discTypes first, then
     // reactions
 };
@@ -166,19 +161,6 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
     if (value < min || value > max)
         throw ExceptionWithLocation("Value for \"" + valueName + "\" out of range: Must be between \"" + toString(min) +
                                     "\" and \"" + toString(max) + "\", but is \"" + toString(value) + "\"");
-}
-
-template <typename... Args> inline void GlobalSettings::addDiscType(Args&&... args)
-{
-    if (settings_.discTypes_.size() == settings_.discTypes_.capacity())
-        throw ExceptionWithLocation("Can't add another disc type, vector is at capacity (would invalidate pointers");
-
-    DiscType newDiscType(std::forward<Args>(args)...);
-    if (std::find_if(settings_.discTypes_.begin(), settings_.discTypes_.end(), [&newDiscType](const DiscType& d)
-                     { return d.getName() == newDiscType.getName(); }) != settings_.discTypes_.end())
-        throw ExceptionWithLocation("A disc type with the name \"" + newDiscType.getName() + "\" already exists");
-
-    settings_.discTypes_.push_back(std::move(newDiscType));
 }
 
 } // namespace cell

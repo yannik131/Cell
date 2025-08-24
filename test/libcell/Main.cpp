@@ -16,6 +16,7 @@ bool cdUpUntilInTestDir()
             fs::current_path("test/output");
             return true;
         }
+
         fs::current_path("..");
     }
 
@@ -29,10 +30,10 @@ bool cdUpUntilInTestDir()
  */
 int main(int argc, char** argv)
 {
+    testing::InitGoogleTest(&argc, argv);
     cell::initLogging(argc, argv);
     if (!cdUpUntilInTestDir())
         return 1;
 
-    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
