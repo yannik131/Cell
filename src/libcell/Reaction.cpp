@@ -46,17 +46,17 @@ bool operator==(const Reaction& a, const Reaction& b)
            a.hasProduct2() == b.hasProduct2() && (!a.hasProduct2() || a.getProduct2() == b.getProduct2());
 }
 
-std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry)
+std::string toString(const Reaction& reaction, const DiscTypeResolver& discTypeResolver)
 {
-    std::string result = discTypeRegistry.getByID(reaction.getEduct1()).getName();
+    std::string result = discTypeResolver(reaction.getEduct1()).getName();
 
     if (reaction.hasEduct2())
-        result += " + " + discTypeRegistry.getByID(reaction.getEduct2()).getName();
+        result += " + " + discTypeResolver(reaction.getEduct2()).getName();
 
-    result += " ). " + discTypeRegistry.getByID(reaction.getProduct1()).getName();
+    result += " ). " + discTypeResolver(reaction.getProduct1()).getName();
 
     if (reaction.hasProduct2())
-        result += " + " + discTypeRegistry.getByID(reaction.getProduct2()).getName();
+        result += " + " + discTypeResolver(reaction.getProduct2()).getName();
 
     return result;
 }
@@ -173,19 +173,19 @@ const Reaction::Type& Reaction::getType() const
     return type_;
 }
 
-void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
+void Reaction::validate(const DiscTypeResolver& discTypeResolver) const
 {
-    auto getMass = [&](DiscTypeID discTypeID) { return discTypeRegistry.getByID(discTypeID).getMass(); };
+    auto getMass = [&](DiscTypeID discTypeID) { return discTypeResolver(discTypeID).getMass(); };
 
     const auto eductMassSum = getMass(educt1_) + (educt2_ ? getMass(*educt2_) : 0);
     const auto productMassSum = getMass(product1_) + (product2_ ? getMass(*product2_) : 0);
 
     if (eductMassSum != productMassSum)
-        throw ExceptionWithLocation(toString(*this, discTypeRegistry) +
+        throw ExceptionWithLocation(toString(*this, discTypeResolver) +
                                     ": Product- and educt masses need to be identical");
 
     if (type_ == Transformation && educt1_ == product1_)
-        throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
+        throw ExceptionWithLocation(toString(*this, discTypeResolver) + ": Educt 1 and product 1 are identical");
 }
 
 } // namespace cell

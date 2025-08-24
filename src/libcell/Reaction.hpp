@@ -81,7 +81,7 @@ public:
      *
      * - educt and product masses are the same
      */
-    void validate(const DiscTypeRegistry& discTypeRegistry) const;
+    void validate(const DiscTypeResolver& discTypeResolver) const;
 
 private:
     DiscTypeID educt1_;
@@ -105,7 +105,7 @@ bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 /**
  * @brief String representation in the form of A + B -> C + D
  */
-std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
+std::string toString(const Reaction& reaction, const DiscTypeResolver& discTypeResolver);
 
 /**
  * @returns `true` if the given disctype is part of the educts or products of the reaction

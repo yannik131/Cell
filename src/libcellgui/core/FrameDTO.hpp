@@ -14,7 +14,7 @@
 struct FrameDTO
 {
     std::vector<cell::Disc> discs_;
-    cell::DiscType::map<int> collisionCounts_;
+    cell::DiscTypeMap<int> collisionCounts_;
     long long elapsedSimulationTimeUs{};
 };
 

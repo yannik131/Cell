@@ -14,9 +14,8 @@ class Disc;
 class ReactionEngine
 {
 public:
-    using DiscTypeResolver = std::function<const DiscType&(DiscTypeID)>;
-    using SingleLookupMap = DiscType::map<std::vector<Reaction>>;
-    using PairLookupMap = DiscType::pair_map<std::vector<Reaction>>;
+    using SingleLookupMap = DiscTypeMap<std::vector<Reaction>>;
+    using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
 
 public:
     ReactionEngine(DiscTypeResolver discTypeResolver, const SingleLookupMap& decompositions,
@@ -60,10 +59,10 @@ public:
 
 private:
     DiscTypeResolver discTypeResolver_;
-    SingleLookupMap transformations_;
-    SingleLookupMap decompositions_;
-    PairLookupMap combinations_;
-    PairLookupMap exchanges_;
+    const SingleLookupMap* transformations_;
+    const SingleLookupMap* decompositions_;
+    const PairLookupMap* combinations_;
+    const PairLookupMap* exchanges_;
 };
 
 } // namespace cell

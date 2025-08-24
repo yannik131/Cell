@@ -2,6 +2,7 @@
 #define REACTIONTABLE_HPP
 
 #include "DiscType.hpp"
+#include "DiscTypeRegistry.hpp"
 #include "Reaction.hpp"
 #include "SFMLJsonSerializers.hpp"
 
@@ -24,7 +25,7 @@ namespace cell
  * disc types. We generate a random number f between 0 and 1 and iterate the vector in order, checking if f is <= p for
  * the given reaction. I. e. if f = 0.2, reaction B would occur. If f = 0.5, no reaction would occur.
  */
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
+void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction, const DiscTypeResolver& discTypeResolver);
 
 /**
  * @brief Maps a `vector<Reaction>` with increasing, cumulative probabilities to `DiscType` or pairs of such:
@@ -36,14 +37,14 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction);
 class ReactionTable
 {
 public:
-    ReactionTable();
+    ReactionTable(DiscTypeResolver discTypeResolver);
 
     // getters for lookup up maps for reactions with increasing, cumulative probabilities
 
-    const DiscType::map<std::vector<Reaction>>& getTransformationReactionLookupMap() const;
-    const DiscType::map<std::vector<Reaction>>& getDecompositionReactionLookupMap() const;
-    const DiscType::pair_map<std::vector<Reaction>>& getCombinationReactionLookupMap() const;
-    const DiscType::pair_map<std::vector<Reaction>>& getExchangeReactionLookupMap() const;
+    const DiscTypeMap<std::vector<Reaction>>& getTransformationReactionLookupMap() const;
+    const DiscTypeMap<std::vector<Reaction>>& getDecompositionReactionLookupMap() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getCombinationReactionLookupMap() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getExchangeReactionLookupMap() const;
 
     /**
      * @brief Adds a new reaction to the table and updates all lookup maps
@@ -60,7 +61,7 @@ public:
      * @param discTypesToRemove A vector containing disc types that are to be removed. Their IDs must match with the
      * disc types already in the table.
      */
-    void removeDiscType(const DiscType* discTypeToRemove);
+    void removeDiscType(DiscTypeID discTypeToRemove);
 
     /**
      * @brief Clears the reaction vector and all reaction lookup tables
@@ -81,10 +82,12 @@ private:
 private:
     std::vector<Reaction> reactions_;
 
-    DiscType::map<std::vector<Reaction>> transformationReactionLookupMap_;
-    DiscType::map<std::vector<Reaction>> decompositionReactionLookupMap_;
-    DiscType::pair_map<std::vector<Reaction>> combinationReactionLookupMap_;
-    DiscType::pair_map<std::vector<Reaction>> exchangeReactionLookupMap_;
+    DiscTypeMap<std::vector<Reaction>> transformationReactionLookupMap_;
+    DiscTypeMap<std::vector<Reaction>> decompositionReactionLookupMap_;
+    DiscTypePairMap<std::vector<Reaction>> combinationReactionLookupMap_;
+    DiscTypePairMap<std::vector<Reaction>> exchangeReactionLookupMap_;
+
+    DiscTypeResolver discTypeResolver_;
 
 public:
     /*     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformationReactionLookupMap_,

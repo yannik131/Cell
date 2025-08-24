@@ -96,7 +96,7 @@ TEST(SerializationTest, SettingsSerialization)
     DiscType C("C", sf::Color::Blue, 12, 5);
     DiscType D("D", sf::Color::Magenta, 15, 10);
 
-    DiscType::map<int> discTypeDistribution;
+    DiscTypeMap<int> discTypeDistribution;
 
     discTypeDistribution[A] = 100;
     discTypeDistribution[B] = 0;

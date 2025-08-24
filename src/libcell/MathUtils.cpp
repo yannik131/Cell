@@ -76,9 +76,9 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, d
     return collidingDiscs;
 }
 
-DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
+DiscTypeMap<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs)
 {
-    DiscType::map<int> collisionCounts;
+    DiscTypeMap<int> collisionCounts;
 
     for (const auto& [p1, p2] : collidingDiscs)
     {

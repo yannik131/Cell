@@ -56,7 +56,7 @@ void GlobalGUISettings::setDiscTypesPlotMap(const QStringList& selectedDiscTypeN
         activeDiscTypes.push_back(utility::getDiscTypeByName(selectedDiscTypeName));
 
     bool hasTrueValue = false;
-    cell::DiscType::map<bool> discTypePlotMap;
+    cell::DiscTypeMap<bool> discTypePlotMap;
     for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         auto iter = std::ranges::find(activeDiscTypes, discType);
@@ -82,7 +82,7 @@ void GlobalGUISettings::setPlotSum(bool value)
 
 void GlobalGUISettings::updateDiscTypesPlotMap()
 {
-    cell::DiscType::map<bool> updatedDiscTypesPlotMap;
+    cell::DiscTypeMap<bool> updatedDiscTypesPlotMap;
     for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
     {
         if (guiSettings_.discTypesPlotMap_.contains(discType))

@@ -1,6 +1,7 @@
 #ifndef DISCTYPE_HPP
 #define DISCTYPE_HPP
 
+#include "DiscTypeRegistry.hpp"
 #include "Hashing.hpp"
 #include "SFMLJsonSerializers.hpp"
 
@@ -21,18 +22,6 @@ namespace cell
  */
 class DiscType
 {
-public:
-    /**
-     * @brief Type to be used for reaction and disc type distribution tables
-     */
-    template <typename T> using map = std::unordered_map<const DiscType*, T>;
-
-    /**
-     * @brief Type for the bimolecular reaction tables
-     */
-    template <typename T>
-    using pair_map = std::unordered_map<std::pair<const DiscType*, const DiscType*>, T, PairHasher>;
-
 public:
     /**
      * @brief Creates a new disc type
@@ -59,6 +48,7 @@ public:
 
     /**
      * @returns The color of this DiscType
+     * @todo Remove the color, it doesn't do anything in the simulation, just for UI
      */
     const sf::Color& getColor() const;
 

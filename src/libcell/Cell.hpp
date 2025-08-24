@@ -1,8 +1,10 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
+#include "CellState.hpp"
 #include "Disc.hpp"
 #include "NanoflannAdapter.hpp"
+#include "ReactionEngine.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -37,19 +39,12 @@ public:
     /**
      * @returns the collision counts for all disc types in the simulation and sets them to 0
      */
-    DiscType::map<int> getAndResetCollisionCount();
+    DiscTypeMap<int> getAndResetCollisionCount();
 
     /**
      * @returns all discs currently part of this cell
      */
     const std::vector<Disc>& getDiscs() const;
-
-    /**
-     * @brief Initializes the starting positions and creates the discs in the cell according to the distribution in the
-     * settings
-     * @note Has to be called at least once before calling `update()`
-     */
-    void reinitialize();
 
     /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
@@ -63,32 +58,18 @@ public:
 
 private:
     /**
-     * @brief Creates discs within the boundaries at the starting positions
-     */
-    void buildScene();
-
-    /**
-     * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the
-     * settings. Doesn't check if the disc type with the largest radius can actually be created with the currently
-     * defined set of reactions, though.
-     */
-    void initializeStartPositions();
-
-    /**
      * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
      * calculates the current kinetic energy based on the discs that are still in the cell
      */
     void removeDestroyedDiscs();
 
 private:
-    std::vector<sf::Vector2d> startPositions_;
     std::vector<Disc> discs_;
-    double maxRadius_{};
-    DiscType::map<int> collisionCounts_;
-    double initialKineticEnergy_{};
-    double currentKineticEnergy_{};
+    DiscTypeMap<int> collisionCounts_;
 
     std::vector<Disc> newDiscs_;
+
+    CellState state_;
 };
 
 } // namespace cell

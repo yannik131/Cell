@@ -7,7 +7,7 @@
 namespace
 {
 
-const cell::DiscType::map<double>& getActiveMap(const DataPoint& dataPoint)
+const cell::DiscTypeMap<double>& getActiveMap(const DataPoint& dataPoint)
 {
     switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
     {
@@ -87,7 +87,7 @@ void PlotModel::emitDataPoint(const DataPoint& averagedDataPoint)
 
 void PlotModel::emitPlot()
 {
-    QVector<cell::DiscType::map<double>> fullPlotData;
+    QVector<cell::DiscTypeMap<double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
 
@@ -117,7 +117,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
     dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
 
-    cell::DiscType::map<sf::Vector2d> totalMomentums;
+    cell::DiscTypeMap<sf::Vector2d> totalMomentums;
 
     for (const auto& disc : frameDTO.discs_)
     {

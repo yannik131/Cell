@@ -1,6 +1,8 @@
 #ifndef DISCTYPEREGISTRY_HPP
 #define DISCTYPEREGISTRY_HPP
 
+#include "Types.hpp"
+
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -8,8 +10,6 @@
 
 namespace cell
 {
-
-using DiscTypeID = std::uint16_t;
 
 class DiscType;
 

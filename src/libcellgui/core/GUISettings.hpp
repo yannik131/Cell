@@ -34,7 +34,7 @@ struct GUISettings
     /**
      * @brief Maps all DiscTypes to whether or not they're selected for the current plot
      */
-    cell::DiscType::map<bool> discTypesPlotMap_;
+    cell::DiscTypeMap<bool> discTypesPlotMap_;
 };
 
 namespace GUISettingsLimits

@@ -134,7 +134,7 @@ void DiscTypeDistributionTableModel::loadSettings()
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    cell::DiscType::map<int> result(rows_.begin(), rows_.end());
+    cell::DiscTypeMap<int> result(rows_.begin(), rows_.end());
     cell::GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }
 

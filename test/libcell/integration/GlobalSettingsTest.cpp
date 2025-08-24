@@ -17,9 +17,9 @@ const Reaction combination{&Mass5, &Mass5, &Mass10, nullptr, 0.1f};
 const Reaction exchange{&Mass5, &Mass5, &Mass5, &Mass5, 0.1f};
 const Reaction transformation{&Mass5, nullptr, &Mass5Radius10, nullptr, 0.1f};
 
-const DiscType::map<int> DefaultDistribution{{&Mass5, 100},        {&Mass10, 0},       {&Mass15, 0},
-                                             {&Mass20, 0},         {&Mass25, 0},       {&Mass5Radius10, 0},
-                                             {&Mass10Radius10, 0}, {&Mass10Radius5, 0}};
+const DiscTypeMap<int> DefaultDistribution{{&Mass5, 100},        {&Mass10, 0},       {&Mass15, 0},
+                                           {&Mass20, 0},         {&Mass25, 0},       {&Mass5Radius10, 0},
+                                           {&Mass10Radius10, 0}, {&Mass10Radius5, 0}};
 
 const Settings& settings = GlobalSettings::getSettings();
 const auto& transformationReactions = GlobalSettings::getSettings().reactionTable_.getTransformationReactionLookupMap();
@@ -155,7 +155,7 @@ TEST(GlobalSettingsTest, DiscTypeDistributionPercentagesAddUpTo100)
 
     for (int i = -10; i < 200; i += 10)
     {
-        DiscType::map<int> distribution{{&Mass5, i}};
+        DiscTypeMap<int> distribution{{&Mass5, i}};
 
         if (i == 100)
             EXPECT_NO_THROW(globalSettings.setDiscTypeDistribution(distribution));
@@ -168,7 +168,7 @@ TEST(GlobalSettingsTest, DuplicateNamesInDistributionArentAllowed)
 {
     GlobalSettings& globalSettings = GlobalSettings::get();
 
-    DiscType::map<int> distribution{{&Mass5, 50}, {&Mass5, 50}};
+    DiscTypeMap<int> distribution{{&Mass5, 50}, {&Mass5, 50}};
 
     EXPECT_ANY_THROW(globalSettings.setDiscTypeDistribution(distribution));
 }
@@ -293,7 +293,7 @@ TEST(GlobalSettingsTest, ReactionsWithRemovedDiscTypesAreRemoved)
     EXPECT_EQ(exchangeReactions.size(), 5);
 
     // Now remove &Mass10 from the distribution
-    DiscType::map<int> distribution = DefaultDistribution;
+    DiscTypeMap<int> distribution = DefaultDistribution;
     distribution.erase(&Mass10);
 
     globalSettings.setDiscTypeDistribution(distribution);

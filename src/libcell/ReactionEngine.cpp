@@ -1,6 +1,5 @@
 #include "ReactionEngine.hpp"
 #include "Disc.hpp"
-#include "GlobalSettings.hpp"
 #include "MathUtils.hpp"
 #include "Reaction.hpp"
 
@@ -55,16 +54,16 @@ ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, const SingleLo
                                const SingleLookupMap& transformations, const PairLookupMap& combinations,
                                const PairLookupMap& exchanges)
     : discTypeResolver_(std::move(discTypeResolver))
-    , decompositions_(decompositions)
-    , transformations_(transformations)
-    , combinations_(combinations)
-    , exchanges_(exchanges)
+    , decompositions_(&decompositions)
+    , transformations_(&transformations)
+    , combinations_(&combinations)
+    , exchanges_(&exchanges)
 {
 }
 
 bool ReactionEngine::transformationReaction(Disc* disc)
 {
-    const Reaction* reaction = selectReaction(transformations_, disc->getDiscTypeID());
+    const Reaction* reaction = selectReaction(*transformations_, disc->getDiscTypeID());
     if (!reaction)
         return false;
 
@@ -75,7 +74,7 @@ bool ReactionEngine::transformationReaction(Disc* disc)
 
 bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs)
 {
-    const Reaction* reaction = selectReaction(decompositions_, d1->getDiscTypeID());
+    const Reaction* reaction = selectReaction(*decompositions_, d1->getDiscTypeID());
     if (!reaction)
         return false;
 
@@ -103,7 +102,7 @@ bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs
 
 bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2)
 {
-    const Reaction* reaction = selectReaction(combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction = selectReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
         return false;
 
@@ -126,7 +125,7 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2)
 
 bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2)
 {
-    const Reaction* reaction = selectReaction(exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction = selectReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
         return false;
 

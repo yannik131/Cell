@@ -7,7 +7,7 @@
 namespace cell
 {
 
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
+void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction, const DiscTypeResolver& discTypeResolver)
 {
     if (reactions.empty())
     {
@@ -18,10 +18,12 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
     for (const auto& r : reactions)
     {
         if (r == reaction)
-            throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction) + "\" not allowed");
+            throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction, discTypeResolver) +
+                                        "\" not allowed");
 
         if (r.getType() != reaction.getType())
-            throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r) + " vs. " + toString(reaction));
+            throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r, discTypeResolver) + " vs. " +
+                                        toString(reaction, discTypeResolver));
     }
 
     double totalProbability = reactions.front().getProbability();
@@ -39,24 +41,27 @@ void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction)
                       { return reaction1.getProbability() < reaction2.getProbability(); });
 }
 
-ReactionTable::ReactionTable() = default;
+ReactionTable::ReactionTable(DiscTypeResolver discTypeResolver)
+    : discTypeResolver_(std::move(discTypeResolver))
+{
+}
 
-const DiscType::map<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
+const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
 {
     return transformationReactionLookupMap_;
 }
 
-const DiscType::map<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
+const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
 {
     return decompositionReactionLookupMap_;
 }
 
-const DiscType::pair_map<std::vector<Reaction>>& ReactionTable::getCombinationReactionLookupMap() const
+const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getCombinationReactionLookupMap() const
 {
     return combinationReactionLookupMap_;
 }
 
-const DiscType::pair_map<std::vector<Reaction>>& ReactionTable::getExchangeReactionLookupMap() const
+const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getExchangeReactionLookupMap() const
 {
     return exchangeReactionLookupMap_;
 }
@@ -73,7 +78,7 @@ void ReactionTable::setReactions(const std::vector<Reaction>& reactions)
     createLookupMaps();
 }
 
-void ReactionTable::removeDiscType(const DiscType* discTypeToRemove)
+void ReactionTable::removeDiscType(DiscTypeID discTypeToRemove)
 {
     std::vector<Reaction> remainingReactions;
     for (const auto& reaction : reactions_)
@@ -115,15 +120,17 @@ void ReactionTable::createLookupMaps()
         {
             auto& lookupMap = reaction.getType() & Reaction::Transformation ? transformationReactionLookupMap_
                                                                             : decompositionReactionLookupMap_;
-            addReactionToVector(lookupMap[reaction.getEduct1()], reaction);
+            addReactionToVector(lookupMap[reaction.getEduct1()], reaction, discTypeResolver_);
         }
         else
         {
             auto& lookupMap =
                 reaction.getType() & Reaction::Combination ? combinationReactionLookupMap_ : exchangeReactionLookupMap_;
-            addReactionToVector(lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())], reaction);
+            addReactionToVector(lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())], reaction,
+                                discTypeResolver_);
             if (reaction.getEduct1() != reaction.getEduct2())
-                addReactionToVector(lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction);
+                addReactionToVector(lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction,
+                                    discTypeResolver_);
         }
     }
 }

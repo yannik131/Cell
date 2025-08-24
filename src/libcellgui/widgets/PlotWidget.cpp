@@ -57,7 +57,7 @@ void PlotWidget::reset()
     setAxisLabels();
 }
 
-void PlotWidget::replacePlot(const QVector<cell::DiscType::map<double>>& dataPoints)
+void PlotWidget::replacePlot(const QVector<cell::DiscTypeMap<double>>& dataPoints)
 {
     reset();
 
@@ -71,7 +71,7 @@ void PlotWidget::replacePlot(const QVector<cell::DiscType::map<double>>& dataPoi
         plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
 }
 
-void PlotWidget::plotDataPoint(const cell::DiscType::map<double>& dataPoint, bool doReplot)
+void PlotWidget::plotDataPoint(const cell::DiscTypeMap<double>& dataPoint, bool doReplot)
 {
     if (GlobalGUISettings::getGUISettings().plotSum_)
         addDataPointSum(dataPoint);
@@ -87,7 +87,7 @@ void PlotWidget::plotDataPoint(const cell::DiscType::map<double>& dataPoint, boo
     }
 }
 
-void PlotWidget::addDataPoint(const cell::DiscType::map<double>& dataPoint)
+void PlotWidget::addDataPoint(const cell::DiscTypeMap<double>& dataPoint)
 {
     if (graphs_.empty())
         return;
@@ -157,7 +157,7 @@ void PlotWidget::setAxisLabels()
     }
 }
 
-void PlotWidget::addDataPointSum(const cell::DiscType::map<double>& dataPoint)
+void PlotWidget::addDataPointSum(const cell::DiscTypeMap<double>& dataPoint)
 {
     if (sumGraph_ == nullptr)
         throw ExceptionWithLocation(
@@ -184,6 +184,6 @@ void PlotWidget::addDataPointSum(const cell::DiscType::map<double>& dataPoint)
 void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::dataPointAdded,
-            [this](const cell::DiscType::map<double>& dataPoint) { plotDataPoint(dataPoint); });
+            [this](const cell::DiscTypeMap<double>& dataPoint) { plotDataPoint(dataPoint); });
     connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
 }

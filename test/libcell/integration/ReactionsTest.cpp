@@ -13,7 +13,7 @@
 
 TEST(ReactionsTest, combinationReaction)
 {
-    cell::DiscType::map<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}, {&Mass5Radius10, 0}};
+    cell::DiscTypeMap<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}, {&Mass5Radius10, 0}};
     cell::Reaction combination{&Mass5Radius5, &Mass5Radius10, &Mass10Radius5, nullptr, 1};
     cell::GlobalSettings::get().setDiscTypeDistribution(distribution);
     cell::GlobalSettings::get().addReaction(combination);
@@ -36,7 +36,7 @@ TEST(ReactionsTest, combinationReaction)
 TEST(ReactionsTest, decompositionReaction)
 {
     // TODO Prevent decomposition if there is not enough space available around the disc
-    cell::DiscType::map<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}};
+    cell::DiscTypeMap<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}};
     cell::Reaction decomposition{&Mass10Radius5, nullptr, &Mass5Radius5, &Mass5Radius5, 1};
     cell::GlobalSettings::get().setDiscTypeDistribution(distribution);
     cell::GlobalSettings::get().addReaction(decomposition);
@@ -79,7 +79,7 @@ TEST(ReactionsTest, decompositionReaction)
 
 TEST(ReactionsTest, exchangeReaction)
 {
-    cell::DiscType::map<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}, {&Mass15Radius10, 0}};
+    cell::DiscTypeMap<int> distribution{{&Mass5Radius5, 100}, {&Mass10Radius5, 0}, {&Mass15Radius10, 0}};
     cell::Reaction exchange{&Mass5Radius5, &Mass15Radius10, &Mass10Radius5, &Mass10Radius5, 1};
     cell::GlobalSettings::get().setDiscTypeDistribution(distribution);
     cell::GlobalSettings::get().addReaction(exchange);
@@ -110,7 +110,7 @@ TEST(ReactionsTest, exchangeReaction)
 
 TEST(ReactionsTest, transformationReaction)
 {
-    cell::DiscType::map<int> distribution{{&Mass5Radius5, 100}, {&Mass5Radius10, 0}};
+    cell::DiscTypeMap<int> distribution{{&Mass5Radius5, 100}, {&Mass5Radius10, 0}};
     cell::Reaction transformation{&Mass5Radius5, nullptr, &Mass5Radius10, nullptr, 1};
     cell::GlobalSettings::get().setDiscTypeDistribution(distribution);
     cell::GlobalSettings::get().addReaction(transformation);
@@ -138,7 +138,7 @@ TEST(ReactionTest, transformationProbabilityShouldntIncreaseWithDecreasedSimulat
     // Used to be a bug: transformationReaction and decompositionReaction used a static const reference to .asSeconds()
     // which returns a new value and not a reference.
 
-    cell::DiscType::map<int> distribution{{&Mass5Radius5, 100}, {&Mass5Radius10, 0}};
+    cell::DiscTypeMap<int> distribution{{&Mass5Radius5, 100}, {&Mass5Radius10, 0}};
     cell::Reaction transformation{&Mass5Radius5, nullptr, &Mass5Radius10, nullptr, 0.1};
     cell::GlobalSettings::get().setDiscTypeDistribution(distribution);
     cell::GlobalSettings::get().addReaction(transformation);

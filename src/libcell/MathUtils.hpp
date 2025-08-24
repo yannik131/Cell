@@ -106,7 +106,7 @@ std::set<std::pair<Disc*, Disc*>> findCollidingDiscs(std::vector<Disc>& discs, d
  * @brief Corrects overlapping discs, calculating their new positions and velocities after collision. Calls the
  * appropriate functions to handle combination and exchange reactions
  */
-DiscType::map<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
+DiscTypeMap<int> handleDiscCollisions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs);
 
 /**
  * @brief Makes the disc bounce back from the walls. Gives additional kinetic energy to the disc if
