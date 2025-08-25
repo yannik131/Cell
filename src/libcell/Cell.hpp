@@ -21,8 +21,8 @@ class CollisionHandler;
 class Cell
 {
 public:
-    Cell(const ReactionEngine& reactionEngine, const CollisionDetector& collisionDetector,
-         const CollisionHandler& collisionHandler);
+    Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
+         const CollisionHandler* collisionHandler);
 
     void setState(CellState&& state);
 
@@ -59,7 +59,6 @@ private:
     void removeDestroyedDiscs();
 
 private:
-    std::vector<Disc> discs_;
     DiscTypeMap<int> collisionCounts_;
 
     std::vector<Disc> newDiscs_;

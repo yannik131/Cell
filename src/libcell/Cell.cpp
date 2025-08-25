@@ -17,11 +17,11 @@
 
 namespace cell
 {
-Cell::Cell(const ReactionEngine& reactionEngine, const CollisionDetector& collisionDetector,
-           const CollisionHandler& collisionHandler)
-    : reactionEngine_(&reactionEngine)
-    , collisionDetector_(&collisionDetector)
-    , collisionHandler_(&collisionHandler)
+Cell::Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
+           const CollisionHandler* collisionHandler)
+    : reactionEngine_(reactionEngine)
+    , collisionDetector_(collisionDetector)
+    , collisionHandler_(collisionHandler)
 {
 }
 
@@ -45,7 +45,7 @@ void Cell::update(const sf::Time& dt)
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{state_->cellWidth_, state_->cellHeight_};
 
-    for (auto& disc : discs_)
+    for (auto& disc : state_->discs_)
     {
         disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
 
@@ -56,11 +56,11 @@ void Cell::update(const sf::Time& dt)
             disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
     }
 
-    const auto& newDiscs = reactionEngine_->unimolecularReactions(discs_);
+    const auto& newDiscs = reactionEngine_->unimolecularReactions(state_->discs_);
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-    discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+    state_->discs_.insert(state_->discs_.end(), newDiscs_.begin(), newDiscs_.end());
 
-    auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(discs_);
+    auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(state_->discs_);
     collisionCounts_ += collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);
 
     removeDestroyedDiscs();
@@ -76,7 +76,7 @@ DiscTypeMap<int> Cell::getAndResetCollisionCount()
 
 const std::vector<Disc>& Cell::getDiscs() const
 {
-    return discs_;
+    return state_->discs_;
 }
 
 double Cell::getInitialKineticEnergy() const
@@ -92,10 +92,10 @@ double Cell::getCurrentKineticEnergy() const
 void Cell::removeDestroyedDiscs()
 {
     state_->currentKineticEnergy_ = 0.0;
-    for (auto iter = discs_.begin(); iter != discs_.end();)
+    for (auto iter = state_->discs_.begin(); iter != state_->discs_.end();)
     {
         if (iter->isMarkedDestroyed())
-            iter = discs_.erase(iter);
+            iter = state_->discs_.erase(iter);
         else
         {
             state_->currentKineticEnergy_ += iter->getKineticEnergy(state_->discTypeResolver_);

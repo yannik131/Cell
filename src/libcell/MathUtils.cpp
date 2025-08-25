@@ -10,6 +10,11 @@
 #include <ostream>
 #include <random>
 
+sf::Time operator*(const sf::Time& time, double factor)
+{
+    return time * static_cast<float>(factor);
+}
+
 std::ostream& operator<<(std::ostream& os, const sf::Vector2d& v)
 {
     return os << "(" << v.x << ", " << v.y << ")";

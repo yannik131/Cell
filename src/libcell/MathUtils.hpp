@@ -7,6 +7,8 @@
 
 #include "Vector2d.hpp"
 
+#include <SFML/System/Time.hpp>
+
 #include <ostream>
 #include <unordered_map>
 #include <utility>
@@ -44,6 +46,8 @@ std::unordered_map<T1, T2, T3, T5> operator*(std::unordered_map<T1, T2, T3, T5> 
 
     return a;
 }
+
+sf::Time operator*(const sf::Time& time, double factor);
 
 /**
  * @brief Prints the x and y coordinates to the given stream

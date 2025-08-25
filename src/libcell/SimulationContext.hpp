@@ -20,7 +20,14 @@ public:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(double simulationTimeScale);
 
-    void run();
+    const sf::Time& getSimulationTimeStep() const;
+    double getSimulationTimeScale() const;
+
+    DiscTypeResolver getDiscTypeResolver() const;
+    std::function<double()> getMaxRadiusProvider() const;
+    const ReactionEngine* getReactionEngine() const;
+    const CollisionDetector* getCollisionDetector() const;
+    const CollisionHandler* getCollisionHandler() const;
 
 private:
     /**
@@ -40,6 +47,7 @@ private:
 
     DiscTypeRegistry discTypeRegistry_;
     DiscTypeResolver discTypeResolver_;
+    std::function<double()> maxRadiusProvider_;
     ReactionTable reactionTable_;
     ReactionEngine reactionEngine_;
     CollisionDetector collisionDetector_;

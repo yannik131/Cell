@@ -10,11 +10,13 @@ namespace cell
 class Simulation
 {
 public:
-    Simulation() = default;
+    Simulation();
+
+    void run();
 
 private:
     SimulationContext simulationContext_;
-    Cell cell;
+    Cell cell_;
 };
 
 } // namespace cell
