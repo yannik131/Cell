@@ -24,12 +24,15 @@ public:
     DiscTypeID getIDFor(const std::string& discTypeName) const;
     const DiscType& getByID(DiscTypeID ID) const;
 
+    double getMaxRadius() const;
+
 private:
     void buildNameIDMap(const std::vector<DiscType>& discTypes);
 
 private:
     std::vector<DiscType> discTypes_;
     std::unordered_map<std::string, DiscTypeID> nameIDMap_;
+    double maxRadius_ = 0;
 };
 
 } // namespace cell

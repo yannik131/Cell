@@ -1,6 +1,8 @@
 #ifndef SIMULATIONCONTEXT_HPP
 #define SIMULATIONCONTEXT_HPP
 
+#include "CollisionDetector.hpp"
+#include "CollisionHandler.hpp"
 #include "DiscTypeRegistry.hpp"
 #include "ReactionEngine.hpp"
 #include "ReactionTable.hpp"
@@ -37,10 +39,11 @@ private:
     double simulationTimeScale_ = 1.0;
 
     DiscTypeRegistry discTypeRegistry_;
-
+    DiscTypeResolver discTypeResolver_;
     ReactionTable reactionTable_;
-
     ReactionEngine reactionEngine_;
+    CollisionDetector collisionDetector_;
+    CollisionHandler collisionHandler_;
 };
 
 } // namespace cell

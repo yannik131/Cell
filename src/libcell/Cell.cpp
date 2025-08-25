@@ -1,6 +1,9 @@
 #include "Cell.hpp"
+#include "CollisionDetector.hpp"
+#include "CollisionHandler.hpp"
+#include "Disc.hpp"
 #include "MathUtils.hpp"
-#include "NanoflannAdapter.hpp"
+#include "ReactionEngine.hpp"
 #include "Reactions.hpp"
 
 #include <glog/logging.h>
@@ -14,9 +17,11 @@
 
 namespace cell
 {
-
-Cell::Cell(const ReactionEngine& reactionEngine)
+Cell::Cell(const ReactionEngine& reactionEngine, const CollisionDetector& collisionDetector,
+           const CollisionHandler& collisionHandler)
     : reactionEngine_(&reactionEngine)
+    , collisionDetector_(&collisionDetector)
+    , collisionHandler_(&collisionHandler)
 {
 }
 
@@ -37,20 +42,26 @@ void Cell::update(const sf::Time& dt)
 {
     newDiscs_.clear();
 
+    const sf::Vector2d topLeft{0, 0};
+    const sf::Vector2d bottomRight{state_->cellWidth_, state_->cellHeight_};
+
     for (auto& disc : discs_)
     {
         disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
-        state_->currentKineticEnergy_ +=
-            mathutils::handleWorldBoundCollision(disc, {0, 0}, {state_->cellWidth_, state_->cellHeight_},
-                                                 state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
+
+        auto collision = collisionDetector_->detectDiscRectangleCollision(disc, topLeft, bottomRight);
+        collisionHandler_->calculateDiscRectangleCollisionResponse(disc, collision);
+
+        state_->currentKineticEnergy_ += collisionHandler_->keepKineticEnergyConstant(
+            disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
     }
 
     const auto& newDiscs = reactionEngine_->unimolecularReactions(discs_);
     newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
     discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
 
-    const auto& collidingDiscs = mathutils::findCollidingDiscs(discs_, state_->maxRadius_);
-    collisionCounts_ += mathutils::handleDiscCollisions(collidingDiscs);
+    auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(discs_);
+    collisionCounts_ += collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);
 
     removeDestroyedDiscs();
 }

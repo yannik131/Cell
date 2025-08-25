@@ -17,6 +17,9 @@ void cell::DiscTypeRegistry::setDiscTypes(std::vector<DiscType>&& discTypes)
     buildNameIDMap(discTypes);
 
     discTypes_ = std::move(discTypes);
+    maxRadius_ = std::max_element(discTypes_.begin(), discTypes_.end(),
+                                  [](const DiscType& a, const DiscType& b) { return a.getRadius() < b.getRadius(); })
+                     ->getRadius();
 }
 
 DiscTypeID DiscTypeRegistry::getIDFor(const std::string& discTypeName) const
@@ -36,6 +39,11 @@ const DiscType& DiscTypeRegistry::getByID(DiscTypeID ID) const
 #endif
 
     return discTypes_[ID];
+}
+
+double DiscTypeRegistry::getMaxRadius() const
+{
+    return maxRadius_;
 }
 
 void DiscTypeRegistry::buildNameIDMap(const std::vector<DiscType>& discTypes)

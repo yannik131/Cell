@@ -12,7 +12,7 @@ class Disc;
 class CellState
 {
 public:
-    CellState(DiscTypeResolver discTypeResolver);
+    CellState(DiscTypeResolver discTypeResolver, std::function<double()> maxRadiusProvider);
 
     void setNumberOfDiscs(int numberOfDiscs);
     void setCellWidth(int cellWidth);
@@ -58,7 +58,7 @@ private:
     double initialKineticEnergy_ = 0;
     double currentKineticEnergy_ = 0;
 
-    double maxRadius_ = 0;
+    std::function<double()> maxRadiusProvider_;
 
     friend class Cell;
 };

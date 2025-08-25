@@ -2,9 +2,6 @@
 #define CELL_HPP
 
 #include "CellState.hpp"
-#include "Disc.hpp"
-#include "NanoflannAdapter.hpp"
-#include "ReactionEngine.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -16,20 +13,16 @@
 namespace cell
 {
 
-/**
- * @brief Represents a single cell with bounds and discs that can move around, collide and react
- * @note Usage:
- * ```cpp
- * Cell cell;
- * GlobalSettings::get().setCellSize(500, 500);
- * cell.reinitialize(); // Populate the cell
- * cell.update(sf::milliseconds(1)); // Advance the simulation
- * // Do whatever
- */
+class Disc;
+class ReactionEngine;
+class CollisionDetector;
+class CollisionHandler;
+
 class Cell
 {
 public:
-    Cell(const ReactionEngine& reactionEngine);
+    Cell(const ReactionEngine& reactionEngine, const CollisionDetector& collisionDetector,
+         const CollisionHandler& collisionHandler);
 
     void setState(CellState&& state);
 
@@ -74,6 +67,8 @@ private:
     std::unique_ptr<CellState> state_;
 
     const ReactionEngine* reactionEngine_;
+    const CollisionDetector* collisionDetector_;
+    const CollisionHandler* collisionHandler_;
 };
 
 } // namespace cell

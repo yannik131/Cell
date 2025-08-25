@@ -48,8 +48,9 @@ std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
 }
 } // namespace
 
-CellState::CellState(DiscTypeResolver discTypeResolver)
+CellState::CellState(DiscTypeResolver discTypeResolver, std::function<double()> maxRadiusProvider)
     : discTypeResolver_(std::move(discTypeResolver))
+    , maxRadiusProvider_(std::move(maxRadiusProvider))
 {
 }
 
@@ -90,16 +91,9 @@ void CellState::randomizeUsingDiscTypeDistribution()
     if (discTypeDistribution_.empty())
         throw ExceptionWithLocation("Disc type distribution can't be empty");
 
-    auto discTypeID = std::ranges::max_element(
-                          discTypeDistribution_, [&](const auto& a, const auto& b)
-                          { return discTypeResolver_(a.first).getRadius() < discTypeResolver_(b.first).getRadius(); })
-                          ->first;
-
-    maxRadius_ = discTypeResolver_(discTypeID).getRadius();
-
     discs_.clear();
 
-    auto gridPositions = calculateGrid(cellWidth_, cellHeight_, maxRadius_);
+    auto gridPositions = calculateGrid(cellWidth_, cellHeight_, maxRadiusProvider_());
 
     build(std::move(gridPositions));
 }

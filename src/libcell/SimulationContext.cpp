@@ -5,11 +5,13 @@ namespace cell
 {
 
 SimulationContext::SimulationContext()
-    : reactionTable_([&](DiscTypeID discTypeID) -> const DiscType& { return discTypeRegistry_.getByID(discTypeID); })
-    , reactionEngine_([&](DiscTypeID discTypeID) -> const DiscType& { return discTypeRegistry_.getByID(discTypeID); },
-                      reactionTable_.getDecompositionReactionLookupMap(),
+    : discTypeResolver_([&](DiscTypeID discTypeID) -> const DiscType& { return discTypeRegistry_.getByID(discTypeID); })
+    , reactionTable_(discTypeResolver_)
+    , reactionEngine_(discTypeResolver_, reactionTable_.getDecompositionReactionLookupMap(),
                       reactionTable_.getTransformationReactionLookupMap(),
                       reactionTable_.getCombinationReactionLookupMap(), reactionTable_.getExchangeReactionLookupMap())
+    , collisionDetector_(discTypeResolver_, [&]() -> double { return discTypeRegistry_.getMaxRadius(); })
+    , collisionHandler_(discTypeResolver_)
 {
 }
 
