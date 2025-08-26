@@ -1,6 +1,7 @@
 #ifndef COLLISIONDETECTOR_HPP
 #define COLLISIONDETECTOR_HPP
 
+#include "PositionNanoflannAdapter.hpp"
 #include "Types.hpp"
 #include "Vector2d.hpp"
 
@@ -47,7 +48,7 @@ public:
     };
 
 public:
-    CollisionDetector(DiscTypeResolver discTypeResolver, std::function<double()> maxRadiusProvider);
+    CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider);
 
     void detectCollisions(std::vector<Disc>& discs);
 
@@ -61,7 +62,7 @@ public:
 private:
     std::set<std::pair<Disc*, Disc*>> discDiscCollisions_;
     DiscTypeResolver discTypeResolver_;
-    std::function<double()> maxRadiusProvider_;
+    MaxRadiusProvider maxRadiusProvider_;
 };
 
 } // namespace cell

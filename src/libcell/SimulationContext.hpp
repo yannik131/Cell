@@ -24,7 +24,8 @@ public:
     double getSimulationTimeScale() const;
 
     DiscTypeResolver getDiscTypeResolver() const;
-    std::function<double()> getMaxRadiusProvider() const;
+    MaxRadiusProvider getMaxRadiusProvider() const;
+    SimulationTimeStepProvider getSimulationTimeStepProvider() const;
     const ReactionEngine* getReactionEngine() const;
     const CollisionDetector* getCollisionDetector() const;
     const CollisionHandler* getCollisionHandler() const;
@@ -47,7 +48,8 @@ private:
 
     DiscTypeRegistry discTypeRegistry_;
     DiscTypeResolver discTypeResolver_;
-    std::function<double()> maxRadiusProvider_;
+    MaxRadiusProvider maxRadiusProvider_;
+    SimulationTimeStepProvider simulationTimeStepProvider_;
     ReactionTable reactionTable_;
     ReactionEngine reactionEngine_;
     CollisionDetector collisionDetector_;

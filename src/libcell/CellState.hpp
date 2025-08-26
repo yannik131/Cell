@@ -1,8 +1,10 @@
 #ifndef state_HPP
 #define state_HPP
 
+#include "Disc.hpp"
 #include "DiscType.hpp"
 #include "Types.hpp"
+#include "Vector2d.hpp"
 
 namespace cell
 {
@@ -12,7 +14,7 @@ class Disc;
 class CellState
 {
 public:
-    CellState(DiscTypeResolver discTypeResolver, std::function<double()> maxRadiusProvider);
+    CellState(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider);
 
     void setNumberOfDiscs(int numberOfDiscs);
     void setCellWidth(int cellWidth);
@@ -58,7 +60,7 @@ private:
     double initialKineticEnergy_ = 0;
     double currentKineticEnergy_ = 0;
 
-    std::function<double()> maxRadiusProvider_;
+    MaxRadiusProvider maxRadiusProvider_;
 
     friend class Cell;
 };

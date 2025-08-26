@@ -1,4 +1,3 @@
-#include "GlobalSettings.hpp"
 #include "TestUtils.hpp"
 
 #include <gmock/gmock.h>

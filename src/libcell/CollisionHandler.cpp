@@ -149,11 +149,8 @@ void CollisionHandler::calculateDiscRectangleCollisionResponse(
 double CollisionHandler::keepKineticEnergyConstant(Disc& disc, const CollisionDetector::RectangleCollision& collision,
                                                    double deficiency) const
 {
-    if (!collision.isCollision())
-        return;
-
-    if (deficiency <= 0)
-        return;
+    if (!collision.isCollision() || deficiency <= 0)
+        return 0.0;
 
     // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
     // not too much to make it look stupid

@@ -4,7 +4,6 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 #include "ReactionEngine.hpp"
-#include "Reactions.hpp"
 
 #include <glog/logging.h>
 
@@ -43,7 +42,7 @@ void Cell::update(const sf::Time& dt)
     newDiscs_.clear();
 
     const sf::Vector2d topLeft{0, 0};
-    const sf::Vector2d bottomRight{state_->cellWidth_, state_->cellHeight_};
+    const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
 
     for (auto& disc : state_->discs_)
     {

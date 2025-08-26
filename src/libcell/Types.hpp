@@ -16,6 +16,8 @@ class Reaction;
 
 using DiscTypeID = std::uint16_t;
 using DiscTypeResolver = std::function<const DiscType&(DiscTypeID)>;
+using MaxRadiusProvider = std::function<double()>;
+using SimulationTimeStepProvider = std::function<double()>;
 
 /**
  * @brief Type to be used for reaction and disc type distribution tables

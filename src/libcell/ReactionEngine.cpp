@@ -6,54 +6,11 @@
 namespace cell
 {
 
-namespace
-{
-
-/**
- * @brief Helper function to search the lookup maps for reactions
- * @param map A reaction lookup map as returned by ReactionTable
- * @param key Either a single disc type (decomposition, transformation) or a pair of disc types (combination, exchange)
- */
-template <typename MapType, typename KeyType> const Reaction* selectReaction(const MapType& map, const KeyType& key)
-{
-    const auto& iter = map.find(key);
-    if (iter == map.end())
-        return nullptr;
-
-    const auto& possibleReactions = iter->second;
-    double randomNumber = mathutils::getRandomFloat();
-
-    // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
-    if constexpr (std::is_same_v<KeyType, std::pair<DiscTypeID, DiscTypeID>>)
-    {
-        for (const auto& reaction : possibleReactions)
-        {
-            if (randomNumber > reaction.getProbability())
-                continue;
-
-            return &reaction;
-        }
-    }
-    else
-    {
-        const auto dt = simulationTimeStep.asSeconds();
-        for (const auto& reaction : possibleReactions)
-        {
-            if (randomNumber > 1 - std::pow(1 - reaction.getProbability(), dt))
-                continue;
-
-            return &reaction;
-        }
-    }
-
-    return nullptr;
-}
-} // namespace
-
-ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, const SingleLookupMap& decompositions,
-                               const SingleLookupMap& transformations, const PairLookupMap& combinations,
-                               const PairLookupMap& exchanges)
+ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
+                               const SingleLookupMap& decompositions, const SingleLookupMap& transformations,
+                               const PairLookupMap& combinations, const PairLookupMap& exchanges)
     : discTypeResolver_(std::move(discTypeResolver))
+    , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
     , decompositions_(&decompositions)
     , transformations_(&transformations)
     , combinations_(&combinations)

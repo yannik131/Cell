@@ -7,8 +7,10 @@ namespace cell
 SimulationContext::SimulationContext()
     : discTypeResolver_([&](DiscTypeID discTypeID) -> const DiscType& { return discTypeRegistry_.getByID(discTypeID); })
     , maxRadiusProvider_([&]() -> double { return discTypeRegistry_.getMaxRadius(); })
+    , simulationTimeStepProvider_([&]() -> double { return static_cast<double>(simulationTimeStep_.asSeconds()); })
     , reactionTable_(discTypeResolver_)
-    , reactionEngine_(discTypeResolver_, reactionTable_.getDecompositionReactionLookupMap(),
+    , reactionEngine_(discTypeResolver_, simulationTimeStepProvider_,
+                      reactionTable_.getDecompositionReactionLookupMap(),
                       reactionTable_.getTransformationReactionLookupMap(),
                       reactionTable_.getCombinationReactionLookupMap(), reactionTable_.getExchangeReactionLookupMap())
     , collisionDetector_(discTypeResolver_, maxRadiusProvider_)
@@ -47,9 +49,14 @@ DiscTypeResolver SimulationContext::getDiscTypeResolver() const
     return discTypeResolver_;
 }
 
-std::function<double()> SimulationContext::getMaxRadiusProvider() const
+MaxRadiusProvider SimulationContext::getMaxRadiusProvider() const
 {
     return maxRadiusProvider_;
+}
+
+SimulationTimeStepProvider SimulationContext::getSimulationTimeStepProvider() const
+{
+    return simulationTimeStepProvider_;
 }
 
 const ReactionEngine* SimulationContext::getReactionEngine() const

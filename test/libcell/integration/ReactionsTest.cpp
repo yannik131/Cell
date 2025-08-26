@@ -1,4 +1,3 @@
-#include "Reactions.hpp"
 #include "Disc.hpp"
 #include "DiscType.hpp"
 #include "GlobalSettings.hpp"

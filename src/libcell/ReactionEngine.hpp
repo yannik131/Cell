@@ -2,6 +2,7 @@
 #define REACTIONENGINE_HPP
 
 #include "DiscTypeRegistry.hpp"
+#include "MathUtils.hpp"
 
 #include <functional>
 
@@ -18,9 +19,9 @@ public:
     using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
 
 public:
-    ReactionEngine(DiscTypeResolver discTypeResolver, const SingleLookupMap& decompositions,
-                   const SingleLookupMap& transformations, const PairLookupMap& combinations,
-                   const PairLookupMap& exchanges);
+    ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
+                   const SingleLookupMap& decompositions, const SingleLookupMap& transformations,
+                   const PairLookupMap& combinations, const PairLookupMap& exchanges);
 
     /**
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
@@ -58,12 +59,59 @@ public:
     std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs) const;
 
 private:
+    /**
+     * @brief Helper function to search the lookup maps for reactions
+     * @param map A reaction lookup map as returned by ReactionTable
+     * @param key Either a single disc type (decomposition, transformation) or a pair of disc types (combination,
+     * exchange)
+     */
+    template <typename MapType, typename KeyType>
+    const Reaction* selectReaction(const MapType& map, const KeyType& key) const;
+
+private:
     DiscTypeResolver discTypeResolver_;
+    SimulationTimeStepProvider simulationTimeStepProvider_;
     const SingleLookupMap* transformations_;
     const SingleLookupMap* decompositions_;
     const PairLookupMap* combinations_;
     const PairLookupMap* exchanges_;
 };
+
+template <typename MapType, typename KeyType>
+const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType& key) const
+{
+    const auto& iter = map.find(key);
+    if (iter == map.end())
+        return nullptr;
+
+    const auto& possibleReactions = iter->second;
+    double randomNumber = mathutils::getRandomFloat();
+
+    // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
+    if constexpr (std::is_same_v<KeyType, std::pair<DiscTypeID, DiscTypeID>>)
+    {
+        for (const auto& reaction : possibleReactions)
+        {
+            if (randomNumber > reaction.getProbability())
+                continue;
+
+            return &reaction;
+        }
+    }
+    else
+    {
+        const auto dt = simulationTimeStepProvider_();
+        for (const auto& reaction : possibleReactions)
+        {
+            if (randomNumber > 1 - std::pow(1 - reaction.getProbability(), dt))
+                continue;
+
+            return &reaction;
+        }
+    }
+
+    return nullptr;
+}
 
 } // namespace cell
 

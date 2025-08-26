@@ -1,6 +1,9 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
+#include "ExceptionWithLocation.hpp"
+#include "StringUtils.hpp"
+
 #include <SFML/System/Time.hpp>
 #include <nlohmann/json.hpp>
 

@@ -1,6 +1,5 @@
 #include "MathUtils.hpp"
 #include "Disc.hpp"
-#include "Reactions.hpp"
 
 #include <glog/logging.h>
 #include <nanoflann.hpp>

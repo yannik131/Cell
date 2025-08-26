@@ -1,5 +1,4 @@
 #include "CellState.hpp"
-#include "Disc.hpp"
 #include "ExceptionWithLocation.hpp"
 #include "Settings.hpp"
 #include "Vector2d.hpp"
@@ -15,7 +14,7 @@ namespace cell
 namespace
 {
 std::random_device rd;
-const std::mt19937 gen(rd());
+std::mt19937 gen(rd());
 
 template <typename T> int calculateValueSum(const std::unordered_map<T, int>& map)
 {
@@ -37,9 +36,7 @@ std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
     for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
     {
         for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
-        {
             gridPoints.emplace_back(spacing * static_cast<double>(2 * i + 1), spacing * static_cast<double>(2 * j + 1));
-        }
     }
 
     std::shuffle(gridPoints.begin(), gridPoints.end(), gen);
@@ -48,7 +45,7 @@ std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
 }
 } // namespace
 
-CellState::CellState(DiscTypeResolver discTypeResolver, std::function<double()> maxRadiusProvider)
+CellState::CellState(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider)
     : discTypeResolver_(std::move(discTypeResolver))
     , maxRadiusProvider_(std::move(maxRadiusProvider))
 {
@@ -108,9 +105,8 @@ void CellState::build(std::vector<sf::Vector2d> discPositions)
 
     if (numberOfDiscs_ > static_cast<int>(discPositions.size()))
         LOG(WARNING) << "According to the settings, " << std::to_string(numberOfDiscs_)
-                     << " discs should be created, but the render window can only fit "
-                     << std::to_string(discPositions.size()) << ". "
-                     << std::to_string(numberOfDiscs_ - discPositions.size()) << " discs will not be created.";
+                     << " discs should be created, but the cell can only fit " << std::to_string(discPositions.size())
+                     << ". " << std::to_string(numberOfDiscs_ - discPositions.size()) << " discs will not be created.";
 
     // We need the accumulated percentages sorted in ascending order for the random number approach to work
     std::vector<std::pair<DiscTypeID, int>> discTypes;
