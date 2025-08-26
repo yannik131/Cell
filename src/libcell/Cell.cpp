@@ -5,15 +5,6 @@
 #include "MathUtils.hpp"
 #include "ReactionEngine.hpp"
 
-#include <glog/logging.h>
-
-#include <algorithm>
-#include <cmath>
-#include <execution>
-#include <map>
-#include <random>
-#include <set>
-
 namespace cell
 {
 Cell::Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
@@ -29,18 +20,8 @@ void Cell::setState(CellState&& state)
     state_ = std::make_unique<CellState>(std::move(state));
 }
 
-template <typename T> DiscTypeMap<T> operator+=(DiscTypeMap<T>& a, const DiscTypeMap<T>& b)
-{
-    for (const auto& [key, value] : b)
-        a[key] += value;
-
-    return a;
-}
-
 void Cell::update(const sf::Time& dt)
 {
-    newDiscs_.clear();
-
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
 
@@ -53,11 +34,21 @@ void Cell::update(const sf::Time& dt)
 
         state_->currentKineticEnergy_ += collisionHandler_->keepKineticEnergyConstant(
             disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
+
+        // TODO apply unimolecular reaction here directly
     }
 
-    const auto& newDiscs = reactionEngine_->unimolecularReactions(state_->discs_);
-    newDiscs_.insert(newDiscs_.end(), newDiscs.begin(), newDiscs.end());
-    state_->discs_.insert(state_->discs_.end(), newDiscs_.begin(), newDiscs_.end());
+    // insert new discs here
+
+    // iterate over discs again here
+    // 1. check for collision, continue if not
+    // 2. attempt bimolecular reactions
+    // continue if reaction happened, mark educts as consumed
+    // 3. calculate collision response with remaining colliding discs
+    // 4. after loop, add products to discs and remove educts
+
+    const auto& newDiscs = reactionEngine_->applyUnimolecularReactions(state_->discs_);
+    state_->discs_.insert(state_->discs_.end(), newDiscs.begin(), newDiscs.end());
 
     auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(state_->discs_);
     collisionCounts_ += collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);

@@ -56,7 +56,7 @@ public:
      * will occur for each disc.
      * @param discs Discs to transform/decompose
      */
-    std::vector<Disc> unimolecularReactions(std::vector<Disc>& discs) const;
+    std::vector<Disc> applyUnimolecularReactions(std::vector<Disc>& discs) const;
 
 private:
     /**

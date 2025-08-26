@@ -29,6 +29,14 @@ template <typename T> using DiscTypeMap = std::unordered_map<DiscTypeID, T>;
  */
 template <typename T> using DiscTypePairMap = std::unordered_map<std::pair<DiscTypeID, DiscTypeID>, T, PairHasher>;
 
+template <typename T> DiscTypeMap<T> operator+=(DiscTypeMap<T>& a, const DiscTypeMap<T>& b)
+{
+    for (const auto& [key, value] : b)
+        a[key] += value;
+
+    return a;
+}
+
 } // namespace cell
 
 #endif /* TYPES_HPP */

@@ -26,7 +26,6 @@ public:
      * simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
      * kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
      * initialKineticEnergy - currentKineticEnergy)
-     *
      */
     double keepKineticEnergyConstant(Disc& disc, const CollisionDetector::RectangleCollision& collision,
                                      double deficiency) const;

@@ -61,8 +61,6 @@ private:
 private:
     DiscTypeMap<int> collisionCounts_;
 
-    std::vector<Disc> newDiscs_;
-
     std::unique_ptr<CellState> state_;
 
     const ReactionEngine* reactionEngine_;

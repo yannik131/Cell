@@ -100,7 +100,7 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
     return true;
 }
 
-std::vector<Disc> ReactionEngine::unimolecularReactions(std::vector<Disc>& discs) const
+std::vector<Disc> ReactionEngine::applyUnimolecularReactions(std::vector<Disc>& discs) const
 {
     std::vector<Disc> newDiscs;
 
