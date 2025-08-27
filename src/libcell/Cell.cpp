@@ -24,9 +24,15 @@ void Cell::update(const sf::Time& dt)
 {
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
+    static std::vector<Disc> newDiscs;
+    newDiscs.clear();
 
     for (auto& disc : state_->discs_)
     {
+        auto product = reactionEngine_->applyUnimolecularReactions(disc);
+        if (product)
+            newDiscs.push_back(std::move(*product));
+
         disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
 
         auto collision = collisionDetector_->detectDiscRectangleCollision(disc, topLeft, bottomRight);
@@ -34,11 +40,7 @@ void Cell::update(const sf::Time& dt)
 
         state_->currentKineticEnergy_ += collisionHandler_->keepKineticEnergyConstant(
             disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
-
-        // TODO apply unimolecular reaction here directly
     }
-
-    // insert new discs here
 
     // iterate over discs again here
     // 1. check for collision, continue if not

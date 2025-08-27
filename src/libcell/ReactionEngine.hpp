@@ -5,6 +5,7 @@
 #include "MathUtils.hpp"
 
 #include <functional>
+#include <optional>
 
 namespace cell
 {
@@ -30,11 +31,10 @@ public:
     bool transformationReaction(Disc* d1) const;
 
     /**
-     * @brief Decomposition reaction A -> B + C. Destroys the old disc and creates 2 new ones if a reaction occurs.
+     * @brief Decomposition reaction A -> B + C.
      * @param d1 The disc to decompose
-     * @param newDiscs vector to store the 2 new discs in
      */
-    bool decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs) const;
+    std::optional<Disc> decompositionReaction(Disc* d1) const;
 
     /**
      * @brief Combination reaction A + B -> C. Destroys one of the 2 educt discs and changes the other if a reaction
@@ -56,7 +56,7 @@ public:
      * will occur for each disc.
      * @param discs Discs to transform/decompose
      */
-    std::vector<Disc> applyUnimolecularReactions(std::vector<Disc>& discs) const;
+    std::optional<Disc> applyUnimolecularReactions(Disc& disc) const;
 
 private:
     /**
@@ -85,14 +85,13 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
         return nullptr;
 
     const auto& possibleReactions = iter->second;
-    double randomNumber = mathutils::getRandomFloat();
 
     // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
     if constexpr (std::is_same_v<KeyType, std::pair<DiscTypeID, DiscTypeID>>)
     {
         for (const auto& reaction : possibleReactions)
         {
-            if (randomNumber > reaction.getProbability())
+            if (mathutils::getRandomFloat() > reaction.getProbability())
                 continue;
 
             return &reaction;
@@ -103,7 +102,7 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
         const auto dt = simulationTimeStepProvider_();
         for (const auto& reaction : possibleReactions)
         {
-            if (randomNumber > 1 - std::pow(1 - reaction.getProbability(), dt))
+            if (mathutils::getRandomFloat() > 1 - std::pow(1 - reaction.getProbability(), dt))
                 continue;
 
             return &reaction;

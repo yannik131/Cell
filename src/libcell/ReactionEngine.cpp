@@ -29,11 +29,11 @@ bool ReactionEngine::transformationReaction(Disc* disc) const
     return true;
 }
 
-bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs) const
+std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
 {
     const Reaction* reaction = selectReaction(*decompositions_, d1->getDiscTypeID());
     if (!reaction)
-        return false;
+        return {};
 
     const auto& vVec = d1->getVelocity();
     const double v = mathutils::abs(vVec);
@@ -42,19 +42,14 @@ bool ReactionEngine::decompositionReaction(Disc* d1, std::vector<Disc>& newDiscs
     // We will let the collision handling in the next time step take care of separation
     // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
     // handling
-    Disc product1(reaction->getProduct1());
-    product1.setPosition(d1->getPosition());
-    product1.setVelocity(v * sf::Vector2d{-n.y, n.x});
+    d1->setType(reaction->getProduct1());
+    d1->setVelocity(v * sf::Vector2d{-n.y, n.x});
 
     Disc product2(reaction->getProduct2());
     product2.setPosition(d1->getPosition());
     product2.setVelocity(v * sf::Vector2d{n.y, -n.x});
 
-    newDiscs.push_back(std::move(product1));
-    newDiscs.push_back(std::move(product2));
-    d1->markDestroyed();
-
-    return true;
+    return product2;
 }
 
 bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
@@ -100,17 +95,13 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
     return true;
 }
 
-std::vector<Disc> ReactionEngine::applyUnimolecularReactions(std::vector<Disc>& discs) const
+std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc) const
 {
-    std::vector<Disc> newDiscs;
+    // TODO random shuffle all reactions
+    if (transformationReaction(&disc))
+        return {};
 
-    for (auto& disc : discs)
-    {
-        if (!decompositionReaction(&disc, newDiscs))
-            transformationReaction(&disc);
-    }
-
-    return newDiscs;
+    return decompositionReaction(&disc);
 }
 
 } // namespace cell
