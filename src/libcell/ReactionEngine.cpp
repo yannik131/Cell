@@ -104,4 +104,14 @@ std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc) const
     return decompositionReaction(&disc);
 }
 
+void ReactionEngine::applyBimolecularReactions(std::set<std::pair<Disc*, Disc*>> collidingDiscs) const
+{
+    for (auto& [d1, d2] : collidingDiscs)
+    {
+        if (combinationReaction(d1, d2))
+            continue;
+        exchangeReaction(d1, d2);
+    }
+}
+
 } // namespace cell

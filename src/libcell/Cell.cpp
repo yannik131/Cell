@@ -29,31 +29,28 @@ void Cell::update(const sf::Time& dt)
 
     for (auto& disc : state_->discs_)
     {
-        auto product = reactionEngine_->applyUnimolecularReactions(disc);
-        if (product)
-            newDiscs.push_back(std::move(*product));
+        if (auto newDisc = reactionEngine_->applyUnimolecularReactions(disc))
+            newDiscs.push_back(std::move(*newDisc));
 
         disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
 
         auto collision = collisionDetector_->detectDiscRectangleCollision(disc, topLeft, bottomRight);
         collisionHandler_->calculateDiscRectangleCollisionResponse(disc, collision);
 
+        // combination reactions are inelastic and consume energy
         state_->currentKineticEnergy_ += collisionHandler_->keepKineticEnergyConstant(
             disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
     }
 
-    // iterate over discs again here
-    // 1. check for collision, continue if not
-    // 2. attempt bimolecular reactions
-    // continue if reaction happened, mark educts as consumed
-    // 3. calculate collision response with remaining colliding discs
-    // 4. after loop, add products to discs and remove educts
-
-    const auto& newDiscs = reactionEngine_->applyUnimolecularReactions(state_->discs_);
-    state_->discs_.insert(state_->discs_.end(), newDiscs.begin(), newDiscs.end());
+    state_->discs_.insert(state_->discs_.begin(), newDiscs.begin(), newDiscs.end());
 
     auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(state_->discs_);
-    collisionCounts_ += collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);
+
+    // marks consumed discs as destroyed
+    reactionEngine_->applyBimolecularReactions(collidingDiscs);
+
+    // ignores marked discs
+    collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);
 
     removeDestroyedDiscs();
 }

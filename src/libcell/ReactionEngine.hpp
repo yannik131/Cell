@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <optional>
+#include <set>
 
 namespace cell
 {
@@ -57,6 +58,8 @@ public:
      * @param discs Discs to transform/decompose
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc) const;
+
+    void applyBimolecularReactions(std::set<std::pair<Disc*, Disc*>> collidingDiscs) const;
 
 private:
     /**

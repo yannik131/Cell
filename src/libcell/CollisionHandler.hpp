@@ -31,6 +31,14 @@ public:
                                      double deficiency) const;
 
 private:
+    double calculateOverlap(const Disc& d1, const Disc& d2) const;
+
+    /**
+     * @brief Given 2 circles, returns the earlier of the 2 times where they just started touching
+     * @note If the overlap was calculated with `calculateOverlap()`, same ordering of parameters is required
+     */
+    double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2) const;
+
     /**
      * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
      */
