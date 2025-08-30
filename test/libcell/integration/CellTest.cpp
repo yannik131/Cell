@@ -76,6 +76,13 @@ TEST_F(ACell, SimulatesUnimolecularReactions)
     ASSERT_THAT(discTypeCounts["A"], Eq(1));
     ASSERT_THAT(discTypeCounts["B"], Eq(2));
     ASSERT_THAT(discTypeCounts["C"], Eq(0));
+
+    auto collisionCounts = simulationContext.getAndResetCollisionCounts();
+    auto getIDFor = [&](const std::string& name) { return simulationContext.getDiscTypeRegistry().getIDFor(name); };
+
+    ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(1));
+    ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
+    ASSERT_THAT(collisionCounts[getIDFor("C")], Eq(0));
 }
 
 TEST_F(ACell, SimulatesBimolecularReactions)
