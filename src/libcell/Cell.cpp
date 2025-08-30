@@ -8,10 +8,11 @@
 namespace cell
 {
 Cell::Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
-           const CollisionHandler* collisionHandler)
+           const CollisionHandler* collisionHandler, SimulationTimeStepProvider simulationTimeStepProvider)
     : reactionEngine_(reactionEngine)
     , collisionDetector_(collisionDetector)
     , collisionHandler_(collisionHandler)
+    , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
 {
 }
 
@@ -20,8 +21,9 @@ void Cell::setState(CellState&& state)
     state_ = std::make_unique<CellState>(std::move(state));
 }
 
-void Cell::update(const sf::Time& dt)
+void Cell::update()
 {
+    const double dt = simulationTimeStepProvider_();
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
     static std::vector<Disc> newDiscs;
@@ -32,7 +34,7 @@ void Cell::update(const sf::Time& dt)
         if (auto newDisc = reactionEngine_->applyUnimolecularReactions(disc))
             newDiscs.push_back(std::move(*newDisc));
 
-        disc.move(disc.getVelocity() * static_cast<double>(dt.asSeconds()));
+        disc.move(disc.getVelocity() * dt);
 
         auto collision = collisionDetector_->detectDiscRectangleCollision(disc, topLeft, bottomRight);
         collisionHandler_->calculateDiscRectangleCollisionResponse(disc, collision);

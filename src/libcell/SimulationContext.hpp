@@ -1,11 +1,13 @@
 #ifndef SIMULATIONCONTEXT_HPP
 #define SIMULATIONCONTEXT_HPP
 
+#include "Cell.hpp"
 #include "CollisionDetector.hpp"
 #include "CollisionHandler.hpp"
 #include "DiscTypeRegistry.hpp"
 #include "ReactionEngine.hpp"
 #include "ReactionTable.hpp"
+#include "SimulationConfig.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -17,18 +19,19 @@ class SimulationContext
 public:
     SimulationContext();
 
+    void buildContextFromConfig(const SimulationConfig& simulationConfig);
+
+    Cell& getCell();
+
+private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(double simulationTimeScale);
-
-    const sf::Time& getSimulationTimeStep() const;
-    double getSimulationTimeScale() const;
-
-    DiscTypeResolver getDiscTypeResolver() const;
-    MaxRadiusProvider getMaxRadiusProvider() const;
-    SimulationTimeStepProvider getSimulationTimeStepProvider() const;
-    const ReactionEngine* getReactionEngine() const;
-    const CollisionDetector* getCollisionDetector() const;
-    const CollisionHandler* getCollisionHandler() const;
+    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
+    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig) const;
+    ReactionEngine buildReactionEngine() const;
+    CollisionDetector buildCollisionDetector() const;
+    CollisionHandler buildCollisionHandler() const;
+    Cell buildCell(const SimulationConfig& simulationConfig) const;
 
 private:
     /**
@@ -46,14 +49,16 @@ private:
      */
     double simulationTimeScale_ = 1.0;
 
-    DiscTypeRegistry discTypeRegistry_;
-    DiscTypeResolver discTypeResolver_;
     MaxRadiusProvider maxRadiusProvider_;
     SimulationTimeStepProvider simulationTimeStepProvider_;
-    ReactionTable reactionTable_;
-    ReactionEngine reactionEngine_;
-    CollisionDetector collisionDetector_;
-    CollisionHandler collisionHandler_;
+
+    std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
+    std::unique_ptr<DiscTypeResolver> discTypeResolver_;
+    std::unique_ptr<ReactionTable> reactionTable_;
+    std::unique_ptr<ReactionEngine> reactionEngine_;
+    std::unique_ptr<CollisionDetector> collisionDetector_;
+    std::unique_ptr<CollisionHandler> collisionHandler_;
+    std::unique_ptr<Cell> cell_;
 };
 
 } // namespace cell

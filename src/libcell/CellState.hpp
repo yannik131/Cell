@@ -20,6 +20,7 @@ public:
     void setCellWidth(int cellWidth);
     void setCellHeight(int cellHeight);
     void setDiscTypeDistribution(const DiscTypeMap<int> discTypeDistribution);
+    void setDiscs(std::vector<Disc>&& discs);
 
     /**
      * @brief Initializes the starting positions and creates the discs in the cell according to the distribution in the

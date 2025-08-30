@@ -18,6 +18,7 @@ class DiscTypeRegistry
 public:
     DiscTypeRegistry() = default;
     DiscTypeRegistry(const DiscTypeRegistry&) = delete;
+    DiscTypeRegistry(DiscTypeRegistry&&) = default;
 
     void setDiscTypes(std::vector<DiscType>&& discTypes);
 
@@ -25,6 +26,8 @@ public:
     const DiscType& getByID(DiscTypeID ID) const;
 
     double getMaxRadius() const;
+
+    DiscTypeResolver getDiscTypeResolver() const;
 
 private:
     void buildNameIDMap(const std::vector<DiscType>& discTypes);

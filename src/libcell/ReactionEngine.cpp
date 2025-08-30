@@ -7,14 +7,13 @@ namespace cell
 {
 
 ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
-                               const SingleLookupMap& decompositions, const SingleLookupMap& transformations,
-                               const PairLookupMap& combinations, const PairLookupMap& exchanges)
+                               const AbstractReactionTable& reactionTable)
     : discTypeResolver_(std::move(discTypeResolver))
     , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
-    , decompositions_(&decompositions)
-    , transformations_(&transformations)
-    , combinations_(&combinations)
-    , exchanges_(&exchanges)
+    , decompositions_(&reactionTable.getDecompositionReactionLookupMap())
+    , transformations_(&reactionTable.getTransformationReactionLookupMap())
+    , combinations_(&reactionTable.getCombinationReactionLookupMap())
+    , exchanges_(&reactionTable.getExchangeReactionLookupMap())
 {
 }
 

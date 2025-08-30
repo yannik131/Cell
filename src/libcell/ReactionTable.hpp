@@ -1,6 +1,7 @@
 #ifndef REACTIONTABLE_HPP
 #define REACTIONTABLE_HPP
 
+#include "AbstractReactionTable.hpp"
 #include "DiscType.hpp"
 #include "DiscTypeRegistry.hpp"
 #include "Reaction.hpp"
@@ -12,34 +13,16 @@ namespace cell
 {
 
 /**
- * @brief Adds a reaction to vector, making sure that the reactions are sorted by cumulative probability. Let X(p) be a
- * reaction with probability p:
- *
- * - {} + A(0.1) -> {A(0.1)}
- *
- * - {A(0.1)} + B(0.2) -> {A(0.1), B(0.3)}
- *
- * - {A(0.1), B(0.3)} + C(0.05) -> {A(0.1), B(0.3), C(0.35)}
- *
- * Let's say 2 discs collide and a reaction might occur because there is a list of possible reactions for the colliding
- * disc types. We generate a random number f between 0 and 1 and iterate the vector in order, checking if f is <= p for
- * the given reaction. I. e. if f = 0.2, reaction B would occur. If f = 0.5, no reaction would occur.
- */
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction, const DiscTypeResolver& discTypeResolver);
-
-/**
  * @brief Maps a `vector<Reaction>` with increasing, cumulative probabilities to `DiscType` or pairs of such:
  *
  * - `DiscType` -> transformation/decomposition reactions
  *
  * - `pair<DiscType, DiscType>` -> combination/exchange reactions
  */
-class ReactionTable
+class ReactionTable : public AbstractReactionTable
 {
 public:
     ReactionTable(DiscTypeResolver discTypeResolver);
-
-    // getters for lookup up maps for reactions with increasing, cumulative probabilities
 
     const DiscTypeMap<std::vector<Reaction>>& getTransformationReactionLookupMap() const;
     const DiscTypeMap<std::vector<Reaction>>& getDecompositionReactionLookupMap() const;

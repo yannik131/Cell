@@ -1,37 +1,37 @@
-#include "Cell.hpp"
-#include "GlobalSettings.hpp"
+#include "SimulationConfigBuilder.hpp"
+#include "SimulationContext.hpp"
 
-#include <SFML/System/Time.hpp>
-#include <glog/logging.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-/*TEST(CellTest, EnergyIsConserved)
+using namespace testing;
+using namespace cell;
+
+const double MaxPositionError = 1e-9;
+
+TEST(ACell, CorrectlySimulatesASingleDisc)
 {
-    cell::GlobalSettings::get().loadFromJson("../resources/defaultSettings.json");
+    Position position{50, 50};
+    Velocity velocity{1, 1};
+    const double timeStep = 1e-3;
 
-    cell::Cell cell;
-    cell::GlobalSettings::get().setCellSize(500, 500);
-    cell.reinitialize();
+    SimulationConfigBuilder builder;
+    builder.addDisc("A", position, velocity);
+    builder.addDiscType("A", Radius{5.0}, Mass{1.0});
+    builder.setCellDimensions(Width{100}, Height{100});
+    builder.setTimeStep(timeStep);
 
-    double initialKineticEnergy = cell.getInitialKineticEnergy();
-    int totalCollisionCount = 0;
-    int collisionTarget = 100;
-    int updateCount = 0;
+    SimulationContext simulationContext;
+    simulationContext.buildContextFromConfig(builder.getSimulationConfig());
 
-    while (totalCollisionCount < collisionTarget)
-    {
-        cell.update(sf::milliseconds(1));
+    auto& cell = simulationContext.getCell();
+    cell.update();
 
-        for (const auto& [discType, collisionCount] : cell.getAndResetCollisionCount())
-            totalCollisionCount += collisionCount;
+    ASSERT_THAT(cell.getDiscs().size(), Eq(1u));
+    ASSERT_THAT(cell.getDiscs().front().getPosition().x,
+                DoubleNear(position.x + velocity.x * timeStep, MaxPositionError));
+    ASSERT_THAT(cell.getDiscs().front().getPosition().y,
+                DoubleNear(position.y + velocity.y * timeStep, MaxPositionError));
 
-        if (++updateCount > collisionTarget * 10)
-            FAIL() << "There is just no way we don't have at least 1 collision per 10 updates";
-    }
-
-    DLOG(INFO) << "Took " << updateCount << " updates to reach " << collisionTarget << " collisions ("
-               << static_cast<float>(collisionTarget) / static_cast<float>(updateCount) << " collisions/s)";
-
-    // Currently, combination reactions don't conserve kinetic energy
-    EXPECT_NEAR(cell.getCurrentKineticEnergy(), initialKineticEnergy, 0.1 * initialKineticEnergy);
-}*/
+    ASSERT_THAT(cell.getAndResetCollisionCount().empty(), Eq(true));
+}

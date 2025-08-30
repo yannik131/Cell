@@ -83,6 +83,11 @@ void CellState::setDiscTypeDistribution(const DiscTypeMap<int> discTypeDistribut
     discTypeDistribution_ = discTypeDistribution;
 }
 
+void CellState::setDiscs(std::vector<Disc>&& discs)
+{
+    discs_ = std::move(discs);
+}
+
 void CellState::randomizeUsingDiscTypeDistribution()
 {
     if (discTypeDistribution_.empty())

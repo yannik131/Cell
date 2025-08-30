@@ -7,40 +7,6 @@
 namespace cell
 {
 
-void addReactionToVector(std::vector<Reaction>& reactions, Reaction reaction, const DiscTypeResolver& discTypeResolver)
-{
-    if (reactions.empty())
-    {
-        reactions.push_back(reaction);
-        return;
-    }
-
-    for (const auto& r : reactions)
-    {
-        if (r == reaction)
-            throw ExceptionWithLocation("Duplicate reaction \"" + toString(reaction, discTypeResolver) +
-                                        "\" not allowed");
-
-        if (r.getType() != reaction.getType())
-            throw ExceptionWithLocation("Inconsistent reaction types: " + toString(r, discTypeResolver) + " vs. " +
-                                        toString(reaction, discTypeResolver));
-    }
-
-    double totalProbability = reactions.front().getProbability();
-
-    for (std::size_t i = 0; i < reactions.size() - 1; ++i)
-        totalProbability += reactions[i + 1].getProbability() - reactions[i].getProbability();
-
-    if (reaction.getProbability() + totalProbability > 1.0)
-        throw ExceptionWithLocation("Can't add reaction to vector: Accumulative probability > 1");
-
-    reaction.setProbability(reaction.getProbability() + totalProbability);
-    reactions.push_back(reaction);
-
-    std::ranges::sort(reactions, [](const auto& reaction1, const auto& reaction2)
-                      { return reaction1.getProbability() < reaction2.getProbability(); });
-}
-
 ReactionTable::ReactionTable(DiscTypeResolver discTypeResolver)
     : discTypeResolver_(std::move(discTypeResolver))
 {
@@ -120,17 +86,16 @@ void ReactionTable::createLookupMaps()
         {
             auto& lookupMap = reaction.getType() & Reaction::Transformation ? transformationReactionLookupMap_
                                                                             : decompositionReactionLookupMap_;
-            addReactionToVector(lookupMap[reaction.getEduct1()], reaction, discTypeResolver_);
+            lookupMap[reaction.getEduct1()].push_back(reaction);
         }
         else
         {
             auto& lookupMap =
                 reaction.getType() & Reaction::Combination ? combinationReactionLookupMap_ : exchangeReactionLookupMap_;
-            addReactionToVector(lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())], reaction,
-                                discTypeResolver_);
+
+            lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())].push_back(reaction);
             if (reaction.getEduct1() != reaction.getEduct2())
-                addReactionToVector(lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())], reaction,
-                                    discTypeResolver_);
+                lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())].push_back(reaction);
         }
     }
 }

@@ -37,6 +37,41 @@ template <typename T> DiscTypeMap<T> operator+=(DiscTypeMap<T>& a, const DiscTyp
     return a;
 }
 
+struct Radius
+{
+    double value;
+};
+
+struct Mass
+{
+    double value;
+};
+
+struct Position
+{
+    double x, y;
+};
+
+struct Velocity
+{
+    double x, y;
+};
+
+struct Width
+{
+    int value;
+};
+
+struct Height
+{
+    int value;
+};
+
+struct Probability
+{
+    double value;
+};
+
 } // namespace cell
 
 #endif /* TYPES_HPP */

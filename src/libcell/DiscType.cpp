@@ -7,13 +7,11 @@
 namespace cell
 {
 
-// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-DiscType::DiscType(const std::string& name, const sf::Color& color, double radius, double mass)
+DiscType::DiscType(const std::string& name, Radius radius, Mass mass)
 {
     setName(name);
-    setColor(color);
-    setRadius(radius);
-    setMass(mass);
+    setRadius(radius.value);
+    setMass(mass.value);
 }
 
 const std::string& DiscType::getName() const
@@ -27,19 +25,6 @@ void DiscType::setName(const std::string& name)
         throw ExceptionWithLocation("Disc type name cannot be empty");
 
     name_ = name;
-}
-
-const sf::Color& DiscType::getColor() const
-{
-    return color_;
-}
-
-void DiscType::setColor(const sf::Color& color)
-{
-    if (color == sf::Color())
-        throw ExceptionWithLocation("Disc type must have a valid color");
-
-    color_ = color;
 }
 
 double DiscType::getRadius() const
@@ -70,7 +55,7 @@ void DiscType::setMass(double mass)
 
 bool DiscType::operator==(const DiscType& other) const
 {
-    return name_ == other.name_ && color_ == other.color_ && radius_ == other.radius_ && mass_ == other.mass_;
+    return name_ == other.name_ && radius_ == other.radius_ && mass_ == other.mass_;
 }
 
 } // namespace cell

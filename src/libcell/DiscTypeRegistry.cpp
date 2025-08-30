@@ -46,6 +46,11 @@ double DiscTypeRegistry::getMaxRadius() const
     return maxRadius_;
 }
 
+DiscTypeResolver DiscTypeRegistry::getDiscTypeResolver() const
+{
+    return [&](DiscTypeID discTypeID) -> const DiscType& { return getByID(discTypeID); };
+}
+
 void DiscTypeRegistry::buildNameIDMap(const std::vector<DiscType>& discTypes)
 {
     std::unordered_map<std::string, DiscTypeID> nameIDMap;

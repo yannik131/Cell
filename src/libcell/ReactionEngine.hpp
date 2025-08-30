@@ -1,6 +1,7 @@
 #ifndef REACTIONENGINE_HPP
 #define REACTIONENGINE_HPP
 
+#include "AbstractReactionTable.hpp"
 #include "DiscTypeRegistry.hpp"
 #include "MathUtils.hpp"
 
@@ -22,8 +23,7 @@ public:
 
 public:
     ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
-                   const SingleLookupMap& decompositions, const SingleLookupMap& transformations,
-                   const PairLookupMap& combinations, const PairLookupMap& exchanges);
+                   const AbstractReactionTable& reactionTable);
 
     /**
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.

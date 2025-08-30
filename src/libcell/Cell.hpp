@@ -22,14 +22,14 @@ class Cell
 {
 public:
     Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
-         const CollisionHandler* collisionHandler);
+         const CollisionHandler* collisionHandler, SimulationTimeStepProvider simulationTimeStepProvider);
 
     void setState(CellState&& state);
 
     /**
      * @brief Advances the simulation by a single time step
      */
-    void update(const sf::Time& dt);
+    void update();
 
     /**
      * @returns the collision counts for all disc types in the simulation and sets them to 0
@@ -66,6 +66,8 @@ private:
     const ReactionEngine* reactionEngine_;
     const CollisionDetector* collisionDetector_;
     const CollisionHandler* collisionHandler_;
+
+    SimulationTimeStepProvider simulationTimeStepProvider_;
 };
 
 } // namespace cell

@@ -26,7 +26,7 @@ public:
     /**
      * @brief Creates a new disc type
      */
-    DiscType(const std::string& name, const sf::Color& color, double radius, double mass);
+    DiscType(const std::string& name, Radius radius, Mass mass);
 
     /**
      * @brief Disc types should be shared across all discs and be unique
@@ -45,18 +45,6 @@ public:
      * @brief Sets the name for this DiscType (can't be empty)
      */
     void setName(const std::string& name);
-
-    /**
-     * @returns The color of this DiscType
-     * @todo Remove the color, it doesn't do anything in the simulation, just for UI
-     */
-    const sf::Color& getColor() const;
-
-    /**
-     * @brief Sets the color of this DiscType. Currently, only the predefined sf::Color static members are allowed
-     * (except sf::Black because of the black simulation background)
-     */
-    void setColor(const sf::Color& color);
 
     /**
      * @returns The radius of this DiscType in px
@@ -88,11 +76,6 @@ private:
      * @brief The name is used to uniquely identify disc types within the disc type distribution
      */
     std::string name_;
-
-    /**
-     * @brief Visual color of the DiscType
-     */
-    sf::Color color_;
 
     /**
      * @brief Radius in px
