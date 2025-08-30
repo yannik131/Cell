@@ -13,7 +13,7 @@ namespace cell
 {
 
 /**
- * @brief Maps a `vector<Reaction>` with increasing, cumulative probabilities to `DiscType` or pairs of such:
+ * @brief Maps a `vector<Reaction>` to `DiscType` or pairs of such:
  *
  * - `DiscType` -> transformation/decomposition reactions
  *

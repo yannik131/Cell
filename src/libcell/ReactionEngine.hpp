@@ -59,7 +59,7 @@ public:
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc) const;
 
-    void applyBimolecularReactions(std::set<std::pair<Disc*, Disc*>> collidingDiscs) const;
+    void applyBimolecularReactions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs) const;
 
 private:
     /**

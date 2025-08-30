@@ -26,8 +26,7 @@ void Cell::update()
     const double dt = simulationTimeStepProvider_();
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
-    static std::vector<Disc> newDiscs;
-    newDiscs.clear();
+    std::vector<Disc> newDiscs;
 
     for (auto& disc : state_->discs_)
     {

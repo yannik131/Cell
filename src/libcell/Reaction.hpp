@@ -55,6 +55,7 @@ public:
 
     // Boilerplate getters and setters with no additional documentation
 
+    // TODO remove these and other unneeded functions (maybe?)
     DiscTypeID getEduct1() const;
     void setEduct1(DiscTypeID educt1);
 

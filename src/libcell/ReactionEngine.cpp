@@ -103,7 +103,7 @@ std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc) const
     return decompositionReaction(&disc);
 }
 
-void ReactionEngine::applyBimolecularReactions(std::set<std::pair<Disc*, Disc*>> collidingDiscs) const
+void ReactionEngine::applyBimolecularReactions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs) const
 {
     for (auto& [d1, d2] : collidingDiscs)
     {
