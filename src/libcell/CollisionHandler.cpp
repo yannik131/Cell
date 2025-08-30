@@ -17,9 +17,6 @@ CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, D
 
     for (const auto& [p1, p2] : discDiscCollisions)
     {
-        if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
-            continue;
-
         // TODO The disc type resolver calls could be avoided here by caching the disc types as members
 
         const auto& overlap = calculateOverlap(*p1, *p2);
@@ -30,6 +27,9 @@ CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, D
 
         ++collisionCounts[p1->getDiscTypeID()];
         ++collisionCounts[p2->getDiscTypeID()];
+
+        if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
+            continue;
 
         double dt = calculateTimeBeforeCollision(*p1, *p2);
 

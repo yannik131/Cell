@@ -56,7 +56,7 @@ bool Simulation::worldIsEmpty() const
 void Simulation::emitFrameData(bool noTimeElapsed)
 {
     FrameDTO frameDTO{.discs_ = cell_.getDiscs(),
-                      .collisionCounts_ = cell_.getAndResetCollisionCount(),
+                      .collisionCounts_ = cell_.getAndResetCollisionCounts(),
                       .elapsedSimulationTimeUs =
                           noTimeElapsed ? 0 : cell::GlobalSettings::getSettings().simulationTimeStep_.asMicroseconds()};
 

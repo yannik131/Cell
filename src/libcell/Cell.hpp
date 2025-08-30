@@ -21,8 +21,8 @@ class CollisionHandler;
 class Cell
 {
 public:
-    Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
-         const CollisionHandler* collisionHandler, SimulationTimeStepProvider simulationTimeStepProvider);
+    Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
+         SimulationTimeStepProvider simulationTimeStepProvider);
 
     void setState(CellState&& state);
 
@@ -30,11 +30,6 @@ public:
      * @brief Advances the simulation by a single time step
      */
     void update();
-
-    /**
-     * @returns the collision counts for all disc types in the simulation and sets them to 0
-     */
-    DiscTypeMap<int> getAndResetCollisionCount();
 
     /**
      * @returns all discs currently part of this cell
@@ -59,13 +54,11 @@ private:
     void removeDestroyedDiscs();
 
 private:
-    DiscTypeMap<int> collisionCounts_;
-
     std::unique_ptr<CellState> state_;
 
-    const ReactionEngine* reactionEngine_;
-    const CollisionDetector* collisionDetector_;
-    const CollisionHandler* collisionHandler_;
+    ReactionEngine& reactionEngine_;
+    CollisionDetector& collisionDetector_;
+    CollisionHandler& collisionHandler_;
 
     SimulationTimeStepProvider simulationTimeStepProvider_;
 };

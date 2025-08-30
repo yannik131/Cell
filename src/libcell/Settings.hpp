@@ -20,7 +20,7 @@ namespace cell
 namespace SettingsLimits
 {
 const sf::Time MinSimulationTimeStep = sf::microseconds(1);
-const sf::Time MaxSimulationTimeStep = sf::microseconds(100000);
+const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
 
 const double MinSimulationTimeScale = 0.0001f;
 const double MaxSimulationTimeScale = 10.0;

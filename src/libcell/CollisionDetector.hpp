@@ -50,17 +50,18 @@ public:
 public:
     CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider);
 
-    void detectCollisions(std::vector<Disc>& discs);
-
     RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                     const sf::Vector2d& bottomRight) const;
 
-    std::set<std::pair<Disc*, Disc*>> getDiscDiscCollisions() const;
+    std::set<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs);
 
-    std::set<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs) const;
+    /**
+     * @returns the collision counts for all disc types in the simulation and sets them to 0
+     */
+    DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
-    std::set<std::pair<Disc*, Disc*>> discDiscCollisions_;
+    DiscTypeMap<int> collisionCounts_;
     DiscTypeResolver discTypeResolver_;
     MaxRadiusProvider maxRadiusProvider_;
 };

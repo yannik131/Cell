@@ -21,7 +21,10 @@ public:
 
     void buildContextFromConfig(const SimulationConfig& simulationConfig);
 
+    const DiscTypeRegistry& getDiscTypeRegistry() const;
     Cell& getCell();
+
+    DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
@@ -51,9 +54,9 @@ private:
 
     MaxRadiusProvider maxRadiusProvider_;
     SimulationTimeStepProvider simulationTimeStepProvider_;
+    DiscTypeResolver discTypeResolver_;
 
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
-    std::unique_ptr<DiscTypeResolver> discTypeResolver_;
     std::unique_ptr<ReactionTable> reactionTable_;
     std::unique_ptr<ReactionEngine> reactionEngine_;
     std::unique_ptr<CollisionDetector> collisionDetector_;

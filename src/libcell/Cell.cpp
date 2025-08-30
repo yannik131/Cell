@@ -7,8 +7,8 @@
 
 namespace cell
 {
-Cell::Cell(const ReactionEngine* reactionEngine, const CollisionDetector* collisionDetector,
-           const CollisionHandler* collisionHandler, SimulationTimeStepProvider simulationTimeStepProvider)
+Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
+           SimulationTimeStepProvider simulationTimeStepProvider)
     : reactionEngine_(reactionEngine)
     , collisionDetector_(collisionDetector)
     , collisionHandler_(collisionHandler)
@@ -31,38 +31,30 @@ void Cell::update()
 
     for (auto& disc : state_->discs_)
     {
-        if (auto newDisc = reactionEngine_->applyUnimolecularReactions(disc))
+        if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc))
             newDiscs.push_back(std::move(*newDisc));
 
         disc.move(disc.getVelocity() * dt);
 
-        auto collision = collisionDetector_->detectDiscRectangleCollision(disc, topLeft, bottomRight);
-        collisionHandler_->calculateDiscRectangleCollisionResponse(disc, collision);
+        auto collision = collisionDetector_.detectDiscRectangleCollision(disc, topLeft, bottomRight);
+        collisionHandler_.calculateDiscRectangleCollisionResponse(disc, collision);
 
         // combination reactions are inelastic and consume energy
-        state_->currentKineticEnergy_ += collisionHandler_->keepKineticEnergyConstant(
+        state_->currentKineticEnergy_ += collisionHandler_.keepKineticEnergyConstant(
             disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
     }
 
     state_->discs_.insert(state_->discs_.begin(), newDiscs.begin(), newDiscs.end());
 
-    auto collidingDiscs = collisionDetector_->detectDiscDiscCollisions(state_->discs_);
+    auto collidingDiscs = collisionDetector_.detectDiscDiscCollisions(state_->discs_);
 
     // marks consumed discs as destroyed
-    reactionEngine_->applyBimolecularReactions(collidingDiscs);
+    reactionEngine_.applyBimolecularReactions(collidingDiscs);
 
     // ignores marked discs
-    collisionHandler_->calculateDiscDiscCollisionResponse(collidingDiscs);
+    collisionHandler_.calculateDiscDiscCollisionResponse(collidingDiscs);
 
     removeDestroyedDiscs();
-}
-
-DiscTypeMap<int> Cell::getAndResetCollisionCount()
-{
-    auto tmp = std::move(collisionCounts_);
-    collisionCounts_.clear();
-
-    return tmp;
 }
 
 const std::vector<Disc>& Cell::getDiscs() const

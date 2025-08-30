@@ -53,7 +53,7 @@ std::string toString(const Reaction& reaction, const DiscTypeResolver& discTypeR
     if (reaction.hasEduct2())
         result += " + " + discTypeResolver(reaction.getEduct2()).getName();
 
-    result += " ). " + discTypeResolver(reaction.getProduct1()).getName();
+    result += " -> " + discTypeResolver(reaction.getProduct1()).getName();
 
     if (reaction.hasProduct2())
         result += " + " + discTypeResolver(reaction.getProduct2()).getName();
@@ -88,9 +88,6 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     , product2_(product2)
     , type_(inferType(educt2, product2))
 {
-    if (!educt1 || !product1)
-        throw ExceptionWithLocation("Reactions require educt1 and product1 to be set");
-
     setProbability(probability);
 }
 

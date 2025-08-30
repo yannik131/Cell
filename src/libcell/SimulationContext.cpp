@@ -5,7 +5,7 @@ namespace cell
 {
 
 SimulationContext::SimulationContext()
-    : simulationTimeStepProvider_([&]() -> double { return simulationTimeStep_.asSeconds() * simulationTimeScale_; })
+    : simulationTimeStepProvider_([&]() -> double { return simulationTimeStep_.asSeconds(); })
     , maxRadiusProvider_([&]() -> double { return discTypeRegistry_->getMaxRadius(); })
 {
 }
@@ -15,6 +15,7 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
     setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.simulationTimeStep)));
     setSimulationTimeScale(simulationConfig.simulationTimeScale);
     discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
+    discTypeResolver_ = discTypeRegistry_->getDiscTypeResolver();
     reactionTable_ = std::make_unique<ReactionTable>(buildReactionTable(simulationConfig));
     reactionEngine_ = std::make_unique<ReactionEngine>(buildReactionEngine());
     collisionDetector_ = std::make_unique<CollisionDetector>(buildCollisionDetector());
@@ -22,9 +23,19 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
     cell_ = std::make_unique<Cell>(buildCell(simulationConfig));
 }
 
+const DiscTypeRegistry& SimulationContext::getDiscTypeRegistry() const
+{
+    return *discTypeRegistry_;
+}
+
 Cell& SimulationContext::getCell()
 {
     return *cell_;
+}
+
+DiscTypeMap<int> SimulationContext::getAndResetCollisionCounts()
+{
+    return collisionDetector_->getAndResetCollisionCounts();
 }
 
 void SimulationContext::setSimulationTimeStep(const sf::Time& simulationTimeStep)
@@ -60,7 +71,7 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
     if (!discTypeRegistry_)
         throw ExceptionWithLocation("Need a valid disc type registry");
 
-    ReactionTable reactionTable(discTypeRegistry_->getDiscTypeResolver());
+    ReactionTable reactionTable(discTypeResolver_);
 
     for (const auto& reaction : simulationConfig.reactions)
     {
@@ -73,26 +84,30 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
                                                  ? std::nullopt
                                                  : std::make_optional(discTypeRegistry_->getIDFor(reaction.product2));
 
-        reactionTable.addReaction(Reaction(educt1, educt2, product1, product2, reaction.probability));
+        Reaction newReaction(educt1, educt2, product1, product2, reaction.probability);
+        newReaction.validate(discTypeResolver_);
+
+        reactionTable.addReaction(newReaction);
     }
 
     return reactionTable;
 }
+
 ReactionEngine SimulationContext::buildReactionEngine() const
 {
-    return ReactionEngine(discTypeRegistry_->getDiscTypeResolver(), simulationTimeStepProvider_, *reactionTable_);
+    return ReactionEngine(discTypeResolver_, simulationTimeStepProvider_, *reactionTable_);
 }
 CollisionDetector SimulationContext::buildCollisionDetector() const
 {
-    return CollisionDetector(discTypeRegistry_->getDiscTypeResolver(), maxRadiusProvider_);
+    return CollisionDetector(discTypeResolver_, maxRadiusProvider_);
 }
 CollisionHandler SimulationContext::buildCollisionHandler() const
 {
-    return CollisionHandler(discTypeRegistry_->getDiscTypeResolver());
+    return CollisionHandler(discTypeResolver_);
 }
 Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) const
 {
-    CellState cellState(discTypeRegistry_->getDiscTypeResolver(), maxRadiusProvider_);
+    CellState cellState(discTypeResolver_, maxRadiusProvider_);
     cellState.setCellHeight(simulationConfig.cellHeight);
     cellState.setCellWidth(simulationConfig.cellWidth);
 
@@ -108,7 +123,7 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) cons
 
     cellState.setDiscs(std::move(discs));
 
-    Cell cell(reactionEngine_.get(), collisionDetector_.get(), collisionHandler_.get(), simulationTimeStepProvider_);
+    Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider_);
     cell.setState(std::move(cellState));
 
     return cell;

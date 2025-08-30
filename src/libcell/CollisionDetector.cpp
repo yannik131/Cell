@@ -10,11 +10,6 @@ CollisionDetector::CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiu
 {
 }
 
-void cell::CollisionDetector::detectCollisions(std::vector<Disc>& discs)
-{
-    discDiscCollisions_ = detectDiscDiscCollisions(discs);
-}
-
 CollisionDetector::RectangleCollision
 CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                 const sf::Vector2d& bottomRight) const
@@ -39,12 +34,7 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
     return rectangleCollision;
 }
 
-std::set<std::pair<Disc*, Disc*>> CollisionDetector::getDiscDiscCollisions() const
-{
-    return discDiscCollisions_;
-}
-
-std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs) const
+std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
     PositionNanoflannAdapter<Disc> adapter(discs);
     KDTree<Disc> kdtree(2, adapter);
@@ -84,6 +74,9 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
             {
                 // Since all collisions are unique, the order doesn't really matter here
                 collidingDiscs.insert({&disc, &otherDisc});
+                collisionCounts_[disc.getDiscTypeID()]++;
+                collisionCounts_[otherDisc.getDiscTypeID()]++;
+
                 discsInCollisions.insert(&disc);
                 discsInCollisions.insert(&otherDisc);
 
@@ -93,6 +86,14 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
     }
 
     return collidingDiscs;
+}
+
+DiscTypeMap<int> CollisionDetector::getAndResetCollisionCounts()
+{
+    auto tmp = std::move(collisionCounts_);
+    collisionCounts_.clear();
+
+    return tmp;
 }
 
 } // namespace cell
