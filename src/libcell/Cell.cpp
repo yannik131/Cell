@@ -4,31 +4,38 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 #include "ReactionEngine.hpp"
+#include "Settings.hpp"
 
 namespace cell
 {
+
 Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-           SimulationTimeStepProvider simulationTimeStepProvider)
+           SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver,
+           Dimensions dimensions, std::vector<Disc>&& discs)
     : reactionEngine_(reactionEngine)
     , collisionDetector_(collisionDetector)
     , collisionHandler_(collisionHandler)
     , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
+    , discTypeResolver_(std::move(discTypeResolver))
+    , width_(dimensions.width)
+    , height_(dimensions.height)
+    , discs_(std::move(discs))
 {
-}
+    throwIfNotInRange(width_, SettingsLimits::MinCellWidth, SettingsLimits::MaxCellWidth, "cell width");
+    throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
 
-void Cell::setState(CellState&& state)
-{
-    state_ = std::make_unique<CellState>(std::move(state));
+    for (const auto& disc : discs_)
+        initialKineticEnergy_ += disc.getKineticEnergy(discTypeResolver_);
 }
 
 void Cell::update()
 {
     const double dt = simulationTimeStepProvider_();
     const sf::Vector2d topLeft{0, 0};
-    const sf::Vector2d bottomRight{static_cast<double>(state_->cellWidth_), static_cast<double>(state_->cellHeight_)};
+    const sf::Vector2d bottomRight{static_cast<double>(width_), static_cast<double>(height_)};
     std::vector<Disc> newDiscs;
 
-    for (auto& disc : state_->discs_)
+    for (auto& disc : discs_)
     {
         if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc))
             newDiscs.push_back(std::move(*newDisc));
@@ -39,13 +46,13 @@ void Cell::update()
         collisionHandler_.calculateDiscRectangleCollisionResponse(disc, collision);
 
         // combination reactions are inelastic and consume energy
-        state_->currentKineticEnergy_ += collisionHandler_.keepKineticEnergyConstant(
-            disc, collision, state_->initialKineticEnergy_ - state_->currentKineticEnergy_);
+        currentKineticEnergy_ +=
+            collisionHandler_.keepKineticEnergyConstant(disc, collision, initialKineticEnergy_ - currentKineticEnergy_);
     }
 
-    state_->discs_.insert(state_->discs_.begin(), newDiscs.begin(), newDiscs.end());
+    discs_.insert(discs_.begin(), newDiscs.begin(), newDiscs.end());
 
-    auto collidingDiscs = collisionDetector_.detectDiscDiscCollisions(state_->discs_);
+    auto collidingDiscs = collisionDetector_.detectDiscDiscCollisions(discs_);
 
     // marks consumed discs as destroyed
     reactionEngine_.applyBimolecularReactions(collidingDiscs);
@@ -58,29 +65,29 @@ void Cell::update()
 
 const std::vector<Disc>& Cell::getDiscs() const
 {
-    return state_->discs_;
+    return discs_;
 }
 
 double Cell::getInitialKineticEnergy() const
 {
-    return state_->initialKineticEnergy_;
+    return initialKineticEnergy_;
 }
 
 double Cell::getCurrentKineticEnergy() const
 {
-    return state_->currentKineticEnergy_;
+    return currentKineticEnergy_;
 }
 
 void Cell::removeDestroyedDiscs()
 {
-    state_->currentKineticEnergy_ = 0.0;
-    for (auto iter = state_->discs_.begin(); iter != state_->discs_.end();)
+    currentKineticEnergy_ = 0.0;
+    for (auto iter = discs_.begin(); iter != discs_.end();)
     {
         if (iter->isMarkedDestroyed())
-            iter = state_->discs_.erase(iter);
+            iter = discs_.erase(iter);
         else
         {
-            state_->currentKineticEnergy_ += iter->getKineticEnergy(state_->discTypeResolver_);
+            currentKineticEnergy_ += iter->getKineticEnergy(discTypeResolver_);
             ++iter;
         }
     }

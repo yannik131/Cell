@@ -1,3 +1,4 @@
+#include "Disc.hpp"
 #include "Settings.hpp"
 #include "SimulationConfigBuilder.hpp"
 #include "SimulationContext.hpp"

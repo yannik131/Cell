@@ -57,14 +57,19 @@ struct Velocity
     double x, y;
 };
 
+struct Dimensions
+{
+    double width, height;
+};
+
 struct Width
 {
-    int value;
+    double value;
 };
 
 struct Height
 {
-    int value;
+    double value;
 };
 
 struct Probability

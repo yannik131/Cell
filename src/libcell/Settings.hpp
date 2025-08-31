@@ -14,9 +14,6 @@
 namespace cell
 {
 
-/* NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Settings, simulationTimeStep_, simulationTimeScale_, numberOfDiscs_, cellWidth_,
-                                   cellHeight_, discTypeDistribution_, discTypes_, reactionTable_) */
-
 namespace SettingsLimits
 {
 const sf::Time MinSimulationTimeStep = sf::microseconds(1);
@@ -28,11 +25,11 @@ const double MaxSimulationTimeScale = 10.0;
 const int MinNumberOfDiscs = 1;
 const int MaxNumberOfDiscs = 10000;
 
-const int MinCellWidth = 100;
-const int MaxCellWidth = 100000;
+const double MinCellWidth = 100;
+const double MaxCellWidth = 100000;
 
-const int MinCellHeight = 100;
-const int MaxCellHeight = 100000;
+const double MinCellHeight = 100;
+const double MaxCellHeight = 100000;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

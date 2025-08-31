@@ -37,6 +37,10 @@ private:
     Cell buildCell(const SimulationConfig& simulationConfig) const;
 
     std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig) const;
+    std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
+    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig) const;
+
+    double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
 
 private:
     /**

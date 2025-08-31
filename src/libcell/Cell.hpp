@@ -1,7 +1,7 @@
 #ifndef CELL_HPP
 #define CELL_HPP
 
-#include "CellState.hpp"
+#include "Types.hpp"
 
 #include <SFML/System/Time.hpp>
 
@@ -22,9 +22,8 @@ class Cell
 {
 public:
     Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-         SimulationTimeStepProvider simulationTimeStepProvider);
-
-    void setState(CellState&& state);
+         SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver,
+         Dimensions dimensions, std::vector<Disc>&& discs);
 
     /**
      * @brief Advances the simulation by a single time step
@@ -54,13 +53,21 @@ private:
     void removeDestroyedDiscs();
 
 private:
-    std::unique_ptr<CellState> state_;
-
     ReactionEngine& reactionEngine_;
     CollisionDetector& collisionDetector_;
     CollisionHandler& collisionHandler_;
 
     SimulationTimeStepProvider simulationTimeStepProvider_;
+    DiscTypeResolver discTypeResolver_;
+
+    std::vector<Disc> discs_;
+
+    double width_;
+    double height_;
+
+    // TODO remove, the simulation doesn't care about this
+    double initialKineticEnergy_ = 0;
+    double currentKineticEnergy_ = 0;
 };
 
 } // namespace cell

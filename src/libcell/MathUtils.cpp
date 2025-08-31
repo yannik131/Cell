@@ -42,8 +42,6 @@ double abs(const sf::Vector2d& vec)
 
 double getRandomFloat()
 {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
     static std::uniform_real_distribution<double> distribution(0, 1);
 
     return distribution(gen);

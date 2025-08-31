@@ -39,8 +39,8 @@ struct SimulationConfig
     std::vector<config::DiscType> discTypes;
     std::vector<config::Disc> discs;
     std::vector<config::Reaction> reactions;
-    int cellWidth;
-    int cellHeight;
+    double cellWidth;
+    double cellHeight;
     double simulationTimeStep;
     double simulationTimeScale = 1;
     int discCount;
