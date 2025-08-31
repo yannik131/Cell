@@ -24,10 +24,10 @@ class ReactionTable : public AbstractReactionTable
 public:
     ReactionTable(DiscTypeResolver discTypeResolver);
 
-    const DiscTypeMap<std::vector<Reaction>>& getTransformationReactionLookupMap() const;
-    const DiscTypeMap<std::vector<Reaction>>& getDecompositionReactionLookupMap() const;
-    const DiscTypePairMap<std::vector<Reaction>>& getCombinationReactionLookupMap() const;
-    const DiscTypePairMap<std::vector<Reaction>>& getExchangeReactionLookupMap() const;
+    const DiscTypeMap<std::vector<Reaction>>& getTransformations() const;
+    const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getCombinations() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getExchanges() const;
 
     /**
      * @brief Adds a new reaction to the table and updates all lookup maps
@@ -62,20 +62,36 @@ private:
      */
     void createLookupMaps();
 
+    void checkIfIsDuplicateReaction(const Reaction& reaction) const;
+
+    bool isUnary(const Reaction& r) const;
+
+    // We make these helpers static and let them have *this as a parameter to avoid const overloads
+
+    template <typename Self> static auto& unaryMap(Self& self, const Reaction& r)
+    {
+        return (r.getType() & Reaction::Transformation) ? self.transformations_ : self.decompositions_;
+    }
+
+    template <typename Self> static auto& binaryMap(Self& self, const Reaction& r)
+    {
+        return (r.getType() & Reaction::Combination) ? self.combinations_ : self.exchanges_;
+    }
+
 private:
     std::vector<Reaction> reactions_;
 
-    DiscTypeMap<std::vector<Reaction>> transformationReactionLookupMap_;
-    DiscTypeMap<std::vector<Reaction>> decompositionReactionLookupMap_;
-    DiscTypePairMap<std::vector<Reaction>> combinationReactionLookupMap_;
-    DiscTypePairMap<std::vector<Reaction>> exchangeReactionLookupMap_;
+    DiscTypeMap<std::vector<Reaction>> transformations_;
+    DiscTypeMap<std::vector<Reaction>> decompositions_;
+    DiscTypePairMap<std::vector<Reaction>> combinations_;
+    DiscTypePairMap<std::vector<Reaction>> exchanges_;
 
     DiscTypeResolver discTypeResolver_;
 
 public:
-    /*     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformationReactionLookupMap_,
-                                       decompositionReactionLookupMap_, combinationReactionLookupMap_,
-                                       exchangeReactionLookupMap_) */
+    /*     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformations_,
+                                       decompositions_, combinations_,
+                                       exchanges_) */
 };
 
 } // namespace cell

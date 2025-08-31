@@ -197,10 +197,10 @@ void ReactionsTableModel::loadSettings()
         }
     };
 
-    collectReactions(settings.reactionTable_.getTransformationReactionLookupMap());
-    collectReactions(settings.reactionTable_.getDecompositionReactionLookupMap());
-    collectReactions(settings.reactionTable_.getCombinationReactionLookupMap());
-    collectReactions(settings.reactionTable_.getExchangeReactionLookupMap());
+    collectReactions(settings.reactionTable_.getTransformations());
+    collectReactions(settings.reactionTable_.getDecompositions());
+    collectReactions(settings.reactionTable_.getCombinations());
+    collectReactions(settings.reactionTable_.getExchanges());
 
     if (reactionSet.empty())
         return;

@@ -85,8 +85,6 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
                                                  : std::make_optional(discTypeRegistry_->getIDFor(reaction.product2));
 
         Reaction newReaction(educt1, educt2, product1, product2, reaction.probability);
-        newReaction.validate(discTypeResolver_);
-
         reactionTable.addReaction(newReaction);
     }
 

@@ -12,29 +12,33 @@ ReactionTable::ReactionTable(DiscTypeResolver discTypeResolver)
 {
 }
 
-const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getTransformationReactionLookupMap() const
+const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getTransformations() const
 {
-    return transformationReactionLookupMap_;
+    return transformations_;
 }
 
-const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getDecompositionReactionLookupMap() const
+const DiscTypeMap<std::vector<Reaction>>& ReactionTable::getDecompositions() const
 {
-    return decompositionReactionLookupMap_;
+    return decompositions_;
 }
 
-const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getCombinationReactionLookupMap() const
+const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getCombinations() const
 {
-    return combinationReactionLookupMap_;
+    return combinations_;
 }
 
-const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getExchangeReactionLookupMap() const
+const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getExchanges() const
 {
-    return exchangeReactionLookupMap_;
+    return exchanges_;
 }
 
 void ReactionTable::addReaction(const Reaction& reaction)
 {
+    reaction.validate(discTypeResolver_);
+    checkIfIsDuplicateReaction(reaction);
+
     reactions_.push_back(reaction);
+
     createLookupMaps();
 }
 
@@ -75,29 +79,56 @@ const std::vector<Reaction>& ReactionTable::getReactions() const
 
 void ReactionTable::createLookupMaps()
 {
-    transformationReactionLookupMap_.clear();
-    decompositionReactionLookupMap_.clear();
-    combinationReactionLookupMap_.clear();
-    exchangeReactionLookupMap_.clear();
+    transformations_.clear();
+    decompositions_.clear();
+    combinations_.clear();
+    exchanges_.clear();
 
     for (const auto& reaction : reactions_)
     {
-        if (reaction.getType() & (Reaction::Transformation | Reaction::Decomposition))
+        if (isUnary(reaction))
         {
-            auto& lookupMap = reaction.getType() & Reaction::Transformation ? transformationReactionLookupMap_
-                                                                            : decompositionReactionLookupMap_;
-            lookupMap[reaction.getEduct1()].push_back(reaction);
+            auto& map = unaryMap(*this, reaction);
+            map[reaction.getEduct1()].push_back(reaction);
         }
         else
         {
-            auto& lookupMap =
-                reaction.getType() & Reaction::Combination ? combinationReactionLookupMap_ : exchangeReactionLookupMap_;
-
-            lookupMap[std::make_pair(reaction.getEduct1(), reaction.getEduct2())].push_back(reaction);
+            auto& map = binaryMap(*this, reaction);
+            map[std::make_pair(reaction.getEduct1(), reaction.getEduct2())].push_back(reaction);
             if (reaction.getEduct1() != reaction.getEduct2())
-                lookupMap[std::make_pair(reaction.getEduct2(), reaction.getEduct1())].push_back(reaction);
+                map[std::make_pair(reaction.getEduct2(), reaction.getEduct1())].push_back(reaction);
         }
     }
+}
+
+void ReactionTable::checkIfIsDuplicateReaction(const Reaction& reaction) const
+{
+    const std::vector<Reaction>* reactions;
+    if (isUnary(reaction))
+    {
+        const auto& map = unaryMap(*this, reaction);
+        if (!map.contains(reaction.getEduct1()))
+            return;
+        reactions = &map.at(reaction.getEduct1());
+    }
+    else
+    {
+        const auto& map = binaryMap(*this, reaction);
+        if (!map.contains(std::make_pair(reaction.getEduct1(), reaction.getEduct2())))
+            return;
+        reactions = &map.at(std::make_pair(reaction.getEduct1(), reaction.getEduct2()));
+    }
+
+    for (const auto& existingReaction : *reactions)
+    {
+        if (existingReaction == reaction)
+            throw ExceptionWithLocation("Duplicate reaction \"" + toString(existingReaction, discTypeResolver_) + "\"");
+    }
+}
+
+bool ReactionTable::isUnary(const Reaction& r) const
+{
+    return r.getType() & (Reaction::Transformation | Reaction::Decomposition);
 }
 
 } // namespace cell
