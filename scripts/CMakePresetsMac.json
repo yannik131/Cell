@@ -1,0 +1,64 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "toolchainFile": "${sourceDir}/contrib/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_SUPPRESS_REGENERATION": "ON",
+                "CMAKE_OSX_ARCHITECTURES": "arm64",
+                "CMAKE_OSX_DEPLOYMENT_TARGET": "15.4",
+                "VCPKG_MANIFEST_INSTALL": false
+            }
+        },
+        {
+            "name": "Debug",
+            "inherits": "base",
+            "hidden": false,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "binaryDir": "${sourceDir}/build_debug"
+        },
+        {
+            "name": "Release",
+            "inherits": "base",
+            "hidden": false,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "binaryDir": "${sourceDir}/build_release"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Build debug",
+            "hidden": false,
+            "configurePreset": "Debug",
+            "configuration": "Debug",
+            "jobs": 16,
+            "targets": [
+                "libcell",
+                "cell-gui",
+                "benchmark",
+                "tests-libcell",
+                "playground"
+            ]
+        },
+        {
+            "name": "Build release",
+            "hidden": false,
+            "configurePreset": "Release",
+            "configuration": "Release",
+            "jobs": 16,
+            "targets": [
+                "cell-gui",
+                "benchmark",
+                "tests-libcell"
+            ]
+        }
+    ]
+}
