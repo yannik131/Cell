@@ -1,34 +1,51 @@
 // configure using cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. and profile with VerySleepy
 
-#include "Cell.hpp"
-#include "GlobalSettings.hpp"
+#include "Disc.hpp"
 #include "Logging.hpp"
+#include "SimulationConfigBuilder.hpp"
+#include "SimulationContext.hpp"
 #include "StringUtils.hpp"
+#include "Types.hpp"
 
 #include <chrono>
 
 #include <glog/logging.h>
 
-void setBenchmarkSettings()
-{
-    cell::GlobalSettings::get().setNumberOfDiscs(800);
-}
+using namespace cell;
 
 int main(int argc, char** argv)
 {
-    cell::initLogging(argc, argv);
-    setBenchmarkSettings();
+    initLogging(argc, argv);
 
-    cell::Cell world;
-    cell::GlobalSettings::get().setCellSize(1000, 1000);
-    world.reinitialize();
+    SimulationConfigBuilder builder;
+
+    builder.setCellDimensions(Width{1000.0}, Height{1000.0});
+    builder.setTimeStep(1e-3);
+    builder.setDiscCount(800);
+
+    builder.addDiscType("A", Radius{10}, Mass{5});
+    builder.addDiscType("B", Radius{10}, Mass{5});
+    builder.addDiscType("C", Radius{12}, Mass{10});
+
+    builder.setDistribution({{"A", 100}});
+
+    builder.addReaction("A", "", "B", "", Probability{0.1});
+    builder.addReaction("A", "B", "C", "", Probability{0.1});
+    builder.addReaction("B", "C", "A", "C", Probability{0.2});
+    builder.addReaction("C", "", "A", "B", Probability{0.1});
+
+    SimulationContext simulationContext;
+    simulationContext.buildContextFromConfig(builder.getSimulationConfig());
+
+    auto& cell = simulationContext.getCell();
+    auto discTypeResolver = simulationContext.getDiscTypeRegistry().getDiscTypeResolver();
 
     const int N = 100000;
     LOG(INFO) << "Starting benchmark";
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < N; ++i)
-        world.update(sf::milliseconds(1));
+        cell.update();
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -37,4 +54,7 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
     LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
+
+    for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
+        LOG(INFO) << discTypeResolver(typeID).getName() << ": " << count << " collisions";
 }

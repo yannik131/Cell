@@ -34,9 +34,15 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
     if (!reaction)
         return {};
 
-    const auto& vVec = d1->getVelocity();
-    const double v = mathutils::abs(vVec);
-    const sf::Vector2d n = vVec / v;
+    double v = mathutils::abs(d1->getVelocity());
+    if (v == 0)
+    {
+        // If the disc is stationary and wants to split apart, we'll give it a random velocity to do so
+        d1->setVelocity(sf::Vector2d{mathutils::getRandomFloat(), mathutils::getRandomFloat()} * 10.0);
+        v = mathutils::abs(d1->getVelocity());
+    }
+
+    const sf::Vector2d n = d1->getVelocity() / v;
 
     // We will let the collision handling in the next time step take care of separation
     // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
