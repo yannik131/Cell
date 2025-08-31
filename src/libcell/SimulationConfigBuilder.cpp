@@ -10,6 +10,16 @@ void SimulationConfigBuilder::addDisc(const std::string& discType, Position posi
         config::Disc{.discTypeName = discType, .x = position.x, .y = position.y, .vx = velocity.x, .vy = velocity.y});
 }
 
+void SimulationConfigBuilder::setDiscCount(int count)
+{
+    simulationConfig_.discCount = count;
+}
+
+void SimulationConfigBuilder::setDistribution(const std::map<std::string, double>& distribution)
+{
+    simulationConfig_.distribution = distribution;
+}
+
 void SimulationConfigBuilder::addDiscType(const std::string& name, Radius radius, Mass mass)
 {
     simulationConfig_.discTypes.push_back(config::DiscType{.name = name, .radius = radius.value, .mass = mass.value});

@@ -16,7 +16,7 @@ class CollisionHandler
 public:
     CollisionHandler(DiscTypeResolver discTypeResolver);
 
-    DiscTypeMap<int> calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
+    void calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
 
     void calculateDiscRectangleCollisionResponse(Disc& disc,
                                                  CollisionDetector::RectangleCollision& rectangleCollision) const;

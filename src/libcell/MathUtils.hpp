@@ -88,6 +88,12 @@ template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
     return std::make_pair(b, a);
 }
 
+/**
+ * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the
+ * settings.
+ */
+std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength);
+
 } // namespace cell::mathutils
 
 #endif /* MATHUTILS_HPP */

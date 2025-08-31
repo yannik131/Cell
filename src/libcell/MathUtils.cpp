@@ -27,6 +27,14 @@ double operator*(const sf::Vector2d& a, const sf::Vector2d& b)
 namespace cell::mathutils
 {
 
+namespace
+{
+
+std::random_device rd;
+std::mt19937 gen(rd());
+
+} // namespace
+
 double abs(const sf::Vector2d& vec)
 {
     return std::hypot(vec.x, vec.y);
@@ -39,6 +47,23 @@ double getRandomFloat()
     static std::uniform_real_distribution<double> distribution(0, 1);
 
     return distribution(gen);
+}
+
+std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
+{
+    std::vector<sf::Vector2d> gridPoints;
+    gridPoints.reserve(static_cast<std::size_t>((width / edgeLength) * (height / edgeLength)));
+    double spacing = edgeLength + 1;
+
+    for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
+    {
+        for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
+            gridPoints.emplace_back(spacing * static_cast<double>(2 * i + 1), spacing * static_cast<double>(2 * j + 1));
+    }
+
+    std::shuffle(gridPoints.begin(), gridPoints.end(), gen);
+
+    return gridPoints;
 }
 
 } // namespace cell::mathutils

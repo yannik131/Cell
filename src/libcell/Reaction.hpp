@@ -27,6 +27,9 @@ namespace cell
  *
  * For transformation and decomposition reactions, p is interpreted in terms of probability per second for each disc in
  * the simulation. For combination and exchange reactions, p is the reaction probability for a single collision
+ * @note For bimolecular reactions, probabilities are per second, but the edge case p = 1 breaks this and will cause an
+ * immediate reaction no matter how small the simulation time step is. Use a value close to, but not equal to 1 to avoid
+ * this (like 0.99)
  */
 class Reaction
 {

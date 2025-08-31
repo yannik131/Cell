@@ -1,6 +1,10 @@
 #include "SimulationContext.hpp"
 #include "Settings.hpp"
 
+#include <glog/logging.h>
+
+#include <random>
+
 namespace cell
 {
 
@@ -109,15 +113,7 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) cons
     cellState.setCellHeight(simulationConfig.cellHeight);
     cellState.setCellWidth(simulationConfig.cellWidth);
 
-    std::vector<Disc> discs;
-    for (const auto& disc : simulationConfig.discs)
-    {
-        Disc newDisc(discTypeRegistry_->getIDFor(disc.discTypeName));
-        newDisc.setPosition({disc.x, disc.y});
-        newDisc.setVelocity({disc.vx, disc.vy});
-
-        discs.push_back(std::move(newDisc));
-    }
+    std::vector<Disc> discs = getDiscsFromConfig(simulationConfig);
 
     cellState.setDiscs(std::move(discs));
 
@@ -125,5 +121,82 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) cons
     cell.setState(std::move(cellState));
 
     return cell;
+}
+std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
+{
+    std::vector<Disc> discs;
+
+    // always prefer discs if provided
+    if (!simulationConfig.discs.empty())
+    {
+        for (const auto& disc : simulationConfig.discs)
+        {
+            Disc newDisc(discTypeRegistry_->getIDFor(disc.discTypeName));
+            newDisc.setPosition({disc.x, disc.y});
+            newDisc.setVelocity({disc.vx, disc.vy});
+
+            discs.push_back(std::move(newDisc));
+        }
+
+        return discs;
+    }
+
+    if (simulationConfig.distribution.empty() || simulationConfig.discCount == 0)
+        throw ExceptionWithLocation("Must provider either discs or disc type distribution with disc count");
+
+    std::uniform_int_distribution<int> distribution(0, 100);
+    std::uniform_real_distribution<double> velocityDistribution(-600.0, 600.0);
+
+    discs.reserve(simulationConfig.discCount);
+    DiscTypeMap<int> counts;
+
+    std::vector<sf::Vector2d> discPositions =
+        mathutils::calculateGrid(simulationConfig.cellWidth, simulationConfig.cellHeight, maxRadiusProvider_());
+
+    if (simulationConfig.discCount > static_cast<int>(discPositions.size()))
+        LOG(WARNING) << "According to the settings, " << std::to_string(simulationConfig.discCount)
+                     << " discs should be created, but the cell can only fit " << std::to_string(discPositions.size())
+                     << ". " << std::to_string(simulationConfig.discCount - discPositions.size())
+                     << " discs will not be created.";
+
+    // We need the accumulated percentages sorted in ascending order for the random number approach to work
+    std::vector<std::pair<DiscTypeID, int>> discTypes;
+    for (const auto& pair : simulationConfig.distribution)
+        discTypes.emplace_back(pair.first, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
+
+    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
+
+    for (int i = 0; i < simulationConfig.discCount && !discPositions.empty(); ++i)
+    {
+        int randomNumber = distribution(gen);
+
+        for (const auto& [discType, percentage] : discTypes)
+        {
+            if (randomNumber < percentage || percentage == 100)
+            {
+                counts[discType]++;
+                Disc newDisc(discType);
+                newDisc.setPosition(discPositions.back());
+                newDisc.setVelocity(sf::Vector2d(velocityDistribution(gen), velocityDistribution(gen)));
+                initialKineticEnergy_ += newDisc.getKineticEnergy(discTypeResolver_);
+
+                discs_.push_back(newDisc);
+                discPositions.pop_back();
+
+                break;
+            }
+        }
+    }
+
+    currentKineticEnergy_ = initialKineticEnergy_;
+
+    DLOG(INFO) << "Radius distribution";
+    for (const auto& [discType, count] : counts)
+    {
+        DLOG(INFO) << discTypeResolver_(discType).getName()
+                   << " (" + std::to_string(discTypeResolver_(discType).getRadius()) + "px): " << count << "/"
+                   << simulationConfig.discCount << " ("
+                   << static_cast<float>(count) / static_cast<float>(simulationConfig.discCount) * 100 << "%)\n";
+    }
 }
 } // namespace cell

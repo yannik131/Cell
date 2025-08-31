@@ -36,6 +36,8 @@ private:
     CollisionHandler buildCollisionHandler() const;
     Cell buildCell(const SimulationConfig& simulationConfig) const;
 
+    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig) const;
+
 private:
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -52,8 +54,8 @@ private:
      */
     double simulationTimeScale_ = 1.0;
 
-    MaxRadiusProvider maxRadiusProvider_;
     SimulationTimeStepProvider simulationTimeStepProvider_;
+    MaxRadiusProvider maxRadiusProvider_;
     DiscTypeResolver discTypeResolver_;
 
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;

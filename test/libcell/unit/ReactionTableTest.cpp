@@ -6,7 +6,7 @@
 
 using namespace cell;
 
-class ReactionTableTest : public ::testing::Test
+class AReactionTable : public ::testing::Test
 {
 protected:
     DiscTypeRegistry registry;
@@ -29,7 +29,7 @@ protected:
     }
 };
 
-TEST_F(ReactionTableTest, ThrowsOnDuplicateTransformation)
+TEST_F(AReactionTable, ThrowsOnDuplicateTransformation)
 {
     ReactionTable table(resolver);
     Reaction r(A, std::nullopt, B, std::nullopt, 1.0);
@@ -39,7 +39,7 @@ TEST_F(ReactionTableTest, ThrowsOnDuplicateTransformation)
     EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
 }
 
-TEST_F(ReactionTableTest, ThrowsOnDuplicateDecomposition)
+TEST_F(AReactionTable, ThrowsOnDuplicateDecomposition)
 {
     ReactionTable table(resolver);
     Reaction r(C, std::nullopt, A, B, 1.0);
@@ -49,7 +49,7 @@ TEST_F(ReactionTableTest, ThrowsOnDuplicateDecomposition)
     EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
 }
 
-TEST_F(ReactionTableTest, ThrowsOnDuplicateCombination)
+TEST_F(AReactionTable, ThrowsOnDuplicateCombination)
 {
     ReactionTable table(resolver);
     Reaction r(A, B, C, std::nullopt, 1.0);
@@ -59,7 +59,7 @@ TEST_F(ReactionTableTest, ThrowsOnDuplicateCombination)
     EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
 }
 
-TEST_F(ReactionTableTest, ThrowsOnDuplicateExchange)
+TEST_F(AReactionTable, ThrowsOnDuplicateExchange)
 {
     ReactionTable table(resolver);
     Reaction r(C, B, C, A, 1.0);

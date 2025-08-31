@@ -13,8 +13,6 @@ namespace cell
 
 namespace
 {
-std::random_device rd;
-std::mt19937 gen(rd());
 
 template <typename T> int calculateValueSum(const std::unordered_map<T, int>& map)
 {
@@ -22,27 +20,6 @@ template <typename T> int calculateValueSum(const std::unordered_map<T, int>& ma
                            [](int currentSum, auto& entryPair) { return currentSum + entryPair.second; });
 }
 
-/**
- * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the
- * settings. Doesn't check if the disc type with the largest radius can actually be created with the currently
- * defined set of reactions, though.
- */
-std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
-{
-    std::vector<sf::Vector2d> gridPoints;
-    gridPoints.reserve(static_cast<std::size_t>((width / edgeLength) * (height / edgeLength)));
-    double spacing = edgeLength + 1;
-
-    for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
-    {
-        for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
-            gridPoints.emplace_back(spacing * static_cast<double>(2 * i + 1), spacing * static_cast<double>(2 * j + 1));
-    }
-
-    std::shuffle(gridPoints.begin(), gridPoints.end(), gen);
-
-    return gridPoints;
-}
 } // namespace
 
 CellState::CellState(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider)

@@ -10,25 +10,19 @@ CollisionHandler::CollisionHandler(DiscTypeResolver discTypeResolver)
 {
 }
 
-DiscTypeMap<int>
-CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
+void CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
 {
-    DiscTypeMap<int> collisionCounts;
-
     for (const auto& [p1, p2] : discDiscCollisions)
     {
+        if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
+            continue;
+
         // TODO The disc type resolver calls could be avoided here by caching the disc types as members
 
         const auto& overlap = calculateOverlap(*p1, *p2);
 
         // No overlap -> no collision
         if (overlap <= 0)
-            continue;
-
-        ++collisionCounts[p1->getDiscTypeID()];
-        ++collisionCounts[p2->getDiscTypeID()];
-
-        if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
             continue;
 
         double dt = calculateTimeBeforeCollision(*p1, *p2);
@@ -41,8 +35,6 @@ CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, D
         p1->move(-dt * p1->getVelocity());
         p2->move(-dt * p2->getVelocity());
     }
-
-    return collisionCounts;
 }
 
 void CollisionHandler::calculateDiscRectangleCollisionResponse(
@@ -119,6 +111,9 @@ double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc
 void CollisionHandler::updateVelocitiesAtCollision(Disc& d1, Disc& d2) const
 {
     static const double e = 1.;
+
+    // Note that discs are moved to right when they were touching before calling this function so the distance will
+    // never be 0 between them
 
     sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
     sf::Vector2d nVec = rVec / mathutils::abs(rVec);

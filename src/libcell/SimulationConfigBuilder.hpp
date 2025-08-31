@@ -11,6 +11,8 @@ class SimulationConfigBuilder
 {
 public:
     void addDisc(const std::string& discType, Position position, Velocity velocity);
+    void setDiscCount(int count);
+    void setDistribution(const std::map<std::string, double>& distribution);
     void addDiscType(const std::string& name, Radius radius, Mass mass);
     void addReaction(const std::string& educt1, const std::string& educt2, const std::string& product1,
                      const std::string& product2, Probability probability);

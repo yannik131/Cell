@@ -3,6 +3,7 @@
 
 #include "Vector2d.hpp"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,8 @@ struct SimulationConfig
     int cellHeight;
     double simulationTimeStep;
     double simulationTimeScale = 1;
+    int discCount;
+    std::map<std::string, double> distribution;
 };
 
 } // namespace cell
