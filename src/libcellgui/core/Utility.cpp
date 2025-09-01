@@ -1,6 +1,5 @@
 #include "Utility.hpp"
 #include "ExceptionWithLocation.hpp"
-#include "GlobalSettings.hpp"
 
 #include <stdexcept>
 
@@ -9,20 +8,15 @@ namespace utility
 
 cell::DiscType getDiscTypeByName(const QString& name)
 {
-    for (const auto& [discType, frequency] : cell::GlobalSettings::getSettings().discTypeDistribution_)
-    {
-        if (discType.getName() == name.toStdString())
-            return discType;
-    }
+    // TODO
 
     throw ExceptionWithLocation(("No disc type found for name \"" + name + "\"").toStdString());
 }
 
 QStringList getDiscTypeNames()
 {
+    // TODO
     QStringList discTypeNames;
-    for (const auto& [discType, _] : cell::GlobalSettings::getSettings().discTypeDistribution_)
-        discTypeNames.push_back(QString::fromStdString(discType.getName()));
 
     return discTypeNames;
 }

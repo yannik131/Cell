@@ -13,6 +13,7 @@ vcpkg_installed
 *fls
 *latexmk
 CMakeUserPresets.json
+CMakePresets.json
 .vscode
 test/output/
 .DS_Store

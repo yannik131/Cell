@@ -2,7 +2,6 @@
 #define PLOTMODEL_HPP
 
 #include "FrameDTO.hpp"
-#include "GlobalGUISettings.hpp"
 #include "PlotCategories.hpp"
 
 #include <QObject>

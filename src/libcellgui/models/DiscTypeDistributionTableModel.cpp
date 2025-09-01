@@ -1,6 +1,5 @@
 #include "DiscTypeDistributionTableModel.hpp"
 #include "ColorMapping.hpp"
-#include "GlobalSettings.hpp"
 
 #include <set>
 
@@ -46,7 +45,7 @@ QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role
     case 2:
         return discType.getMass();
     case 3:
-        return getColorNameMapping()[discType.getColor()];
+        return "Green";
     case 4:
         return frequency;
     case 5:
@@ -74,7 +73,6 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
         discType.setMass(value.toFloat());
         break;
     case 3:
-        discType.setColor(getNameColorMapping()[value.toString()]);
         break;
     case 4:
         frequency = value.toInt();
@@ -97,14 +95,12 @@ Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
 void DiscTypeDistributionTableModel::addRowFromDiscType(const cell::DiscType& discType)
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
-    rows_.push_back({discType, 0});
     endInsertRows();
 }
 
 void DiscTypeDistributionTableModel::addEmptyRow()
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
-    rows_.push_back({cell::DiscType{"Type" + std::to_string(rows_.size()), sf::Color::Blue, 1, 1}, 0});
     endInsertRows();
 }
 
@@ -122,20 +118,11 @@ void DiscTypeDistributionTableModel::loadSettings()
 {
     clearRows();
 
-    const auto& discTypeDistribution = cell::GlobalSettings::getSettings().discTypeDistribution_;
-    if (discTypeDistribution.empty())
-        return;
-
-    beginInsertRows(QModelIndex(), 0, static_cast<int>(discTypeDistribution.size()) - 1);
-    for (const auto& pair : discTypeDistribution)
-        rows_.push_back(pair);
     endInsertRows();
 }
 
 void DiscTypeDistributionTableModel::saveSettings()
 {
-    cell::DiscTypeMap<int> result(rows_.begin(), rows_.end());
-    cell::GlobalSettings::get().setDiscTypeDistribution(std::move(result));
 }
 
 void DiscTypeDistributionTableModel::clearRows()

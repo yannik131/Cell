@@ -1,6 +1,3 @@
-#include "GlobalGUISettings.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "Logging.hpp"
 #include "MainWindow.hpp"
 #include "Settings.hpp"

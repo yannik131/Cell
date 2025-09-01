@@ -80,15 +80,6 @@ target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
 add_executable(benchmark src/benchmark/Main.cpp)
-
-if (MSVC)
-    target_compile_options(benchmark PRIVATE /O2 /Zi /Zo)
-    target_link_options(benchmark PRIVATE /DEBUG)
-else()
-    target_compile_options(benchmark PRIVATE -O3 -g)
-    target_link_options(benchmark PRIVATE -O3 -g)
-endif()
-
 target_link_libraries(benchmark libcell)
 
 # target for trying stuff out

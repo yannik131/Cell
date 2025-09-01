@@ -43,9 +43,6 @@ public:
 
 signals:
     void frameData(const FrameDTO& data);
-
-private:
-    cell::Cell cell_;
 };
 
 #endif /* SIMULATION_HPP */

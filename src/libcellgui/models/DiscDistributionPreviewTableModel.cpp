@@ -1,15 +1,10 @@
 #include "DiscDistributionPreviewTableModel.hpp"
 #include "ColorMapping.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 
 DiscDistributionPreviewTableModel::DiscDistributionPreviewTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
     loadSettings();
-
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
-            &DiscDistributionPreviewTableModel::loadSettings);
 }
 
 int DiscDistributionPreviewTableModel::rowCount(const QModelIndex&) const
@@ -43,7 +38,7 @@ QVariant DiscDistributionPreviewTableModel::data(const QModelIndex& index, int r
     case 0:
         return QString::fromStdString(discType.getName());
     case 1:
-        return getColorNameMapping()[discType.getColor()];
+        return "Green";
     case 2:
         return frequency;
     default:
@@ -61,8 +56,6 @@ void DiscDistributionPreviewTableModel::loadSettings()
     beginResetModel();
 
     distribution_.clear();
-    for (const auto& pair : cell::GlobalSettings::getSettings().discTypeDistribution_)
-        distribution_.push_back(pair);
 
     endResetModel();
 }

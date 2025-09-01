@@ -1,7 +1,5 @@
 #include "MainWindow.hpp"
 #include "ExceptionWithLocation.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "ui_MainWindow.h"
 
 #include <glog/logging.h>
@@ -21,10 +19,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, simulation_.get(),
-            &Simulation::reset);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, simulation_.get(),
-            &Simulation::reset);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
             [this]()
@@ -72,7 +66,6 @@ MainWindow::MainWindow(QWidget* parent)
                 }
                 const auto& widgetSize = ui->simulationWidget->size();
 
-                cell::GlobalSettings::get().setCellSize(widgetSize.width(), widgetSize.height());
                 ui->simulationWidget->resetView();
             });
 
@@ -100,7 +93,7 @@ void MainWindow::saveSettingsAsJson()
 
     try
     {
-        cell::GlobalSettings::get().saveAsJson(fileName.toStdString());
+        // TODO
     }
     catch (const ExceptionWithLocation& e)
     {
@@ -117,7 +110,7 @@ void MainWindow::loadSettingsFromJson()
 
     try
     {
-        cell::GlobalSettings::get().loadFromJson(fileName.toStdString());
+        // TODO
     }
     catch (const ExceptionWithLocation& e)
     {
@@ -127,11 +120,7 @@ void MainWindow::loadSettingsFromJson()
 
 void MainWindow::loadDefaultSettings()
 {
-    fs::path cwd = fs::current_path();
-    fs::path defaultSettingsFile = cwd / "defaultSettings.json";
-
-    if (fs::exists(defaultSettingsFile))
-        cell::GlobalSettings::get().loadFromJson(defaultSettingsFile);
+    // TODO
 }
 
 MainWindow::~MainWindow()

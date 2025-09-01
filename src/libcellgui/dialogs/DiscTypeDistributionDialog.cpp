@@ -2,8 +2,8 @@
 #include "ButtonDelegate.hpp"
 #include "ColorMapping.hpp"
 #include "ComboBoxDelegate.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "SafeCast.hpp"
+#include "Settings.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
@@ -35,8 +35,6 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent)
             &DiscTypeDistributionTableModel::addEmptyRow);
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged,
-            discTypeDistributionTableModel_, &DiscTypeDistributionTableModel::loadSettings);
 
     auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);

@@ -1,7 +1,4 @@
 #include "PlotModel.hpp"
-#include "GlobalGUISettings.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "MathUtils.hpp"
 
 namespace
@@ -9,19 +6,6 @@ namespace
 
 const cell::DiscTypeMap<double>& getActiveMap(const DataPoint& dataPoint)
 {
-    switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
-    {
-    case PlotCategory::AbsoluteImpulse:
-        return dataPoint.totalMomentumMap_;
-    case PlotCategory::CollisionCounts:
-        return dataPoint.collisionCounts_;
-    case PlotCategory::KineticEnergy:
-        return dataPoint.totalKineticEnergyMap_;
-    case PlotCategory::TypeCounts:
-        return dataPoint.discTypeCountMap_;
-    default:
-        throw ExceptionWithLocation("Unknown plot category selected");
-    }
 }
 
 void averageDataPoint(DataPoint& dataPoint, int length)
@@ -47,11 +31,6 @@ PlotModel::PlotModel(QObject* parent)
     // With a simulation time step of 1ms, we get 1000 data points each second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*1000
     dataPoints_.reserve(300000);
-
-    connect(&GlobalGUISettings::get(), &GlobalGUISettings::replotRequired, this, &PlotModel::emitPlot);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::numberOfDiscsChanged, this, &PlotModel::clear);
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
-            &PlotModel::clear);
 }
 
 void PlotModel::clear()
@@ -121,9 +100,9 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 
     for (const auto& disc : frameDTO.discs_)
     {
-        ++dataPoint.discTypeCountMap_[disc.getType()];
-        dataPoint.totalKineticEnergyMap_[disc.getType()] += disc.getKineticEnergy();
-        totalMomentums[disc.getType()] += disc.getMomentum();
+        ++dataPoint.discTypeCountMap_[disc.getDiscTypeID()];
+        dataPoint.totalKineticEnergyMap_[disc.getDiscTypeID()] += disc.getKineticEnergy();
+        // totalMomentums[disc.getDiscTypeID()] += disc.getMomentum();
     }
 
     for (const auto& [discType, totalMomentum] : totalMomentums)

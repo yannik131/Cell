@@ -1,8 +1,6 @@
 #include "ReactionsDialog.hpp"
 #include "ButtonDelegate.hpp"
 #include "ComboBoxDelegate.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
 #include "SafeCast.hpp"
 #include "SpinBoxDelegate.hpp"
 #include "Utility.hpp"

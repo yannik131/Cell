@@ -1,6 +1,5 @@
 #include "ReactionsTableModel.hpp"
-#include "GlobalSettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "Utility.hpp"
 
 #include <optional>
@@ -10,9 +9,6 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
     loadSettings();
-
-    connect(&GlobalSettingsFunctor::get(), &GlobalSettingsFunctor::discTypeDistributionChanged, this,
-            &ReactionsTableModel::loadSettings);
 }
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const
@@ -45,17 +41,13 @@ QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
     switch (index.column())
     {
     case 0:
-        return QString::fromStdString(reaction.getEduct1().getName());
+        return "educt1";
     case 2:
-        if (reaction.hasEduct2())
-            return QString::fromStdString(reaction.getEduct2().getName());
-        return {};
+        return "educt2";
     case 4:
-        return QString::fromStdString(reaction.getProduct1().getName());
+        return "product1";
     case 6:
-        if (reaction.hasProduct2())
-            return QString::fromStdString(reaction.getProduct2().getName());
-        return {};
+        return "product2";
     case 7:
         return reaction.getProbability();
     case 8:
@@ -74,16 +66,15 @@ bool ReactionsTableModel::setData(const QModelIndex& index, const QVariant& valu
 
     if (index.column() == 0 || index.column() == 2 || index.column() == 4 || index.column() == 6)
     {
-        cell::DiscType discType = utility::getDiscTypeByName(value.toString());
-
+        cell::DiscTypeID ID = 0;
         if (index.column() == 0)
-            reaction.setEduct1(discType);
+            reaction.setEduct1(ID);
         else if (index.column() == 2)
-            reaction.setEduct2(discType);
+            reaction.setEduct2(ID);
         else if (index.column() == 4)
-            reaction.setProduct1(discType);
+            reaction.setProduct1(ID);
         else if (index.column() == 6)
-            reaction.setProduct2(discType);
+            reaction.setProduct2(ID);
     }
     else if (index.column() == 7)
         reaction.setProbability(value.toFloat());
@@ -143,25 +134,15 @@ void ReactionsTableModel::addRowFromReaction(const cell::Reaction& reaction)
 
 void ReactionsTableModel::addEmptyRow(const cell::Reaction::Type& type)
 {
-    const auto& discTypeDistribution = cell::GlobalSettings::getSettings().discTypeDistribution_;
-    if (discTypeDistribution.empty())
-        throw ExceptionWithLocation("Can't add reaction: There are no available disc types defined");
-
-    const auto& defaultDiscType = discTypeDistribution.begin()->first;
-
     switch (type)
     {
     case cell::Reaction::Type::Transformation:
-        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, std::nullopt, 0.0});
         break;
     case cell::Reaction::Type::Combination:
-        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, std::nullopt, 0.0});
         break;
     case cell::Reaction::Type::Decomposition:
-        addRowFromReaction(cell::Reaction{defaultDiscType, std::nullopt, defaultDiscType, defaultDiscType, 0.0});
         break;
     case cell::Reaction::Type::Exchange:
-        addRowFromReaction(cell::Reaction{defaultDiscType, defaultDiscType, defaultDiscType, defaultDiscType, 0.0});
         break;
     case cell::Reaction::Type::None:
         throw ExceptionWithLocation("Invalid reaction type");
@@ -182,8 +163,6 @@ void ReactionsTableModel::loadSettings()
 {
     clearRows();
 
-    const auto& settings = cell::GlobalSettings::getSettings();
-
     // Reactions for {A, B} are duplicated in the maps with {B, A} for easier lookup
     // Gotta ignore those duplicates here
     std::unordered_set<cell::Reaction, cell::ReactionHash> reactionSet;
@@ -196,11 +175,6 @@ void ReactionsTableModel::loadSettings()
                 reactionSet.insert(reaction);
         }
     };
-
-    collectReactions(settings.reactionTable_.getTransformations());
-    collectReactions(settings.reactionTable_.getDecompositions());
-    collectReactions(settings.reactionTable_.getCombinations());
-    collectReactions(settings.reactionTable_.getExchanges());
 
     if (reactionSet.empty())
         return;
@@ -215,25 +189,6 @@ void ReactionsTableModel::loadSettings()
 
 void ReactionsTableModel::saveSettings()
 {
-    const auto reactionsBackup = cell::GlobalSettings::get().getReactions();
-
-    static const auto& setReactions = [](const std::vector<cell::Reaction>& reactions)
-    {
-        cell::GlobalSettings::get().clearReactions();
-        for (const auto& reaction : reactions)
-            cell::GlobalSettings::get().addReaction(reaction);
-    };
-
-    try
-    {
-        setReactions(rows_);
-    }
-    catch (const std::exception& e)
-    {
-        setReactions(reactionsBackup);
-        throw e;
-    }
-
     emit reactionsChanged();
 }
 

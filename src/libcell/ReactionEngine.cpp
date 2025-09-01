@@ -45,8 +45,6 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
     const sf::Vector2d n = d1->getVelocity() / v;
 
     // We will let the collision handling in the next time step take care of separation
-    // But we can't have identical positions, so this ASSUMES that discs will be moved BEFORE the next collision
-    // handling
     d1->setType(reaction->getProduct1());
     d1->setVelocity(v * sf::Vector2d{-n.y, n.x});
 

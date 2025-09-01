@@ -1,6 +1,5 @@
 #include "PlotWidget.hpp"
-#include "GlobalGUISettings.hpp"
-#include "GlobalSettingsFunctor.hpp"
+#include "ExceptionWithLocation.hpp"
 #include "Utility.hpp"
 
 #include <algorithm>
@@ -11,9 +10,6 @@ PlotWidget::PlotWidget(QWidget* parent)
     setInteraction(QCP::iRangeDrag, true); // Allow dragging the plot by left click-hold
     setInteraction(QCP::iRangeZoom, true); // Allow zoom with mouse wheel
 
-    plotTitle_ =
-        new QCPTextElement(this, PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_],
-                           QFont("sans", 12, QFont::Bold));
     plotLayout()->insertRow(0);
     plotLayout()->addElement(0, 0, plotTitle_);
 
@@ -49,10 +45,7 @@ void PlotWidget::reset()
     graphs_.clear();
     sumGraph_ = nullptr;
 
-    if (GlobalGUISettings::getGUISettings().plotSum_)
-        createSumGraph();
-    else
-        createRegularGraphs();
+    // TODO
 
     setAxisLabels();
 }
@@ -73,10 +66,7 @@ void PlotWidget::replacePlot(const QVector<cell::DiscTypeMap<double>>& dataPoint
 
 void PlotWidget::plotDataPoint(const cell::DiscTypeMap<double>& dataPoint, bool doReplot)
 {
-    if (GlobalGUISettings::getGUISettings().plotSum_)
-        addDataPointSum(dataPoint);
-    else
-        addDataPoint(dataPoint);
+    // TODO
 
     if (doReplot)
     {
@@ -93,21 +83,6 @@ void PlotWidget::addDataPoint(const cell::DiscTypeMap<double>& dataPoint)
         return;
 
     const auto& size = graphs_.begin()->second->dataCount();
-    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
-
-    for (const auto& [discType, enabled] : GlobalGUISettings::getGUISettings().discTypesPlotMap_)
-    {
-        if (!enabled)
-            continue;
-
-        auto value = dataPoint.contains(discType) ? dataPoint.at(discType) : 0;
-
-        xMax_ = timeStep * static_cast<double>(size);
-        graphs_[discType]->addData(xMax_, value);
-
-        yMin_ = std::min(yMin_, value);
-        yMax_ = std::max(yMax_, value);
-    }
 }
 
 void PlotWidget::createSumGraph()
@@ -115,26 +90,11 @@ void PlotWidget::createSumGraph()
     sumGraph_ = addGraph();
     sumGraph_->setPen(QColor());
     legend->setVisible(false);
-    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_] + " (sum)");
 }
 
 void PlotWidget::createRegularGraphs()
 {
     legend->setVisible(true);
-    plotTitle_->setText(PlotCategoryNameMapping[GlobalGUISettings::getGUISettings().currentPlotCategory_]);
-
-    const auto& discTypesPlotMap = GlobalGUISettings::getGUISettings().discTypesPlotMap_;
-    for (const auto& [discType, plotEnabled] : discTypesPlotMap)
-    {
-        if (!plotEnabled)
-            continue;
-
-        QCPGraph* graph = addGraph();
-        graph->setPen(
-            utility::sfColorToQColor(discType.getColor() == sf::Color::White ? sf::Color::Black : discType.getColor()));
-        graph->setName(QString::fromStdString(discType.getName()));
-        graphs_[discType] = graph;
-    }
 
     for (int i = 0; i < legend->itemCount(); ++i)
         legend->item(i)->setLayer("legend layer");
@@ -142,19 +102,6 @@ void PlotWidget::createRegularGraphs()
 
 void PlotWidget::setAxisLabels()
 {
-    switch (GlobalGUISettings::getGUISettings().currentPlotCategory_)
-    {
-    case CollisionCounts:
-    case TypeCounts:
-        yAxis->setLabel("N");
-        break;
-    case KineticEnergy:
-        yAxis->setLabel("Kinetic energy");
-        break;
-    case AbsoluteImpulse:
-        yAxis->setLabel("|Total impulse|");
-        break;
-    }
 }
 
 void PlotWidget::addDataPointSum(const cell::DiscTypeMap<double>& dataPoint)
@@ -164,21 +111,6 @@ void PlotWidget::addDataPointSum(const cell::DiscTypeMap<double>& dataPoint)
             "Can't add data point to sumGraph_: Is nullptr (this is a bug and shouldn't happen");
 
     const auto& size = sumGraph_->dataCount();
-    const auto& timeStep = GlobalGUISettings::getGUISettings().plotTimeInterval_.asSeconds();
-    double sum = 0.0;
-
-    for (const auto& [discType, value] : dataPoint)
-    {
-        if (!GlobalGUISettings::getGUISettings().discTypesPlotMap_.at(discType))
-            continue;
-
-        xMax_ = timeStep * static_cast<double>(size);
-        sum += value;
-    }
-
-    sumGraph_->addData(xMax_, sum);
-    yMin_ = std::min(yMin_, sum);
-    yMax_ = std::max(yMax_, sum);
 }
 
 void PlotWidget::setModel(PlotModel* plotModel)
