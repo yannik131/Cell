@@ -31,10 +31,10 @@ find_package(nlohmann_json CONFIG REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
-file(GLOB LIBCELL_SRC src/libcell/*.cpp)
+file(GLOB LIBCELL_SRC src/lib/cell/*.cpp)
 add_library(libcell ${LIBCELL_SRC})
 
-target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/src/libcell/)
+target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
 
 target_link_libraries(libcell PUBLIC
     sfml-system
@@ -56,8 +56,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 file(GLOB_RECURSE QT_GUI_SRC RELATIVE ${CMAKE_SOURCE_DIR}
-    src/libcellgui/*.cpp 
-    src/libcellgui/*.hpp
+    src/lib/gui/*.cpp 
+    src/lib/gui/*.hpp
 )
 
 #the header files have to be added here as well for Q_OBJECT to work
@@ -66,24 +66,22 @@ add_library(libcellgui
 )
 
 target_include_directories(libcellgui PUBLIC 
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/core/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/delegates/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/dialogs/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/models/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/widgets/
+    ${CMAKE_SOURCE_DIR}/src/lib/gui/
+    ${CMAKE_SOURCE_DIR}/src/lib/
 )
 
 target_link_libraries(libcellgui libcell Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
 
-add_executable(cell-gui WIN32 src/cell-gui/Main.cpp)
+add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
-add_executable(benchmark src/benchmark/Main.cpp)
+add_executable(benchmark src/apps/benchmark/Main.cpp)
 target_link_libraries(benchmark libcell)
+target_include_directories(benchmark PUBLIC ${CMAKE_SOURCE_DIR}/src/lib/)
 
 # target for trying stuff out
-add_executable(playground src/playground/Main.cpp)
+add_executable(playground src/apps/playground/Main.cpp)
 target_link_libraries(playground PRIVATE
     sfml-system
     sfml-window
@@ -113,7 +111,10 @@ target_link_libraries(tests-libcell
     GTest::gtest
 )
 
-target_include_directories(tests-libcell PUBLIC ${PROJECT_SOURCE_DIR}/test/libcell/common)
+target_include_directories(tests-libcell PUBLIC 
+    ${PROJECT_SOURCE_DIR}/test/libcell/common
+    ${PROJECT_SOURCE_DIR}/lib/
+)
 
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)

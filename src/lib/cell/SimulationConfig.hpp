@@ -12,6 +12,7 @@ namespace cell
 
 namespace config
 {
+
 struct DiscType
 {
     std::string name;
@@ -32,19 +33,29 @@ struct Reaction
     double probability;
 };
 
+struct StateSetup
+{
+    double cellWidth;
+    double cellHeight;
+    double simulationTimeStep;
+    double simulationTimeScale = 1;
+    bool useDistribution;
+
+    // In case of distribution:
+    int discCount;
+    std::map<std::string, double> distribution;
+
+    // In case not:
+    std::vector<config::Disc> discs;
+}
+
 } // namespace config
 
 struct SimulationConfig
 {
     std::vector<config::DiscType> discTypes;
-    std::vector<config::Disc> discs;
     std::vector<config::Reaction> reactions;
-    double cellWidth;
-    double cellHeight;
-    double simulationTimeStep;
-    double simulationTimeScale = 1;
-    int discCount;
-    std::map<std::string, double> distribution;
+    config::StateSetup stateSetup;
 };
 
 } // namespace cell
