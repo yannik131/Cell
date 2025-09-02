@@ -12,8 +12,7 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     ui->discDistributionPreviewTableView->setModel(discDistributionPreviewTableModel_);
     ui->discDistributionPreviewTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    // The order matters here: If we connect the callbacks to the widgets first, setting them to
-    // the value from the settings would lead to infinite recursion
+    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [&]() { emit editDiscTypesClicked(); });
 
     setRanges();
     displayGlobalSettings();

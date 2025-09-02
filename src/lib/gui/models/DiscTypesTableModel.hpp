@@ -1,18 +1,22 @@
-#ifndef DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
-#define DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
+#ifndef DISCTYPESTABLEMODEL_HPP
+#define DISCTYPESTABLEMODEL_HPP
+
+#include "cell/SimulationConfig.hpp"
 
 #include <QAbstractTableModel>
 #include <QVector>
 
+#include <SFML/Graphics/Color.hpp>
+
 /**
  * @brief Model for managing the disc type distribution of the simulation. Used to display the distribution in the
- * DiscTypeDistributionDialog
+ * DiscTypesDialog
  */
-class DiscTypeDistributionTableModel : public QAbstractTableModel
+class DiscTypesTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit DiscTypeDistributionTableModel(QObject* parent = nullptr);
+    explicit DiscTypesTableModel(QObject* parent = nullptr);
 
     /**
      * @returns Number of disc types in the currently edited distribution
@@ -57,19 +61,24 @@ public:
     void removeRow(int row);
 
     /**
-     * @brief Deletes all rows and loads the current disc type distribution
-     */
-    void loadSettings();
-
-    /**
-     * @brief Saves the currently edited disc type distributions to the settings, throwing if something is incorrect
-     */
-    void saveSettings();
-
-    /**
      * @brief Deletes all rows in the model
      */
     void clearRows();
+
+    void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                          const std::map<std::string, sf::Color>& discTypeColorMap);
+
+    void emitContents();
+    void requestCurrentState();
+
+signals:
+    void discTypes(const std::vector<cell::config::DiscType>& discTypes,
+                   const std::map<std::string, sf::Color>& discTypeColorMap);
+    void discTypesRequested();
+
+private:
+    std::vector<cell::config::DiscType> rows_;
+    std::map<std::string, sf::Color> discTypeColorMap_;
 };
 
-#endif /* DISCTYPEDISTRIBUTIONTABLEMODEL_HPP */
+#endif /* DISCTYPESTABLEMODEL_HPP */

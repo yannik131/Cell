@@ -1,27 +1,29 @@
-#ifndef DISCTYPEDISTRIBUTIONDIALOG_HPP
-#define DISCTYPEDISTRIBUTIONDIALOG_HPP
+#ifndef DISCTYPESDIALOG_HPP
+#define DISCTYPESDIALOG_HPP
 
-#include "models/DiscTypeDistributionTableModel.hpp"
+#include "models/DiscTypesTableModel.hpp"
 
 #include <QDialog>
 #include <QStandardItemModel>
 
 namespace Ui
 {
-class DiscTypeDistributionDialog;
+class DiscTypesDialog;
 };
 
 /**
  * @brief Dialog where the user can create/delete disc types and specify how many of them should be created initially
  */
-class DiscTypeDistributionDialog : public QDialog
+class DiscTypesDialog : public QDialog
 {
     Q_OBJECT
 public:
     /**
      * @brief Creates the delegates and sets them in the table view. Also connects all necessary callbacks
      */
-    explicit DiscTypeDistributionDialog(QWidget* parent = nullptr);
+    explicit DiscTypesDialog(QWidget* parent = nullptr);
+
+    DiscTypesTableModel* getModel();
 
 private:
     /**
@@ -36,8 +38,8 @@ private:
     void cancel();
 
 private:
-    Ui::DiscTypeDistributionDialog* ui;
-    DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
+    Ui::DiscTypesDialog* ui;
+    DiscTypesTableModel* discTypesTableModel_;
 };
 
-#endif /* DISCTYPEDISTRIBUTIONDIALOG_HPP */
+#endif /* DISCTYPESDIALOG_HPP */

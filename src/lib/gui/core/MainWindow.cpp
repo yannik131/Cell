@@ -10,12 +10,19 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulation_(new Simulation())
-    , discDistributionDialog_(new DiscTypeDistributionDialog(this))
+    , discTypesDialog_(new DiscTypesDialog(this))
     , reactionsDialog_(new ReactionsDialog(this))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
     , plotModel_(new PlotModel(this))
 {
     ui->setupUi(this);
+
+    connect(discTypesDialog_->getModel(), &DiscTypesTableModel::discTypes, simulation_.get(),
+            &Simulation::receiveDiscTypes);
+    connect(discTypesDialog_->getModel(), &DiscTypesTableModel::discTypesRequested, simulation_.get(),
+            &Simulation::emitDiscTypes);
+    connect(simulation_.get(), &Simulation::discTypes, discTypesDialog_->getModel(),
+            &DiscTypesTableModel::receiveDiscTypes);
 
     connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);
@@ -38,7 +45,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationResetTriggered, this,
             &MainWindow::resetSimulation);
 
-    connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscTypesClicked, discDistributionDialog_,
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscTypesClicked, discTypesDialog_,
             &QDialog::show);
     connect(ui->simulationControlWidget, &SimulationControlWidget::editReactionsClicked, reactionsDialog_,
             &QDialog::show);

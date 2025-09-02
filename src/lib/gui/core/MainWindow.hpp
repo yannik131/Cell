@@ -2,7 +2,7 @@
 #define MAINWINDOW_HPP
 
 #include "core/Simulation.hpp"
-#include "dialogs/DiscTypeDistributionDialog.hpp"
+#include "dialogs/DiscTypesDialog.hpp"
 #include "dialogs/PlotDataSelectionDialog.hpp"
 #include "dialogs/ReactionsDialog.hpp"
 #include "models/PlotModel.hpp"
@@ -79,7 +79,7 @@ private:
     QThread* simulationThread_ = nullptr;
     std::unique_ptr<Simulation> simulation_;
 
-    DiscTypeDistributionDialog* discDistributionDialog_;
+    DiscTypesDialog* discTypesDialog_;
     ReactionsDialog* reactionsDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 

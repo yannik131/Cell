@@ -34,13 +34,18 @@ public:
      */
     void emitFrameData(bool noTimeElapsed = false);
 
-public slots:
-    void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
+public:
+    void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                          const std::map<std::string, sf::Color>& discTypeColorMap);
     void receiveReactions(const std::vector<cell::config::Reaction>& reactions);
     void receiveSetup(const cell::config::Setup& setup);
 
+    void emitDiscTypes();
+
 signals:
     void frameData(const FrameDTO& data);
+    void discTypes(const std::vector<cell::config::DiscType>& discTypes,
+                   const std::map<std::string, sf::Color>& discTypeColorMap);
 
 private:
     void tryBuildContext(bool throwIfIncomplete = false);
@@ -48,6 +53,7 @@ private:
 private:
     cell::SimulationConfig simulationConfig_;
     cell::SimulationContext simulationContext;
+    std::map<std::string, sf::Color> discTypeColorMap_;
     bool setupReceived_ = false;
 };
 

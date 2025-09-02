@@ -4,6 +4,7 @@
 #include <QThread>
 #include <SFML/System/Clock.hpp>
 
+#include "Simulation.hpp"
 #include <glog/logging.h>
 
 Simulation::Simulation(QObject* parent)
@@ -47,9 +48,11 @@ void Simulation::emitFrameData(bool noTimeElapsed)
     // TODO
 }
 
-void Simulation::receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes)
+void Simulation::receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                                  const std::map<std::string, sf::Color>& discTypeColorMap)
 {
     simulationConfig_.discTypes = discTypes;
+    discTypeColorMap_ = discTypeColorMap;
     tryBuildContext();
 }
 
@@ -65,6 +68,11 @@ void Simulation::receiveSetup(const cell::config::Setup& setup)
     setupReceived_ = true;
 
     tryBuildContext();
+}
+
+void Simulation::emitDiscTypes()
+{
+    emit discTypes(simulationConfig_.discTypes, discTypeColorMap_);
 }
 
 void Simulation::tryBuildContext(bool throwIfIncomplete)
