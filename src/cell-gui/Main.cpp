@@ -11,10 +11,15 @@ int main(int argc, char* argv[])
     cell::initLogging(argc, argv);
     QApplication app(argc, argv);
 
-    auto& functor = GlobalSettingsFunctor::get();
-    cell::GlobalSettings::setCallback([&functor](const cell::SettingID& settingID) { functor(settingID); });
+#ifdef DEBUG
 
-#ifndef DEBUG
+    MainWindow mainWindow;
+    mainWindow.show();
+
+    return app.exec();
+
+#else
+
     try
     {
         MainWindow mainWindow;
@@ -37,13 +42,6 @@ int main(int argc, char* argv[])
     {
         QMessageBox::critical(nullptr, "Error", QString("An unknown exception occured! Closing down."));
     }
-
-#else
-
-    MainWindow mainWindow;
-    mainWindow.show();
-
-    return app.exec();
 
 #endif
     return 1;

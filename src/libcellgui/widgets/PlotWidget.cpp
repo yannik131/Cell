@@ -11,7 +11,6 @@ PlotWidget::PlotWidget(QWidget* parent)
     setInteraction(QCP::iRangeZoom, true); // Allow zoom with mouse wheel
 
     plotLayout()->insertRow(0);
-    plotLayout()->addElement(0, 0, plotTitle_);
 
     xAxis->setLabel("t [s]");
 

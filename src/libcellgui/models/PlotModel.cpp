@@ -6,6 +6,7 @@ namespace
 
 const cell::DiscTypeMap<double>& getActiveMap(const DataPoint& dataPoint)
 {
+    return {};
 }
 
 void averageDataPoint(DataPoint& dataPoint, int length)
@@ -74,15 +75,6 @@ void PlotModel::emitPlot()
     {
         dataPointToAverage += dataPoint;
         ++averagingCount;
-
-        if (dataPointToAverage.elapsedTimeUs_ >= PlotTimeInterval.asMicroseconds())
-        {
-            averageDataPoint(dataPointToAverage, averagingCount);
-            fullPlotData.append(getActiveMap(dataPointToAverage));
-
-            dataPointToAverage = DataPoint();
-            averagingCount = 0;
-        }
     }
 
     emit newPlotCreated(fullPlotData);
@@ -101,8 +93,6 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
     for (const auto& disc : frameDTO.discs_)
     {
         ++dataPoint.discTypeCountMap_[disc.getDiscTypeID()];
-        dataPoint.totalKineticEnergyMap_[disc.getDiscTypeID()] += disc.getKineticEnergy();
-        // totalMomentums[disc.getDiscTypeID()] += disc.getMomentum();
     }
 
     for (const auto& [discType, totalMomentum] : totalMomentums)
@@ -113,9 +103,6 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 
 void PlotModel::plotAveragedDataPoint()
 {
-    if (dataPointBeingAveraged_.elapsedTimeUs_ < PlotTimeInterval.asMicroseconds())
-        return;
-
     averageDataPoint(dataPointBeingAveraged_, averagingCount_);
 
     emitDataPoint(dataPointBeingAveraged_);

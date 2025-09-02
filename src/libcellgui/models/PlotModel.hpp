@@ -87,11 +87,6 @@ private:
      * @brief Number of data points already added to the dataPointBeingAveraged_
      */
     int averagingCount_ = 0;
-
-    /**
-     * @brief Alias for frequently accessed setting
-     */
-    const sf::Time& PlotTimeInterval = GlobalGUISettings::getGUISettings().plotTimeInterval_;
 };
 
 #endif /* PLOTMODEL_HPP */

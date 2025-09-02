@@ -78,9 +78,6 @@ public:
      * @brief Deletes all rows in the model
      */
     void clearRows();
-
-private:
-    QVector<std::pair<cell::DiscType, int>> rows_;
 };
 
 #endif /* DISCTYPEDISTRIBUTIONTABLEMODEL_HPP */
