@@ -1,7 +1,7 @@
 #ifndef PLOT_WIDGET_HPP
 #define PLOT_WIDGET_HPP
 
-#include "PlotModel.hpp"
+#include "models/PlotModel.hpp"
 
 #include "qcustomplot.h"
 

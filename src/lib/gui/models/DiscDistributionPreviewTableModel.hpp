@@ -1,8 +1,6 @@
 #ifndef DISCDISTRIBUTIONPREVIEWTABLEMODEL_HPP
 #define DISCDISTRIBUTIONPREVIEWTABLEMODEL_HPP
 
-#include "DiscType.hpp"
-
 #include <QAbstractTableModel>
 #include <QVector>
 
@@ -42,15 +40,6 @@ public:
      * @brief The preview table should not be editable, so this function should make sure that that's the case
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-private:
-    /**
-     * @brief Load the disc type distribution from the settings
-     */
-    void loadSettings();
-
-private:
-    QVector<std::pair<cell::DiscType, int>> distribution_;
 };
 
 #endif /* DISCDISTRIBUTIONPREVIEWTABLEMODEL_HPP */

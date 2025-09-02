@@ -1,5 +1,5 @@
-#include "ColorMapping.hpp"
-#include "Utility.hpp"
+#include "core/ColorMapping.hpp"
+#include "core/Utility.hpp"
 
 namespace sf
 {

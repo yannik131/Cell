@@ -42,6 +42,8 @@ private:
 
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
 
+    void throwIfNotBuildYet() const;
+
 private:
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -68,6 +70,8 @@ private:
     std::unique_ptr<CollisionDetector> collisionDetector_;
     std::unique_ptr<CollisionHandler> collisionHandler_;
     std::unique_ptr<Cell> cell_;
+
+    bool built_ = false;
 };
 
 } // namespace cell

@@ -1,4 +1,4 @@
-#include "MultiSelectListWidget.hpp"
+#include "widgets/MultiSelectListWidget.hpp"
 
 #include <QMouseEvent>
 

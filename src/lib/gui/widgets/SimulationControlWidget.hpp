@@ -1,7 +1,7 @@
 #ifndef SIMULATIONCONTROLWIDGET_HPP
 #define SIMULATIONCONTROLWIDGET_HPP
 
-#include "DiscDistributionPreviewTableModel.hpp"
+#include "models/DiscDistributionPreviewTableModel.hpp"
 
 #include <QMessageBox>
 #include <QWidget>

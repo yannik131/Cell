@@ -1,8 +1,8 @@
 #ifndef PLOTMODEL_HPP
 #define PLOTMODEL_HPP
 
-#include "FrameDTO.hpp"
-#include "PlotCategories.hpp"
+#include "core/FrameDTO.hpp"
+#include "core/PlotCategories.hpp"
 
 #include <QObject>
 

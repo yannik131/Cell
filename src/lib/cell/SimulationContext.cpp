@@ -17,6 +17,8 @@ SimulationContext::SimulationContext()
 
 void SimulationContext::buildContextFromConfig(const SimulationConfig& simulationConfig)
 {
+    built_ = false;
+
     setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
     setSimulationTimeScale(simulationConfig.setup.simulationTimeScale);
     discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
@@ -26,20 +28,28 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
     collisionDetector_ = std::make_unique<CollisionDetector>(buildCollisionDetector());
     collisionHandler_ = std::make_unique<CollisionHandler>(buildCollisionHandler());
     cell_ = std::make_unique<Cell>(buildCell(simulationConfig));
+
+    built_ = true;
 }
 
 const DiscTypeRegistry& SimulationContext::getDiscTypeRegistry() const
 {
+    throwIfNotBuildYet();
+
     return *discTypeRegistry_;
 }
 
 Cell& SimulationContext::getCell()
 {
+    throwIfNotBuildYet();
+
     return *cell_;
 }
 
 DiscTypeMap<int> SimulationContext::getAndResetCollisionCounts()
 {
+    throwIfNotBuildYet();
+
     return collisionDetector_->getAndResetCollisionCounts();
 }
 
@@ -205,6 +215,12 @@ double SimulationContext::calculateDistributionSum(const std::map<std::string, d
 {
     return std::accumulate(distribution.begin(), distribution.end(), 0,
                            [](double currentSum, auto& entryPair) { return currentSum + entryPair.second; });
+}
+
+void SimulationContext::throwIfNotBuildYet() const
+{
+    if (!built_)
+        throw ExceptionWithLocation("Simulation context was not yet fully built");
 }
 
 } // namespace cell

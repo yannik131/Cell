@@ -1,7 +1,7 @@
 #ifndef PLOTCONTROLWIDGET_HPP
 #define PLOTCONTROLWIDGET_HPP
 
-#include "PlotModel.hpp"
+#include "models/PlotModel.hpp"
 
 #include <QWidget>
 

@@ -1,10 +1,10 @@
-#include "DiscTypeDistributionDialog.hpp"
-#include "ButtonDelegate.hpp"
-#include "ColorMapping.hpp"
-#include "ComboBoxDelegate.hpp"
-#include "SafeCast.hpp"
-#include "Settings.hpp"
-#include "SpinBoxDelegate.hpp"
+#include "dialogs/DiscTypeDistributionDialog.hpp"
+#include "cell/Settings.hpp"
+#include "core/ColorMapping.hpp"
+#include "core/SafeCast.hpp"
+#include "delegates/ButtonDelegate.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+#include "delegates/SpinBoxDelegate.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
 #include <QCloseEvent>

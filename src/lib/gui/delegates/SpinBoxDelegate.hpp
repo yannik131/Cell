@@ -1,7 +1,7 @@
 #ifndef SPINBOXDELEGATE_HPP
 #define SPINBOXDELEGATE_HPP
 
-#include "SafeCast.hpp"
+#include "core/SafeCast.hpp"
 
 #include <QDoubleSpinBox>
 #include <QSpinBox>

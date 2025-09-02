@@ -1,8 +1,7 @@
 #ifndef DISCTYPEDISTRIBUTIONDIALOG_HPP
 #define DISCTYPEDISTRIBUTIONDIALOG_HPP
 
-#include "DiscType.hpp"
-#include "DiscTypeDistributionTableModel.hpp"
+#include "models/DiscTypeDistributionTableModel.hpp"
 
 #include <QDialog>
 #include <QStandardItemModel>

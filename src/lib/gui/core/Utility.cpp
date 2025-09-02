@@ -1,25 +1,10 @@
-#include "Utility.hpp"
-#include "ExceptionWithLocation.hpp"
+#include "core/Utility.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 
 #include <stdexcept>
 
 namespace utility
 {
-
-cell::DiscType getDiscTypeByName(const QString& name)
-{
-    // TODO
-
-    throw ExceptionWithLocation(("No disc type found for name \"" + name + "\"").toStdString());
-}
-
-QStringList getDiscTypeNames()
-{
-    // TODO
-    QStringList discTypeNames;
-
-    return discTypeNames;
-}
 
 QColor sfColorToQColor(const sf::Color& sfColor)
 {

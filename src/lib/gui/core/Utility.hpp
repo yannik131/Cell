@@ -1,22 +1,12 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
-#include "ComboBoxDelegate.hpp"
-#include "DiscType.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+
+#include <SFML/Graphics/Color.hpp>
 
 namespace utility
 {
-
-/**
- * @brief Iterates all disc types in the current disc type distribution and returns the one with the given name or
- * throws if it can't be found
- */
-cell::DiscType getDiscTypeByName(const QString& name);
-
-/**
- * @returns a list of all disc type names in the current distribution
- */
-QStringList getDiscTypeNames();
 
 /**
  * @brief Converts a sfml color to a QColor

@@ -1,5 +1,5 @@
-#include "MainWindow.hpp"
-#include "ExceptionWithLocation.hpp"
+#include "core/MainWindow.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 #include "ui_MainWindow.h"
 
 #include <glog/logging.h>
@@ -76,11 +76,6 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::resetSimulation()
 {
     stopSimulation();
-
-    if (simulationThread_ != nullptr)
-        connect(simulationThread_, &QThread::finished, simulation_.get(), &Simulation::reset, Qt::QueuedConnection);
-    else
-        simulation_->reset();
 
     plotModel_->clear();
 }

@@ -1,8 +1,6 @@
 #ifndef REACTIONSTABLEMODEL_HPP
 #define REACTIONSTABLEMODEL_HPP
 
-#include "Reaction.hpp"
-
 #include <QAbstractTableModel>
 
 /**
@@ -46,17 +44,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
-     * @brief Adds a row from the given reaction, filling it with the actual values
-     */
-    void addRowFromReaction(const cell::Reaction& reaction);
-
-    /**
-     * @brief Creates a new row with a possibly invalid reaction (educt and product masses may not add up etc.) based on
-     * the given type
-     */
-    void addEmptyRow(const cell::Reaction::Type& type);
-
-    /**
      * @brief Removes the reaction from the model at the given row
      */
     void removeRow(int row);
@@ -79,9 +66,6 @@ public:
 
 signals:
     void reactionsChanged();
-
-private:
-    std::vector<cell::Reaction> rows_;
 };
 
 #endif /* REACTIONSTABLEMODEL_HPP */

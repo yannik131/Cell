@@ -1,9 +1,9 @@
-#include "ReactionsDialog.hpp"
-#include "ButtonDelegate.hpp"
-#include "ComboBoxDelegate.hpp"
-#include "SafeCast.hpp"
-#include "SpinBoxDelegate.hpp"
-#include "Utility.hpp"
+#include "dialogs/ReactionsDialog.hpp"
+#include "core/SafeCast.hpp"
+#include "core/Utility.hpp"
+#include "delegates/ButtonDelegate.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+#include "delegates/SpinBoxDelegate.hpp"
 #include "ui_ReactionsDialog.h"
 
 #include <QCloseEvent>
@@ -30,15 +30,6 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
                 }
             });
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::cancel);
-
-    connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Combination); });
-    connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Decomposition); });
-    connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Exchange); });
-    connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
-            [this]() { requestEmptyRowFromModel(cell::Reaction::Type::Transformation); });
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
@@ -73,18 +64,6 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
 void ReactionsDialog::closeEvent(QCloseEvent*)
 {
     reactionsTableModel_->loadSettings();
-}
-
-void ReactionsDialog::requestEmptyRowFromModel(const cell::Reaction::Type& type)
-{
-    try
-    {
-        reactionsTableModel_->addEmptyRow(type);
-    }
-    catch (const std::exception& e)
-    {
-        QMessageBox::critical(this, "Error", "Can't add row: " + QString(e.what()));
-    }
 }
 
 void ReactionsDialog::cancel()

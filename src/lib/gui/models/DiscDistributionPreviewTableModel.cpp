@@ -1,15 +1,14 @@
-#include "DiscDistributionPreviewTableModel.hpp"
-#include "ColorMapping.hpp"
+#include "models/DiscDistributionPreviewTableModel.hpp"
+#include "core/ColorMapping.hpp"
 
 DiscDistributionPreviewTableModel::DiscDistributionPreviewTableModel(QObject* parent)
     : QAbstractTableModel(parent)
 {
-    loadSettings();
 }
 
 int DiscDistributionPreviewTableModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(distribution_.size());
+    return 0;
 }
 
 int DiscDistributionPreviewTableModel::columnCount(const QModelIndex&) const
@@ -31,31 +30,9 @@ QVariant DiscDistributionPreviewTableModel::data(const QModelIndex& index, int r
 {
     if (index.row() >= rowCount() || role != Qt::DisplayRole)
         return {};
-
-    const auto& [discType, frequency] = distribution_[index.row()];
-    switch (index.column())
-    {
-    case 0:
-        return QString::fromStdString(discType.getName());
-    case 1:
-        return "Green";
-    case 2:
-        return frequency;
-    default:
-        return {};
-    }
 }
 
 Qt::ItemFlags DiscDistributionPreviewTableModel::flags(const QModelIndex&) const
 {
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-}
-
-void DiscDistributionPreviewTableModel::loadSettings()
-{
-    beginResetModel();
-
-    distribution_.clear();
-
-    endResetModel();
 }

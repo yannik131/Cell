@@ -86,25 +86,25 @@
   <customwidget>
    <class>SimulationWidget</class>
    <extends>QWidget</extends>
-   <header>SimulationWidget.hpp</header>
+   <header>widgets/SimulationWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PlotWidget</class>
    <extends>QWidget</extends>
-   <header>PlotWidget.hpp</header>
+   <header>widgets/PlotWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PlotControlWidget</class>
    <extends>QWidget</extends>
-   <header>PlotControlWidget.hpp</header>
+   <header>widgets/PlotControlWidget.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SimulationControlWidget</class>
    <extends>QWidget</extends>
-   <header>SimulationControlWidget.hpp</header>
+   <header>widgets/SimulationControlWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

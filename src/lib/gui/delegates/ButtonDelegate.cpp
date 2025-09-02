@@ -1,4 +1,4 @@
-#include "ButtonDelegate.hpp"
+#include "delegates/ButtonDelegate.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>

@@ -7,6 +7,9 @@
 namespace cell
 {
 
+/**
+ * @brief Convenience class for integration testing to easily build a simulation state
+ */
 class SimulationConfigBuilder
 {
 public:

@@ -1,5 +1,5 @@
-#include "DiscTypeDistributionTableModel.hpp"
-#include "ColorMapping.hpp"
+#include "models/DiscTypeDistributionTableModel.hpp"
+#include "core/ColorMapping.hpp"
 
 #include <set>
 
@@ -42,10 +42,6 @@ bool DiscTypeDistributionTableModel::setData(const QModelIndex& index, const QVa
 Qt::ItemFlags DiscTypeDistributionTableModel::flags(const QModelIndex&) const
 {
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-void DiscTypeDistributionTableModel::addRowFromDiscType(const cell::DiscType& discType)
-{
 }
 
 void DiscTypeDistributionTableModel::addEmptyRow()

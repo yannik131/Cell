@@ -1,7 +1,7 @@
 #ifndef SAFECAST_HPP
 #define SAFECAST_HPP
 
-#include "ExceptionWithLocation.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 
 #include <QObject>
 

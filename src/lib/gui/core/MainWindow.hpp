@@ -1,11 +1,11 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
-#include "DiscTypeDistributionDialog.hpp"
-#include "PlotDataSelectionDialog.hpp"
-#include "PlotModel.hpp"
-#include "ReactionsDialog.hpp"
-#include "Simulation.hpp"
+#include "core/Simulation.hpp"
+#include "dialogs/DiscTypeDistributionDialog.hpp"
+#include "dialogs/PlotDataSelectionDialog.hpp"
+#include "dialogs/ReactionsDialog.hpp"
+#include "models/PlotModel.hpp"
 
 #include <QMainWindow>
 #include <QThread>

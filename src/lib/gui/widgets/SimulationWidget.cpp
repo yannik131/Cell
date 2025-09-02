@@ -1,4 +1,4 @@
-#include "SimulationWidget.hpp"
+#include "widgets/SimulationWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -24,15 +24,10 @@ void SimulationWidget::render(const FrameDTO& frameDTO)
 
     for (const auto& disc : frameDTO.discs_)
     {
-        sf::CircleShape circleShape = circleShapeFromDisc(disc);
+        sf::CircleShape circleShape;
         sf::RenderWindow::draw(circleShape);
     }
 
     sf::RenderWindow::draw(boundingRect_);
     sf::RenderWindow::display();
-}
-
-sf::CircleShape SimulationWidget::circleShapeFromDisc(const cell::Disc& disc)
-{
-    return sf::CircleShape();
 }

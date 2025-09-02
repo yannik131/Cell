@@ -1,6 +1,6 @@
-#include "PlotCategories.hpp"
-#include "ColorMapping.hpp"
-#include "Utility.hpp"
+#include "core/PlotCategories.hpp"
+#include "core/ColorMapping.hpp"
+#include "core/Utility.hpp"
 
 const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TypeCounts, "Type counts"},
                                                           {PlotCategory::CollisionCounts, "Collision count"},

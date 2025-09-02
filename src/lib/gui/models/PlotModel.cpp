@@ -1,5 +1,5 @@
-#include "PlotModel.hpp"
-#include "MathUtils.hpp"
+#include "models/PlotModel.hpp"
+#include "cell/MathUtils.hpp"
 
 namespace
 {

@@ -1,8 +1,9 @@
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
-#include "FrameDTO.hpp"
 #include "cell/SimulationConfig.hpp"
+#include "cell/SimulationContext.hpp"
+#include "core/FrameDTO.hpp"
 
 #include <QObject>
 #include <SFML/System/Time.hpp>
@@ -24,6 +25,8 @@ public:
      */
     void run();
 
+    void buildContext();
+
     /**
      * @brief Populates a `FrameDTO` with the current cell state and emits it
      * @param noTimeElapsed If `true`, set the elapsed time information for the emitted `FrameDTO` to 0, indicating that
@@ -34,10 +37,18 @@ public:
 public slots:
     void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
     void receiveReactions(const std::vector<cell::config::Reaction>& reactions);
-    void receiveState(const cell::config::StateSetup& stateSetup);
+    void receiveSetup(const cell::config::Setup& setup);
 
 signals:
     void frameData(const FrameDTO& data);
+
+private:
+    void tryBuildContext(bool throwIfIncomplete = false);
+
+private:
+    cell::SimulationConfig simulationConfig_;
+    cell::SimulationContext simulationContext;
+    bool setupReceived_ = false;
 };
 
 #endif /* SIMULATION_HPP */

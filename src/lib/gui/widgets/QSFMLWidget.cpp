@@ -1,4 +1,4 @@
-#include "QSFMLWidget.hpp"
+#include "widgets/QSFMLWidget.hpp"
 
 #include <QResizeEvent>
 

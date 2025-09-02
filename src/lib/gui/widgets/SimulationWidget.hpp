@@ -1,9 +1,8 @@
 #ifndef SIMULATIONWIDGET_HPP
 #define SIMULATIONWIDGET_HPP
 
-#include "Disc.hpp"
-#include "FrameDTO.hpp"
-#include "QSFMLWidget.hpp"
+#include "core/FrameDTO.hpp"
+#include "widgets/QSFMLWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -25,12 +24,6 @@ public slots:
      * @brief Clears the render window and displays circles based on the given `FrameDTO`
      */
     void render(const FrameDTO& frameDTO);
-
-private:
-    /**
-     * @brief Creates a `sf::CircleShape` from a disc, reflecting its properties like size and color
-     */
-    sf::CircleShape circleShapeFromDisc(const cell::Disc& disc);
 
 private:
     std::vector<sf::CircleShape> circles_;

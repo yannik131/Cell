@@ -1,5 +1,5 @@
-#include "SimulationControlWidget.hpp"
-#include "Settings.hpp"
+#include "widgets/SimulationControlWidget.hpp"
+#include "cell/Settings.hpp"
 #include "ui_SimulationControlWidget.h"
 
 SimulationControlWidget::SimulationControlWidget(QWidget* parent)

@@ -1,6 +1,6 @@
-#include "PlotWidget.hpp"
-#include "ExceptionWithLocation.hpp"
-#include "Utility.hpp"
+#include "widgets/PlotWidget.hpp"
+#include "cell/ExceptionWithLocation.hpp"
+#include "core/Utility.hpp"
 
 #include <algorithm>
 

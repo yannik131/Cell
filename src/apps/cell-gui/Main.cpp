@@ -1,6 +1,5 @@
-#include "Logging.hpp"
-#include "MainWindow.hpp"
-#include "Settings.hpp"
+#include "cell/Logging.hpp"
+#include "core/MainWindow.hpp"
 
 #include <QApplication>
 #include <QMessageBox>

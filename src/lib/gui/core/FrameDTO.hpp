@@ -1,7 +1,7 @@
 #ifndef FRAMEDTO_HPP
 #define FRAMEDTO_HPP
 
-#include "Disc.hpp"
+#include "cell/Disc.hpp"
 
 #include <QtCore/QMetaType>
 #include <SFML/System/Vector2.hpp>

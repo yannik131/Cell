@@ -1,6 +1,6 @@
-#include "ComboBoxDelegate.hpp"
-#include "SafeCast.hpp"
-#include "Utility.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+#include "core/SafeCast.hpp"
+#include "core/Utility.hpp"
 
 ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
@@ -38,10 +38,7 @@ DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent)
 QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(utility::getDiscTypeNames());
     emit editorCreated(editor);
-
-    // TODO
 
     return editor;
 }

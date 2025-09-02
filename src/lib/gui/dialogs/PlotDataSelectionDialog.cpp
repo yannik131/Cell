@@ -1,7 +1,7 @@
-#include "PlotDataSelectionDialog.hpp"
-#include "MultiSelectListWidget.hpp"
-#include "PlotCategories.hpp"
+#include "dialogs/PlotDataSelectionDialog.hpp"
+#include "core/PlotCategories.hpp"
 #include "ui_PlotDataSelectionDialog.h"
+#include "widgets/MultiSelectListWidget.hpp"
 
 #include <QCloseEvent>
 #include <QMessageBox>

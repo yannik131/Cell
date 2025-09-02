@@ -1,9 +1,8 @@
 #ifndef REACTIONSDIALOG_HPP
 #define REACTIONSDIALOG_HPP
 
-#include "ComboBoxDelegate.hpp"
-#include "DiscType.hpp"
-#include "ReactionsTableModel.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+#include "models/ReactionsTableModel.hpp"
 
 #include <QDialog>
 
@@ -30,11 +29,6 @@ public:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    /**
-     * @brief Lets the model add an empty row to the table with the given type
-     */
-    void requestEmptyRowFromModel(const cell::Reaction::Type& type);
-
     /**
      * @brief Loads the settings and hides the dialog
      */

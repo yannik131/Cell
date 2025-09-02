@@ -114,7 +114,7 @@
   <customwidget>
    <class>MultiSelectListWidget</class>
    <extends>QListWidget</extends>
-   <header>MultiSelectListWidget.hpp</header>
+   <header>widgets/MultiSelectListWidget.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

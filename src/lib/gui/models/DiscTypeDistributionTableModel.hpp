@@ -1,8 +1,6 @@
 #ifndef DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
 #define DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
 
-#include "DiscType.hpp"
-
 #include <QAbstractTableModel>
 #include <QVector>
 
@@ -46,12 +44,6 @@ public:
      * @brief The disc type distribution table has now columns that can't be edited or selected
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-    /**
-     * @brief Creates a new row in the table with information of the given disc type, used to display existing disc
-     * types
-     */
-    void addRowFromDiscType(const cell::DiscType& discType);
 
     /**
      * @brief Creates a new row with a default disc type, used to add new disc types since we can't make any assumptions
