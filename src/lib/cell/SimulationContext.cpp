@@ -17,8 +17,8 @@ SimulationContext::SimulationContext()
 
 void SimulationContext::buildContextFromConfig(const SimulationConfig& simulationConfig)
 {
-    setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.simulationTimeStep)));
-    setSimulationTimeScale(simulationConfig.simulationTimeScale);
+    setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
+    setSimulationTimeScale(simulationConfig.setup.simulationTimeScale);
     discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
     discTypeResolver_ = discTypeRegistry_->getDiscTypeResolver();
     reactionTable_ = std::make_unique<ReactionTable>(buildReactionTable(simulationConfig));
@@ -113,23 +113,22 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) cons
     std::vector<Disc> discs = getDiscsFromConfig(simulationConfig);
 
     Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider_, discTypeResolver_,
-              Dimensions{simulationConfig.cellWidth, simulationConfig.cellHeight}, std::move(discs));
+              Dimensions{simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight}, std::move(discs));
 
     return cell;
 }
 std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
 {
-    // always prefer discs if provided
-    if (!simulationConfig.discs.empty())
-        return createDiscsDirectly(simulationConfig);
+    if (simulationConfig.setup.useDistribution)
+        return createDiscGridFromDistribution(simulationConfig);
 
-    return createDiscGridFromDistribution(simulationConfig);
+    return createDiscsDirectly(simulationConfig);
 }
 std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig& simulationConfig) const
 {
     std::vector<Disc> discs;
 
-    for (const auto& disc : simulationConfig.discs)
+    for (const auto& disc : simulationConfig.setup.discs)
     {
         Disc newDisc(discTypeRegistry_->getIDFor(disc.discTypeName));
         newDisc.setPosition({disc.x, disc.y});
@@ -142,10 +141,10 @@ std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig&
 }
 std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const SimulationConfig& simulationConfig) const
 {
-    if (simulationConfig.distribution.empty() || simulationConfig.discCount == 0)
+    if (simulationConfig.setup.distribution.empty() || simulationConfig.setup.discCount == 0)
         throw ExceptionWithLocation("Must provider either discs or disc type distribution with disc count");
 
-    if (double total = calculateDistributionSum(simulationConfig.distribution); std::abs(total - 100) > 1e-3)
+    if (double total = calculateDistributionSum(simulationConfig.setup.distribution); std::abs(total - 100) > 1e-3)
     {
         throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100. They add up to " +
                                     std::to_string(total));
@@ -157,22 +156,22 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
     std::uniform_int_distribution<int> distribution(0, 100);
     std::uniform_real_distribution<double> velocityDistribution(-600.0, 600.0);
 
-    discs.reserve(simulationConfig.discCount);
+    discs.reserve(simulationConfig.setup.discCount);
 
-    std::vector<sf::Vector2d> discPositions =
-        mathutils::calculateGrid(simulationConfig.cellWidth, simulationConfig.cellHeight, maxRadiusProvider_());
+    std::vector<sf::Vector2d> discPositions = mathutils::calculateGrid(
+        simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight, maxRadiusProvider_());
 
-    if (simulationConfig.discCount > static_cast<int>(discPositions.size()))
+    if (simulationConfig.setup.discCount > static_cast<int>(discPositions.size()))
     {
-        LOG(WARNING) << "According to the settings, " << std::to_string(simulationConfig.discCount)
+        LOG(WARNING) << "According to the settings, " << std::to_string(simulationConfig.setup.discCount)
                      << " discs should be created, but the grid can only fit " << std::to_string(discPositions.size())
-                     << ". " << std::to_string(simulationConfig.discCount - discPositions.size())
+                     << ". " << std::to_string(simulationConfig.setup.discCount - discPositions.size())
                      << " discs will not be created.";
     }
 
     // We need the accumulated percentages sorted in ascending order for the random number approach to work
     std::vector<std::pair<DiscTypeID, double>> discTypes;
-    for (const auto& pair : simulationConfig.distribution)
+    for (const auto& pair : simulationConfig.setup.distribution)
     {
         DiscTypeID ID = discTypeRegistry_->getIDFor(pair.first);
         discTypes.emplace_back(ID, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
@@ -180,7 +179,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
 
     std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
 
-    for (int i = 0; i < simulationConfig.discCount && !discPositions.empty(); ++i)
+    for (int i = 0; i < simulationConfig.setup.discCount && !discPositions.empty(); ++i)
     {
         int randomNumber = distribution(gen);
 

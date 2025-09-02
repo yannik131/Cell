@@ -1,7 +1,7 @@
-#include "Disc.hpp"
-#include "Settings.hpp"
-#include "SimulationConfigBuilder.hpp"
-#include "SimulationContext.hpp"
+#include "cell/Disc.hpp"
+#include "cell/Settings.hpp"
+#include "cell/SimulationConfigBuilder.hpp"
+#include "cell/SimulationContext.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

@@ -33,13 +33,13 @@ struct Reaction
     double probability;
 };
 
-struct StateSetup
+struct Setup
 {
     double cellWidth;
     double cellHeight;
     double simulationTimeStep;
     double simulationTimeScale = 1;
-    bool useDistribution;
+    bool useDistribution = false;
 
     // In case of distribution:
     int discCount;
@@ -47,7 +47,7 @@ struct StateSetup
 
     // In case not:
     std::vector<config::Disc> discs;
-}
+};
 
 } // namespace config
 
@@ -55,7 +55,7 @@ struct SimulationConfig
 {
     std::vector<config::DiscType> discTypes;
     std::vector<config::Reaction> reactions;
-    config::StateSetup stateSetup;
+    config::Setup setup;
 };
 
 } // namespace cell

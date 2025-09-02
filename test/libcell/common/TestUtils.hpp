@@ -1,9 +1,9 @@
 #ifndef TESTUTILS_HPP
 #define TESTUTILS_HPP
 
-#include "DiscType.hpp"
-#include "Reaction.hpp"
-#include "Vector2d.hpp"
+#include "cell/DiscType.hpp"
+#include "cell/Reaction.hpp"
+#include "cell/Vector2d.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>

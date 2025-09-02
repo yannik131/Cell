@@ -1,7 +1,7 @@
-#include "CollisionHandler.hpp"
-#include "Disc.hpp"
-#include "DiscTypeRegistry.hpp"
+#include "cell/CollisionHandler.hpp"
 #include "TestUtils.hpp"
+#include "cell/Disc.hpp"
+#include "cell/DiscTypeRegistry.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

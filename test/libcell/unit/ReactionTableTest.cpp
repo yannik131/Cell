@@ -1,6 +1,6 @@
-#include "ReactionTable.hpp"
-#include "DiscTypeRegistry.hpp"
-#include "ExceptionWithLocation.hpp"
+#include "cell/ReactionTable.hpp"
+#include "cell/DiscTypeRegistry.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 
 #include <gtest/gtest.h>
 

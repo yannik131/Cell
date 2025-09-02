@@ -6,18 +6,23 @@ namespace cell
 
 void SimulationConfigBuilder::addDisc(const std::string& discType, Position position, Velocity velocity)
 {
-    simulationConfig_.discs.push_back(
+    simulationConfig_.setup.discs.push_back(
         config::Disc{.discTypeName = discType, .x = position.x, .y = position.y, .vx = velocity.x, .vy = velocity.y});
+}
+
+void SimulationConfigBuilder::useDistribution(bool useDistribution)
+{
+    simulationConfig_.setup.useDistribution = useDistribution;
 }
 
 void SimulationConfigBuilder::setDiscCount(int count)
 {
-    simulationConfig_.discCount = count;
+    simulationConfig_.setup.discCount = count;
 }
 
 void SimulationConfigBuilder::setDistribution(const std::map<std::string, double>& distribution)
 {
-    simulationConfig_.distribution = distribution;
+    simulationConfig_.setup.distribution = distribution;
 }
 
 void SimulationConfigBuilder::addDiscType(const std::string& name, Radius radius, Mass mass)
@@ -39,19 +44,19 @@ void SimulationConfigBuilder::addReaction(const std::string& educt1, const std::
 void SimulationConfigBuilder::setCellDimensions(Width width, Height height)
 {
     ++requiredCallsCount_;
-    simulationConfig_.cellWidth = width.value;
-    simulationConfig_.cellHeight = height.value;
+    simulationConfig_.setup.cellWidth = width.value;
+    simulationConfig_.setup.cellHeight = height.value;
 }
 
 void SimulationConfigBuilder::setTimeStep(double simulationTimeStep)
 {
     ++requiredCallsCount_;
-    simulationConfig_.simulationTimeStep = simulationTimeStep;
+    simulationConfig_.setup.simulationTimeStep = simulationTimeStep;
 }
 
 void SimulationConfigBuilder::setTimeScale(double simulationTimeScale)
 {
-    simulationConfig_.simulationTimeScale = simulationTimeScale;
+    simulationConfig_.setup.simulationTimeScale = simulationTimeScale;
 }
 
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const
