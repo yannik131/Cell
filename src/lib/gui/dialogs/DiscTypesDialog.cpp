@@ -11,17 +11,17 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-DiscTypesDialog::DiscTypesDialog(QWidget* parent)
+DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QDialog(parent)
     , ui(new Ui::DiscTypesDialog)
-    , discTypesTableModel_(new DiscTypesTableModel(this))
+    , discTypesTableModel_(new DiscTypesTableModel(this, abstractSimulationBuilder))
 {
     ui->setupUi(this);
 
     connect(ui->okPushButton, &QPushButton::clicked,
             [this]()
             {
-                discTypesTableModel_->emitContents();
+                discTypesTableModel_->commitChanges();
                 hide();
             });
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypesDialog::cancel);
@@ -67,11 +67,11 @@ DiscTypesTableModel* DiscTypesDialog::getModel()
 
 void DiscTypesDialog::closeEvent(QCloseEvent*)
 {
-    discTypesTableModel_->requestCurrentState();
+    discTypesTableModel_->discardChanges();
 }
 
 void DiscTypesDialog::cancel()
 {
-    discTypesTableModel_->requestCurrentState();
+    discTypesTableModel_->discardChanges();
     hide();
 }

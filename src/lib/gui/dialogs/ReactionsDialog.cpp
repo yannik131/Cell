@@ -9,10 +9,10 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-ReactionsDialog::ReactionsDialog(QWidget* parent)
+ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QDialog(parent)
     , ui(new Ui::ReactionsDialog)
-    , reactionsTableModel_(new ReactionsTableModel(this))
+    , reactionsTableModel_(new ReactionsTableModel(this, abstractSimulationBuilder))
 {
     ui->setupUi(this);
 
@@ -21,7 +21,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             {
                 try
                 {
-                    reactionsTableModel_->saveSettings();
+                    reactionsTableModel_->commitChanges();
                     hide();
                 }
                 catch (const std::exception& error)
@@ -31,12 +31,21 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
             });
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::cancel);
 
+    connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
+            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); });
+    connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked,
+            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Decomposition); });
+    connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
+            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Exchange); });
+    connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
+            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Transformation); });
+
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
 
     auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
-    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this);
+    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this, abstractSimulationBuilder);
     auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
 
     connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, reactionsTableModel_,
@@ -61,13 +70,18 @@ ReactionsDialog::ReactionsDialog(QWidget* parent)
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
+ReactionsTableModel* ReactionsDialog::getModel()
+{
+    return reactionsTableModel_;
+}
+
 void ReactionsDialog::closeEvent(QCloseEvent*)
 {
-    reactionsTableModel_->loadSettings();
+    reactionsTableModel_->discardChanges();
 }
 
 void ReactionsDialog::cancel()
 {
-    reactionsTableModel_->loadSettings();
+    reactionsTableModel_->discardChanges();
     hide();
 }

@@ -10,19 +10,12 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulation_(new Simulation())
-    , discTypesDialog_(new DiscTypesDialog(this))
-    , reactionsDialog_(new ReactionsDialog(this))
+    , discTypesDialog_(new DiscTypesDialog(this, simulation_.get()))
+    , reactionsDialog_(new ReactionsDialog(this, simulation_.get()))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
     , plotModel_(new PlotModel(this))
 {
     ui->setupUi(this);
-
-    connect(discTypesDialog_->getModel(), &DiscTypesTableModel::discTypes, simulation_.get(),
-            &Simulation::receiveDiscTypes);
-    connect(discTypesDialog_->getModel(), &DiscTypesTableModel::discTypesRequested, simulation_.get(),
-            &Simulation::emitDiscTypes);
-    connect(simulation_.get(), &Simulation::discTypes, discTypesDialog_->getModel(),
-            &DiscTypesTableModel::receiveDiscTypes);
 
     connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
     connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);

@@ -48,31 +48,30 @@ void Simulation::emitFrameData(bool noTimeElapsed)
     // TODO
 }
 
-void Simulation::receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                                  const std::map<std::string, sf::Color>& discTypeColorMap)
+cell::SimulationConfig& Simulation::getSimulationConfig()
 {
-    simulationConfig_.discTypes = discTypes;
-    discTypeColorMap_ = discTypeColorMap;
-    tryBuildContext();
+    return simulationConfig_;
 }
 
-void Simulation::receiveReactions(const std::vector<cell::config::Reaction>& reactions)
+std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap()
 {
-    simulationConfig_.reactions = reactions;
-    tryBuildContext();
+    return discTypeColorMap_;
 }
 
-void Simulation::receiveSetup(const cell::config::Setup& setup)
+void Simulation::registerDiscTypeObserver(DiscTypeObserver observer)
 {
-    simulationConfig_.setup = setup;
-    setupReceived_ = true;
-
-    tryBuildContext();
+    observers_.push_back(std::move(observer));
 }
 
-void Simulation::emitDiscTypes()
+void Simulation::notifyDiscTypeObservers()
 {
-    emit discTypes(simulationConfig_.discTypes, discTypeColorMap_);
+    for (auto iter = observers_.begin(); iter != observers_.end();)
+    {
+        if ((*iter)(simulationConfig_.discTypes))
+            ++iter;
+        else
+            iter = observers_.erase(iter);
+    }
 }
 
 void Simulation::tryBuildContext(bool throwIfIncomplete)

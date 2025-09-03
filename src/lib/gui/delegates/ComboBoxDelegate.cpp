@@ -1,6 +1,9 @@
 #include "delegates/ComboBoxDelegate.hpp"
+#include "ComboBoxDelegate.hpp"
 #include "core/SafeCast.hpp"
 #include "core/Utility.hpp"
+
+#include <QPointer>
 
 ComboBoxDelegate::ComboBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent)
@@ -30,15 +33,41 @@ void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
-DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent)
+DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent,
+                                                   AbstractSimulationBuilder* abstractSimulationBuilder)
     : ComboBoxDelegate(parent)
+    , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
 }
 
 QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
+    editor->addItems(getDiscTypeNames(abstractSimulationBuilder_->getSimulationConfig().discTypes));
     emit editorCreated(editor);
 
+    abstractSimulationBuilder_->registerDiscTypeObserver(
+        [editor = QPointer<QComboBox>(editor), this](const std::vector<cell::config::DiscType>& discTypes)
+        {
+            if (!editor)
+                return false;
+
+            editor->clear();
+            editor->addItems(getDiscTypeNames(discTypes));
+
+            return true;
+        });
+
     return editor;
+}
+
+QVector<QString> DiscTypeComboBoxDelegate::getDiscTypeNames(const std::vector<cell::config::DiscType>& discTypes) const
+{
+    QVector<QString> names;
+    names.reserve(discTypes.size());
+
+    for (const auto& discType : discTypes)
+        names.push_back(QString::fromStdString(discType.name));
+
+    return names;
 }

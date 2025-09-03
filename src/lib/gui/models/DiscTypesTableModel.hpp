@@ -2,6 +2,7 @@
 #define DISCTYPESTABLEMODEL_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "core/AbstractSimulationBuilder.hpp"
 
 #include <QAbstractTableModel>
 #include <QVector>
@@ -16,7 +17,7 @@ class DiscTypesTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit DiscTypesTableModel(QObject* parent = nullptr);
+    explicit DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
     /**
      * @returns Number of disc types in the currently edited distribution
@@ -65,20 +66,14 @@ public:
      */
     void clearRows();
 
-    void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                          const std::map<std::string, sf::Color>& discTypeColorMap);
-
-    void emitContents();
-    void requestCurrentState();
-
-signals:
-    void discTypes(const std::vector<cell::config::DiscType>& discTypes,
-                   const std::map<std::string, sf::Color>& discTypeColorMap);
-    void discTypesRequested();
+    void commitChanges();
+    void discardChanges();
 
 private:
     std::vector<cell::config::DiscType> rows_;
     std::map<std::string, sf::Color> discTypeColorMap_;
+
+    AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
 #endif /* DISCTYPESTABLEMODEL_HPP */

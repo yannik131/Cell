@@ -25,18 +25,6 @@ std::string toString(Reaction::Type type)
         throw ExceptionWithLocation("Invalid reaction type");
     }
 }
-
-Reaction::Type inferType(const std::optional<DiscTypeID>& educt2, const std::optional<DiscTypeID>& product2)
-{
-    if (!educt2 && !product2)
-        return Reaction::Type::Transformation;
-    else if (educt2 && !product2)
-        return Reaction::Type::Combination;
-    else if (!educt2 && product2)
-        return Reaction::Type::Decomposition;
-    else
-        return Reaction::Type::Exchange;
-}
 } // namespace
 
 bool operator==(const Reaction& a, const Reaction& b)
@@ -67,6 +55,18 @@ bool contains(const Reaction& reaction, DiscTypeID discType)
            reaction.getProduct2() == discType;
 }
 
+Reaction::Type inferType(bool educt2, bool product2)
+{
+    if (!educt2 && !product2)
+        return Reaction::Type::Transformation;
+    else if (educt2 && !product2)
+        return Reaction::Type::Combination;
+    else if (!educt2 && product2)
+        return Reaction::Type::Decomposition;
+    else
+        return Reaction::Type::Exchange;
+}
+
 size_t ReactionHash::operator()(const Reaction& reaction) const
 {
     auto hash = calculateHash(reaction.getEduct1(), reaction.getProduct1());
@@ -86,7 +86,7 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     , educt2_(educt2)
     , product1_(product1)
     , product2_(product2)
-    , type_(inferType(educt2, product2))
+    , type_(inferType(educt2.has_value(), product2.has_value()))
 {
     setProbability(probability);
 }

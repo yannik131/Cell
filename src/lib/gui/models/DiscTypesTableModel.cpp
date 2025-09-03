@@ -4,8 +4,9 @@
 #include "DiscTypesTableModel.hpp"
 #include <set>
 
-DiscTypesTableModel::DiscTypesTableModel(QObject* parent)
+DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QAbstractTableModel(parent)
+    , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
 }
 
@@ -117,27 +118,28 @@ void DiscTypesTableModel::clearRows()
 
     beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
     rows_.clear();
+    discTypeColorMap_.clear();
     endRemoveRows();
 }
 
-void DiscTypesTableModel::receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                                           const std::map<std::string, sf::Color>& discTypeColorMap)
+void DiscTypesTableModel::commitChanges()
+{
+    abstractSimulationBuilder_->getSimulationConfig().discTypes = rows_;
+    abstractSimulationBuilder_->getDiscTypeColorMap() = discTypeColorMap_;
+}
+
+void DiscTypesTableModel::discardChanges()
 {
     clearRows();
 
-    discTypeColorMap_ = discTypeColorMap;
+    auto discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
+    if (discTypes.empty())
+        return;
 
     beginInsertRows(QModelIndex(), 0, static_cast<int>(discTypes.size()) - 1);
-    rows_ = discTypes;
+
+    rows_ = std::move(discTypes);
+    discTypeColorMap_ = abstractSimulationBuilder_->getDiscTypeColorMap();
+
     endInsertRows();
-}
-
-void DiscTypesTableModel::emitContents()
-{
-    emit discTypes(rows_, discTypeColorMap_);
-}
-
-void DiscTypesTableModel::requestCurrentState()
-{
-    emit discTypesRequested();
 }

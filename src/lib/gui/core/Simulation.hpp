@@ -3,6 +3,7 @@
 
 #include "cell/SimulationConfig.hpp"
 #include "cell/SimulationContext.hpp"
+#include "core/AbstractSimulationBuilder.hpp"
 #include "core/FrameDTO.hpp"
 
 #include <QObject>
@@ -13,7 +14,7 @@
 /**
  * @brief Contains and runs the cell for the simulation
  */
-class Simulation : public QObject
+class Simulation : public QObject, public AbstractSimulationBuilder
 {
     Q_OBJECT
 public:
@@ -34,18 +35,13 @@ public:
      */
     void emitFrameData(bool noTimeElapsed = false);
 
-public:
-    void receiveDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                          const std::map<std::string, sf::Color>& discTypeColorMap);
-    void receiveReactions(const std::vector<cell::config::Reaction>& reactions);
-    void receiveSetup(const cell::config::Setup& setup);
-
-    void emitDiscTypes();
+    cell::SimulationConfig& getSimulationConfig() override;
+    std::map<std::string, sf::Color>& getDiscTypeColorMap() override;
+    void registerDiscTypeObserver(DiscTypeObserver observer) override;
+    void notifyDiscTypeObservers() override;
 
 signals:
     void frameData(const FrameDTO& data);
-    void discTypes(const std::vector<cell::config::DiscType>& discTypes,
-                   const std::map<std::string, sf::Color>& discTypeColorMap);
 
 private:
     void tryBuildContext(bool throwIfIncomplete = false);
@@ -55,6 +51,7 @@ private:
     cell::SimulationContext simulationContext;
     std::map<std::string, sf::Color> discTypeColorMap_;
     bool setupReceived_ = false;
+    std::vector<DiscTypeObserver> observers_;
 };
 
 #endif /* SIMULATION_HPP */

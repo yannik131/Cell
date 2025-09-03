@@ -21,7 +21,9 @@ public:
     /**
      * @brief Creates the delegates for displaying the reactions and connects callbacks
      */
-    explicit ReactionsDialog(QWidget* parent = nullptr);
+    explicit ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+
+    ReactionsTableModel* getModel();
 
     /**
      * @brief Loads the settings again so they are displayed correctly next time the dialog is opened

@@ -1,6 +1,8 @@
 #ifndef COMBOBOXDELEGATE_HPP
 #define COMBOBOXDELEGATE_HPP
 
+#include "core/AbstractSimulationBuilder.hpp"
+
 #include <QComboBox>
 #include <QStyledItemDelegate>
 
@@ -40,12 +42,18 @@ class DiscTypeComboBoxDelegate : public ComboBoxDelegate
 {
     Q_OBJECT
 public:
-    DiscTypeComboBoxDelegate(QObject* parent = nullptr);
+    DiscTypeComboBoxDelegate(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
     /**
      * @brief Creates a `QComboBox` and fills it with the currently available disc type names
      */
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override;
+
+private:
+    QVector<QString> getDiscTypeNames(const std::vector<cell::config::DiscType>& discTypes) const;
+
+private:
+    AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
 #endif /* COMBOBOXDELEGATE_HPP */

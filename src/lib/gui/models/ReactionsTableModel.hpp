@@ -1,6 +1,10 @@
 #ifndef REACTIONSTABLEMODEL_HPP
 #define REACTIONSTABLEMODEL_HPP
 
+#include "cell/Reaction.hpp"
+#include "cell/SimulationConfig.hpp"
+#include "core/AbstractSimulationBuilder.hpp"
+
 #include <QAbstractTableModel>
 
 /**
@@ -10,8 +14,7 @@ class ReactionsTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit ReactionsTableModel(QObject* parent = nullptr);
-
+    explicit ReactionsTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
     /**
      * @returns number of reactions currently in the model
      */
@@ -43,29 +46,29 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
+    void addRow(cell::Reaction::Type type);
+
     /**
      * @brief Removes the reaction from the model at the given row
      */
     void removeRow(int row);
 
     /**
-     * @brief Resets the model to the reactions that are already in the current settings
-     */
-    void loadSettings();
-
-    /**
-     * @brief Saves the reactions in the model to the settings, throwing and exception if something is incorrect (i. e.
-     * educt and product masses don't add up etc.)
-     */
-    void saveSettings();
-
-    /**
      * @brief Removes all rows from the model
      */
     void clearRows();
 
-signals:
-    void reactionsChanged();
+    void commitChanges();
+    void discardChanges();
+
+private:
+    std::vector<cell::Reaction::Type> inferReactionTypes(const std::vector<cell::config::Reaction>& reactions) const;
+
+private:
+    std::vector<cell::config::Reaction> rows_;
+    std::vector<cell::Reaction::Type> types_;
+
+    AbstractSimulationBuilder* abstractSimulationBuilder_ = nullptr;
 };
 
 #endif /* REACTIONSTABLEMODEL_HPP */

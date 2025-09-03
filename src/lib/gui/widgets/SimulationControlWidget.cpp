@@ -13,6 +13,7 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     ui->discDistributionPreviewTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [&]() { emit editDiscTypesClicked(); });
+    connect(ui->editReactionsPushButton, &QPushButton::clicked, [&]() { emit editReactionsClicked(); });
 
     setRanges();
     displayGlobalSettings();

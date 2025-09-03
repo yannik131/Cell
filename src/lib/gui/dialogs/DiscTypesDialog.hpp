@@ -21,7 +21,7 @@ public:
     /**
      * @brief Creates the delegates and sets them in the table view. Also connects all necessary callbacks
      */
-    explicit DiscTypesDialog(QWidget* parent = nullptr);
+    explicit DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
     DiscTypesTableModel* getModel();
 
