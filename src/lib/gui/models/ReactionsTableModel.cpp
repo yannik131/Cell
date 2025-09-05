@@ -14,7 +14,7 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent, AbstractSimulationBuil
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const
 {
-    return rows_.size();
+    return static_cast<int>(rows_.size());
 }
 
 int ReactionsTableModel::columnCount(const QModelIndex&) const
@@ -127,10 +127,31 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
 
 void ReactionsTableModel::addRow(cell::Reaction::Type type)
 {
+    if (abstractSimulationBuilder_->getSimulationConfig().discTypes.empty())
+        throw ExceptionWithLocation(
+            "You're trying to add a reaction without any disc types available. Go define some first.");
+
+    const auto& defaultName = abstractSimulationBuilder_->getSimulationConfig().discTypes.front().name;
+
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
 
     types_.push_back(type);
-    rows_.push_back(cell::config::Reaction{});
+    cell::config::Reaction newReaction{
+        .educt1 = defaultName, .educt2 = defaultName, .product1 = defaultName, .product2 = defaultName};
+    switch (type)
+    {
+    case cell::Reaction::Transformation:
+        newReaction.educt2 = newReaction.product2 = "";
+        break;
+    case cell::Reaction::Decomposition:
+        newReaction.educt2 = "";
+        break;
+    case cell::Reaction::Combination:
+        newReaction.product2 = "";
+        break;
+    default:;
+    }
+    rows_.push_back(newReaction);
 
     endInsertRows();
 }
@@ -160,7 +181,6 @@ void ReactionsTableModel::clearRows()
 void ReactionsTableModel::commitChanges()
 {
     abstractSimulationBuilder_->getSimulationConfig().reactions = rows_;
-    abstractSimulationBuilder_->notifyDiscTypeObservers();
 }
 
 void ReactionsTableModel::discardChanges()

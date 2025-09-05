@@ -17,28 +17,22 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->setupUi(this);
 
     connect(ui->okPushButton, &QPushButton::clicked,
-            [this]()
-            {
-                try
-                {
-                    reactionsTableModel_->commitChanges();
-                    hide();
-                }
-                catch (const std::exception& error)
-                {
-                    QMessageBox::critical(this, "Error", error.what());
-                }
-            });
+            utility::safeSlot(this,
+                              [this]()
+                              {
+                                  reactionsTableModel_->commitChanges();
+                                  hide();
+                              }));
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::cancel);
 
     connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
-            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); });
+            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); }));
     connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked,
-            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Decomposition); });
+            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Decomposition); }));
     connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
-            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Exchange); });
+            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Exchange); }));
     connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
-            [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Transformation); });
+            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Transformation); }));
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 

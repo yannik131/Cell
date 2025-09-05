@@ -126,6 +126,8 @@ void DiscTypesTableModel::commitChanges()
 {
     abstractSimulationBuilder_->getSimulationConfig().discTypes = rows_;
     abstractSimulationBuilder_->getDiscTypeColorMap() = discTypeColorMap_;
+
+    abstractSimulationBuilder_->notifyDiscTypeObservers();
 }
 
 void DiscTypesTableModel::discardChanges()

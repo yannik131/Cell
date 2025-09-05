@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics/Color.hpp>
 
+#include <QMessageBox>
+
 namespace utility
 {
 
@@ -25,6 +27,33 @@ MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
         inverted[it.value()] = it.key();
 
     return inverted;
+}
+
+/**
+ * @brief If the given callable `f` throws, catches the exception and displays it using QMessageBox. Forwards any
+ * arguments to the lambda or calls it without them if it doesn't take any.
+ */
+template <typename F> auto safeSlot(QWidget* parent, F&& f)
+{
+    return [parent, fun = std::forward<F>(f)](auto&&... args)
+    {
+        try
+        {
+            if constexpr (std::is_invocable_v<F, decltype(args)...>)
+                fun(std::forward<decltype(args)>(args)...);
+            else if constexpr (std::is_invocable_v<F>)
+                fun();
+        }
+        catch (const std::exception& e)
+        {
+            QMessageBox::warning(parent, QStringLiteral("Epic fail!"), QString::fromUtf8(e.what()));
+        }
+        catch (...)
+        {
+            QMessageBox::warning(parent, QStringLiteral("Epic unknown fail!"),
+                                 QStringLiteral("Unknown error occurred while executing callback!"));
+        }
+    };
 }
 
 }; // namespace utility
