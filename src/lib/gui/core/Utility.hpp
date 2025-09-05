@@ -30,8 +30,9 @@ MapType<ValueType, KeyType> invertMap(const MapType<KeyType, ValueType>& map)
 }
 
 /**
- * @brief If the given callable `f` throws, catches the exception and displays it using QMessageBox. Forwards any
- * arguments to the lambda or calls it without them if it doesn't take any.
+ * @returns A callable that executes the given callable. If the given callable `f` throws, catches the exception and
+ * displays it using QMessageBox. Forwards any arguments to the callable or calls it without them if it doesn't take
+ * any.
  */
 template <typename F> auto safeSlot(QWidget* parent, F&& f)
 {

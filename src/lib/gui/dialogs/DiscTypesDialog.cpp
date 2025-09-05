@@ -60,11 +60,6 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->discTypesTableView->setModel(discTypesTableModel_);
 }
 
-DiscTypesTableModel* DiscTypesDialog::getModel()
-{
-    return discTypesTableModel_;
-}
-
 void DiscTypesDialog::closeEvent(QCloseEvent*)
 {
     discTypesTableModel_->discardChanges();

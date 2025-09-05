@@ -64,11 +64,6 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
-ReactionsTableModel* ReactionsDialog::getModel()
-{
-    return reactionsTableModel_;
-}
-
 void ReactionsDialog::closeEvent(QCloseEvent*)
 {
     reactionsTableModel_->discardChanges();

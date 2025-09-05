@@ -23,8 +23,6 @@ public:
      */
     explicit DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
-    DiscTypesTableModel* getModel();
-
 private:
     /**
      * @brief Reloads the settings. This is necessary for when the user changes some stuff and then cancels. Opening the

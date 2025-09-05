@@ -23,8 +23,6 @@ public:
      */
     explicit ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
-    ReactionsTableModel* getModel();
-
     /**
      * @brief Loads the settings again so they are displayed correctly next time the dialog is opened
      */
