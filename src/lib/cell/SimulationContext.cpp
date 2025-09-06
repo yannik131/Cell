@@ -10,8 +10,6 @@ namespace cell
 {
 
 SimulationContext::SimulationContext()
-    : simulationTimeStepProvider_([&]() -> double { return simulationTimeStep_.asSeconds(); })
-    , maxRadiusProvider_([&]() -> double { return discTypeRegistry_->getMaxRadius(); })
 {
 }
 
@@ -19,15 +17,48 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
 {
     built_ = false;
 
-    setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
-    setSimulationTimeScale(simulationConfig.setup.simulationTimeScale);
-    discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
-    discTypeResolver_ = discTypeRegistry_->getDiscTypeResolver();
-    reactionTable_ = std::make_unique<ReactionTable>(buildReactionTable(simulationConfig));
-    reactionEngine_ = std::make_unique<ReactionEngine>(buildReactionEngine());
-    collisionDetector_ = std::make_unique<CollisionDetector>(buildCollisionDetector());
-    collisionHandler_ = std::make_unique<CollisionHandler>(buildCollisionHandler());
-    cell_ = std::make_unique<Cell>(buildCell(simulationConfig));
+    try
+    {
+        discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
+    }
+    catch (const std::exception& e)
+    {
+        throw InvalidDiscTypesException(e.what());
+    }
+
+    auto discTypeResolver = discTypeRegistry_->getDiscTypeResolver();
+
+    try
+    {
+        reactionTable_ =
+            std::make_unique<ReactionTable>(buildReactionTable(simulationConfig, *discTypeRegistry_, discTypeResolver));
+    }
+    catch (const std::exception& e)
+    {
+        throw InvalidReactionsException(e.what());
+    }
+
+    try
+    {
+        setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
+        setSimulationTimeScale(simulationConfig.setup.simulationTimeScale);
+
+        auto simulationTimeStepProvider = [this]() -> double { return simulationTimeStep_.asSeconds(); };
+        auto maxRadiusProvider = [this]() -> double { return discTypeRegistry_->getMaxRadius(); };
+
+        reactionEngine_ = std::make_unique<ReactionEngine>(
+            buildReactionEngine(discTypeResolver, simulationTimeStepProvider, *reactionTable_));
+        collisionDetector_ =
+            std::make_unique<CollisionDetector>(buildCollisionDetector(discTypeResolver, maxRadiusProvider));
+        collisionHandler_ = std::make_unique<CollisionHandler>(buildCollisionHandler(discTypeResolver));
+
+        cell_ = std::make_unique<Cell>(
+            buildCell(simulationConfig, maxRadiusProvider, simulationTimeStepProvider, discTypeResolver));
+    }
+    catch (const std::exception& e)
+    {
+        throw InvalidSetupException(e.what());
+    }
 
     built_ = true;
 }
@@ -81,23 +112,21 @@ DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig
     return discTypeRegistry;
 }
 
-ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simulationConfig) const
+ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simulationConfig,
+                                                    const DiscTypeRegistry& discTypeRegistry,
+                                                    DiscTypeResolver discTypeResolver) const
 {
-    if (!discTypeRegistry_)
-        throw ExceptionWithLocation("Need a valid disc type registry");
-
-    ReactionTable reactionTable(discTypeResolver_);
+    ReactionTable reactionTable(discTypeResolver);
 
     for (const auto& reaction : simulationConfig.reactions)
     {
-        DiscTypeID educt1 = discTypeRegistry_->getIDFor(reaction.educt1);
+        DiscTypeID educt1 = discTypeRegistry.getIDFor(reaction.educt1);
         std::optional<DiscTypeID> educt2 =
-            reaction.educt2.empty() ? std::nullopt : std::make_optional(discTypeRegistry_->getIDFor(reaction.educt2));
+            reaction.educt2.empty() ? std::nullopt : std::make_optional(discTypeRegistry.getIDFor(reaction.educt2));
 
-        DiscTypeID product1 = discTypeRegistry_->getIDFor(reaction.product1);
-        std::optional<DiscTypeID> product2 = reaction.product2.empty()
-                                                 ? std::nullopt
-                                                 : std::make_optional(discTypeRegistry_->getIDFor(reaction.product2));
+        DiscTypeID product1 = discTypeRegistry.getIDFor(reaction.product1);
+        std::optional<DiscTypeID> product2 =
+            reaction.product2.empty() ? std::nullopt : std::make_optional(discTypeRegistry.getIDFor(reaction.product2));
 
         Reaction newReaction(educt1, educt2, product1, product2, reaction.probability);
         reactionTable.addReaction(newReaction);
@@ -106,34 +135,44 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
     return reactionTable;
 }
 
-ReactionEngine SimulationContext::buildReactionEngine() const
+ReactionEngine SimulationContext::buildReactionEngine(DiscTypeResolver discTypeResolver,
+                                                      SimulationTimeStepProvider simulationTimeStepProvider,
+                                                      const ReactionTable& reactionTable) const
 {
-    return ReactionEngine(discTypeResolver_, simulationTimeStepProvider_, *reactionTable_);
+    return ReactionEngine(discTypeResolver, simulationTimeStepProvider, reactionTable);
 }
-CollisionDetector SimulationContext::buildCollisionDetector() const
-{
-    return CollisionDetector(discTypeResolver_, maxRadiusProvider_);
-}
-CollisionHandler SimulationContext::buildCollisionHandler() const
-{
-    return CollisionHandler(discTypeResolver_);
-}
-Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) const
-{
-    std::vector<Disc> discs = getDiscsFromConfig(simulationConfig);
 
-    Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider_, discTypeResolver_,
+CollisionDetector SimulationContext::buildCollisionDetector(DiscTypeResolver discTypeResolver,
+                                                            MaxRadiusProvider maxRadiusProvider) const
+{
+    return CollisionDetector(discTypeResolver, maxRadiusProvider);
+}
+
+CollisionHandler SimulationContext::buildCollisionHandler(DiscTypeResolver discTypeResolver) const
+{
+    return CollisionHandler(discTypeResolver);
+}
+
+Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
+                                  SimulationTimeStepProvider simulationTimeStepProvider,
+                                  DiscTypeResolver discTypeResolver) const
+{
+    std::vector<Disc> discs = getDiscsFromConfig(simulationConfig, maxRadiusProvider);
+
+    Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider, discTypeResolver,
               Dimensions{simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight}, std::move(discs));
 
     return cell;
 }
-std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
+std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig,
+                                                        MaxRadiusProvider maxRadiusProvider) const
 {
     if (simulationConfig.setup.useDistribution)
-        return createDiscGridFromDistribution(simulationConfig);
+        return createDiscGridFromDistribution(simulationConfig, maxRadiusProvider);
 
     return createDiscsDirectly(simulationConfig);
 }
+
 std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig& simulationConfig) const
 {
     std::vector<Disc> discs;
@@ -149,7 +188,9 @@ std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig&
 
     return discs;
 }
-std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const SimulationConfig& simulationConfig) const
+
+std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
+                                                                    MaxRadiusProvider maxRadiusProvider) const
 {
     if (simulationConfig.setup.distribution.empty() || simulationConfig.setup.discCount == 0)
         throw ExceptionWithLocation("Must provider either discs or disc type distribution with disc count");
@@ -169,7 +210,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
     discs.reserve(simulationConfig.setup.discCount);
 
     std::vector<sf::Vector2d> discPositions = mathutils::calculateGrid(
-        simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight, maxRadiusProvider_());
+        simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight, maxRadiusProvider());
 
     if (simulationConfig.setup.discCount > static_cast<int>(discPositions.size()))
     {
@@ -211,6 +252,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
 
     return discs;
 }
+
 double SimulationContext::calculateDistributionSum(const std::map<std::string, double>& distribution) const
 {
     return std::accumulate(distribution.begin(), distribution.end(), 0,

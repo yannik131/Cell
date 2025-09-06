@@ -2,9 +2,11 @@
 #include "cell/Settings.hpp"
 #include "core/ColorMapping.hpp"
 #include "core/SafeCast.hpp"
+#include "core/Utility.hpp"
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
+#include "models/DiscTypesTableModel.hpp"
 #include "ui_DiscTypesDialog.h"
 
 #include "DiscTypesDialog.hpp"
@@ -19,11 +21,12 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->setupUi(this);
 
     connect(ui->okPushButton, &QPushButton::clicked,
-            [this]()
-            {
-                discTypesTableModel_->commitChanges();
-                hide();
-            });
+            utility::safeSlot(this,
+                              [this]()
+                              {
+                                  discTypesTableModel_->commitChanges();
+                                  hide();
+                              }));
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &DiscTypesDialog::cancel);
     connect(ui->addTypePushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::addEmptyRow);
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::clearRows);

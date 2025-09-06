@@ -2,7 +2,6 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 
-#include "ReactionsTableModel.hpp"
 #include <optional>
 #include <unordered_set>
 
@@ -180,7 +179,10 @@ void ReactionsTableModel::clearRows()
 
 void ReactionsTableModel::commitChanges()
 {
-    abstractSimulationBuilder_->getSimulationConfig().reactions = rows_;
+    auto config = abstractSimulationBuilder_->getSimulationConfig();
+    config.reactions = rows_;
+
+    abstractSimulationBuilder_->setSimulationConfig(config);
 }
 
 void ReactionsTableModel::discardChanges()

@@ -1,6 +1,7 @@
 #ifndef SIMULATIONCONFIG_HPP
 #define SIMULATIONCONFIG_HPP
 
+#include "Settings.hpp"
 #include "Vector2d.hpp"
 
 #include <map>
@@ -35,14 +36,15 @@ struct Reaction
 
 struct Setup
 {
-    double cellWidth;
-    double cellHeight;
-    double simulationTimeStep;
+    double cellWidth = SettingsLimits::MinCellWidth;
+    double cellHeight = SettingsLimits::MinCellHeight;
+    double simulationTimeStep = SettingsLimits::MinSimulationTimeStep.asSeconds();
     double simulationTimeScale = 1;
     bool useDistribution = false;
 
     // In case of distribution:
-    int discCount;
+    int discCount = SettingsLimits::MinNumberOfDiscs;
+    ;
     std::map<std::string, double> distribution;
 
     // In case not:

@@ -1,8 +1,6 @@
 #ifndef DISCTYPESDIALOG_HPP
 #define DISCTYPESDIALOG_HPP
 
-#include "models/DiscTypesTableModel.hpp"
-
 #include <QDialog>
 #include <QStandardItemModel>
 
@@ -10,6 +8,9 @@ namespace Ui
 {
 class DiscTypesDialog;
 };
+
+class DiscTypesTableModel;
+class AbstractSimulationBuilder;
 
 /**
  * @brief Dialog where the user can create/delete disc types and specify how many of them should be created initially

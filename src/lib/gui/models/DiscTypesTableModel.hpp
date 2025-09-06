@@ -2,30 +2,30 @@
 #define DISCTYPESTABLEMODEL_HPP
 
 #include "cell/SimulationConfig.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 
 #include <QAbstractTableModel>
 #include <QVector>
 
 #include <SFML/Graphics/Color.hpp>
 
-/**
- * @brief Model for managing the disc type distribution of the simulation. Used to display the distribution in the
- * DiscTypesDialog
- */
+class AbstractSimulationBuilder;
+
 class DiscTypesTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Creates the model with the injected `AbstractSimulationBuilder` providing direct access to the config
+     */
     explicit DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
     /**
-     * @returns Number of disc types in the currently edited distribution
+     * @returns Number of disc types
      */
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
-     * @returns 6: Disc type name, radius, mass, color, frequency, delete button
+     * @returns 5: Disc type name, radius, mass, color, delete button
      */
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
@@ -46,13 +46,12 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     /**
-     * @brief The disc type distribution table has now columns that can't be edited or selected
+     * @brief All columns can be edited here
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
-     * @brief Creates a new row with a default disc type, used to add new disc types since we can't make any assumptions
-     * about new ones
+     * @brief Creates a new row with a default disc type
      */
     void addEmptyRow();
 
@@ -66,7 +65,14 @@ public:
      */
     void clearRows();
 
+    /**
+     * @brief Sets the disc types using the injected dependency
+     */
     void commitChanges();
+
+    /**
+     * @brief Reloads the disc types from the injected dependency
+     */
     void discardChanges();
 
 private:

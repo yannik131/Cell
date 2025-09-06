@@ -12,11 +12,13 @@ using DiscTypeObserver = std::function<bool(const std::vector<cell::config::Disc
 class AbstractSimulationBuilder
 {
 public:
-    virtual cell::SimulationConfig& getSimulationConfig() = 0;
+    virtual const cell::SimulationConfig& getSimulationConfig() const = 0;
+    virtual void setSimulationConfig(const cell::SimulationConfig& simulationConfig) = 0;
 
-    virtual std::map<std::string, sf::Color>& getDiscTypeColorMap() = 0;
+    virtual const std::map<std::string, sf::Color>& getDiscTypeColorMap() const = 0;
+    virtual void setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap) = 0;
+
     virtual void registerDiscTypeObserver(DiscTypeObserver observer) = 0;
-    virtual void notifyDiscTypeObservers() = 0;
 };
 
 #endif /* ABSTRACTSIMULATIONBUILDER_HPP */

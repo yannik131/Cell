@@ -1,7 +1,7 @@
 #include "models/DiscTypesTableModel.hpp"
+#include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
 
-#include "DiscTypesTableModel.hpp"
 #include <set>
 
 DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
@@ -124,10 +124,11 @@ void DiscTypesTableModel::clearRows()
 
 void DiscTypesTableModel::commitChanges()
 {
-    abstractSimulationBuilder_->getSimulationConfig().discTypes = rows_;
-    abstractSimulationBuilder_->getDiscTypeColorMap() = discTypeColorMap_;
+    auto config = abstractSimulationBuilder_->getSimulationConfig();
+    config.discTypes = rows_;
 
-    abstractSimulationBuilder_->notifyDiscTypeObservers();
+    abstractSimulationBuilder_->setSimulationConfig(config);
+    abstractSimulationBuilder_->setDiscTypeColorMap(discTypeColorMap_);
 }
 
 void DiscTypesTableModel::discardChanges()

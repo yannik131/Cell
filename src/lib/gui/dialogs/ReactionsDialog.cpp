@@ -4,6 +4,7 @@
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
+#include "models/ReactionsTableModel.hpp"
 #include "ui_ReactionsDialog.h"
 
 #include <QCloseEvent>

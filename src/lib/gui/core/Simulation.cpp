@@ -32,7 +32,7 @@ void Simulation::run()
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
 
-            simulationContext.getCell().update();
+            simulationContext_.getCell().update();
             emitFrameData();
         }
     }
@@ -40,7 +40,7 @@ void Simulation::run()
 
 void Simulation::buildContext()
 {
-    tryBuildContext(true);
+    simulationContext_.buildContextFromConfig(simulationConfig_);
 }
 
 void Simulation::emitFrameData(bool noTimeElapsed)
@@ -48,12 +48,25 @@ void Simulation::emitFrameData(bool noTimeElapsed)
     // TODO
 }
 
-cell::SimulationConfig& Simulation::getSimulationConfig()
+const cell::SimulationConfig& Simulation::getSimulationConfig() const
 {
     return simulationConfig_;
 }
 
-std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap()
+void Simulation::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
+{
+    simulationContext_.buildContextFromConfig(simulationConfig);
+    simulationConfig_ = simulationConfig;
+
+    notifyDiscTypeObservers();
+}
+
+void Simulation::setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap)
+{
+    discTypeColorMap_ = discTypeColorMap;
+}
+
+const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
 {
     return discTypeColorMap_;
 }
@@ -72,18 +85,4 @@ void Simulation::notifyDiscTypeObservers()
         else
             iter = observers_.erase(iter);
     }
-}
-
-void Simulation::tryBuildContext(bool throwIfIncomplete)
-{
-    if (simulationConfig_.discTypes.empty() || !setupReceived_)
-    {
-        if (throwIfIncomplete)
-            throw ExceptionWithLocation(
-                "Can't build simulation context: Incomplete setup (disc types or setup information missing)");
-        else
-            return;
-    }
-
-    simulationContext.buildContextFromConfig(simulationConfig_);
 }

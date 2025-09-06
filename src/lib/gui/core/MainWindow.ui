@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1274</width>
+    <width>1212</width>
     <height>894</height>
    </rect>
   </property>
@@ -14,13 +14,13 @@
    <string>Discs</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="3,3,2">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="4,4,1" columnminimumwidth="0,0,0">
     <item row="0" column="0">
      <widget class="SimulationWidget" name="simulationWidget" native="true">
       <property name="minimumSize">
        <size>
-        <width>50</width>
-        <height>50</height>
+        <width>0</width>
+        <height>0</height>
        </size>
       </property>
      </widget>
@@ -45,7 +45,14 @@
      </widget>
     </item>
     <item row="0" column="2">
-     <widget class="SimulationControlWidget" name="simulationControlWidget" native="true"/>
+     <widget class="SimulationControlWidget" name="simulationControlWidget" native="true">
+      <property name="maximumSize">
+       <size>
+        <width>120</width>
+        <height>300</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -54,7 +61,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1274</width>
+     <width>1212</width>
      <height>21</height>
     </rect>
    </property>

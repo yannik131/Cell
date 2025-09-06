@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>SetupDialog</class>
+ <widget class="QDialog" name="SetupDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -18,16 +18,16 @@
     <widget class="QWidget" name="widget_10" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
-       <widget class="QRadioButton" name="radioButton">
+       <widget class="QRadioButton" name="useDistributionRadioButton">
         <property name="text">
          <string>Use distribution</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="radioButton_2">
+       <widget class="QRadioButton" name="manualSetupRadioButton">
         <property name="text">
-         <string>Manual</string>
+         <string>Manual setup</string>
         </property>
        </widget>
       </item>
@@ -70,7 +70,45 @@
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="listView_2"/>
+          <widget class="QTableView" name="tableView_2"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="widget_13" native="true">
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QPushButton" name="addDistributionEntryPushButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearDistributionPushButton">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -79,7 +117,39 @@
        <widget class="QWidget" name="widget_2" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QListView" name="listView"/>
+          <widget class="QTableView" name="tableView"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="widget_14" native="true">
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QPushButton" name="addDiscPushButton">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="clearDiscsPushButton">
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Clear</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -163,7 +233,7 @@
          <item>
           <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>Height</string>
+            <string>Cell height</string>
            </property>
           </widget>
          </item>
@@ -179,7 +249,7 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Width</string>
+            <string>Cell width</string>
            </property>
           </widget>
          </item>
@@ -206,7 +276,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="fpsSpinBox">
+          <widget class="QSpinBox" name="GUIFPSSpinBox">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -231,7 +301,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="okPushButton">
         <property name="maximumSize">
          <size>
           <width>75</width>
@@ -244,7 +314,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="cancelPushButton">
         <property name="maximumSize">
          <size>
           <width>75</width>

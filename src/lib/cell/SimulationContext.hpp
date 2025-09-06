@@ -14,6 +14,21 @@
 namespace cell
 {
 
+class InvalidDiscTypesException : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
+class InvalidReactionsException : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
+class InvalidSetupException : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
 class SimulationContext
 {
 public:
@@ -30,15 +45,22 @@ private:
     void setSimulationTimeStep(const sf::Time& simulationTimeStep);
     void setSimulationTimeScale(double simulationTimeScale);
     DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
-    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig) const;
-    ReactionEngine buildReactionEngine() const;
-    CollisionDetector buildCollisionDetector() const;
-    CollisionHandler buildCollisionHandler() const;
-    Cell buildCell(const SimulationConfig& simulationConfig) const;
+    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig, const DiscTypeRegistry& discTypeRegistry,
+                                     DiscTypeResolver discTypeResolver) const;
+    ReactionEngine buildReactionEngine(DiscTypeResolver discTypeResolver,
+                                       SimulationTimeStepProvider simulationTimeStepProvider,
+                                       const ReactionTable& reactionTable) const;
+    CollisionDetector buildCollisionDetector(DiscTypeResolver discTypeResolver,
+                                             MaxRadiusProvider maxRadiusProvider) const;
+    CollisionHandler buildCollisionHandler(DiscTypeResolver discTypeResolver) const;
+    Cell buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
+                   SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver) const;
 
-    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig) const;
+    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig,
+                                         MaxRadiusProvider maxRadiusProvider) const;
     std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
-    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig) const;
+    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
+                                                     MaxRadiusProvider maxRadiusProvider) const;
 
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
 
@@ -59,10 +81,6 @@ private:
      * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
     double simulationTimeScale_ = 1.0;
-
-    SimulationTimeStepProvider simulationTimeStepProvider_;
-    MaxRadiusProvider maxRadiusProvider_;
-    DiscTypeResolver discTypeResolver_;
 
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
     std::unique_ptr<ReactionTable> reactionTable_;

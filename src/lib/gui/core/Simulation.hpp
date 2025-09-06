@@ -35,22 +35,24 @@ public:
      */
     void emitFrameData(bool noTimeElapsed = false);
 
-    cell::SimulationConfig& getSimulationConfig() override;
-    std::map<std::string, sf::Color>& getDiscTypeColorMap() override;
+    const cell::SimulationConfig& getSimulationConfig() const override;
+    void setSimulationConfig(const cell::SimulationConfig& simulationConfig) override;
+
+    const std::map<std::string, sf::Color>& getDiscTypeColorMap() const override;
+    void setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap) override;
+
     void registerDiscTypeObserver(DiscTypeObserver observer) override;
-    void notifyDiscTypeObservers() override;
 
 signals:
     void frameData(const FrameDTO& data);
 
 private:
-    void tryBuildContext(bool throwIfIncomplete = false);
+    void notifyDiscTypeObservers();
 
 private:
     cell::SimulationConfig simulationConfig_;
-    cell::SimulationContext simulationContext;
+    cell::SimulationContext simulationContext_;
     std::map<std::string, sf::Color> discTypeColorMap_;
-    bool setupReceived_ = false;
     std::vector<DiscTypeObserver> observers_;
 };
 

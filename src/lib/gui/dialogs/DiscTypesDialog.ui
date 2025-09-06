@@ -30,12 +30,12 @@
        <widget class="QPushButton" name="addTypePushButton">
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>75</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="text">
-         <string>Add type</string>
+         <string>Add</string>
         </property>
        </widget>
       </item>
@@ -43,7 +43,7 @@
        <widget class="QPushButton" name="clearTypesPushButton">
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>75</width>
           <height>16777215</height>
          </size>
         </property>
@@ -60,6 +60,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QPushButton" name="okPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>OK</string>
         </property>
@@ -67,6 +73,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="cancelPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Cancel</string>
         </property>

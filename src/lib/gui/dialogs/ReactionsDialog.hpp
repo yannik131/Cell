@@ -1,15 +1,15 @@
 #ifndef REACTIONSDIALOG_HPP
 #define REACTIONSDIALOG_HPP
 
-#include "delegates/ComboBoxDelegate.hpp"
-#include "models/ReactionsTableModel.hpp"
-
 #include <QDialog>
 
 namespace Ui
 {
 class ReactionsDialog;
 };
+
+class ReactionsTableModel;
+class AbstractSimulationBuilder;
 
 /**
  * @brief Dialog where the user can create/delete reactions
