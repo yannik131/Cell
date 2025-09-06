@@ -1,5 +1,9 @@
 #include "core/MainWindow.hpp"
 #include "cell/ExceptionWithLocation.hpp"
+#include "dialogs/DiscTypesDialog.hpp"
+#include "dialogs/PlotDataSelectionDialog.hpp"
+#include "dialogs/ReactionsDialog.hpp"
+#include "dialogs/SetupDialog.hpp"
 #include "ui_MainWindow.h"
 
 #include <glog/logging.h>
@@ -12,6 +16,7 @@ MainWindow::MainWindow(QWidget* parent)
     , simulation_(new Simulation())
     , discTypesDialog_(new DiscTypesDialog(this, simulation_.get()))
     , reactionsDialog_(new ReactionsDialog(this, simulation_.get()))
+    , setupDialog_(new SetupDialog(this, simulation_.get()))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
     , plotModel_(new PlotModel(this))
 {
@@ -42,6 +47,7 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
     connect(ui->simulationControlWidget, &SimulationControlWidget::editReactionsClicked, reactionsDialog_,
             &QDialog::show);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editSetupClicked, setupDialog_, &QDialog::show);
 
     ui->plotWidget->setModel(plotModel_);
 

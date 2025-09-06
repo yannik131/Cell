@@ -14,6 +14,7 @@ SetupModel::SetupModel(QObject* parent, DiscTypeDistributionTableModel* discType
 
 void SetupModel::commitChanges()
 {
+    auto config = abstractSimulationBuilder_->getSimulationConfig();
 }
 
 void SetupModel::discardChanges()

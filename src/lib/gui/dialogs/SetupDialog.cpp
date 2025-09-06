@@ -29,6 +29,19 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                                   hide();
                               }));
 
+    auto updateWidgets = [this](bool toggled)
+    {
+        bool enableDistributionWidget = toggled;
+        bool enableManualWidget = !toggled;
+
+        ui->distributionWidget->setEnabled(enableDistributionWidget);
+        ui->manualWidget->setEnabled(enableManualWidget);
+    };
+
+    connect(ui->useDistributionRadioButton, &QRadioButton::toggled, updateWidgets);
+    ui->useDistributionRadioButton->setChecked(true);
+    updateWidgets(true);
+
     ui->numberOfDiscsSpinBox->setRange(cell::SettingsLimits::MinNumberOfDiscs, cell::SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
                                   static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));

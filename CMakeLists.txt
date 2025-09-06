@@ -55,7 +55,7 @@ target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-file(GLOB_RECURSE QT_GUI_SRC RELATIVE ${CMAKE_SOURCE_DIR}
+file(GLOB_RECURSE QT_GUI_SRC ${CMAKE_SOURCE_DIR}
     src/lib/gui/*.cpp 
     src/lib/gui/*.hpp
 )

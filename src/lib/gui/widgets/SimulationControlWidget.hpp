@@ -25,6 +25,7 @@ signals:
     void simulationResetTriggered();
     void editDiscTypesClicked();
     void editReactionsClicked();
+    void editSetupClicked();
     void fitIntoViewRequested();
 
 private:

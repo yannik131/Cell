@@ -2,9 +2,6 @@
 #define MAINWINDOW_HPP
 
 #include "core/Simulation.hpp"
-#include "dialogs/DiscTypesDialog.hpp"
-#include "dialogs/PlotDataSelectionDialog.hpp"
-#include "dialogs/ReactionsDialog.hpp"
 #include "models/PlotModel.hpp"
 
 #include <QMainWindow>
@@ -15,6 +12,11 @@ namespace Ui
 {
 class MainWindow;
 }
+
+class DiscTypesDialog;
+class ReactionsDialog;
+class SetupDialog;
+class PlotDataSelectionDialog;
 
 /**
  * @brief Contains the simulation thread to start/stop the simulation and connects various callbacks from the simulation
@@ -81,6 +83,7 @@ private:
 
     DiscTypesDialog* discTypesDialog_;
     ReactionsDialog* reactionsDialog_;
+    SetupDialog* setupDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
 
     PlotModel* plotModel_;
