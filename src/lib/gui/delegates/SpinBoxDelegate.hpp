@@ -71,4 +71,6 @@ public:
     }
 };
 
+void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, int column);
+
 #endif /* SPINBOXDELEGATE_HPP */

@@ -37,30 +37,11 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
-    using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
+    insertDeleteButtonIntoView(this, reactionsTableModel_, ui->reactionsTableView, 8);
+    insertDiscTypeComboboxIntoView(ui->reactionsTableView, abstractSimulationBuilder, 0, 2, 4, 6);
+    insertProbabilitySpinBoxIntoView(ui->reactionsTableView, 7);
 
-    auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
-    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(this, abstractSimulationBuilder);
-    auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(this);
-
-    connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, reactionsTableModel_,
-            &ReactionsTableModel::removeRow);
-    connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
-            [](QWidget* spinBox)
-            {
-                safeCast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
-                safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
-                safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
-            });
-
-    ui->reactionsTableView->setItemDelegateForColumn(0, discTypeComboBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(2, discTypeComboBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(4, discTypeComboBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(6, discTypeComboBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(7, probabilitySpinBoxDelegate);
-    ui->reactionsTableView->setItemDelegateForColumn(8, deleteButtonDelegate);
-    ui->reactionsTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
-                                            QAbstractItemView::EditTrigger::SelectedClicked);
+    ui->reactionsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }

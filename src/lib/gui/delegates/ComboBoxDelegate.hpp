@@ -3,6 +3,7 @@
 
 #include "core/AbstractSimulationBuilder.hpp"
 
+#include <QAbstractItemView>
 #include <QComboBox>
 #include <QStyledItemDelegate>
 
@@ -55,5 +56,15 @@ private:
 private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
+
+template <std::integral... Columns>
+void insertDiscTypeComboboxIntoView(QAbstractItemView* view, AbstractSimulationBuilder* abstractSimulationBuilder,
+                                    Columns... columns)
+{
+    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(view, abstractSimulationBuilder);
+    (view->setItemDelegateForColumn(columns, discTypeComboBoxDelegate), ...);
+    view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
+                          QAbstractItemView::EditTrigger::SelectedClicked);
+}
 
 #endif /* COMBOBOXDELEGATE_HPP */

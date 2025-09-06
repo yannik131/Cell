@@ -16,6 +16,14 @@ public:
     explicit SetupModel(QObject* parent, DiscTypeDistributionTableModel* discTypeDistributionTableModel,
                         DiscTableModel* discTableModel, AbstractSimulationBuilder* abstractSimulationBuilder);
 
+    void setUseDistribution(bool useDistribution);
+    void setNumberOfDiscs(int numberOfDiscs);
+    void setTimeStep(int timeStep);
+    void setTimeScale(int timeScale);
+    void setCellWidth(int cellWidth);
+    void setCellHeight(int cellHeight);
+    void setGUIFPS(int GUIFPS);
+
     // TODO make an interface out of this, there's 3 dialogs and models doing the same shit
     void commitChanges();
     void discardChanges();

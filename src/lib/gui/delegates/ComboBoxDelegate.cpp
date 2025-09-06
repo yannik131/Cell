@@ -3,6 +3,7 @@
 #include "core/SafeCast.hpp"
 #include "core/Utility.hpp"
 
+#include <QAbstractItemView>
 #include <QPointer>
 
 ComboBoxDelegate::ComboBoxDelegate(QObject* parent)

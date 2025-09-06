@@ -1,6 +1,8 @@
 #ifndef BUTTONDELEGATE_HPP
 #define BUTTONDELEGATE_HPP
 
+#include <QAbstractItemView>
+#include <QDebug>
 #include <QStyledItemDelegate>
 
 /**
@@ -33,5 +35,17 @@ signals:
 private:
     QString text_;
 };
+
+template <typename T> void insertDeleteButtonIntoView(QDialog* dialog, T* model, QAbstractItemView* view, int column)
+{
+    auto* deleteButtonDelegate = new ButtonDelegate(view, "Delete");
+    QObject::connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked,
+                     [model](int row)
+                     {
+                         model->removeRow(row);
+                         qDebug() << row;
+                     });
+    view->setItemDelegateForColumn(column, deleteButtonDelegate);
+}
 
 #endif /* BUTTONDELEGATE_HPP */

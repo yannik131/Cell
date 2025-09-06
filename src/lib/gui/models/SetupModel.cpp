@@ -12,6 +12,42 @@ SetupModel::SetupModel(QObject* parent, DiscTypeDistributionTableModel* discType
 {
 }
 
+void SetupModel::setUseDistribution(bool useDistribution)
+{
+    setup_.useDistribution = useDistribution;
+}
+
+void SetupModel::setNumberOfDiscs(int numberOfDiscs)
+{
+    setup_.discCount = numberOfDiscs;
+}
+
+void SetupModel::setTimeStep(int timeStep)
+{
+    setup_.simulationTimeStep = timeStep;
+}
+
+void SetupModel::setTimeScale(int timeScale)
+{
+    setup_.simulationTimeScale = timeScale;
+}
+
+void SetupModel::setCellWidth(int cellWidth)
+{
+
+    setup_.cellWidth = cellWidth;
+}
+
+void SetupModel::setCellHeight(int cellHeight)
+{
+    setup_.cellHeight = cellHeight;
+}
+
+void SetupModel::setGUIFPS(int GUIFPS)
+{
+    // TODO
+}
+
 void SetupModel::commitChanges()
 {
     auto config = abstractSimulationBuilder_->getSimulationConfig();

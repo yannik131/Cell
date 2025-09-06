@@ -1,9 +1,12 @@
 #ifndef EXCEPTIONWITHLOCATION_HPP
 #define EXCEPTIONWITHLOCATION_HPP
 
+#include <filesystem>
 #include <source_location>
 #include <sstream>
 #include <stdexcept>
+
+namespace fs = std::filesystem;
 
 /**
  * @brief This is really just an experiment to see if giving additional information for exceptions is useful when
@@ -14,19 +17,10 @@ class ExceptionWithLocation : public std::runtime_error
 {
 public:
     ExceptionWithLocation(const std::string& description,
-                          const std::source_location location = std::source_location::current())
-        : std::runtime_error(buildMessage(description, location))
-    {
-    }
+                          const std::source_location location = std::source_location::current());
 
 private:
-    static std::string buildMessage(const std::string& description, const std::source_location& location)
-    {
-        std::ostringstream oss;
-        oss << "Error:\t" << description << "\nLine:\t" << location.file_name() << ":" << location.line()
-            << "\nFunction:\t" << location.function_name();
-        return oss.str();
-    }
+    static std::string buildMessage(const std::string& description, const std::source_location& location);
 };
 
 #endif /* EXCEPTIONWITHLOCATION_HPP */

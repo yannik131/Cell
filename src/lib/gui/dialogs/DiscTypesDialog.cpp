@@ -34,7 +34,8 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
-    auto* deleteButtonDelegate = new ButtonDelegate(this, "Delete");
+
+    insertDeleteButtonIntoView(this, discTypesTableModel_, ui->discTypesTableView, 4);
 
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
@@ -50,15 +51,13 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
                 safeCast<QDoubleSpinBox*>(spinBox)->setRange(cell::DiscTypeLimits::MinMass,
                                                              cell::DiscTypeLimits::MaxMass);
             });
-    connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, discTypesTableModel_,
-            &DiscTypesTableModel::removeRow);
 
     ui->discTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
     ui->discTypesTableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
     ui->discTypesTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
-    ui->discTypesTableView->setItemDelegateForColumn(4, deleteButtonDelegate);
     ui->discTypesTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                                             QAbstractItemView::EditTrigger::SelectedClicked);
+    ui->discTypesTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->discTypesTableView->setModel(discTypesTableModel_);
 }
