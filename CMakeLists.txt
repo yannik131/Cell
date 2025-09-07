@@ -26,7 +26,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
-find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
@@ -70,7 +70,13 @@ target_include_directories(libcellgui PUBLIC
     ${CMAKE_SOURCE_DIR}/src/lib/
 )
 
-target_link_libraries(libcellgui libcell Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+target_link_libraries(libcellgui PUBLIC 
+    libcell 
+    Qt6::Core 
+    Qt6::Widgets 
+    Qt6::OpenGLWidgets 
+    qcustomplot
+)
 
 add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
 target_link_libraries(cell-gui libcellgui)
@@ -91,7 +97,7 @@ target_link_libraries(playground PRIVATE
     nlohmann_json::nlohmann_json
 )
 
-# testing
+# tests for cell
 enable_testing()
 
 find_package(GTest REQUIRED)
@@ -112,3 +118,11 @@ target_include_directories(tests-libcell PUBLIC
 
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)
+
+# tests for gui
+add_executable(tests-gui ${PROJECT_SOURCE_DIR}/test/libcellgui/e2e/DiscTypesTest.cpp)
+
+target_link_libraries(tests-gui PRIVATE 
+    libcellgui 
+    Qt::Test
+)
