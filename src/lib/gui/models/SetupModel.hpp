@@ -18,8 +18,8 @@ public:
 
     void setUseDistribution(bool useDistribution);
     void setNumberOfDiscs(int numberOfDiscs);
-    void setTimeStep(int timeStep);
-    void setTimeScale(int timeScale);
+    void setTimeStepUs(int timeStepUs);
+    void setTimeScale(double timeScale);
     void setCellWidth(int cellWidth);
     void setCellHeight(int cellHeight);
     void setGUIFPS(int GUIFPS);
@@ -27,6 +27,10 @@ public:
     // TODO make an interface out of this, there's 3 dialogs and models doing the same shit
     void commitChanges();
     void discardChanges();
+    const cell::config::Setup& getSetup();
+
+private:
+    void loadDiscsAndDistribution();
 
 private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;

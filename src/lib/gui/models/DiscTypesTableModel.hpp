@@ -8,6 +8,8 @@
 
 #include <SFML/Graphics/Color.hpp>
 
+#include <unordered_set>
+
 class AbstractSimulationBuilder;
 
 class DiscTypesTableModel : public QAbstractTableModel
@@ -76,8 +78,13 @@ public:
     void discardChanges();
 
 private:
+    void removeRemovedDiscTypes(cell::SimulationConfig& config);
+    void updateDiscTypes(cell::SimulationConfig& config, const std::vector<cell::config::DiscType>& originalDiscTypes);
+
+private:
     std::vector<cell::config::DiscType> rows_;
     std::map<std::string, sf::Color> discTypeColorMap_;
+    std::unordered_set<std::string> removedDiscTypes_;
 
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };

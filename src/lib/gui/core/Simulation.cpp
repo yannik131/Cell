@@ -18,7 +18,7 @@ void Simulation::run()
     sf::Time timeSinceLastUpdate;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
-    auto simulationTimeScale = static_cast<float>(simulationConfig_.setup.simulationTimeScale);
+    auto simulationTimeScale = 1.0f;
     auto simulationTimeStep = sf::seconds(static_cast<float>(simulationConfig_.setup.simulationTimeStep));
 
     while (true)

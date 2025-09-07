@@ -23,6 +23,7 @@ public:
     void removeRow(int row);
     void addRow();
     void clearRows();
+    const std::vector<cell::config::Disc>& getRows() const;
 
 private:
     std::vector<cell::config::Disc> rows_;

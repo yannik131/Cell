@@ -40,13 +40,6 @@ double abs(const sf::Vector2d& vec)
     return std::hypot(vec.x, vec.y);
 }
 
-double getRandomFloat()
-{
-    static std::uniform_real_distribution<double> distribution(0, 1);
-
-    return distribution(gen);
-}
-
 std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength)
 {
     std::vector<sf::Vector2d> gridPoints;

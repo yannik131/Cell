@@ -38,7 +38,8 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
     if (v == 0)
     {
         // If the disc is stationary and wants to split apart, we'll give it a random velocity to do so
-        d1->setVelocity(sf::Vector2d{mathutils::getRandomFloat(), mathutils::getRandomFloat()} * 10.0);
+        d1->setVelocity(
+            sf::Vector2d{mathutils::getRandomNumber<double>(-10, 10), mathutils::getRandomNumber<double>(-10, 10)});
         v = mathutils::abs(d1->getVelocity());
     }
 

@@ -21,6 +21,9 @@ public:
     explicit SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
 private:
+    void displayCurrentSetup();
+
+private:
     Ui::SetupDialog* ui;
 
     DiscTypeDistributionTableModel* discTypeDistributionTableModel_;

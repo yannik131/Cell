@@ -1,6 +1,7 @@
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 
+#include "DiscTypeDistributionTableModel.hpp"
 #include <string>
 #include <unordered_set>
 
@@ -116,4 +117,9 @@ void DiscTypeDistributionTableModel::clearRows()
     beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
     rows_.clear();
     endRemoveRows();
+}
+
+const std::vector<std::pair<std::string, double>>& DiscTypeDistributionTableModel::getRows() const
+{
+    return rows_;
 }

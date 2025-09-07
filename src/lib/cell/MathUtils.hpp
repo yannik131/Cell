@@ -10,6 +10,7 @@
 #include <SFML/System/Time.hpp>
 
 #include <ostream>
+#include <random>
 #include <unordered_map>
 #include <utility>
 
@@ -73,19 +74,21 @@ namespace cell::mathutils
 double abs(const sf::Vector2d& vec);
 
 /**
- * @brief Returns a random double within [0, 1)
+ * @brief Returns a number in the given range
  */
-double getRandomFloat();
-
-/**
- * @return pair where pair.first <= pair.second
- */
-template <typename T> std::pair<T, T> makeOrderedPair(const T& a, const T& b)
+template <typename T> T getRandomNumber(std::type_identity_t<T> low, std::type_identity_t<T> high)
 {
-    if (a <= b)
-        return std::make_pair(a, b);
-
-    return std::make_pair(b, a);
+    static thread_local std::mt19937 gen{std::random_device{}()};
+    if constexpr (std::is_integral_v<T>)
+    {
+        std::uniform_int_distribution<T> dist(low, high);
+        return dist(gen);
+    }
+    else
+    {
+        std::uniform_real_distribution<T> dist(low, high);
+        return dist(gen);
+    }
 }
 
 /**

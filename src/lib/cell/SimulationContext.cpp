@@ -40,10 +40,8 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
 
     try
     {
-        setSimulationTimeStep(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
-        setSimulationTimeScale(simulationConfig.setup.simulationTimeScale);
-
-        auto simulationTimeStepProvider = [this]() -> double { return simulationTimeStep_.asSeconds(); };
+        auto simulationTimeStepProvider =
+            buildSimulationTimeStepProvider(sf::seconds(static_cast<float>(simulationConfig.setup.simulationTimeStep)));
         auto maxRadiusProvider = [this]() -> double { return discTypeRegistry_->getMaxRadius(); };
 
         reactionEngine_ = std::make_unique<ReactionEngine>(
@@ -84,20 +82,13 @@ DiscTypeMap<int> SimulationContext::getAndResetCollisionCounts()
     return collisionDetector_->getAndResetCollisionCounts();
 }
 
-void SimulationContext::setSimulationTimeStep(const sf::Time& simulationTimeStep)
+SimulationTimeStepProvider SimulationContext::buildSimulationTimeStepProvider(const sf::Time& simulationTimeStep)
 {
     throwIfNotInRange(simulationTimeStep, SettingsLimits::MinSimulationTimeStep, SettingsLimits::MaxSimulationTimeStep,
                       "simulation time step");
 
-    simulationTimeStep_ = simulationTimeStep;
-}
-
-void SimulationContext::setSimulationTimeScale(double simulationTimeScale)
-{
-    throwIfNotInRange(simulationTimeScale, SettingsLimits::MinSimulationTimeScale,
-                      SettingsLimits::MaxSimulationTimeScale, "simulation time scale");
-
-    simulationTimeScale_ = simulationTimeScale;
+    return std::function<double()>([simulationTimeStep]()
+                                   { return static_cast<double>(simulationTimeStep.asSeconds()); });
 }
 
 DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const
@@ -192,19 +183,18 @@ std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig&
 std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
                                                                     MaxRadiusProvider maxRadiusProvider) const
 {
-    if (simulationConfig.setup.distribution.empty() || simulationConfig.setup.discCount == 0)
-        throw ExceptionWithLocation("Must provider either discs or disc type distribution with disc count");
+    if (simulationConfig.setup.distribution.empty())
+        throw ExceptionWithLocation("Can't distribute discs: Empty distribution");
 
-    if (double total = calculateDistributionSum(simulationConfig.setup.distribution); std::abs(total - 100) > 1e-3)
+    if (double total = calculateDistributionSum(simulationConfig.setup.distribution); std::abs(total - 1) > 1e-3)
     {
-        throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100. They add up to " +
+        throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100%. They add up to " +
                                     std::to_string(total));
     }
 
     std::vector<Disc> discs;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> distribution(0, 100);
     std::uniform_real_distribution<double> velocityDistribution(-600.0, 600.0);
 
     discs.reserve(simulationConfig.setup.discCount);
@@ -232,11 +222,11 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
 
     for (int i = 0; i < simulationConfig.setup.discCount && !discPositions.empty(); ++i)
     {
-        int randomNumber = distribution(gen);
+        int randomNumber = mathutils::getRandomNumber<double>(0, 1);
 
         for (const auto& [discType, percentage] : discTypes)
         {
-            if (randomNumber < percentage || percentage == 100)
+            if (randomNumber < percentage)
             {
                 Disc newDisc(discType);
                 newDisc.setPosition(discPositions.back());
@@ -255,7 +245,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
 
 double SimulationContext::calculateDistributionSum(const std::map<std::string, double>& distribution) const
 {
-    return std::accumulate(distribution.begin(), distribution.end(), 0,
+    return std::accumulate(distribution.begin(), distribution.end(), 0.0,
                            [](double currentSum, auto& entryPair) { return currentSum + entryPair.second; });
 }
 

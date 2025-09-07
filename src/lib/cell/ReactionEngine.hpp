@@ -94,7 +94,7 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
     {
         for (const auto& reaction : possibleReactions)
         {
-            if (mathutils::getRandomFloat() > reaction.getProbability())
+            if (mathutils::getRandomNumber<double>(0, 1) > reaction.getProbability())
                 continue;
 
             return &reaction;
@@ -105,7 +105,7 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
         const auto dt = simulationTimeStepProvider_();
         for (const auto& reaction : possibleReactions)
         {
-            if (mathutils::getRandomFloat() > 1 - std::pow(1 - reaction.getProbability(), dt))
+            if (mathutils::getRandomNumber<double>(0, 1) > 1 - std::pow(1 - reaction.getProbability(), dt))
                 continue;
 
             return &reaction;

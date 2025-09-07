@@ -23,6 +23,7 @@ public:
     void removeRow(int row);
     void addRow();
     void clearRows();
+    const std::vector<std::pair<std::string, double>>& getRows() const;
 
 private:
     std::vector<std::pair<std::string, double>> rows_;

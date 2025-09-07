@@ -225,6 +225,9 @@
            <property name="singleStep">
             <double>1.000000000000000</double>
            </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
           </widget>
          </item>
         </layout>

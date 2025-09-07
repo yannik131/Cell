@@ -37,6 +37,7 @@ void Cell::update()
 
     for (auto& disc : discs_)
     {
+        // A -> B returns nothing, A -> B + C returns 1 new disc
         if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc))
             newDiscs.push_back(std::move(*newDisc));
 

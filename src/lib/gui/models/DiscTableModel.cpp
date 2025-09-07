@@ -126,3 +126,8 @@ void DiscTableModel::clearRows()
     rows_.clear();
     endRemoveRows();
 }
+
+const std::vector<cell::config::Disc>& DiscTableModel::getRows() const 
+{
+    return rows_;
+}

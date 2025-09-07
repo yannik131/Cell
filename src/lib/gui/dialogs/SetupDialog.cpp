@@ -1,4 +1,5 @@
 #include "dialogs/SetupDialog.hpp"
+#include "SetupDialog.hpp"
 #include "cell/Settings.hpp"
 #include "core/Utility.hpp"
 #include "delegates/ButtonDelegate.hpp"
@@ -51,7 +52,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
     connect(ui->clearDiscsPushButton, &QPushButton::clicked, discTableModel_, &DiscTableModel::clearRows);
 
     connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setNumberOfDiscs);
-    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStep);
+    connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
     connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellWidth);
     connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellHeight);
@@ -79,4 +80,15 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
 
     ui->discTypeDistributionTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->discsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    displayCurrentSetup();
+}
+void SetupDialog::displayCurrentSetup()
+{
+    const auto& setup = setupModel_->getSetup();
+    ui->numberOfDiscsSpinBox->setValue(setup.discCount);
+    ui->timeStepSpinBox->setValue(static_cast<int>(std::round(setup.simulationTimeStep * 1e6)));
+    ui->timeScaleDoubleSpinBox->setValue(setup.simulationTimeScale);
+    ui->cellWidthSpinBox->setValue(static_cast<int>(std::round(setup.cellWidth)));
+    ui->cellHeightSpinBox->setValue(static_cast<int>(std::round(setup.cellHeight)));
 }

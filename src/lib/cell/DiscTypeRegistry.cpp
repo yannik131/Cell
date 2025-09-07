@@ -9,6 +9,12 @@ namespace cell
 
 void cell::DiscTypeRegistry::setDiscTypes(std::vector<DiscType>&& discTypes)
 {
+    if (discTypes.empty())
+    {
+        discTypes_.clear();
+        return;
+    }
+
     const auto& MaxCount = std::numeric_limits<DiscTypeID>::max();
     if (discTypes.size() > MaxCount)
         throw ExceptionWithLocation("Too many disc types: Registry only supports " + std::to_string(MaxCount) +
