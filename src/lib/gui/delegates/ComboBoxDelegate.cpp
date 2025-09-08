@@ -47,18 +47,6 @@ QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOpt
     editor->addItems(getDiscTypeNames(abstractSimulationBuilder_->getSimulationConfig().discTypes));
     emit editorCreated(editor);
 
-    abstractSimulationBuilder_->registerDiscTypeObserver(
-        [editor = QPointer<QComboBox>(editor), this](const std::vector<cell::config::DiscType>& discTypes)
-        {
-            if (!editor)
-                return false;
-
-            editor->clear();
-            editor->addItems(getDiscTypeNames(discTypes));
-
-            return true;
-        });
-
     return editor;
 }
 

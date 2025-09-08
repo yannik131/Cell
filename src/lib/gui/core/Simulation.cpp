@@ -1,11 +1,10 @@
 #include "core/Simulation.hpp"
 #include "cell/ExceptionWithLocation.hpp"
-
-#include <QThread>
-#include <SFML/System/Clock.hpp>
+#include "core/SimulationConfigUpdater.hpp"
 
 #include "Simulation.hpp"
-#include <glog/logging.h>
+#include <QThread>
+#include <SFML/System/Clock.hpp>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
@@ -53,12 +52,27 @@ const cell::SimulationConfig& Simulation::getSimulationConfig() const
     return simulationConfig_;
 }
 
+void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                              const std::unordered_set<std::string>& removedDiscTypes)
+{
+    SimulationConfigUpdater updater;
+    auto changeMap = updater.createChangeMap(discTypes, simulationConfig_.discTypes, removedDiscTypes);
+
+    auto newConfig = simulationConfig_;
+    newConfig.discTypes = discTypes;
+    updater.removeDiscTypes(newConfig, removedDiscTypes);
+    updater.updateDiscTypes(newConfig, changeMap);
+
+    simulationContext_.buildContextFromConfig(newConfig);
+
+    simulationConfig_ = std::move(newConfig);
+    notifyConfigObservers();
+}
+
 void Simulation::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
     simulationContext_.buildContextFromConfig(simulationConfig);
     simulationConfig_ = simulationConfig;
-
-    notifyDiscTypeObservers();
 }
 
 void Simulation::setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap)
@@ -71,18 +85,13 @@ const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
     return discTypeColorMap_;
 }
 
-void Simulation::registerDiscTypeObserver(DiscTypeObserver observer)
+void Simulation::registerConfigObserver(ConfigObserver observer)
 {
     observers_.push_back(std::move(observer));
 }
 
-void Simulation::notifyDiscTypeObservers()
+void Simulation::notifyConfigObservers()
 {
-    for (auto iter = observers_.begin(); iter != observers_.end();)
-    {
-        if ((*iter)(simulationConfig_.discTypes))
-            ++iter;
-        else
-            iter = observers_.erase(iter);
-    }
+    for (const auto& observer : observers_)
+        observer(simulationConfig_);
 }

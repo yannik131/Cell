@@ -6,6 +6,13 @@ DiscTableModel::DiscTableModel(QObject* parent, AbstractSimulationBuilder* abstr
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
+    abstractSimulationBuilder_->registerConfigObserver(
+        [&](const cell::SimulationConfig& config)
+        {
+            beginResetModel();
+            rows_ = config.setup.discs;
+            endResetModel();
+        });
 }
 
 int DiscTableModel::rowCount(const QModelIndex& parent) const
@@ -127,7 +134,7 @@ void DiscTableModel::clearRows()
     endRemoveRows();
 }
 
-const std::vector<cell::config::Disc>& DiscTableModel::getRows() const 
+const std::vector<cell::config::Disc>& DiscTableModel::getRows() const
 {
     return rows_;
 }

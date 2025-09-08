@@ -9,6 +9,14 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent, AbstractSimulationBuil
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
+    abstractSimulationBuilder_->registerConfigObserver(
+        [&](const cell::SimulationConfig& config)
+        {
+            beginResetModel();
+            rows_ = config.reactions;
+            types_ = inferReactionTypes(rows_);
+            endResetModel();
+        });
 }
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const

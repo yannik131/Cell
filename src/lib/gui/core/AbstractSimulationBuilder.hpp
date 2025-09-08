@@ -6,19 +6,23 @@
 #include <SFML/Graphics/Color.hpp>
 
 #include <functional>
+#include <string>
+#include <unordered_set>
 
-using DiscTypeObserver = std::function<bool(const std::vector<cell::config::DiscType>&)>;
+using ConfigObserver = std::function<void(const cell::SimulationConfig& config)>;
 
 class AbstractSimulationBuilder
 {
 public:
     virtual const cell::SimulationConfig& getSimulationConfig() const = 0;
     virtual void setSimulationConfig(const cell::SimulationConfig& simulationConfig) = 0;
+    virtual void setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                              const std::unordered_set<std::string>& removedDiscTypes) = 0;
 
     virtual const std::map<std::string, sf::Color>& getDiscTypeColorMap() const = 0;
     virtual void setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap) = 0;
 
-    virtual void registerDiscTypeObserver(DiscTypeObserver observer) = 0;
+    virtual void registerConfigObserver(ConfigObserver observer) = 0;
 };
 
 #endif /* ABSTRACTSIMULATIONBUILDER_HPP */

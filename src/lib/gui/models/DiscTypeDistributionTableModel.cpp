@@ -10,6 +10,13 @@ DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
+    abstractSimulationBuilder_->registerConfigObserver(
+        [&](const cell::SimulationConfig& config)
+        {
+            beginResetModel();
+            rows_.assign(config.setup.distribution.begin(), config.setup.distribution.end());
+            endResetModel();
+        });
 }
 
 int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const

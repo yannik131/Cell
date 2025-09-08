@@ -65,7 +65,7 @@ bool DiscTypesTableModel::setData(const QModelIndex& index, const QVariant& valu
     switch (index.column())
     {
     case 0:
-        discType.name = value.toString().toStdString();
+        updateDiscTypeName(value.toString().toStdString(), index.row());
         break;
     case 1:
         discType.radius = value.toDouble();
@@ -132,12 +132,7 @@ void DiscTypesTableModel::clearRows()
 
 void DiscTypesTableModel::commitChanges()
 {
-    auto config = abstractSimulationBuilder_->getSimulationConfig();
-    removeRemovedDiscTypes(config);
-
-    updateDiscTypes(config, rows_);
-
-    abstractSimulationBuilder_->setSimulationConfig(config);
+    abstractSimulationBuilder_->setDiscTypes(rows_, removedDiscTypes_);
     abstractSimulationBuilder_->setDiscTypeColorMap(discTypeColorMap_);
 
     removedDiscTypes_.clear();
@@ -160,64 +155,12 @@ void DiscTypesTableModel::discardChanges()
     endInsertRows();
 }
 
-void DiscTypesTableModel::removeRemovedDiscTypes(cell::SimulationConfig& config)
+void DiscTypesTableModel::updateDiscTypeName(const std::string& newName, int row)
 {
-    config.discTypes.erase(std::remove_if(config.discTypes.begin(), config.discTypes.end(),
-                                          [&](const cell::config::DiscType& discType)
-                                          { return removedDiscTypes_.contains(discType.name); }),
-                           config.discTypes.end());
+    auto& discType = rows_[row];
+    auto color = discTypeColorMap_.at(discType.name);
+    discTypeColorMap_.erase(discType.name);
 
-    config.reactions.erase(std::remove_if(config.reactions.begin(), config.reactions.end(),
-                                          [&](const cell::config::Reaction& reaction)
-                                          {
-                                              return removedDiscTypes_.contains(reaction.educt1) ||
-                                                     removedDiscTypes_.contains(reaction.educt2) ||
-                                                     removedDiscTypes_.contains(reaction.product1) ||
-                                                     removedDiscTypes_.contains(reaction.product2);
-                                          }),
-                           config.reactions.end());
-
-    for (auto iter = config.setup.distribution.begin(); iter != config.setup.distribution.end();)
-    {
-        if (removedDiscTypes_.contains(iter->first))
-            iter = config.setup.distribution.erase(iter);
-        else
-            ++iter;
-    }
-
-    config.setup.discs.erase(std::remove_if(config.setup.discs.begin(), config.setup.discs.end(),
-                                            [&](const cell::config::Disc& disc)
-                                            { return removedDiscTypes_.contains(disc.discTypeName); }),
-                             config.setup.discs.end());
-}
-
-void DiscTypesTableModel::updateDiscTypes(cell::SimulationConfig& config,
-                                          const std::vector<cell::config::DiscType>& updatedDiscTypes)
-{
-    if (config.discTypes.size() > updatedDiscTypes.size())
-        throw std::logic_error(
-            "The original configuration can't contain more disc types than the new one after deleting deleted ones.");
-
-    // We'll map "" to "" to accomodate empty strings like in reactions
-    std::unordered_map<std::string, std::string> changeMap({{"", ""}});
-    for (std::size_t i = 0; i < config.discTypes.size(); ++i)
-        changeMap[config.discTypes[i].name] = updatedDiscTypes[i].name;
-
-    for (auto& reaction : config.reactions)
-    {
-        reaction.educt1 = changeMap[reaction.educt1];
-        reaction.educt2 = changeMap[reaction.educt2];
-        reaction.product1 = changeMap[reaction.product1];
-        reaction.product2 = changeMap[reaction.product2];
-    }
-
-    std::map<std::string, double> newDistribution;
-    for (const auto& [discType, frequency] : config.setup.distribution)
-        newDistribution[changeMap[discType]] = frequency;
-    config.setup.distribution = std::move(newDistribution);
-
-    for (auto& disc : config.setup.discs)
-        disc.discTypeName = changeMap[disc.discTypeName];
-
-    config.discTypes = updatedDiscTypes;
+    discType.name = newName;
+    discTypeColorMap_[newName] = color;
 }

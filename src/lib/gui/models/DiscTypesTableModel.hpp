@@ -78,8 +78,7 @@ public:
     void discardChanges();
 
 private:
-    void removeRemovedDiscTypes(cell::SimulationConfig& config);
-    void updateDiscTypes(cell::SimulationConfig& config, const std::vector<cell::config::DiscType>& originalDiscTypes);
+    void updateDiscTypeName(const std::string& newName, int row);
 
 private:
     std::vector<cell::config::DiscType> rows_;

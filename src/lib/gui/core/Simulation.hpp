@@ -37,23 +37,25 @@ public:
 
     const cell::SimulationConfig& getSimulationConfig() const override;
     void setSimulationConfig(const cell::SimulationConfig& simulationConfig) override;
+    void setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
+                      const std::unordered_set<std::string>& removedDiscTypes);
 
     const std::map<std::string, sf::Color>& getDiscTypeColorMap() const override;
     void setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap) override;
 
-    void registerDiscTypeObserver(DiscTypeObserver observer) override;
+    void registerConfigObserver(ConfigObserver observer) override;
 
 signals:
     void frameData(const FrameDTO& data);
 
 private:
-    void notifyDiscTypeObservers();
+    void notifyConfigObservers();
 
 private:
     cell::SimulationConfig simulationConfig_;
     cell::SimulationContext simulationContext_;
     std::map<std::string, sf::Color> discTypeColorMap_;
-    std::vector<DiscTypeObserver> observers_;
+    std::vector<ConfigObserver> observers_;
 };
 
 #endif /* SIMULATION_HPP */
