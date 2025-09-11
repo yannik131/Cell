@@ -7,6 +7,8 @@
 
 int main(int argc, char* argv[])
 {
+    qRegisterMetaType<FrameDTO>("FrameDTO");
+
     cell::initLogging(argc, argv);
     QApplication app(argc, argv);
 

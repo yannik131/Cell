@@ -132,8 +132,7 @@ void DiscTypesTableModel::clearRows()
 
 void DiscTypesTableModel::commitChanges()
 {
-    abstractSimulationBuilder_->setDiscTypes(rows_, removedDiscTypes_);
-    abstractSimulationBuilder_->setDiscTypeColorMap(discTypeColorMap_);
+    abstractSimulationBuilder_->setDiscTypes(rows_, removedDiscTypes_, discTypeColorMap_);
 
     removedDiscTypes_.clear();
 }

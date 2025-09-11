@@ -255,4 +255,9 @@ void SimulationContext::throwIfNotBuildYet() const
         throw ExceptionWithLocation("Simulation context was not yet fully built");
 }
 
+bool SimulationContext::isBuilt() const
+{
+    return built_;
+}
+
 } // namespace cell

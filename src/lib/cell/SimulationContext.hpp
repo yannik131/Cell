@@ -38,6 +38,7 @@ public:
 
     const DiscTypeRegistry& getDiscTypeRegistry() const;
     Cell& getCell();
+    bool isBuilt() const;
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 

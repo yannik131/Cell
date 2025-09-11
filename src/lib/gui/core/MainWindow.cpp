@@ -1,5 +1,6 @@
 #include "core/MainWindow.hpp"
 #include "cell/ExceptionWithLocation.hpp"
+#include "core/Utility.hpp"
 #include "dialogs/DiscTypesDialog.hpp"
 #include "dialogs/PlotDataSelectionDialog.hpp"
 #include "dialogs/ReactionsDialog.hpp"
@@ -22,21 +23,8 @@ MainWindow::MainWindow(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(simulation_.get(), &Simulation::frameData, ui->simulationWidget, &SimulationWidget::render);
-    connect(simulation_.get(), &Simulation::frameData, plotModel_, &PlotModel::addDataPointFromFrameDTO);
-
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStartClicked,
-            [this]()
-            {
-                try
-                {
-                    startSimulation();
-                }
-                catch (const std::exception& e)
-                {
-                    QMessageBox::critical(this, "Error", "Error starting the simulation: " + QString(e.what()));
-                }
-            });
+            utility::safeSlot(this, [this]() { startSimulation(); }));
     connect(ui->simulationControlWidget, &SimulationControlWidget::simulationStopClicked, this,
             &MainWindow::stopSimulation);
 
@@ -58,9 +46,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
     resizeTimer_.setSingleShot(true);
-    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrameData(true); });
+    connect(&resizeTimer_, &QTimer::timeout, [this]() { ui->simulationWidget->renderRequired(); });
 
-    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [this]() { simulation_->emitFrameData(true); });
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
             [this]()
             {
@@ -75,6 +62,15 @@ MainWindow::MainWindow(QWidget* parent)
                 ui->simulationWidget->resetView();
             });
 
+    connect(
+        simulation_.get(), &Simulation::frame, this,
+        [&](const FrameDTO& frame)
+        {
+            ui->simulationWidget->render(frame.discs_, simulation_->getDiscTypeResolver(),
+                                         simulation_->getDiscTypeColorMap());
+        },
+        Qt::QueuedConnection);
+
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);
 }
@@ -82,8 +78,8 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::resetSimulation()
 {
     stopSimulation();
-
     plotModel_->clear();
+    simulation_->rebuildContext();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -145,19 +141,14 @@ void MainWindow::startSimulation()
 {
     if (simulationThread_ != nullptr)
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
+    if (!simulation_->contextIsBuilt())
+        throw ExceptionWithLocation("Can't start simulation: Simulation context has not been built yet.");
 
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);
 
-    connect(simulationThread_, &QThread::started,
-            [&]()
-            {
-                simulation_->run();
-                simulation_->moveToThread(QCoreApplication::instance()->thread());
-                simulationThread_->quit();
-            });
-
-    connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater, Qt::QueuedConnection);
+    connect(simulationThread_, &QThread::started, simulation_.get(), &Simulation::run);
+    connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
     connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
 
     simulationThread_->start();

@@ -9,6 +9,8 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Clock.hpp>
 
+class AbstractSimulationBuilder;
+
 /**
  * @brief Widget displaying the simulation state by drawing a bunch of circles in different colors each frame based on
  * what is currently in the simulation
@@ -23,7 +25,8 @@ public slots:
     /**
      * @brief Clears the render window and displays circles based on the given `FrameDTO`
      */
-    void render(const FrameDTO& frameDTO);
+    void render(const std::vector<cell::Disc>& discs, const cell::DiscTypeResolver& discTypeResolver,
+                const std::map<std::string, sf::Color>& colorMap);
 
 private:
     std::vector<sf::CircleShape> circles_;

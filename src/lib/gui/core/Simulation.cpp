@@ -20,7 +20,7 @@ void Simulation::run()
     auto simulationTimeScale = 1.0f;
     auto simulationTimeStep = sf::seconds(static_cast<float>(simulationConfig_.setup.simulationTimeStep));
 
-    while (true)
+    while (!simulationContext_.getCell().getDiscs().empty())
     {
         if (QThread::currentThread()->isInterruptionRequested())
             break;
@@ -30,21 +30,22 @@ void Simulation::run()
         while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-
             simulationContext_.getCell().update();
-            emitFrameData();
+
+            emitFrameDTO();
         }
     }
 }
 
-void Simulation::buildContext()
+void Simulation::buildContext(const cell::SimulationConfig& config)
 {
-    simulationContext_.buildContextFromConfig(simulationConfig_);
+    simulationContext_.buildContextFromConfig(config);
+    emitFrameDTO();
 }
 
-void Simulation::emitFrameData(bool noTimeElapsed)
+void Simulation::rebuildContext()
 {
-    // TODO
+    buildContext(simulationConfig_);
 }
 
 const cell::SimulationConfig& Simulation::getSimulationConfig() const
@@ -53,7 +54,8 @@ const cell::SimulationConfig& Simulation::getSimulationConfig() const
 }
 
 void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                              const std::unordered_set<std::string>& removedDiscTypes)
+                              const std::unordered_set<std::string>& removedDiscTypes,
+                              const std::map<std::string, sf::Color>& discTypeColorMap)
 {
     SimulationConfigUpdater updater;
     auto changeMap = updater.createChangeMap(discTypes, simulationConfig_.discTypes, removedDiscTypes);
@@ -63,7 +65,8 @@ void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTyp
     updater.removeDiscTypes(newConfig, removedDiscTypes);
     updater.updateDiscTypes(newConfig, changeMap);
 
-    simulationContext_.buildContextFromConfig(newConfig);
+    discTypeColorMap_ = discTypeColorMap;
+    buildContext(newConfig);
 
     simulationConfig_ = std::move(newConfig);
     notifyConfigObservers();
@@ -71,13 +74,8 @@ void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTyp
 
 void Simulation::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
-    simulationContext_.buildContextFromConfig(simulationConfig);
+    buildContext(simulationConfig);
     simulationConfig_ = simulationConfig;
-}
-
-void Simulation::setDiscTypeColorMap(const std::map<std::string, sf::Color>& discTypeColorMap)
-{
-    discTypeColorMap_ = discTypeColorMap;
 }
 
 const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
@@ -87,11 +85,29 @@ const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
 
 void Simulation::registerConfigObserver(ConfigObserver observer)
 {
-    observers_.push_back(std::move(observer));
+    configObservers_.push_back(std::move(observer));
+}
+
+cell::DiscTypeResolver Simulation::getDiscTypeResolver() const
+{
+    return simulationContext_.getDiscTypeRegistry().getDiscTypeResolver();
+}
+
+bool Simulation::contextIsBuilt() const
+{
+    return simulationContext_.isBuilt();
 }
 
 void Simulation::notifyConfigObservers()
 {
-    for (const auto& observer : observers_)
+    for (const auto& observer : configObservers_)
         observer(simulationConfig_);
+}
+
+void Simulation::emitFrameDTO()
+{
+    FrameDTO frameDTO;
+    frameDTO.discs_ = simulationContext_.getCell().getDiscs();
+
+    emit frame(frameDTO);
 }
