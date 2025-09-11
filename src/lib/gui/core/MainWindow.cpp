@@ -62,14 +62,12 @@ MainWindow::MainWindow(QWidget* parent)
                 ui->simulationWidget->resetView();
             });
 
-    connect(
-        simulation_.get(), &Simulation::frame, this,
-        [&](const FrameDTO& frame)
-        {
-            ui->simulationWidget->render(frame.discs_, simulation_->getDiscTypeResolver(),
-                                         simulation_->getDiscTypeColorMap());
-        },
-        Qt::QueuedConnection);
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
+            [&](const FrameDTO& frame)
+            {
+                ui->simulationWidget->render(frame.discs_, simulation_->getDiscTypeResolver(),
+                                             simulation_->getDiscTypeColorMap());
+            });
 
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);
@@ -141,13 +139,21 @@ void MainWindow::startSimulation()
 {
     if (simulationThread_ != nullptr)
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
+
     if (!simulation_->contextIsBuilt())
         throw ExceptionWithLocation("Can't start simulation: Simulation context has not been built yet.");
 
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);
 
-    connect(simulationThread_, &QThread::started, simulation_.get(), &Simulation::run);
+    connect(simulationThread_, &QThread::started,
+            [&]()
+            {
+                simulation_->run();
+                simulation_->moveToThread(QCoreApplication::instance()->thread());
+                simulationThread_->quit();
+            });
+
     connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
     connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
 
