@@ -41,7 +41,6 @@ void Simulation::run()
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
     simulationContext_.buildContextFromConfig(config);
-    emitFrame(RedrawOnly{true});
 }
 
 void Simulation::rebuildContext()
@@ -70,6 +69,7 @@ void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTyp
     buildContext(newConfig);
 
     simulationConfig_ = std::move(newConfig);
+
     notifyConfigObservers();
 }
 
@@ -77,6 +77,7 @@ void Simulation::setSimulationConfig(const cell::SimulationConfig& simulationCon
 {
     buildContext(simulationConfig);
     simulationConfig_ = simulationConfig;
+    notifyConfigObservers();
 }
 
 const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
@@ -108,6 +109,8 @@ void Simulation::notifyConfigObservers()
 {
     for (const auto& observer : configObservers_)
         observer(simulationConfig_, discTypeColorMap_);
+
+    emitFrame(RedrawOnly{true});
 }
 
 void Simulation::emitFrame(RedrawOnly redrawOnly)

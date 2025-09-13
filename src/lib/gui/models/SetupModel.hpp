@@ -28,6 +28,9 @@ public:
     void discardChanges();
     const cell::config::Setup& getSetup();
 
+signals:
+    void reloaded();
+
 private:
     void loadDiscsAndDistribution();
 

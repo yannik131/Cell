@@ -184,7 +184,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
                                                                     MaxRadiusProvider maxRadiusProvider) const
 {
     if (simulationConfig.setup.distribution.empty())
-        throw ExceptionWithLocation("Can't distribute discs: Empty distribution");
+        return {};
 
     if (double total = calculateDistributionSum(simulationConfig.setup.distribution); std::abs(total - 1) > 1e-3)
     {

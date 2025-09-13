@@ -32,6 +32,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                                   setupModel_->discardChanges();
                                   reject();
                               }));
+    connect(setupModel_, &SetupModel::reloaded, this, &SetupDialog::displayCurrentSetup);
 
     auto updateWidgets = [this](bool on)
     {
@@ -85,6 +86,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
 void SetupDialog::displayCurrentSetup()
 {
     const auto& setup = setupModel_->getSetup();
+    ui->useDistributionRadioButton->setChecked(setup.useDistribution);
     ui->numberOfDiscsSpinBox->setValue(setup.discCount);
     ui->timeStepSpinBox->setValue(static_cast<int>(std::round(setup.simulationTimeStep * 1e6)));
     ui->timeScaleDoubleSpinBox->setValue(setup.simulationTimeScale);

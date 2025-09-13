@@ -54,7 +54,7 @@ struct Setup
      */
     double simulationTimeScale = 1;
 
-    bool useDistribution = false;
+    bool useDistribution = true;
 
     // In case of distribution:
     int discCount = SettingsLimits::MinNumberOfDiscs;
