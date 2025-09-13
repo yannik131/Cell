@@ -46,6 +46,8 @@ void Simulation::buildContext(const cell::SimulationConfig& config)
 void Simulation::rebuildContext()
 {
     buildContext(simulationConfig_);
+    notifyConfigObservers();
+    emitFrame(RedrawOnly{true});
 }
 
 const cell::SimulationConfig& Simulation::getSimulationConfig() const
