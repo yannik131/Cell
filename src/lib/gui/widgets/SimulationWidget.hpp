@@ -21,17 +21,20 @@ class SimulationWidget : public QSFMLWidget
 public:
     SimulationWidget(QWidget* parent);
 
+    void injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder);
+
 public slots:
     /**
      * @brief Clears the render window and displays circles based on the given `FrameDTO`
      */
-    void render(const std::vector<cell::Disc>& discs, const cell::DiscTypeResolver& discTypeResolver,
+    void render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
                 const std::map<std::string, sf::Color>& colorMap);
 
 private:
     std::vector<sf::CircleShape> circles_;
     sf::Clock clock_;
     sf::RectangleShape boundingRect_;
+    AbstractSimulationBuilder* abstractSimulationBuilder_ = nullptr;
 };
 
 #endif /* SIMULATIONWIDGET_HPP */

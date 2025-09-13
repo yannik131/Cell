@@ -22,9 +22,15 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
                               [this]()
                               {
                                   reactionsTableModel_->commitChanges();
-                                  hide();
+                                  accept();
                               }));
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &ReactionsDialog::cancel);
+    connect(ui->cancelPushButton, &QPushButton::clicked,
+            utility::safeSlot(this,
+                              [this]()
+                              {
+                                  reactionsTableModel_->discardChanges();
+                                  reject();
+                              }));
 
     connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
             utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); }));
@@ -49,10 +55,4 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
 void ReactionsDialog::closeEvent(QCloseEvent*)
 {
     reactionsTableModel_->discardChanges();
-}
-
-void ReactionsDialog::cancel()
-{
-    reactionsTableModel_->discardChanges();
-    hide();
 }

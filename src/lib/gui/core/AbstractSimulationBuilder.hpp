@@ -14,7 +14,8 @@ namespace cell
 class Disc;
 }
 
-using ConfigObserver = std::function<void(const cell::SimulationConfig& config)>;
+using ConfigObserver =
+    std::function<void(const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& discTypeColorMap)>;
 
 class AbstractSimulationBuilder
 {

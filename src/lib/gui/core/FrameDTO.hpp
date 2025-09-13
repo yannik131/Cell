@@ -15,7 +15,7 @@ struct FrameDTO
 {
     std::vector<cell::Disc> discs_;
     cell::DiscTypeMap<int> collisionCounts_;
-    long long elapsedSimulationTimeUs{};
+    long long elapsedSimulationTimeUs = 0;
 };
 
 Q_DECLARE_METATYPE(FrameDTO);

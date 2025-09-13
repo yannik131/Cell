@@ -7,7 +7,7 @@ DiscTableModel::DiscTableModel(QObject* parent, AbstractSimulationBuilder* abstr
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
     abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config)
+        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
         {
             beginResetModel();
             rows_ = config.setup.discs;

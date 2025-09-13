@@ -10,7 +10,7 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent, AbstractSimulationBuil
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
     abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config)
+        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
         {
             beginResetModel();
             rows_ = config.reactions;

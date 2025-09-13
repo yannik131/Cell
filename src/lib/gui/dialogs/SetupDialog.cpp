@@ -23,14 +23,14 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                               [this]()
                               {
                                   setupModel_->commitChanges();
-                                  hide();
+                                  accept();
                               }));
     connect(ui->cancelPushButton, &QPushButton::clicked,
             utility::safeSlot(this,
                               [this]()
                               {
                                   setupModel_->discardChanges();
-                                  hide();
+                                  reject();
                               }));
 
     auto updateWidgets = [this](bool on)
@@ -56,7 +56,6 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
     connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellWidth);
     connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellHeight);
-    connect(ui->GUIFPSSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setGUIFPS);
 
     ui->numberOfDiscsSpinBox->setRange(cell::SettingsLimits::MinNumberOfDiscs, cell::SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),

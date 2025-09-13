@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
     resizeTimer_.setSingleShot(true);
-    connect(&resizeTimer_, &QTimer::timeout, [this]() { ui->simulationWidget->renderRequired(); });
+    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
             [this]()
@@ -65,9 +65,12 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame)
             {
-                ui->simulationWidget->render(frame.discs_, simulation_->getDiscTypeResolver(),
+                ui->simulationWidget->render(frame, simulation_->getDiscTypeResolver(),
                                              simulation_->getDiscTypeColorMap());
             });
+    ui->simulationWidget->injectAbstractSimulationBuilder(simulation_.get());
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired,
+            [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);

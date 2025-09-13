@@ -44,11 +44,6 @@ void SetupModel::setCellHeight(int cellHeight)
     setup_.cellHeight = cellHeight;
 }
 
-void SetupModel::setGUIFPS(int GUIFPS)
-{
-    // TODO
-}
-
 void SetupModel::commitChanges()
 {
     loadDiscsAndDistribution();

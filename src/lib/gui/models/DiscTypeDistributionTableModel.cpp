@@ -11,7 +11,7 @@ DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
     abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config)
+        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
         {
             beginResetModel();
             rows_.assign(config.setup.distribution.begin(), config.setup.distribution.end());

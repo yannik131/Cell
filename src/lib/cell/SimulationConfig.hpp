@@ -44,7 +44,7 @@ struct Setup
      * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
      * able to keep up and start lagging
      */
-    double simulationTimeStep = SettingsLimits::MinSimulationTimeStep.asSeconds();
+    double simulationTimeStep = sf::milliseconds(1).asSeconds();
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.

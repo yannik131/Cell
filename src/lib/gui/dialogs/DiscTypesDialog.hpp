@@ -31,11 +31,6 @@ private:
      */
     void closeEvent(QCloseEvent* event) override;
 
-    /**
-     * @brief Hides the dialog and loads the settings again (see closeEvent)
-     */
-    void cancel();
-
 private:
     Ui::DiscTypesDialog* ui;
     DiscTypesTableModel* discTypesTableModel_;

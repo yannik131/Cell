@@ -2,13 +2,14 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include "Simulation.hpp"
 #include <QThread>
+#include <QTimer>
 #include <SFML/System/Clock.hpp>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
+    QTimer::singleShot(0, this, &Simulation::loadDefaultConfig);
 }
 
 void Simulation::run()
@@ -17,7 +18,7 @@ void Simulation::run()
     sf::Time timeSinceLastUpdate;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
-    auto simulationTimeScale = 1.0f;
+    auto simulationTimeScale = static_cast<float>(simulationConfig_.setup.simulationTimeScale);
     auto simulationTimeStep = sf::seconds(static_cast<float>(simulationConfig_.setup.simulationTimeStep));
 
     while (!simulationContext_.getCell().getDiscs().empty())
@@ -32,7 +33,7 @@ void Simulation::run()
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
             simulationContext_.getCell().update();
 
-            emitFrameDTO();
+            emitFrame(RedrawOnly{false});
         }
     }
 }
@@ -40,7 +41,7 @@ void Simulation::run()
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
     simulationContext_.buildContextFromConfig(config);
-    emitFrameDTO();
+    emitFrame(RedrawOnly{true});
 }
 
 void Simulation::rebuildContext()
@@ -98,16 +99,27 @@ bool Simulation::contextIsBuilt() const
     return simulationContext_.isBuilt();
 }
 
+void Simulation::loadDefaultConfig()
+{
+    simulationConfig_ = {};
+}
+
 void Simulation::notifyConfigObservers()
 {
     for (const auto& observer : configObservers_)
-        observer(simulationConfig_);
+        observer(simulationConfig_, discTypeColorMap_);
 }
 
-void Simulation::emitFrameDTO()
+void Simulation::emitFrame(RedrawOnly redrawOnly)
 {
+    if (!simulationContext_.isBuilt())
+        return;
+
     FrameDTO frameDTO;
     frameDTO.discs_ = simulationContext_.getCell().getDiscs();
+
+    if (!redrawOnly.value)
+        frameDTO.elapsedSimulationTimeUs = simulationConfig_.setup.simulationTimeStep * 1e6;
 
     emit frame(frameDTO);
 }

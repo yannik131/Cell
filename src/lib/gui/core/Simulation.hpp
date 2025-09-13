@@ -5,6 +5,7 @@
 #include "cell/SimulationContext.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/FrameDTO.hpp"
+#include "core/Types.hpp"
 
 #include <QObject>
 #include <SFML/System/Time.hpp>
@@ -42,12 +43,19 @@ public:
     cell::DiscTypeResolver getDiscTypeResolver() const;
     bool contextIsBuilt() const;
 
+    /**
+     * @todo Resets the internal config to a default constructed object and sends signals to all observers so that they
+     * display that config
+     */
+    void loadDefaultConfig();
+
+    void emitFrame(RedrawOnly redrawOnly);
+
 signals:
     void frame(const FrameDTO& frame);
 
 private:
     void notifyConfigObservers();
-    void emitFrameDTO();
 
 private:
     cell::SimulationConfig simulationConfig_;

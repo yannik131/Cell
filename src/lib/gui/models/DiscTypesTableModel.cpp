@@ -9,6 +9,14 @@ DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuil
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
+    abstractSimulationBuilder->registerConfigObserver(
+        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& discTypeColorMap)
+        {
+            beginResetModel();
+            rows_ = config.discTypes;
+            discTypeColorMap_ = discTypeColorMap;
+            endResetModel();
+        });
 }
 
 int DiscTypesTableModel::rowCount(const QModelIndex&) const

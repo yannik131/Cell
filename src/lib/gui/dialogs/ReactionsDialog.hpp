@@ -29,12 +29,6 @@ public:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    /**
-     * @brief Loads the settings and hides the dialog
-     */
-    void cancel();
-
-private:
     Ui::ReactionsDialog* ui;
     ReactionsTableModel* reactionsTableModel_;
 };
