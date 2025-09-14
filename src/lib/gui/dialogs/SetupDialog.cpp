@@ -29,10 +29,9 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
             utility::safeSlot(this,
                               [this]()
                               {
-                                  setupModel_->discardChanges();
+                                  setupModel_->reload();
                                   reject();
                               }));
-    connect(setupModel_, &SetupModel::reloaded, this, &SetupDialog::displayCurrentSetup);
 
     auto updateWidgets = [this](bool on)
     {
@@ -83,6 +82,13 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
 
     displayCurrentSetup();
 }
+
+void SetupDialog::showEvent(QShowEvent*)
+{
+    setupModel_->reload();
+    displayCurrentSetup();
+}
+
 void SetupDialog::displayCurrentSetup()
 {
     const auto& setup = setupModel_->getSetup();

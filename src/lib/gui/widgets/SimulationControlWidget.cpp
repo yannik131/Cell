@@ -12,6 +12,7 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     connect(ui->editReactionsPushButton, &QPushButton::clicked, [&]() { emit editReactionsClicked(); });
     connect(ui->editSetupPushButton, &QPushButton::clicked, [&]() { emit editSetupClicked(); });
     connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
+    connect(ui->fitIntoViewButton, &QPushButton::clicked, [&]() { emit fitIntoViewRequested(); });
     connect(ui->reinitializeButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
 }
 

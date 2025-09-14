@@ -54,10 +54,9 @@ void SetupModel::commitChanges()
     abstractSimulationBuilder_->setSimulationConfig(config);
 }
 
-void SetupModel::discardChanges()
+void SetupModel::reload()
 {
     setup_ = abstractSimulationBuilder_->getSimulationConfig().setup;
-    emit reloaded();
 }
 
 const cell::config::Setup& SetupModel::getSetup()

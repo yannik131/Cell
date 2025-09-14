@@ -57,7 +57,12 @@ MainWindow::MainWindow(QWidget* parent)
                                              "Can't resize right now, simulation is running");
                     return;
                 }
+
                 const auto& widgetSize = ui->simulationWidget->size();
+                auto config = simulation_->getSimulationConfig();
+                config.setup.cellWidth = widgetSize.width();
+                config.setup.cellHeight = widgetSize.height();
+                simulation_->setSimulationConfig(config);
 
                 ui->simulationWidget->resetView();
             });

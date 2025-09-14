@@ -1,5 +1,6 @@
 #include "widgets/QSFMLWidget.hpp"
 
+#include "QSFMLWidget.hpp"
 #include <QResizeEvent>
 
 QSFMLWidget::QSFMLWidget(QWidget* parent)
@@ -72,13 +73,20 @@ void QSFMLWidget::wheelEvent(QWheelEvent* event)
 {
     auto delta = event->angleDelta().y();
 
-    float zoomFactor = (delta > 0) ? 0.9f : 1.1f;
-    currentZoom_ *= zoomFactor;
-    view_.zoom(zoomFactor);
+    if (delta > 0)
+        zoom(ZoomDirection::Out);
+    else
+        zoom(ZoomDirection::In);
+}
 
-    RenderWindow::setView(view_);
-
-    emit renderRequired();
+void QSFMLWidget::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Plus)
+        zoom(ZoomDirection::In);
+    else if (event->key() == Qt::Key_Minus)
+        zoom(ZoomDirection::Out);
+    else
+        QWidget::keyPressEvent(event);
 }
 
 void QSFMLWidget::resetView()
@@ -111,4 +119,15 @@ void QSFMLWidget::showEvent(QShowEvent*)
     sf::RenderWindow::create((sf::WindowHandle)winId());
 
     initialized_ = true;
+}
+
+void QSFMLWidget::zoom(ZoomDirection direction)
+{
+    float zoomFactor = (direction == ZoomDirection::In) ? 0.9f : 1.1f;
+    currentZoom_ *= zoomFactor;
+    view_.zoom(zoomFactor);
+
+    RenderWindow::setView(view_);
+
+    emit renderRequired();
 }

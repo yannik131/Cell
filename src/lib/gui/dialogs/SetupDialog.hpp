@@ -20,6 +20,8 @@ class SetupDialog : public QDialog
 public:
     explicit SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
+    void showEvent(QShowEvent*) override;
+
 private:
     void displayCurrentSetup();
 

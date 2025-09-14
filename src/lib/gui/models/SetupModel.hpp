@@ -25,11 +25,8 @@ public:
 
     // TODO make an interface out of this, there's 3 dialogs and models doing the same shit
     void commitChanges();
-    void discardChanges();
+    void reload();
     const cell::config::Setup& getSetup();
-
-signals:
-    void reloaded();
 
 private:
     void loadDiscsAndDistribution();

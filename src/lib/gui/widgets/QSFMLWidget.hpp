@@ -12,6 +12,13 @@
 class QSFMLWidget : public QWidget, public sf::RenderWindow
 {
     Q_OBJECT
+private:
+    enum class ZoomDirection
+    {
+        In,
+        Out
+    };
+
 public:
     /**
      * @brief See https://github.com/SFML/SFML/wiki/Tutorial:-Integrating-SFML-into-Qt for additional information on
@@ -46,6 +53,11 @@ public:
     void wheelEvent(QWheelEvent* event) override;
 
     /**
+     * @brief Zoom using + and - keys
+     */
+    void keyPressEvent(QKeyEvent* event) override;
+
+    /**
      * @brief Creates a new view without zoom and translation and resets zoom and translation offset
      */
     void resetView();
@@ -68,6 +80,8 @@ private:
      * @brief Creates the `sf::RenderWindow` using the existing window handle
      */
     void showEvent(QShowEvent*) override;
+
+    void zoom(ZoomDirection direction);
 
 private:
     bool initialized_ = false;
