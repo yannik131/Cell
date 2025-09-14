@@ -3,10 +3,8 @@
 
 #include "DiscTypeRegistry.hpp"
 #include "Hashing.hpp"
-#include "SFMLJsonSerializers.hpp"
 
 #include <SFML/Graphics/Color.hpp>
-#include <nlohmann/json.hpp>
 
 #include <string>
 #include <tuple>
@@ -89,24 +87,5 @@ private:
 };
 
 } // namespace cell
-
-/* namespace nlohmann
-{
-
-template <> struct adl_serializer<cell::DiscType>
-{
-    static void to_json(json& j, const cell::DiscType& d)
-    {
-        j = json{{"name", d.getName()}, {"color", d.getColor()}, {"radius", d.getRadius()}, {"mass", d.getMass()}};
-    }
-
-    static cell::DiscType from_json(const json& j, const cell::DiscType& d)
-    {
-        return cell::DiscType{j.at("name").get<std::string>(), j.at("color").get<sf::Color>(),
-                              j.at("radius").get<double>(), j.at("mass").get<double>()};
-    }
-};
-
-} // namespace nlohmann */
 
 #endif /* DISCTYPE_HPP */

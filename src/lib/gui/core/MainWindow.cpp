@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget* parent)
             [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this, &MainWindow::loadDefaultSettings);
+    QTimer::singleShot(0, this, [&]() { simulation_->rebuildContext(); });
 }
 
 void MainWindow::resetSimulation()
@@ -96,7 +96,7 @@ void MainWindow::saveSettingsAsJson()
 
     try
     {
-        // TODO
+        simulation_->saveConfigToFile(fs::path{fileName.toStdString()});
     }
     catch (const ExceptionWithLocation& e)
     {
@@ -113,7 +113,7 @@ void MainWindow::loadSettingsFromJson()
 
     try
     {
-        // TODO
+        simulation_->loadConfigFromFile(fs::path{fileName.toStdString()});
     }
     catch (const ExceptionWithLocation& e)
     {

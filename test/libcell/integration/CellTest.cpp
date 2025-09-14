@@ -37,6 +37,7 @@ protected:
         builder.addDiscType("A", Radius{5}, Mass{1});
         builder.addDiscType("B", Radius{5}, Mass{1});
         builder.addDiscType("C", Radius{5}, Mass{2});
+        builder.useDistribution(false);
         builder.setCellDimensions(Width{100}, Height{100});
         builder.setTimeStep(timeStep);
     }

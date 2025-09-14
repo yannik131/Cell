@@ -3,9 +3,6 @@
 
 #include "DiscType.hpp"
 #include "DiscTypeRegistry.hpp"
-#include "SFMLJsonSerializers.hpp"
-
-#include <nlohmann/json.hpp>
 
 #include <optional>
 #include <vector>
@@ -44,11 +41,6 @@ public:
     };
 
 public:
-    /**
-     * @brief Default ctor for json, don't use
-     */
-    Reaction() = default;
-
     /**
      * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
      * not in the interval [0, 1]
@@ -119,26 +111,5 @@ bool contains(const Reaction& reaction, DiscTypeID discType);
 Reaction::Type inferType(bool educt2, bool product2);
 
 } // namespace cell
-
-/* namespace nlohmann
-{
-template <> struct adl_serializer<cell::Reaction>
-{
-    static void to_json(json& j, const cell::Reaction& reaction)
-    {
-        j = {};
-        j["educt1"] = reaction.getEduct1()->getName();
-        j["educt2"] = reaction.hasEduct2() ? reaction.getEduct2()->getName() : nullptr;
-        j["product1"] = reaction.getProduct1()->getName();
-        j["product2"] = reaction.hasProduct2() ? reaction.getProduct2()->getName() : nullptr;
-        j["probability"] = reaction.getProbability();
-    }
-
-    static cell::Reaction from_json(const json& j)
-    {
-        return cell::Reaction();
-    }
-};
-} // namespace nlohmann */
 
 #endif /* REACTION_HPP */

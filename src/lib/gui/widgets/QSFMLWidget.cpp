@@ -74,9 +74,9 @@ void QSFMLWidget::wheelEvent(QWheelEvent* event)
     auto delta = event->angleDelta().y();
 
     if (delta > 0)
-        zoom(ZoomDirection::Out);
-    else
         zoom(ZoomDirection::In);
+    else
+        zoom(ZoomDirection::Out);
 }
 
 void QSFMLWidget::keyPressEvent(QKeyEvent* event)

@@ -49,6 +49,9 @@ public:
      */
     void loadDefaultConfig();
 
+    void saveConfigToFile(const fs::path& path) const;
+    void loadConfigFromFile(const fs::path& path);
+
     void emitFrame(RedrawOnly redrawOnly);
 
 signals:

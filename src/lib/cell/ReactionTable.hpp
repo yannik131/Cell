@@ -5,7 +5,6 @@
 #include "DiscType.hpp"
 #include "DiscTypeRegistry.hpp"
 #include "Reaction.hpp"
-#include "SFMLJsonSerializers.hpp"
 
 #include <vector>
 
@@ -87,11 +86,6 @@ private:
     DiscTypePairMap<std::vector<Reaction>> exchanges_;
 
     DiscTypeResolver discTypeResolver_;
-
-public:
-    /*     NLOHMANN_DEFINE_TYPE_INTRUSIVE(ReactionTable, reactions_, transformations_,
-                                       decompositions_, combinations_,
-                                       exchanges_) */
 };
 
 } // namespace cell

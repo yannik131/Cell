@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 namespace cell
 {
 
@@ -19,6 +21,7 @@ struct DiscType
     std::string name;
     double radius;
     double mass;
+    bool operator==(const DiscType&) const = default;
 };
 
 struct Disc
@@ -26,12 +29,14 @@ struct Disc
     std::string discTypeName;
     double x, y;
     double vx, vy;
+    bool operator==(const Disc&) const = default;
 };
 
 struct Reaction
 {
     std::string educt1, educt2, product1, product2;
     double probability;
+    bool operator==(const Reaction&) const = default;
 };
 
 struct Setup
@@ -62,6 +67,8 @@ struct Setup
 
     // In case not:
     std::vector<config::Disc> discs;
+
+    bool operator==(const Setup&) const = default;
 };
 
 } // namespace config
@@ -71,7 +78,21 @@ struct SimulationConfig
     std::vector<config::DiscType> discTypes;
     std::vector<config::Reaction> reactions;
     config::Setup setup;
+    bool operator==(const SimulationConfig&) const = default;
 };
+
+namespace config
+{
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiscType, name, radius, mass)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale,
+                                   useDistribution, discCount, distribution, discs)
+
+} // namespace config
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, reactions, setup)
 
 } // namespace cell
 

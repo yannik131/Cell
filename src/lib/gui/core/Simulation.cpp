@@ -1,10 +1,16 @@
 #include "core/Simulation.hpp"
 #include "cell/ExceptionWithLocation.hpp"
+#include "cell/SFMLJsonSerializers.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
 #include <QThread>
 #include <QTimer>
 #include <SFML/System/Clock.hpp>
+#include <nlohmann/json.hpp>
+
+#include <fstream>
+
+using json = nlohmann::json;
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
@@ -105,6 +111,28 @@ bool Simulation::contextIsBuilt() const
 void Simulation::loadDefaultConfig()
 {
     simulationConfig_ = {};
+}
+
+void Simulation::saveConfigToFile(const fs::path& path) const
+{
+    json j;
+    j["config"] = simulationConfig_;
+    j["colorMap"] = discTypeColorMap_;
+
+    std::ofstream file(path);
+    file << j.dump(4);
+}
+
+void Simulation::loadConfigFromFile(const fs::path& path)
+{
+    json j;
+    std::ifstream file(path);
+    file >> j;
+
+    simulationConfig_ = j["config"].get<cell::SimulationConfig>();
+    discTypeColorMap_ = j["colorMap"].get<std::map<std::string, sf::Color>>();
+
+    rebuildContext();
 }
 
 void Simulation::notifyConfigObservers()

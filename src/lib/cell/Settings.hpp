@@ -5,7 +5,6 @@
 #include "StringUtils.hpp"
 
 #include <SFML/System/Time.hpp>
-#include <nlohmann/json.hpp>
 
 #include <map>
 #include <utility>
