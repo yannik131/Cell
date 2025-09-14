@@ -75,7 +75,7 @@ public:
     /**
      * @brief Reloads the disc types from the injected dependency
      */
-    void discardChanges();
+    void reload();
 
 private:
     void updateDiscTypeName(const std::string& newName, int row);

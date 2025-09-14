@@ -9,14 +9,6 @@ ReactionsTableModel::ReactionsTableModel(QObject* parent, AbstractSimulationBuil
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
-    abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
-        {
-            beginResetModel();
-            rows_ = config.reactions;
-            types_ = inferReactionTypes(rows_);
-            endResetModel();
-        });
 }
 
 int ReactionsTableModel::rowCount(const QModelIndex&) const
@@ -193,20 +185,12 @@ void ReactionsTableModel::commitChanges()
     abstractSimulationBuilder_->setSimulationConfig(config);
 }
 
-void ReactionsTableModel::discardChanges()
+void ReactionsTableModel::reload()
 {
-    clearRows();
-
-    auto reactions = abstractSimulationBuilder_->getSimulationConfig().reactions;
-    if (reactions.empty())
-        return;
-
-    beginInsertRows(QModelIndex(), 0, static_cast<int>(reactions.size()) - 1);
-
-    rows_ = std::move(reactions);
+    beginResetModel();
+    rows_ = abstractSimulationBuilder_->getSimulationConfig().reactions;
     types_ = inferReactionTypes(rows_);
-
-    endInsertRows();
+    endResetModel();
 }
 
 std::vector<cell::Reaction::Type>

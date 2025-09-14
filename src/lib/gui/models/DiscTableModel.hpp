@@ -24,6 +24,7 @@ public:
     void addRow();
     void clearRows();
     const std::vector<cell::config::Disc>& getRows() const;
+    void reload();
 
 private:
     std::vector<cell::config::Disc> rows_;

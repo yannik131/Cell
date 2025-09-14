@@ -24,6 +24,7 @@ public:
     void addRow();
     void clearRows();
     const std::vector<std::pair<std::string, double>>& getRows() const;
+    void reload();
 
 private:
     std::vector<std::pair<std::string, double>> rows_;

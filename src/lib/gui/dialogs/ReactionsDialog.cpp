@@ -7,6 +7,7 @@
 #include "models/ReactionsTableModel.hpp"
 #include "ui_ReactionsDialog.h"
 
+#include "ReactionsDialog.hpp"
 #include <QCloseEvent>
 #include <QMessageBox>
 
@@ -24,13 +25,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
                                   reactionsTableModel_->commitChanges();
                                   accept();
                               }));
-    connect(ui->cancelPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  reactionsTableModel_->discardChanges();
-                                  reject();
-                              }));
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
 
     connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
             utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); }));
@@ -52,7 +47,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
-void ReactionsDialog::closeEvent(QCloseEvent*)
+void ReactionsDialog::showEvent(QShowEvent* event)
 {
-    reactionsTableModel_->discardChanges();
+    reactionsTableModel_->reload();
 }

@@ -27,13 +27,7 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
                                   discTypesTableModel_->commitChanges();
                                   accept();
                               }));
-    connect(ui->cancelPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  discTypesTableModel_->discardChanges();
-                                  reject();
-                              }));
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(ui->addTypePushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::addEmptyRow);
     connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::clearRows);
 
@@ -68,7 +62,7 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->discTypesTableView->setModel(discTypesTableModel_);
 }
 
-void DiscTypesDialog::closeEvent(QCloseEvent*)
+void DiscTypesDialog::showEvent(QShowEvent* event)
 {
-    discTypesTableModel_->discardChanges();
+    discTypesTableModel_->reload();
 }

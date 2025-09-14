@@ -25,13 +25,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                                   setupModel_->commitChanges();
                                   accept();
                               }));
-    connect(ui->cancelPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  setupModel_->reload();
-                                  reject();
-                              }));
+    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
 
     auto updateWidgets = [this](bool on)
     {
@@ -39,6 +33,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
         ui->distributionWidget->setEnabled(on);
         ui->manualWidget->setDisabled(on);
     };
+
     connect(ui->useDistributionRadioButton, &QRadioButton::toggled, this, updateWidgets);
     updateWidgets(ui->useDistributionRadioButton->isChecked());
 

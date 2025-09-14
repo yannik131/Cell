@@ -59,7 +59,7 @@ public:
     void clearRows();
 
     void commitChanges();
-    void discardChanges();
+    void reload();
 
 private:
     std::vector<cell::Reaction::Type> inferReactionTypes(const std::vector<cell::config::Reaction>& reactions) const;

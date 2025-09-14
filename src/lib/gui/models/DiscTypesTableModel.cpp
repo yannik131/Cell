@@ -9,14 +9,6 @@ DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuil
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
-    abstractSimulationBuilder->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& discTypeColorMap)
-        {
-            beginResetModel();
-            rows_ = config.discTypes;
-            discTypeColorMap_ = discTypeColorMap;
-            endResetModel();
-        });
 }
 
 int DiscTypesTableModel::rowCount(const QModelIndex&) const
@@ -145,21 +137,13 @@ void DiscTypesTableModel::commitChanges()
     removedDiscTypes_.clear();
 }
 
-void DiscTypesTableModel::discardChanges()
+void DiscTypesTableModel::reload()
 {
-    clearRows();
     removedDiscTypes_.clear();
-
-    auto discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-    if (discTypes.empty())
-        return;
-
-    beginInsertRows(QModelIndex(), 0, static_cast<int>(discTypes.size()) - 1);
-
-    rows_ = std::move(discTypes);
+    beginResetModel();
+    rows_ = abstractSimulationBuilder_->getSimulationConfig().discTypes;
     discTypeColorMap_ = abstractSimulationBuilder_->getDiscTypeColorMap();
-
-    endInsertRows();
+    endResetModel();
 }
 
 void DiscTypesTableModel::updateDiscTypeName(const std::string& newName, int row)

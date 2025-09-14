@@ -25,11 +25,7 @@ public:
     explicit DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
 private:
-    /**
-     * @brief Reloads the settings. This is necessary for when the user changes some stuff and then cancels. Opening the
-     * dialog again would show the discarded changes if we don't load the settings again
-     */
-    void closeEvent(QCloseEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 
 private:
     Ui::DiscTypesDialog* ui;

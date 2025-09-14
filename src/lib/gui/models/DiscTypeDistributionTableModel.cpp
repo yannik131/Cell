@@ -10,13 +10,6 @@ DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,
     : QAbstractTableModel(parent)
     , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
-    abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
-        {
-            beginResetModel();
-            rows_.assign(config.setup.distribution.begin(), config.setup.distribution.end());
-            endResetModel();
-        });
 }
 
 int DiscTypeDistributionTableModel::rowCount(const QModelIndex& parent) const
@@ -129,4 +122,13 @@ void DiscTypeDistributionTableModel::clearRows()
 const std::vector<std::pair<std::string, double>>& DiscTypeDistributionTableModel::getRows() const
 {
     return rows_;
+}
+
+void DiscTypeDistributionTableModel::reload()
+{
+    const auto& config = abstractSimulationBuilder_->getSimulationConfig();
+
+    beginResetModel();
+    rows_.assign(config.setup.distribution.begin(), config.setup.distribution.end());
+    endResetModel();
 }
