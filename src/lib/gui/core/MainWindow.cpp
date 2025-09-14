@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent)
     , reactionsDialog_(new ReactionsDialog(this, simulation_.get()))
     , setupDialog_(new SetupDialog(this, simulation_.get()))
     , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
-    , plotModel_(new PlotModel(this))
+    , plotModel_(new PlotModel(this, simulation_.get()))
 {
     ui->setupUi(this);
 
@@ -77,6 +77,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationWidget, &SimulationWidget::renderRequired,
             [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
+    connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
+
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, [&]() { simulation_->rebuildContext(); });
 }
@@ -84,7 +86,6 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::resetSimulation()
 {
     stopSimulation();
-    plotModel_->clear();
     simulation_->rebuildContext();
 }
 
@@ -154,12 +155,21 @@ void MainWindow::startSimulation()
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);
 
+    connect(simulationThread_, &QThread::started, ui->simulationControlWidget,
+            [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{true}); });
+    connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
+            [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{false}); });
+
     connect(simulationThread_, &QThread::started,
             [&]()
             {
                 simulation_->run();
                 simulation_->moveToThread(QCoreApplication::instance()->thread());
                 simulationThread_->quit();
+
+                // Revert the fixed size to enable resizing again
+                setMinimumSize(QSize(0, 0));
+                setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
             });
 
     connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
@@ -175,8 +185,4 @@ void MainWindow::stopSimulation()
 {
     if (simulationThread_)
         simulationThread_->requestInterruption();
-
-    // Revert the fixed size to enable resizing again
-    setMinimumSize(QSize(0, 0));
-    setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 }

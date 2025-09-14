@@ -7,11 +7,11 @@
 /**
  * @brief Currently supported plot types by the GUI
  */
-enum PlotCategory
+enum class PlotCategory
 {
     TypeCounts,
     CollisionCounts,
-    AbsoluteImpulse,
+    AbsoluteMomentum,
     KineticEnergy
 };
 

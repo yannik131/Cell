@@ -8,6 +8,7 @@
 #include <SFML/System/Clock.hpp>
 #include <nlohmann/json.hpp>
 
+#include "Simulation.hpp"
 #include <fstream>
 
 using json = nlohmann::json;
@@ -150,6 +151,7 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
 
     FrameDTO frameDTO;
     frameDTO.discs_ = simulationContext_.getCell().getDiscs();
+    frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
 
     if (!redrawOnly.value)
         frameDTO.elapsedSimulationTimeUs = simulationConfig_.setup.simulationTimeStep * 1e6;

@@ -1,13 +1,10 @@
 #include "models/PlotModel.hpp"
+#include "PlotModel.hpp"
 #include "cell/MathUtils.hpp"
+#include "core/AbstractSimulationBuilder.hpp"
 
 namespace
 {
-
-const cell::DiscTypeMap<double>& getActiveMap(const DataPoint& dataPoint)
-{
-    return {};
-}
 
 void averageDataPoint(DataPoint& dataPoint, int length)
 {
@@ -26,48 +23,77 @@ void averageDataPoint(DataPoint& dataPoint, int length)
 
 } // namespace
 
-PlotModel::PlotModel(QObject* parent)
+PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QObject(parent)
+    , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
     // With a simulation time step of 1ms, we get 1000 data points each second
-    // We'll reserve enough space for 5 minutes of plotting, 5*60*1000
-    dataPoints_.reserve(300000);
+    // With an averaging time of 100ms, we save 10 datapoints for 1 second
+    // We'll reserve enough space for 5 minutes of plotting, 5*60*10
+    dataPoints_.reserve(3000);
+
+    abstractSimulationBuilder_->registerConfigObserver(
+        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& colorMap)
+        {
+            labels_.clear();
+            colors_.clear();
+            for (const auto& discType : config.discTypes)
+            {
+                labels_.push_back(discType.name);
+                colors_.push_back(colorMap.at(discType.name));
+            }
+            emit createGraphs(labels_, colors_);
+        });
 }
 
-void PlotModel::clear()
+void PlotModel::setPlotCategory(PlotCategory plotCategory)
+{
+    plotCategory_ = plotCategory;
+}
+
+void PlotModel::setPlotTimeInterval(int valueMilliseconds)
+{
+    plotTimeIntervalMs_ = valueMilliseconds;
+}
+
+void PlotModel::setPlotSum(bool value)
+{
+    plotSum_ = value;
+}
+
+void PlotModel::reset()
 {
     dataPoints_.clear();
     dataPointBeingAveraged_ = DataPoint();
     averagingCount_ = 0;
-
-    emitPlot();
 }
 
-void PlotModel::addDataPointFromFrameDTO(const FrameDTO& frameDTO)
+void PlotModel::processFrame(const FrameDTO& frameDTO)
 {
     // Elapsed time 0 means this DTO was only emitted for a redraw
     if (frameDTO.elapsedSimulationTimeUs == 0)
         return;
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-
     dataPointBeingAveraged_ += dataPoint;
     ++averagingCount_;
 
-    dataPoints_.push_back(std::move(dataPoint));
+    if (dataPointBeingAveraged_.elapsedTimeUs_ >= MinAveragingTimeUs_)
+    {
+        averageDataPoint(dataPointBeingAveraged_, averagingCount_);
+        dataPoints_.push_back(dataPointBeingAveraged_);
+        double x = static_cast<double>(dataPoints_.size()) * static_cast<double>(plotTimeIntervalMs_);
 
-    plotAveragedDataPoint();
-}
+        emit addDataPoint(getActiveMap(dataPointBeingAveraged_), x, DoReplot{true});
 
-void PlotModel::emitDataPoint(const DataPoint& averagedDataPoint)
-{
-    // https://stackoverflow.com/questions/8455887/stack-object-qt-signal-and-parameter-as-reference
-    emit dataPointAdded(getActiveMap(averagedDataPoint));
+        dataPointBeingAveraged_ = {};
+        averagingCount_ = 0;
+    }
 }
 
 void PlotModel::emitPlot()
 {
-    QVector<cell::DiscTypeMap<double>> fullPlotData;
+    std::vector<std::unordered_map<std::string, double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
 
@@ -76,39 +102,44 @@ void PlotModel::emitPlot()
         dataPointToAverage += dataPoint;
         ++averagingCount;
     }
-
-    emit newPlotCreated(fullPlotData);
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
+    auto discTypeResolver = abstractSimulationBuilder_->getDiscTypeResolver();
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[discType] = static_cast<double>(collisionCount);
-    dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
+        dataPoint.collisionCounts_[discTypeResolver(discType).getName()] = static_cast<double>(collisionCount);
 
-    cell::DiscTypeMap<sf::Vector2d> totalMomentums;
+    dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
 
     for (const auto& disc : frameDTO.discs_)
     {
-        ++dataPoint.discTypeCountMap_[disc.getDiscTypeID()];
+        std::string discTypeName = discTypeResolver(disc.getDiscTypeID()).getName();
+        ++dataPoint.discTypeCountMap_[discTypeName];
+        dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(discTypeResolver);
+        dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(discTypeResolver);
     }
-
-    for (const auto& [discType, totalMomentum] : totalMomentums)
-        dataPoint.totalMomentumMap_[discType] = std::hypot(totalMomentum.x, totalMomentum.y);
 
     return dataPoint;
 }
 
-void PlotModel::plotAveragedDataPoint()
+std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint& dataPoint)
 {
-    averageDataPoint(dataPointBeingAveraged_, averagingCount_);
-
-    emitDataPoint(dataPointBeingAveraged_);
-
-    dataPointBeingAveraged_ = DataPoint();
-    averagingCount_ = 0;
+    switch (plotCategory_)
+    {
+    case PlotCategory::TypeCounts:
+        return dataPoint.discTypeCountMap_;
+    case PlotCategory::CollisionCounts:
+        return dataPoint.collisionCounts_;
+    case PlotCategory::AbsoluteMomentum:
+        return dataPoint.totalMomentumMap_;
+    case PlotCategory::KineticEnergy:
+        return dataPoint.totalKineticEnergyMap_;
+    default:
+        return {};
+    }
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)

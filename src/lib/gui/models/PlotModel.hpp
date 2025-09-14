@@ -3,6 +3,7 @@
 
 #include "core/FrameDTO.hpp"
 #include "core/PlotCategories.hpp"
+#include "core/Types.hpp"
 
 #include <QObject>
 
@@ -14,13 +15,15 @@
 struct DataPoint
 {
     long long elapsedTimeUs_ = 0;
-    cell::DiscTypeMap<double> collisionCounts_;
-    cell::DiscTypeMap<double> totalMomentumMap_;
-    cell::DiscTypeMap<double> totalKineticEnergyMap_;
-    cell::DiscTypeMap<double> discTypeCountMap_;
+    std::unordered_map<std::string, double> collisionCounts_;
+    std::unordered_map<std::string, double> totalMomentumMap_;
+    std::unordered_map<std::string, double> totalKineticEnergyMap_;
+    std::unordered_map<std::string, double> discTypeCountMap_;
 };
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
+
+class AbstractSimulationBuilder;
 
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
@@ -31,30 +34,28 @@ class PlotModel : public QObject
 {
     Q_OBJECT
 public:
-    PlotModel(QObject* parent = nullptr);
+    PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
 
-    /**
-     * @brief Removes all plot data and emits an empty plot
-     */
-    void clear();
+    void setPlotCategory(PlotCategory plotCategory);
+    void setPlotTimeInterval(int valueMilliseconds);
+    void setPlotSum(bool value);
+    void reset();
 
 public slots:
     /**
-     * @brief Extracts information from the `frameDTO` relevant for the plot as a `DataPoint` and averages all collected
-     * `DataPoint`s if the plot time interval has elapsed since the last plot, emitting a new plot data point
+     * @brief Extracts information from the `frameDTO` relevant for the plot as a `DataPoint` and averages all
+     * collected `DataPoint`s if the plot time interval has elapsed since the last plot, emitting a new plot data
+     * point
      */
-    void addDataPointFromFrameDTO(const FrameDTO& frameDTO);
+    void processFrame(const FrameDTO& frameDTO);
 
 signals:
-    void dataPointAdded(const cell::DiscTypeMap<double>& dataPoint);
-    void newPlotCreated(const QVector<cell::DiscTypeMap<double>>& dataPoints);
+    void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
+    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot doReplot);
+    void replaceDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
+    void setPlotTitle(const std::string& title);
 
 private:
-    /**
-     * @brief Emits the newest data point to be added to the plot
-     */
-    void emitDataPoint(const DataPoint& averagedDataPoint);
-
     /**
      * @brief Emits data for the full plot with all data points
      */
@@ -66,16 +67,13 @@ private:
      */
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
 
-    /**
-     * @brief
-     */
-    void plotAveragedDataPoint();
+    std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
 
 private:
     /**
      * @brief All data points received from the simulation
      */
-    QVector<DataPoint> dataPoints_;
+    std::vector<DataPoint> dataPoints_;
 
     /**
      * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
@@ -87,6 +85,18 @@ private:
      * @brief Number of data points already added to the dataPointBeingAveraged_
      */
     int averagingCount_ = 0;
+
+    // 100ms
+    const long long MinAveragingTimeUs_ = 100 * 1000;
+
+    int plotTimeIntervalMs_ = 100;
+    bool plotSum_ = false;
+    PlotCategory plotCategory_ = PlotCategory::CollisionCounts;
+
+    AbstractSimulationBuilder* abstractSimulationBuilder_;
+
+    std::vector<std::string> labels_;
+    std::vector<sf::Color> colors_;
 };
 
 #endif /* PLOTMODEL_HPP */

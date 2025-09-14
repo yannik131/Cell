@@ -39,8 +39,8 @@ public:
     const std::map<std::string, sf::Color>& getDiscTypeColorMap() const override;
 
     void registerConfigObserver(ConfigObserver observer) override;
+    cell::DiscTypeResolver getDiscTypeResolver() const override;
 
-    cell::DiscTypeResolver getDiscTypeResolver() const;
     bool contextIsBuilt() const;
 
     /**

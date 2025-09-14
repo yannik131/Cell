@@ -43,6 +43,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolve
         const auto& discType = discTypeResolver(disc.getDiscTypeID());
 
         sf::CircleShape circleShape;
+        circleShape.setPointCount(50);
         circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
         circleShape.setRadius(discType.getRadius());
         circleShape.setFillColor(colorMap.at(discType.getName()));

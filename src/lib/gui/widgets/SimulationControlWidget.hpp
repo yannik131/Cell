@@ -1,6 +1,8 @@
 #ifndef SIMULATIONCONTROLWIDGET_HPP
 #define SIMULATIONCONTROLWIDGET_HPP
 
+#include "core/Types.hpp"
+
 #include <QMessageBox>
 #include <QWidget>
 
@@ -18,6 +20,11 @@ class SimulationControlWidget : public QWidget
     Q_OBJECT
 public:
     SimulationControlWidget(QWidget* parent = nullptr);
+
+    void updateWidgets(SimulationRunning simulationRunning);
+
+private:
+    void setWidgetsEnabled(bool value);
 
 signals:
     void simulationStartClicked();
@@ -42,8 +49,6 @@ private:
 
 private:
     Ui::SimulationControlWidget* ui;
-
-    bool simulationStarted_ = false;
 };
 
 #endif /* SIMULATIONCONTROLWIDGET_HPP */

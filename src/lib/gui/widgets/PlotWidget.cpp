@@ -2,7 +2,7 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 
-#include <algorithm>
+#include <QFont>
 
 PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
@@ -20,16 +20,81 @@ PlotWidget::PlotWidget(QWidget* parent)
 
     // Place the legend
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignCenter);
+}
 
-    // These are the default colors for matplotlib. I like them.
-    colors_ << QColor(31, 119, 180) << QColor(255, 127, 14) << QColor(44, 160, 44) << QColor(214, 39, 40)
-            << QColor(148, 103, 189) << QColor(140, 86, 75) << QColor(227, 119, 194) << QColor(127, 127, 127)
-            << QColor(188, 189, 34) << QColor(23, 190, 207);
+void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors)
+{
+    if (labels.size() != colors.size())
+        throw std::logic_error("Must have equal number of labels and colors");
 
-    reset();
+    for (std::size_t i = 0; i < labels.size(); ++i)
+    {
+        QCPGraph* graph = addGraph();
+        if (colors[i] == sf::Color::White)
+            graph->setPen(utility::sfColorToQColor(sf::Color::Black));
+        else
+            graph->setPen(utility::sfColorToQColor(colors[i]));
+
+        graph->setName(QString::fromStdString(labels[i]));
+        graphs_[labels[i]] = graph;
+    }
+
+    if (labels.size() == 1)
+        legend->setVisible(false);
+    else
+    {
+        for (int i = 0; i < legend->itemCount(); ++i)
+            legend->item(i)->setLayer("legend layer");
+    }
+
+    replot();
+}
+
+void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot doReplot)
+{
+    for (const auto& [label, value] : dataPoint)
+    {
+        auto graph = graphs_.find(label);
+        if (graph == graphs_.end())
+            throw std::logic_error("Invalid datapoint: There is no plot with label\"" + label + "\"");
+
+        graph->second->addData(x, value);
+
+        yMin_ = std::min(yMin_, value);
+        yMax_ = std::max(yMax_, value);
+    }
+
+    yAxis->setRange(yMin_ - 1, yMax_ + 1);
+    xAxis->setRange(xMin_, x);
+
+    if (doReplot.value)
+        replot();
+}
+
+void PlotWidget::replaceDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
+{
+    resetRanges();
+
+    for (std::size_t i = 0; i < dataPoints.size(); ++i)
+        addDataPoint(dataPoints[i], i * xStep, DoReplot{false});
+
+    replot();
+}
+
+void PlotWidget::setPlotTitle(const std::string& title)
+{
+    plotTitle_ = new QCPTextElement(this, QString::fromStdString(title), QFont("sans", 12, QFont::Bold));
 }
 
 void PlotWidget::reset()
+{
+    resetRanges();
+    resetGraphs();
+
+    setAxisLabels();
+}
+
+void PlotWidget::resetRanges()
 {
     xMin_ = 0;
     xMax_ = INT_MIN;
@@ -39,82 +104,22 @@ void PlotWidget::reset()
     // These seem to be the default values used by QCustomPlot
     yAxis->setRange(0, 5);
     xAxis->setRange(0, 5);
+}
 
+void PlotWidget::resetGraphs()
+{
     clearGraphs();
     graphs_.clear();
-    sumGraph_ = nullptr;
-
-    // TODO
-
-    setAxisLabels();
-}
-
-void PlotWidget::replacePlot(const QVector<cell::DiscTypeMap<double>>& dataPoints)
-{
-    reset();
-
-    if (dataPoints.empty())
-    {
-        replot();
-        return;
-    }
-
-    for (auto i = 0; i < dataPoints.size(); ++i)
-        plotDataPoint(dataPoints[i], i == dataPoints.size() - 1);
-}
-
-void PlotWidget::plotDataPoint(const cell::DiscTypeMap<double>& dataPoint, bool doReplot)
-{
-    // TODO
-
-    if (doReplot)
-    {
-        yAxis->setRange(yMin_ - 1, yMax_ + 1);
-        xAxis->setRange(xMin_, xMax_);
-
-        replot();
-    }
-}
-
-void PlotWidget::addDataPoint(const cell::DiscTypeMap<double>& dataPoint)
-{
-    if (graphs_.empty())
-        return;
-
-    const auto& size = graphs_.begin()->second->dataCount();
-}
-
-void PlotWidget::createSumGraph()
-{
-    sumGraph_ = addGraph();
-    sumGraph_->setPen(QColor());
-    legend->setVisible(false);
-}
-
-void PlotWidget::createRegularGraphs()
-{
-    legend->setVisible(true);
-
-    for (int i = 0; i < legend->itemCount(); ++i)
-        legend->item(i)->setLayer("legend layer");
 }
 
 void PlotWidget::setAxisLabels()
 {
 }
 
-void PlotWidget::addDataPointSum(const cell::DiscTypeMap<double>& dataPoint)
-{
-    if (sumGraph_ == nullptr)
-        throw ExceptionWithLocation(
-            "Can't add data point to sumGraph_: Is nullptr (this is a bug and shouldn't happen");
-
-    const auto& size = sumGraph_->dataCount();
-}
-
 void PlotWidget::setModel(PlotModel* plotModel)
 {
-    connect(plotModel, &PlotModel::dataPointAdded,
-            [this](const cell::DiscTypeMap<double>& dataPoint) { plotDataPoint(dataPoint); });
-    connect(plotModel, &PlotModel::newPlotCreated, this, &PlotWidget::replacePlot);
+    connect(plotModel, &PlotModel::createGraphs, this, &PlotWidget::createGraphs);
+    connect(plotModel, &PlotModel::addDataPoint, this, &PlotWidget::addDataPoint);
+    connect(plotModel, &PlotModel::replaceDataPoints, this, &PlotWidget::replaceDataPoints);
+    connect(plotModel, &PlotModel::setPlotTitle, this, &PlotWidget::setPlotTitle);
 }

@@ -4,7 +4,7 @@
 
 const QMap<PlotCategory, QString> PlotCategoryNameMapping{{PlotCategory::TypeCounts, "Type counts"},
                                                           {PlotCategory::CollisionCounts, "Collision count"},
-                                                          {PlotCategory::AbsoluteImpulse, "Impulse"},
+                                                          {PlotCategory::AbsoluteMomentum, "Impulse"},
                                                           {PlotCategory::KineticEnergy, "Kinetic energy"}};
 
 const QList<PlotCategory> SupportedPlotCategories = PlotCategoryNameMapping.keys();

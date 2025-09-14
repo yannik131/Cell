@@ -2,6 +2,7 @@
 #define ABSTRACTSIMULATIONBUILDER_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "cell/Types.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 
@@ -29,6 +30,7 @@ public:
     virtual const std::map<std::string, sf::Color>& getDiscTypeColorMap() const = 0;
 
     virtual void registerConfigObserver(ConfigObserver observer) = 0;
+    virtual cell::DiscTypeResolver getDiscTypeResolver() const = 0;
 };
 
 #endif /* ABSTRACTSIMULATIONBUILDER_HPP */
