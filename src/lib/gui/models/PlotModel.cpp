@@ -3,12 +3,22 @@
 #include "cell/MathUtils.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 
+/**
+ * - Disc types changed:
+ *  - Identify remaining active disc types for plot
+ *  - If there are none, plot is empty (no active disc types for plotting)
+ *  - If there are, replot
+ * - Any other changes that triggered a simulation reset (context rebuild):
+ *  - Empty the plot, keep everything else
+ * - Plot category, plotting sum or plot time interval changed: Re-create current plot
+ */
+
 namespace
 {
 
 void averageDataPoint(DataPoint& dataPoint, int length)
 {
-    double dt = sf::microseconds(dataPoint.elapsedTimeUs_).asSeconds();
+    double dt = dataPoint.elapsedTime_;
 
     // Collisions per second = All registered collisions / dt
     dataPoint.collisionCounts_ /= dt;
@@ -49,16 +59,19 @@ PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulat
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
 {
     plotCategory_ = plotCategory;
+    emitPlot();
 }
 
 void PlotModel::setPlotTimeInterval(int valueMilliseconds)
 {
-    plotTimeIntervalMs_ = valueMilliseconds;
+    plotTimeInterval_ = static_cast<double>(valueMilliseconds) / 1000.0;
+    emitPlot();
 }
 
 void PlotModel::setPlotSum(bool value)
 {
     plotSum_ = value;
+    emitPlot();
 }
 
 void PlotModel::reset()
@@ -78,11 +91,11 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
     dataPointBeingAveraged_ += dataPoint;
     ++averagingCount_;
 
-    if (dataPointBeingAveraged_.elapsedTimeUs_ >= MinAveragingTimeUs_)
+    if (dataPointBeingAveraged_.elapsedTime_ >= plotTimeInterval_)
     {
         averageDataPoint(dataPointBeingAveraged_, averagingCount_);
         dataPoints_.push_back(dataPointBeingAveraged_);
-        double x = static_cast<double>(dataPoints_.size()) * static_cast<double>(plotTimeIntervalMs_);
+        double x = static_cast<double>(dataPoints_.size()) * plotTimeInterval_;
 
         emit addDataPoint(getActiveMap(dataPointBeingAveraged_), x, DoReplot{true});
 
@@ -101,7 +114,17 @@ void PlotModel::emitPlot()
     {
         dataPointToAverage += dataPoint;
         ++averagingCount;
+
+        if (dataPointToAverage.elapsedTime_ >= plotTimeInterval_)
+        {
+            averageDataPoint(dataPointToAverage, averagingCount);
+            fullPlotData.push_back(getActiveMap(dataPointToAverage));
+            dataPointToAverage = {};
+            averagingCount = 0;
+        }
     }
+
+    emit replaceDataPoints(fullPlotData, plotTimeInterval_);
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
@@ -112,7 +135,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
         dataPoint.collisionCounts_[discTypeResolver(discType).getName()] = static_cast<double>(collisionCount);
 
-    dataPoint.elapsedTimeUs_ = frameDTO.elapsedSimulationTimeUs;
+    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000;
 
     for (const auto& disc : frameDTO.discs_)
     {
@@ -144,15 +167,13 @@ std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint&
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
 {
-    auto dt = static_cast<double>(rhs.elapsedTimeUs_) / 1'000'000.0;
-
-    lhs.elapsedTimeUs_ += rhs.elapsedTimeUs_;
+    lhs.elapsedTime_ += rhs.elapsedTime_;
     lhs.collisionCounts_ += rhs.collisionCounts_;
     lhs.discTypeCountMap_ += rhs.discTypeCountMap_;
 
     // To get values per second, we multiply by elapsed time in seconds
-    lhs.totalKineticEnergyMap_ += (rhs.totalKineticEnergyMap_ * dt);
-    lhs.totalMomentumMap_ += (rhs.totalMomentumMap_ * dt);
+    lhs.totalKineticEnergyMap_ += (rhs.totalKineticEnergyMap_ * rhs.elapsedTime_);
+    lhs.totalMomentumMap_ += (rhs.totalMomentumMap_ * rhs.elapsedTime_);
 
     return lhs;
 }

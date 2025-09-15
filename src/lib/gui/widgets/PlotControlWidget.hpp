@@ -19,6 +19,8 @@ class PlotControlWidget : public QWidget
 public:
     PlotControlWidget(QWidget* parent = nullptr);
 
+    void setModel(PlotModel* plotModel);
+
 signals:
     void plotSettingsChanged();
     void selectDiscTypesClicked();

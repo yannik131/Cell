@@ -12,3 +12,11 @@ PlotControlWidget::PlotControlWidget(QWidget* parent)
     ui->plotTypeComboBox->clear();
     ui->plotTypeComboBox->addItems(SupportedPlotCategoryNames);
 }
+
+void PlotControlWidget::setModel(PlotModel* plotModel)
+{
+    connect(ui->plotSumCheckBox, &QCheckBox::toggled, plotModel, &PlotModel::setPlotSum);
+    connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged,
+            [&](const QString& text) { plotModel->setPlotCategory(PlotCategoryNameMapping[text]); });
+    connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged, plotModel, &PlotModel::setPlotTimeInterval);
+}

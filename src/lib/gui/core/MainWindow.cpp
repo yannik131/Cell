@@ -79,6 +79,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
 
+    ui->plotControlWidget->setModel(plotModel_);
+
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, [&]() { simulation_->rebuildContext(); });
 }

@@ -151,10 +151,15 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
 
     FrameDTO frameDTO;
     frameDTO.discs_ = simulationContext_.getCell().getDiscs();
-    frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
 
-    if (!redrawOnly.value)
-        frameDTO.elapsedSimulationTimeUs = simulationConfig_.setup.simulationTimeStep * 1e6;
+    if (redrawOnly.value)
+    {
+        emit frame(frameDTO);
+        return;
+    }
+
+    frameDTO.elapsedSimulationTimeUs = simulationConfig_.setup.simulationTimeStep * 1e6;
+    frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);
 }

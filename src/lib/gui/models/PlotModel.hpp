@@ -14,7 +14,7 @@
  */
 struct DataPoint
 {
-    long long elapsedTimeUs_ = 0;
+    double elapsedTime_ = 0;
     std::unordered_map<std::string, double> collisionCounts_;
     std::unordered_map<std::string, double> totalMomentumMap_;
     std::unordered_map<std::string, double> totalKineticEnergyMap_;
@@ -86,10 +86,7 @@ private:
      */
     int averagingCount_ = 0;
 
-    // 100ms
-    const long long MinAveragingTimeUs_ = 100 * 1000;
-
-    int plotTimeIntervalMs_ = 100;
+    double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
     PlotCategory plotCategory_ = PlotCategory::CollisionCounts;
 

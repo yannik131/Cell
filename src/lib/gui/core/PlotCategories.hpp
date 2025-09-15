@@ -23,7 +23,7 @@ enum class PlotCategory
 /**
  * @brief Maps the plot types to human readable strings for the GUI
  */
-extern const QMap<PlotCategory, QString> PlotCategoryNameMapping;
+extern const QMap<QString, PlotCategory> PlotCategoryNameMapping;
 
 /**
  * @brief Contains all entries of `PlotCategory` as a list
