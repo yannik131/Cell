@@ -60,10 +60,10 @@ private:
     SimulationTimeStepProvider simulationTimeStepProvider_;
     DiscTypeResolver discTypeResolver_;
 
-    std::vector<Disc> discs_;
-
     double width_;
     double height_;
+
+    std::vector<Disc> discs_;
 
     // TODO remove, the simulation doesn't care about this
     double initialKineticEnergy_ = 0;

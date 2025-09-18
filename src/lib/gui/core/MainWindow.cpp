@@ -163,16 +163,20 @@ void MainWindow::startSimulation()
     connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
             [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{false}); });
 
+    connect(simulationThread_, &QThread::finished, this,
+            [&]()
+            {
+                // Revert the fixed size to enable resizing again
+                setMinimumSize(QSize(0, 0));
+                setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+            });
+
     connect(simulationThread_, &QThread::started,
             [&]()
             {
                 simulation_->run();
                 simulation_->moveToThread(QCoreApplication::instance()->thread());
                 simulationThread_->quit();
-
-                // Revert the fixed size to enable resizing again
-                setMinimumSize(QSize(0, 0));
-                setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
             });
 
     connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
