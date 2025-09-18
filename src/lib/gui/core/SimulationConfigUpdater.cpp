@@ -48,12 +48,18 @@ SimulationConfigUpdater::createChangeMap(const std::vector<cell::config::DiscTyp
         changeMap[oldDiscTypes[i].name] = newDiscTypes[i].name;
     }
 
+    if (changeMap.size() == 1)
+        return {};
+
     return changeMap;
 }
 
 void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
                                               const std::map<std::string, std::string>& changeMap)
 {
+    if (changeMap.empty())
+        return;
+
     for (auto& reaction : config.reactions)
     {
         reaction.educt1 = changeMap.at(reaction.educt1);

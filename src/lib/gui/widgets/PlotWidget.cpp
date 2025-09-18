@@ -24,6 +24,8 @@ PlotWidget::PlotWidget(QWidget* parent)
 
 void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors)
 {
+    reset();
+
     if (labels.size() != colors.size())
         throw std::logic_error("Must have equal number of labels and colors");
 
@@ -50,8 +52,10 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
     replot();
 }
 
-void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot doReplot)
+void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep, DoReplot doReplot)
 {
+    double x = xStep * count_++;
+
     for (const auto& [label, value] : dataPoint)
     {
         auto graph = graphs_.find(label);
@@ -71,12 +75,10 @@ void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dat
         replot();
 }
 
-void PlotWidget::replaceDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
+void PlotWidget::addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
 {
-    resetRanges();
-
     for (std::size_t i = 0; i < dataPoints.size(); ++i)
-        addDataPoint(dataPoints[i], i * xStep, DoReplot{false});
+        addDataPoint(dataPoints[i], xStep, DoReplot{false});
 
     replot();
 }
@@ -90,6 +92,7 @@ void PlotWidget::reset()
 {
     resetRanges();
     resetGraphs();
+    count_ = 0;
 
     setAxisLabels();
 }
@@ -120,6 +123,6 @@ void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::createGraphs, this, &PlotWidget::createGraphs);
     connect(plotModel, &PlotModel::addDataPoint, this, &PlotWidget::addDataPoint);
-    connect(plotModel, &PlotModel::replaceDataPoints, this, &PlotWidget::replaceDataPoints);
+    connect(plotModel, &PlotModel::addDataPoints, this, &PlotWidget::addDataPoints);
     connect(plotModel, &PlotModel::setPlotTitle, this, &PlotWidget::setPlotTitle);
 }

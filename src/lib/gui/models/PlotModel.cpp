@@ -3,6 +3,8 @@
 #include "cell/MathUtils.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 
+#include <cmath>
+
 /**
  * - Disc types changed:
  *  - Identify remaining active disc types for plot
@@ -23,8 +25,8 @@ void averageDataPoint(DataPoint& dataPoint, int length)
     // Collisions per second = All registered collisions / dt
     dataPoint.collisionCounts_ /= dt;
 
-    dataPoint.totalKineticEnergyMap_ /= dt;
-    dataPoint.totalMomentumMap_ /= dt;
+    dataPoint.totalKineticEnergyMap_ /= length;
+    dataPoint.totalMomentumMap_ /= length;
 
     // This is time-independent, divide by just number of data points to get average number of disc types for each data
     // point
@@ -52,6 +54,7 @@ PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulat
                 labels_.push_back(discType.name);
                 colors_.push_back(colorMap.at(discType.name));
             }
+            reset();
             emit createGraphs(labels_, colors_);
         });
 }
@@ -64,6 +67,13 @@ void PlotModel::setPlotCategory(PlotCategory plotCategory)
 
 void PlotModel::setPlotTimeInterval(int valueMilliseconds)
 {
+    // To reduce the number of datapoints, we store 100ms intervals
+    if (valueMilliseconds < 100)
+        throw std::invalid_argument("The plot time interval must be at least 100ms");
+
+    if (valueMilliseconds % 100 != 0)
+        throw std::invalid_argument("The plot time interval must be a multiple of 100ms");
+
     plotTimeInterval_ = static_cast<double>(valueMilliseconds) / 1000.0;
     emitPlot();
 }
@@ -77,7 +87,8 @@ void PlotModel::setPlotSum(bool value)
 void PlotModel::reset()
 {
     dataPoints_.clear();
-    dataPointBeingAveraged_ = DataPoint();
+    dataPointForStorage_ = {};
+    dataPointForPlotting_ = {};
     averagingCount_ = 0;
 }
 
@@ -88,18 +99,22 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
         return;
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-    dataPointBeingAveraged_ += dataPoint;
+    dataPointForStorage_ += dataPoint;
+    dataPointForPlotting_ += dataPoint;
     ++averagingCount_;
 
-    if (dataPointBeingAveraged_.elapsedTime_ >= plotTimeInterval_)
+    if (dataPointForStorage_.elapsedTime_ >= storageTime_)
     {
-        averageDataPoint(dataPointBeingAveraged_, averagingCount_);
-        dataPoints_.push_back(dataPointBeingAveraged_);
-        double x = static_cast<double>(dataPoints_.size()) * plotTimeInterval_;
+        dataPoints_.push_back(dataPointForStorage_);
+        dataPointForStorage_ = {};
+    }
 
-        emit addDataPoint(getActiveMap(dataPointBeingAveraged_), x, DoReplot{true});
+    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
+    {
+        averageDataPoint(dataPointForPlotting_, averagingCount_);
+        emit addDataPoint(getActiveMap(dataPointForPlotting_), plotTimeInterval_, DoReplot{true});
 
-        dataPointBeingAveraged_ = {};
+        dataPointForPlotting_ = {};
         averagingCount_ = 0;
     }
 }
@@ -109,6 +124,8 @@ void PlotModel::emitPlot()
     std::vector<std::unordered_map<std::string, double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
+    double timeStep = abstractSimulationBuilder_->getSimulationConfig().setup.simulationTimeStep;
+    const int dataPointsPerStoredPoint = std::ceil(storageTime_ / timeStep);
 
     for (const auto& dataPoint : dataPoints_)
     {
@@ -117,14 +134,15 @@ void PlotModel::emitPlot()
 
         if (dataPointToAverage.elapsedTime_ >= plotTimeInterval_)
         {
-            averageDataPoint(dataPointToAverage, averagingCount);
+            averageDataPoint(dataPointToAverage, averagingCount * dataPointsPerStoredPoint);
             fullPlotData.push_back(getActiveMap(dataPointToAverage));
             dataPointToAverage = {};
             averagingCount = 0;
         }
     }
 
-    emit replaceDataPoints(fullPlotData, plotTimeInterval_);
+    emit createGraphs(labels_, colors_);
+    emit addDataPoints(fullPlotData, plotTimeInterval_);
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
@@ -171,9 +189,8 @@ DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
     lhs.collisionCounts_ += rhs.collisionCounts_;
     lhs.discTypeCountMap_ += rhs.discTypeCountMap_;
 
-    // To get values per second, we multiply by elapsed time in seconds
-    lhs.totalKineticEnergyMap_ += (rhs.totalKineticEnergyMap_ * rhs.elapsedTime_);
-    lhs.totalMomentumMap_ += (rhs.totalMomentumMap_ * rhs.elapsedTime_);
+    lhs.totalKineticEnergyMap_ += rhs.totalKineticEnergyMap_;
+    lhs.totalMomentumMap_ += rhs.totalMomentumMap_;
 
     return lhs;
 }

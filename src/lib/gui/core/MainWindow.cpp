@@ -89,6 +89,7 @@ void MainWindow::resetSimulation()
 {
     stopSimulation();
     simulation_->rebuildContext();
+    plotModel_->reset();
 }
 
 void MainWindow::saveSettingsAsJson()

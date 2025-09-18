@@ -22,9 +22,10 @@ public:
 
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
 
-    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot = DoReplot{true});
+    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
+                      DoReplot = DoReplot{true});
 
-    void replaceDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
+    void addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
 
     void setPlotTitle(const std::string& title);
 
@@ -48,6 +49,8 @@ private:
     double xMax_ = 0;
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
+
+    int count_ = 0;
 };
 
 #endif

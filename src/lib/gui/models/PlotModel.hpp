@@ -52,7 +52,7 @@ public slots:
 signals:
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
     void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot doReplot);
-    void replaceDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
+    void addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void setPlotTitle(const std::string& title);
 
 private:
@@ -79,12 +79,15 @@ private:
      * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
      * continously add data points to this one
      */
-    DataPoint dataPointBeingAveraged_;
+    DataPoint dataPointForStorage_;
+    DataPoint dataPointForPlotting_;
 
     /**
-     * @brief Number of data points already added to the dataPointBeingAveraged_
+     * @brief Number of data points already added to the dataPointForStorage_
      */
     int averagingCount_ = 0;
+
+    const double storageTime_ = 0.1;
 
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
