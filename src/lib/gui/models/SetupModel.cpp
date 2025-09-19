@@ -7,9 +7,9 @@
 SetupModel::SetupModel(QObject* parent, DiscTypeDistributionTableModel* discTypeDistributionTableModel,
                        DiscTableModel* discTableModel, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QObject(parent)
+    , abstractSimulationBuilder_(abstractSimulationBuilder)
     , discTypeDistributionTableModel_(discTypeDistributionTableModel)
     , discTableModel_(discTableModel)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
 {
 }
 

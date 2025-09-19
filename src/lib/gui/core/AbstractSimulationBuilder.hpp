@@ -31,6 +31,8 @@ public:
 
     virtual void registerConfigObserver(ConfigObserver observer) = 0;
     virtual cell::DiscTypeResolver getDiscTypeResolver() const = 0;
+
+    virtual ~AbstractSimulationBuilder() = default;
 };
 
 #endif /* ABSTRACTSIMULATIONBUILDER_HPP */

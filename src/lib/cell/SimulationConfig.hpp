@@ -19,23 +19,23 @@ namespace config
 struct DiscType
 {
     std::string name;
-    double radius;
-    double mass;
+    double radius = 0;
+    double mass = 0;
     bool operator==(const DiscType&) const = default;
 };
 
 struct Disc
 {
     std::string discTypeName;
-    double x, y;
-    double vx, vy;
+    double x = 0, y = 0;
+    double vx = 0, vy = 0;
     bool operator==(const Disc&) const = default;
 };
 
 struct Reaction
 {
     std::string educt1, educt2, product1, product2;
-    double probability;
+    double probability = 0;
     bool operator==(const Reaction&) const = default;
 };
 

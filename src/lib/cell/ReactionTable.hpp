@@ -23,10 +23,10 @@ class ReactionTable : public AbstractReactionTable
 public:
     ReactionTable(DiscTypeResolver discTypeResolver);
 
-    const DiscTypeMap<std::vector<Reaction>>& getTransformations() const;
-    const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const;
-    const DiscTypePairMap<std::vector<Reaction>>& getCombinations() const;
-    const DiscTypePairMap<std::vector<Reaction>>& getExchanges() const;
+    const DiscTypeMap<std::vector<Reaction>>& getTransformations() const override;
+    const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const override;
+    const DiscTypePairMap<std::vector<Reaction>>& getCombinations() const override;
+    const DiscTypePairMap<std::vector<Reaction>>& getExchanges() const override;
 
     /**
      * @brief Adds a new reaction to the table and updates all lookup maps
