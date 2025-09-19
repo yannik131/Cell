@@ -25,6 +25,7 @@ public:
     void injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder);
 
     void closeEvent(QCloseEvent* event) override;
+    void toggleFullscreen();
 
 signals:
     void requestExitFullscreen();

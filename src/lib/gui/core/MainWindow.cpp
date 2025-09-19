@@ -139,56 +139,8 @@ void MainWindow::loadSettingsFromJson()
 
 void MainWindow::toggleSimulationFullscreen()
 {
-    // This was ChatGPT-generated
-    static QWidget* origParent = nullptr;
-    static QLayout* origLayout = nullptr;
-    static QWidget* placeholder = nullptr;
-    static Qt::WindowFlags origFlags;
-
-    QWidget* w = ui->simulationWidget;
-
-    if (!placeholder)
-    {
-        // Detach to full screen
-        origParent = w->parentWidget();
-        origLayout = origParent ? origParent->layout() : nullptr;
-        origFlags = w->windowFlags();
-
-        if (origLayout)
-        {
-            placeholder = new QWidget(origParent);
-            placeholder->setSizePolicy(w->sizePolicy());
-            origLayout->replaceWidget(w, placeholder);
-        }
-
-        w->setParent(nullptr);
-        w->setWindowFlag(Qt::Window, true);
-        w->showFullScreen();
-        w->raise();
-        w->activateWindow();
-        fullscreenIsToggled_ = true;
-    }
-    else
-    {
-        // Restore to original place
-        w->showNormal(); // leave full screen
-        w->setWindowFlags(origFlags & ~Qt::Window);
-        w->setParent(origParent);
-
-        if (origLayout)
-        {
-            origLayout->replaceWidget(placeholder, w);
-            placeholder->deleteLater();
-        }
-
-        placeholder = nullptr;
-        origParent = nullptr;
-        origLayout = nullptr;
-
-        w->show(); // apply new flags/parent
-        fullscreenIsToggled_ = false;
-    }
-
+    ui->simulationWidget->toggleFullscreen();
+    fullscreenIsToggled_ = !fullscreenIsToggled_;
     simulation_->emitFrame(RedrawOnly{true});
 }
 

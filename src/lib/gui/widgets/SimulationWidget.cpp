@@ -2,6 +2,7 @@
 #include "core/AbstractSimulationBuilder.hpp"
 
 #include <QCloseEvent>
+#include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <glog/logging.h>
@@ -34,6 +35,57 @@ void SimulationWidget::closeEvent(QCloseEvent* event)
     event->ignore();
 }
 
+void SimulationWidget::toggleFullscreen()
+{
+    // This was ChatGPT-generated, so it's still pretty ugly.
+    // TODO Fix fullscreen issue on window, repeated calls to this don't fill out the entire screen
+
+    static QWidget* origParent = nullptr;
+    static QLayout* origLayout = nullptr;
+    static QWidget* placeholder = nullptr;
+    static Qt::WindowFlags origFlags;
+
+    if (!placeholder)
+    {
+        // Detach to full screen
+        origParent = parentWidget();
+        origLayout = origParent ? origParent->layout() : nullptr;
+        origFlags = windowFlags();
+
+        if (origLayout)
+        {
+            placeholder = new QWidget(origParent);
+            placeholder->setSizePolicy(sizePolicy());
+            origLayout->replaceWidget(this, placeholder);
+        }
+
+        setParent(nullptr);
+        setWindowFlag(Qt::Window, true);
+        showFullScreen();
+        raise();
+        activateWindow();
+    }
+    else
+    {
+        // Restore to original place
+        showNormal(); // leave full screen
+        setWindowFlags(origFlags & ~Qt::Window);
+        setParent(origParent);
+
+        if (origLayout)
+        {
+            origLayout->replaceWidget(placeholder, this);
+            placeholder->deleteLater();
+        }
+
+        placeholder = nullptr;
+        origParent = nullptr;
+        origLayout = nullptr;
+
+        show(); // apply new flags/parent
+    }
+}
+
 void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
                               const std::map<std::string, sf::Color>& colorMap)
 {
@@ -44,13 +96,12 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolve
     clock_.restart();
 
     sf::RenderWindow::clear(sf::Color::Black);
+    sf::CircleShape circleShape;
 
     for (const auto& disc : frame.discs_)
     {
         const auto& discType = discTypeResolver(disc.getDiscTypeID());
 
-        sf::CircleShape circleShape;
-        circleShape.setPointCount(50);
         circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
         circleShape.setRadius(discType.getRadius());
         circleShape.setFillColor(colorMap.at(discType.getName()));
