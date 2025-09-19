@@ -76,8 +76,8 @@ void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dat
 
 void PlotWidget::addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
 {
-    for (std::size_t i = 0; i < dataPoints.size(); ++i)
-        addDataPoint(dataPoints[i], xStep, DoReplot{false});
+    for (const auto& dataPoint : dataPoints)
+        addDataPoint(dataPoint, xStep, DoReplot{false});
 
     replot();
 }

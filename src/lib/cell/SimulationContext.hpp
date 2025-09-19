@@ -32,7 +32,7 @@ class InvalidSetupException : public std::runtime_error
 class SimulationContext
 {
 public:
-    SimulationContext();
+    SimulationContext() = default;
 
     void buildContextFromConfig(const SimulationConfig& simulationConfig);
 

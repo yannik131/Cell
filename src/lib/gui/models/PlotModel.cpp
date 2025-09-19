@@ -237,7 +237,7 @@ void PlotModel::emitGraphs()
 
     if (plotSum_)
     {
-        labels_.push_back("Sum");
+        labels_.emplace_back("Sum");
         colors_.push_back(sf::Color::Black);
     }
     else

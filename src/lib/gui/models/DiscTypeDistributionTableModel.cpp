@@ -105,7 +105,7 @@ void DiscTypeDistributionTableModel::addRow()
         throw ExceptionWithLocation("There are no disc types available that are not already in the distribution.");
 
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
-    rows_.push_back(std::make_pair(*availableNames.begin(), 0));
+    rows_.emplace_back(*availableNames.begin(), 0);
     endInsertRows();
 }
 

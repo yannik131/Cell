@@ -11,7 +11,7 @@ class AReactionTable : public ::testing::Test
 protected:
     DiscTypeRegistry registry;
     DiscTypeResolver resolver;
-    DiscTypeID A, B, C;
+    DiscTypeID A{}, B{}, C{};
 
     void SetUp() override
     {

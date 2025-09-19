@@ -9,10 +9,6 @@
 namespace cell
 {
 
-SimulationContext::SimulationContext()
-{
-}
-
 void SimulationContext::buildContextFromConfig(const SimulationConfig& simulationConfig)
 {
     built_ = false;
@@ -87,8 +83,7 @@ SimulationTimeStepProvider SimulationContext::buildSimulationTimeStepProvider(co
     throwIfNotInRange(simulationTimeStep, SettingsLimits::MinSimulationTimeStep, SettingsLimits::MaxSimulationTimeStep,
                       "simulation time step");
 
-    return std::function<double()>([simulationTimeStep]()
-                                   { return static_cast<double>(simulationTimeStep.asSeconds()); });
+    return [simulationTimeStep]() { return static_cast<double>(simulationTimeStep.asSeconds()); };
 }
 
 DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const
@@ -151,7 +146,8 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig, MaxR
     std::vector<Disc> discs = getDiscsFromConfig(simulationConfig, maxRadiusProvider);
 
     Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider, discTypeResolver,
-              Dimensions{simulationConfig.setup.cellWidth, simulationConfig.setup.cellHeight}, std::move(discs));
+              Dimensions{.width = simulationConfig.setup.cellWidth, .height = simulationConfig.setup.cellHeight},
+              std::move(discs));
 
     return cell;
 }

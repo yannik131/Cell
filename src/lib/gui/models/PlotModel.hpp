@@ -50,7 +50,7 @@ public slots:
 
 signals:
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
-    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double x, DoReplot doReplot);
+    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep, DoReplot doReplot);
     void addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void setPlotTitle(const std::string& title);
 

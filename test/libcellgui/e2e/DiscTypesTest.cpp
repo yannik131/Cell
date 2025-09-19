@@ -31,6 +31,7 @@ private slots:
         QTest::mouseClick(mainWindow.findChild<QPushButton*>("editDiscTypesPushButton"), Qt::LeftButton);
 
         DiscTypesDialog* discTypesDialog = nullptr;
+        // NOLINTNEXTLINE
         QTRY_VERIFY_WITH_TIMEOUT(
             (discTypesDialog = qobject_cast<DiscTypesDialog*>(QApplication::activeModalWidget())) != nullptr, 1000);
 

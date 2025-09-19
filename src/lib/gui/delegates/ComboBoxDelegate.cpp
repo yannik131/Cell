@@ -53,7 +53,7 @@ QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOpt
 QVector<QString> DiscTypeComboBoxDelegate::getDiscTypeNames(const std::vector<cell::config::DiscType>& discTypes) const
 {
     QVector<QString> names;
-    names.reserve(discTypes.size());
+    names.reserve(static_cast<qsizetype>(discTypes.size()));
 
     for (const auto& discType : discTypes)
         names.push_back(QString::fromStdString(discType.name));

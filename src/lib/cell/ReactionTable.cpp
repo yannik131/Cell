@@ -103,7 +103,7 @@ void ReactionTable::createLookupMaps()
 
 void ReactionTable::checkIfIsDuplicateReaction(const Reaction& reaction) const
 {
-    const std::vector<Reaction>* reactions;
+    const std::vector<Reaction>* reactions = nullptr;
     if (isUnary(reaction))
     {
         const auto& map = unaryMap(*this, reaction);

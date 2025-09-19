@@ -160,7 +160,7 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
         return;
     }
 
-    frameDTO.elapsedSimulationTimeUs = simulationConfig_.setup.simulationTimeStep * 1e6;
+    frameDTO.elapsedSimulationTimeUs = static_cast<long long>(simulationConfig_.setup.simulationTimeStep * 1e6);
     frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);

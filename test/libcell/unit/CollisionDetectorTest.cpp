@@ -37,9 +37,9 @@ std::vector<std::pair<Disc*, Disc*>> createPossiblePairs(std::vector<Disc>& disc
     {
         for (std::size_t j = i; j < discs.size(); ++j)
         {
-            pairs.push_back(std::make_pair(&discs[i], &discs[j]));
+            pairs.emplace_back(&discs[i], &discs[j]);
             if (i != j)
-                pairs.push_back(std::make_pair(&discs[j], &discs[i]));
+                pairs.emplace_back(&discs[j], &discs[i]);
         }
     }
 

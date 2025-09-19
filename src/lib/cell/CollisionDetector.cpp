@@ -19,7 +19,7 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
     const double& R = discTypeResolver_(disc.getDiscTypeID()).getRadius();
     const sf::Vector2d& r = disc.getPosition();
     RectangleCollision rectangleCollision;
-    double l;
+    double l = NAN;
 
     if (l = R + topLeft.x - r.x; l > 0)
         rectangleCollision.xCollision_ = {Wall::Left, l};

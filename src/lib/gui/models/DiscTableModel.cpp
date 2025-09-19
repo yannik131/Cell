@@ -10,7 +10,7 @@ DiscTableModel::DiscTableModel(QObject* parent, AbstractSimulationBuilder* abstr
 
 int DiscTableModel::rowCount(const QModelIndex& parent) const
 {
-    return rows_.size();
+    return static_cast<int>(rows_.size());
 }
 
 int DiscTableModel::columnCount(const QModelIndex& parent) const

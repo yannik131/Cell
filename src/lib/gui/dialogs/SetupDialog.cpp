@@ -57,8 +57,10 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                                   static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
                                          cell::SettingsLimits::MaxSimulationTimeScale);
-    ui->cellWidthSpinBox->setRange(cell::SettingsLimits::MinCellWidth, cell::SettingsLimits::MaxCellWidth);
-    ui->cellHeightSpinBox->setRange(cell::SettingsLimits::MinCellHeight, cell::SettingsLimits::MaxCellHeight);
+    ui->cellWidthSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinCellWidth),
+                                   static_cast<int>(cell::SettingsLimits::MaxCellWidth));
+    ui->cellHeightSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinCellHeight),
+                                    static_cast<int>(cell::SettingsLimits::MaxCellHeight));
     ui->GUIFPSSpinBox->setRange(1, 120);
 
     insertDiscTypeComboboxIntoView(ui->discTypeDistributionTableView, abstractSimulationBuilder, 0);
