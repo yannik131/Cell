@@ -1,6 +1,7 @@
 #ifndef HASHING_HPP
 #define HASHING_HPP
 
+#include <string>
 #include <type_traits>
 #include <utility>
 
