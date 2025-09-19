@@ -22,7 +22,6 @@ public:
     void setModel(PlotModel* plotModel);
 
 signals:
-    void plotSettingsChanged();
     void selectDiscTypesClicked();
 
 private:

@@ -10,8 +10,6 @@ PlotWidget::PlotWidget(QWidget* parent)
     setInteraction(QCP::iRangeDrag, true); // Allow dragging the plot by left click-hold
     setInteraction(QCP::iRangeZoom, true); // Allow zoom with mouse wheel
 
-    plotLayout()->insertRow(0);
-
     xAxis->setLabel("t [s]");
 
     addLayer("legend layer");
@@ -45,6 +43,7 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
         legend->setVisible(false);
     else
     {
+        legend->setVisible(true);
         for (int i = 0; i < legend->itemCount(); ++i)
             legend->item(i)->setLayer("legend layer");
     }

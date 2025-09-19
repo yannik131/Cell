@@ -9,17 +9,19 @@
 
 #include <glog/logging.h>
 
+#include "MainWindow.hpp"
+#include <QKeyEvent>
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulation_(new Simulation())
+    , plotModel_(new PlotModel(this, simulation_.get()))
     , discTypesDialog_(new DiscTypesDialog(this, simulation_.get()))
     , reactionsDialog_(new ReactionsDialog(this, simulation_.get()))
     , setupDialog_(new SetupDialog(this, simulation_.get()))
-    , plotDataSelectionDialog_(new PlotDataSelectionDialog(this))
-    , plotModel_(new PlotModel(this, simulation_.get()))
+    , plotDataSelectionDialog_(new PlotDataSelectionDialog(this, simulation_.get(), plotModel_))
 {
     ui->setupUi(this);
 
@@ -80,6 +82,20 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
 
     ui->plotControlWidget->setModel(plotModel_);
+    connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
+            &QDialog::show);
+
+    // Application-wide shortcuts so they work even when the widget is a separate window
+    auto* scFull = new QShortcut(QKeySequence(Qt::Key_F), this);
+    scFull->setContext(Qt::ApplicationShortcut);
+
+    auto* scEsc = new QShortcut(QKeySequence::Cancel, this);
+    scEsc->setContext(Qt::ApplicationShortcut);
+
+    connect(scFull, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
+    connect(scEsc, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
+    connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,
+            &MainWindow::toggleSimulationFullscreen);
 
     // This will queue an event that will be handled as soon as the event loop is available
     QTimer::singleShot(0, this, [&]() { simulation_->rebuildContext(); });
@@ -125,9 +141,57 @@ void MainWindow::loadSettingsFromJson()
     }
 }
 
-void MainWindow::loadDefaultSettings()
+void MainWindow::toggleSimulationFullscreen()
 {
-    // TODO
+    // This was ChatGPT-generated
+    static QWidget* origParent = nullptr;
+    static QLayout* origLayout = nullptr;
+    static QWidget* placeholder = nullptr;
+    static Qt::WindowFlags origFlags;
+
+    QWidget* w = ui->simulationWidget;
+
+    if (!placeholder)
+    {
+        // Detach to full screen
+        origParent = w->parentWidget();
+        origLayout = origParent ? origParent->layout() : nullptr;
+        origFlags = w->windowFlags();
+
+        if (origLayout)
+        {
+            placeholder = new QWidget(origParent);
+            placeholder->setSizePolicy(w->sizePolicy());
+            origLayout->replaceWidget(w, placeholder);
+        }
+
+        w->setParent(nullptr);
+        w->setWindowFlag(Qt::Window, true);
+        w->showFullScreen();
+        w->raise();
+        w->activateWindow();
+    }
+    else
+    {
+        // Restore to original place
+        w->showNormal(); // leave full screen
+        w->setWindowFlags(origFlags & ~Qt::Window);
+        w->setParent(origParent);
+
+        if (origLayout)
+        {
+            origLayout->replaceWidget(placeholder, w);
+            placeholder->deleteLater();
+        }
+
+        placeholder = nullptr;
+        origParent = nullptr;
+        origLayout = nullptr;
+
+        w->show(); // apply new flags/parent
+    }
+
+    simulation_->emitFrame(RedrawOnly{true});
 }
 
 MainWindow::~MainWindow()
@@ -147,6 +211,17 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     QMainWindow::resizeEvent(event);
 }
 
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_F)
+    {
+        if (ui->simulationWidget->isFullScreen())
+            ui->simulationWidget->showNormal();
+        else
+            ui->simulationWidget->showFullScreen();
+    }
+}
+
 void MainWindow::startSimulation()
 {
     if (simulationThread_ != nullptr)
@@ -163,14 +238,6 @@ void MainWindow::startSimulation()
     connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
             [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{false}); });
 
-    connect(simulationThread_, &QThread::finished, this,
-            [&]()
-            {
-                // Revert the fixed size to enable resizing again
-                setMinimumSize(QSize(0, 0));
-                setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-            });
-
     connect(simulationThread_, &QThread::started,
             [&]()
             {
@@ -183,9 +250,6 @@ void MainWindow::startSimulation()
     connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
 
     simulationThread_->start();
-
-    // Resizing the window would change the world (haha) so we can't allow it during simulation
-    setFixedSize(size());
 }
 
 void MainWindow::stopSimulation()

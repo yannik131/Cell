@@ -24,6 +24,11 @@ public:
 
     void injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder);
 
+    void closeEvent(QCloseEvent* event) override;
+
+signals:
+    void requestExitFullscreen();
+
 public slots:
     /**
      * @brief Clears the render window and displays circles based on the given `FrameDTO`

@@ -10,8 +10,8 @@ ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTime
                                const AbstractReactionTable& reactionTable)
     : discTypeResolver_(std::move(discTypeResolver))
     , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
-    , decompositions_(&reactionTable.getDecompositions())
     , transformations_(&reactionTable.getTransformations())
+    , decompositions_(&reactionTable.getDecompositions())
     , combinations_(&reactionTable.getCombinations())
     , exchanges_(&reactionTable.getExchanges())
 {

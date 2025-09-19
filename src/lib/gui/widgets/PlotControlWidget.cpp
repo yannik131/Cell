@@ -11,6 +11,7 @@ PlotControlWidget::PlotControlWidget(QWidget* parent)
     // Remove items set by the designer, might not be up to date (source code is the ssot)
     ui->plotTypeComboBox->clear();
     ui->plotTypeComboBox->addItems(SupportedPlotCategoryNames);
+    connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, this, [&]() { emit selectDiscTypesClicked(); });
 }
 
 void PlotControlWidget::setModel(PlotModel* plotModel)

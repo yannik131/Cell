@@ -1,11 +1,11 @@
 #include "widgets/SimulationWidget.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 
+#include <QCloseEvent>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <glog/logging.h>
 
-#include "SimulationWidget.hpp"
 #include <map>
 
 SimulationWidget::SimulationWidget(QWidget* parent)
@@ -25,6 +25,13 @@ void SimulationWidget::injectAbstractSimulationBuilder(AbstractSimulationBuilder
             boundingRect_.setSize(
                 sf::Vector2f{static_cast<float>(config.setup.cellWidth), static_cast<float>(config.setup.cellHeight)});
         });
+}
+
+void SimulationWidget::closeEvent(QCloseEvent* event)
+{
+    // If the widget is full screen, exit full screen instead of destroying it
+    emit requestExitFullscreen();
+    event->ignore();
 }
 
 void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,

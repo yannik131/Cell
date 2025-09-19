@@ -34,7 +34,7 @@ public:
     void setSimulationConfig(const cell::SimulationConfig& simulationConfig) override;
     void setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
                       const std::unordered_set<std::string>& removedDiscTypes,
-                      const std::map<std::string, sf::Color>& discTypeColorMap);
+                      const std::map<std::string, sf::Color>& discTypeColorMap) override;
 
     const std::map<std::string, sf::Color>& getDiscTypeColorMap() const override;
 

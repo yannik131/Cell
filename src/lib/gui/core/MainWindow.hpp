@@ -44,6 +44,8 @@ protected:
      */
     void resizeEvent(QResizeEvent* event) override;
 
+    void keyPressEvent(QKeyEvent* event) override;
+
 private:
     /**
      * @brief Starts the simulation in a separate thread and waits for it to exit before moving it back to the main
@@ -71,23 +73,18 @@ private:
      */
     void loadSettingsFromJson();
 
-    /**
-     * @brief Looks for a file called defaultSettings.json in the cwd and loads it if it's there
-     */
-    void loadDefaultSettings();
+    void toggleSimulationFullscreen();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QThread* simulationThread_ = nullptr;
     std::unique_ptr<Simulation> simulation_;
+    PlotModel* plotModel_;
 
     DiscTypesDialog* discTypesDialog_;
     ReactionsDialog* reactionsDialog_;
     SetupDialog* setupDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
-
-    PlotModel* plotModel_;
-
     QTimer resizeTimer_;
 };
 

@@ -4,6 +4,7 @@
 #include "core/AbstractSimulationBuilder.hpp"
 
 #include <cmath>
+#include <unordered_set>
 
 namespace
 {
@@ -17,9 +18,6 @@ void averageDataPoint(DataPoint& dataPoint, int length)
 
     dataPoint.totalKineticEnergyMap_ /= length;
     dataPoint.totalMomentumMap_ /= length;
-
-    // This is time-independent, divide by just number of data points to get average number of disc types for each data
-    // point
     dataPoint.discTypeCountMap_ /= length;
 }
 
@@ -38,6 +36,7 @@ PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulat
         [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& colorMap)
         {
             reset();
+            updateActivePlotDiscTypes(config.discTypes);
             emitGraphs();
         });
 }
@@ -76,6 +75,21 @@ void PlotModel::reset()
     averagingCount_ = 0;
 }
 
+void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames)
+{
+    activePlotDiscTypes_.clear();
+    for (const auto& name : activeDiscTypeNames)
+        activePlotDiscTypes_[name] = true;
+
+    emitGraphs();
+    emitPlot();
+}
+
+const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
+{
+    return activePlotDiscTypes_;
+}
+
 void PlotModel::processFrame(const FrameDTO& frameDTO)
 {
     // Elapsed time 0 means this DTO was only emitted for a redraw
@@ -94,7 +108,7 @@ void PlotModel::emitPlot()
     DataPoint dataPointToAverage;
     int averagingCount = 0;
     double timeStep = abstractSimulationBuilder_->getSimulationConfig().setup.simulationTimeStep;
-    const int dataPointsPerStoredPoint = std::ceil(storageTime_ / timeStep);
+    const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
 
     for (const auto& dataPoint : dataPoints_)
     {
@@ -147,19 +161,35 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 
 std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint& dataPoint)
 {
+    std::unordered_map<std::string, double> activeMap;
+
     switch (plotCategory_)
     {
     case PlotCategory::TypeCounts:
-        return dataPoint.discTypeCountMap_;
+        activeMap = dataPoint.discTypeCountMap_;
+        break;
     case PlotCategory::CollisionCounts:
-        return dataPoint.collisionCounts_;
+        activeMap = dataPoint.collisionCounts_;
+        break;
     case PlotCategory::AbsoluteMomentum:
-        return dataPoint.totalMomentumMap_;
+        activeMap = dataPoint.totalMomentumMap_;
+        break;
     case PlotCategory::KineticEnergy:
-        return dataPoint.totalKineticEnergyMap_;
+        activeMap = dataPoint.totalKineticEnergyMap_;
+        break;
     default:
-        return {};
+        activeMap = {};
     }
+
+    for (auto iter = activeMap.begin(); iter != activeMap.end();)
+    {
+        if (!activePlotDiscTypes_[iter->first])
+            iter = activeMap.erase(iter);
+        else
+            ++iter;
+    }
+
+    return activeMap;
 }
 
 void PlotModel::storeDataPoint(const DataPoint& dataPoint)
@@ -187,11 +217,11 @@ void PlotModel::plotDataPoint(const DataPoint& dataPoint)
     if (plotSum_)
     {
         auto sum = std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
-                                   [](double partialSum, const auto& pair) { return pair.second + partialSum; });
+                                   [&](double partialSum, const auto& pair) { return pair.second + partialSum; });
         emit addDataPoint({{"Sum", sum}}, plotTimeInterval_, DoReplot{true});
     }
     else
-        emit addDataPoint(getActiveMap(dataPointForPlotting_), plotTimeInterval_, DoReplot{true});
+        emit addDataPoint(activeMap, plotTimeInterval_, DoReplot{true});
 
     dataPointForPlotting_ = {};
     averagingCount_ = 0;
@@ -214,12 +244,38 @@ void PlotModel::emitGraphs()
     {
         for (const auto& discType : config.discTypes)
         {
+            if (!activePlotDiscTypes_[discType.name])
+                continue;
+
             labels_.push_back(discType.name);
             colors_.push_back(colorMap.at(discType.name));
         }
     }
 
     emit createGraphs(labels_, colors_);
+}
+
+void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes)
+{
+    std::unordered_set<std::string> discTypeNames;
+
+    // Make all new disc types active by default
+    for (const auto& discType : discTypes)
+    {
+        if (!activePlotDiscTypes_.contains(discType.name))
+            activePlotDiscTypes_[discType.name] = true;
+
+        discTypeNames.insert(discType.name);
+    }
+
+    // Remove disc types that were deleted
+    for (auto iter = activePlotDiscTypes_.begin(); iter != activePlotDiscTypes_.end();)
+    {
+        if (!discTypeNames.contains(iter->first))
+            iter = activePlotDiscTypes_.erase(iter);
+        else
+            ++iter;
+    }
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)

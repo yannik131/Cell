@@ -1,6 +1,7 @@
 #ifndef PLOTMODEL_HPP
 #define PLOTMODEL_HPP
 
+#include "cell/SimulationConfig.hpp"
 #include "core/FrameDTO.hpp"
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
@@ -41,12 +42,10 @@ public:
     void setPlotSum(bool value);
     void reset();
 
+    void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
+    const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
+
 public slots:
-    /**
-     * @brief Extracts information from the `frameDTO` relevant for the plot as a `DataPoint` and averages all
-     * collected `DataPoint`s if the plot time interval has elapsed since the last plot, emitting a new plot data
-     * point
-     */
     void processFrame(const FrameDTO& frameDTO);
 
 signals:
@@ -72,6 +71,7 @@ private:
     void storeDataPoint(const DataPoint& dataPoint);
     void plotDataPoint(const DataPoint& dataPoint);
     void emitGraphs();
+    void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
 
 private:
     /**
@@ -101,6 +101,8 @@ private:
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;
+
+    std::map<std::string, bool> activePlotDiscTypes_;
 };
 
 #endif /* PLOTMODEL_HPP */
