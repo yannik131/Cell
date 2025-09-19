@@ -92,8 +92,6 @@ void PlotWidget::reset()
     resetRanges();
     resetGraphs();
     count_ = 0;
-
-    setAxisLabels();
 }
 
 void PlotWidget::resetRanges()
@@ -112,10 +110,6 @@ void PlotWidget::resetGraphs()
 {
     clearGraphs();
     graphs_.clear();
-}
-
-void PlotWidget::setAxisLabels()
-{
 }
 
 void PlotWidget::setModel(PlotModel* plotModel)

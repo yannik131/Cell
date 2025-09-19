@@ -74,10 +74,12 @@ void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTyp
     updater.removeDiscTypes(newConfig, removedDiscTypes);
     updater.updateDiscTypes(newConfig, changeMap);
 
-    discTypeColorMap_ = discTypeColorMap;
     buildContext(newConfig);
 
+    // If the above line didn't throw, we're safe to actually change the config now
+
     simulationConfig_ = std::move(newConfig);
+    discTypeColorMap_ = discTypeColorMap;
 
     notifyConfigObservers();
 }

@@ -30,11 +30,6 @@ public:
     void setPlotTitle(const std::string& title);
 
 private:
-    /**
-     * @brief Create labels using correct units depending on the current plot type
-     */
-    void setAxisLabels();
-
     void reset();
     void resetRanges();
     void resetGraphs();

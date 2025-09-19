@@ -37,6 +37,8 @@ public:
      */
     ~MainWindow() override;
 
+    void closeEvent(QCloseEvent* event) override;
+
 protected:
     /**
      * @brief A resize of the main window resets the world and the plot right now, see
@@ -86,6 +88,8 @@ private:
     SetupDialog* setupDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;
     QTimer resizeTimer_;
+
+    bool fullscreenIsToggled_ = false;
 };
 
 #endif /* MAINWINDOW_HPP */

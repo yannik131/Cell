@@ -65,12 +65,19 @@
                 "probability": 0.1,
                 "product1": "Type1",
                 "product2": "Type2"
+            },
+            {
+                "educt1": "Type1",
+                "educt2": "",
+                "probability": 0.2,
+                "product1": "Type0",
+                "product2": ""
             }
         ],
         "setup": {
-            "cellHeight": 900.0,
-            "cellWidth": 1440.0,
-            "discCount": 1000,
+            "cellHeight": 1440.0,
+            "cellWidth": 2560.0,
+            "discCount": 2000,
             "discs": [],
             "distribution": {
                 "Type0": 0.5,

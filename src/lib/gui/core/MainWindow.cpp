@@ -89,11 +89,7 @@ MainWindow::MainWindow(QWidget* parent)
     auto* scFull = new QShortcut(QKeySequence(Qt::Key_F), this);
     scFull->setContext(Qt::ApplicationShortcut);
 
-    auto* scEsc = new QShortcut(QKeySequence::Cancel, this);
-    scEsc->setContext(Qt::ApplicationShortcut);
-
     connect(scFull, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
-    connect(scEsc, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
     connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,
             &MainWindow::toggleSimulationFullscreen);
 
@@ -170,6 +166,7 @@ void MainWindow::toggleSimulationFullscreen()
         w->showFullScreen();
         w->raise();
         w->activateWindow();
+        fullscreenIsToggled_ = true;
     }
     else
     {
@@ -189,6 +186,7 @@ void MainWindow::toggleSimulationFullscreen()
         origLayout = nullptr;
 
         w->show(); // apply new flags/parent
+        fullscreenIsToggled_ = false;
     }
 
     simulation_->emitFrame(RedrawOnly{true});
@@ -201,6 +199,18 @@ MainWindow::~MainWindow()
         simulationThread_->requestInterruption();
         simulationThread_->wait();
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (fullscreenIsToggled_)
+    {
+        QMessageBox::warning(this, "Warning", "You have to disable fullscreen mode before closing the app.");
+        event->ignore();
+        return;
+    }
+
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event)

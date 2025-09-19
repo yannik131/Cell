@@ -78,7 +78,7 @@ double CollisionHandler::keepKineticEnergyConstant(Disc& disc, const CollisionDe
 
     // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
     // not too much to make it look stupid
-    double randomNumber = mathutils::getRandomNumber<double>(0, 0.05);
+    double randomNumber = mathutils::getRandomNumber<double>(0, 0.15);
     double kineticEnergyBefore = disc.getKineticEnergy(discTypeResolver_);
     disc.scaleVelocity(1.0 + randomNumber);
 

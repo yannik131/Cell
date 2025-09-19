@@ -62,7 +62,7 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->discTypesTableView->setModel(discTypesTableModel_);
 }
 
-void DiscTypesDialog::showEvent(QShowEvent* event)
+void DiscTypesDialog::showEvent(QShowEvent*)
 {
     discTypesTableModel_->reload();
 }

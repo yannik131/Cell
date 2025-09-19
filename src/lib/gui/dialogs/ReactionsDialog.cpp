@@ -47,7 +47,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->reactionsTableView->setModel(reactionsTableModel_);
 }
 
-void ReactionsDialog::showEvent(QShowEvent* event)
+void ReactionsDialog::showEvent(QShowEvent*)
 {
     reactionsTableModel_->reload();
 }
