@@ -1,0 +1,84 @@
+{
+    "colorMap": {
+        "Type0": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "Type1": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Type2": [
+            255,
+            0,
+            0,
+            255
+        ]
+    },
+    "config": {
+        "discTypes": [
+            {
+                "mass": 5.0,
+                "name": "Type0",
+                "radius": 5.0
+            },
+            {
+                "mass": 5.0,
+                "name": "Type1",
+                "radius": 5.0
+            },
+            {
+                "mass": 10.0,
+                "name": "Type2",
+                "radius": 10.0
+            }
+        ],
+        "reactions": [
+            {
+                "educt1": "Type0",
+                "educt2": "Type1",
+                "probability": 0.1,
+                "product1": "Type2",
+                "product2": ""
+            },
+            {
+                "educt1": "Type2",
+                "educt2": "",
+                "probability": 0.1,
+                "product1": "Type0",
+                "product2": "Type1"
+            },
+            {
+                "educt1": "Type0",
+                "educt2": "",
+                "probability": 0.1,
+                "product1": "Type1",
+                "product2": ""
+            },
+            {
+                "educt1": "Type0",
+                "educt2": "Type2",
+                "probability": 0.1,
+                "product1": "Type1",
+                "product2": "Type2"
+            }
+        ],
+        "setup": {
+            "cellHeight": 900.0,
+            "cellWidth": 1440.0,
+            "discCount": 1000,
+            "discs": [],
+            "distribution": {
+                "Type0": 0.5,
+                "Type1": 0.5
+            },
+            "simulationTimeScale": 1.0,
+            "simulationTimeStep": 0.0010000000474974513,
+            "useDistribution": true
+        }
+    }
+}
