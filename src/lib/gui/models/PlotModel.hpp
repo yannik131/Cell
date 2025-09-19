@@ -69,6 +69,10 @@ private:
 
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
 
+    void storeDataPoint(const DataPoint& dataPoint);
+    void plotDataPoint(const DataPoint& dataPoint);
+    void emitGraphs();
+
 private:
     /**
      * @brief All data points received from the simulation

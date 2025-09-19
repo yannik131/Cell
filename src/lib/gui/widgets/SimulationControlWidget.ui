@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>154</width>
-    <height>294</height>
+    <height>338</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <property name="layoutDirection">
-   <enum>Qt::LeftToRight</enum>
+   <enum>Qt::LayoutDirection::LeftToRight</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -27,7 +27,7 @@
        <widget class="QPushButton" name="editSetupPushButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
@@ -46,7 +46,7 @@
        <widget class="QPushButton" name="editDiscTypesPushButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
@@ -65,7 +65,7 @@
        <widget class="QPushButton" name="editReactionsPushButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
@@ -84,7 +84,7 @@
        <widget class="QPushButton" name="fitIntoViewButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
@@ -103,7 +103,7 @@
        <widget class="QPushButton" name="reinitializeButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>
@@ -122,7 +122,7 @@
        <widget class="QPushButton" name="startStopButton">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>100</width>
           <height>16777215</height>
          </size>
         </property>

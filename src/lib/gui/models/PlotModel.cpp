@@ -5,16 +5,6 @@
 
 #include <cmath>
 
-/**
- * - Disc types changed:
- *  - Identify remaining active disc types for plot
- *  - If there are none, plot is empty (no active disc types for plotting)
- *  - If there are, replot
- * - Any other changes that triggered a simulation reset (context rebuild):
- *  - Empty the plot, keep everything else
- * - Plot category, plotting sum or plot time interval changed: Re-create current plot
- */
-
 namespace
 {
 
@@ -47,15 +37,8 @@ PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulat
     abstractSimulationBuilder_->registerConfigObserver(
         [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& colorMap)
         {
-            labels_.clear();
-            colors_.clear();
-            for (const auto& discType : config.discTypes)
-            {
-                labels_.push_back(discType.name);
-                colors_.push_back(colorMap.at(discType.name));
-            }
             reset();
-            emit createGraphs(labels_, colors_);
+            emitGraphs();
         });
 }
 
@@ -81,6 +64,7 @@ void PlotModel::setPlotTimeInterval(int valueMilliseconds)
 void PlotModel::setPlotSum(bool value)
 {
     plotSum_ = value;
+    emitGraphs();
     emitPlot();
 }
 
@@ -99,24 +83,9 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
         return;
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-    dataPointForStorage_ += dataPoint;
-    dataPointForPlotting_ += dataPoint;
-    ++averagingCount_;
 
-    if (dataPointForStorage_.elapsedTime_ >= storageTime_)
-    {
-        dataPoints_.push_back(dataPointForStorage_);
-        dataPointForStorage_ = {};
-    }
-
-    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
-    {
-        averageDataPoint(dataPointForPlotting_, averagingCount_);
-        emit addDataPoint(getActiveMap(dataPointForPlotting_), plotTimeInterval_, DoReplot{true});
-
-        dataPointForPlotting_ = {};
-        averagingCount_ = 0;
-    }
+    storeDataPoint(dataPoint);
+    plotDataPoint(dataPoint);
 }
 
 void PlotModel::emitPlot()
@@ -132,13 +101,23 @@ void PlotModel::emitPlot()
         dataPointToAverage += dataPoint;
         ++averagingCount;
 
-        if (dataPointToAverage.elapsedTime_ >= plotTimeInterval_)
+        if (dataPointToAverage.elapsedTime_ < plotTimeInterval_)
+            continue;
+
+        averageDataPoint(dataPointToAverage, averagingCount * dataPointsPerStoredPoint);
+        const auto& activeMap = getActiveMap(dataPointToAverage);
+
+        if (plotSum_)
         {
-            averageDataPoint(dataPointToAverage, averagingCount * dataPointsPerStoredPoint);
-            fullPlotData.push_back(getActiveMap(dataPointToAverage));
-            dataPointToAverage = {};
-            averagingCount = 0;
+            auto sum = std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
+                                       [](double partialSum, const auto& pair) { return pair.second + partialSum; });
+            fullPlotData.push_back({{"Sum", sum}});
         }
+        else
+            fullPlotData.push_back(getActiveMap(dataPointToAverage));
+
+        dataPointToAverage = {};
+        averagingCount = 0;
     }
 
     emit createGraphs(labels_, colors_);
@@ -181,6 +160,66 @@ std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint&
     default:
         return {};
     }
+}
+
+void PlotModel::storeDataPoint(const DataPoint& dataPoint)
+{
+    dataPointForStorage_ += dataPoint;
+
+    if (dataPointForStorage_.elapsedTime_ >= storageTime_)
+    {
+        dataPoints_.push_back(dataPointForStorage_);
+        dataPointForStorage_ = {};
+    }
+}
+
+void PlotModel::plotDataPoint(const DataPoint& dataPoint)
+{
+    dataPointForPlotting_ += dataPoint;
+    ++averagingCount_;
+
+    if (dataPointForPlotting_.elapsedTime_ < plotTimeInterval_)
+        return;
+
+    averageDataPoint(dataPointForPlotting_, averagingCount_);
+    const auto& activeMap = getActiveMap(dataPointForPlotting_);
+
+    if (plotSum_)
+    {
+        auto sum = std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
+                                   [](double partialSum, const auto& pair) { return pair.second + partialSum; });
+        emit addDataPoint({{"Sum", sum}}, plotTimeInterval_, DoReplot{true});
+    }
+    else
+        emit addDataPoint(getActiveMap(dataPointForPlotting_), plotTimeInterval_, DoReplot{true});
+
+    dataPointForPlotting_ = {};
+    averagingCount_ = 0;
+}
+
+void PlotModel::emitGraphs()
+{
+    labels_.clear();
+    colors_.clear();
+
+    const auto& config = abstractSimulationBuilder_->getSimulationConfig();
+    const auto& colorMap = abstractSimulationBuilder_->getDiscTypeColorMap();
+
+    if (plotSum_)
+    {
+        labels_.push_back("Sum");
+        colors_.push_back(sf::Color::Black);
+    }
+    else
+    {
+        for (const auto& discType : config.discTypes)
+        {
+            labels_.push_back(discType.name);
+            colors_.push_back(colorMap.at(discType.name));
+        }
+    }
+
+    emit createGraphs(labels_, colors_);
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
