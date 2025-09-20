@@ -91,6 +91,7 @@
                 "Prey": 0.333,
                 "Resource": 0.333
             },
+            "maxVelocity": 100.0,
             "simulationTimeScale": 3.0,
             "simulationTimeStep": 0.001,
             "useDistribution": true
