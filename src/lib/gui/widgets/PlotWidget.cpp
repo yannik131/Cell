@@ -55,13 +55,14 @@ void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dat
 {
     double x = xStep * count_++;
 
-    for (const auto& [label, value] : dataPoint)
+    for (auto& [label, graph] : graphs_)
     {
-        auto graph = graphs_.find(label);
-        if (graph == graphs_.end())
-            throw std::logic_error("Invalid datapoint: There is no plot with label\"" + label + "\"");
+        double value = 0;
+        const auto& iter = dataPoint.find(label);
+        if (iter != dataPoint.end())
+            value = iter->second;
 
-        graph->second->addData(x, value);
+        graph->addData(x, value);
 
         yMin_ = std::min(yMin_, value);
         yMax_ = std::max(yMax_, value);

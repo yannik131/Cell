@@ -68,8 +68,8 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
 
     insertProbabilitySpinBoxIntoView(ui->discTypeDistributionTableView, 1);
 
-    insertDeleteButtonIntoView(this, discTypeDistributionTableModel_, ui->discTypeDistributionTableView, 2);
-    insertDeleteButtonIntoView(this, discTableModel_, ui->discsTableView, 5);
+    insertDeleteButtonIntoView(discTypeDistributionTableModel_, ui->discTypeDistributionTableView, 2);
+    insertDeleteButtonIntoView(discTableModel_, ui->discsTableView, 5);
 
     ui->discTypeDistributionTableView->setModel(discTypeDistributionTableModel_);
     ui->discsTableView->setModel(discTableModel_);

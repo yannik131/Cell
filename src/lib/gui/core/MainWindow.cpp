@@ -131,7 +131,7 @@ void MainWindow::loadSettingsFromJson()
     {
         simulation_->loadConfigFromFile(fs::path{fileName.toStdString()});
     }
-    catch (const ExceptionWithLocation& e)
+    catch (const std::exception& e)
     {
         QMessageBox::warning(this, "Couldn't open file", e.what());
     }

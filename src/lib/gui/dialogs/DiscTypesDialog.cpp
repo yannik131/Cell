@@ -35,7 +35,7 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
 
-    insertDeleteButtonIntoView(this, discTypesTableModel_, ui->discTypesTableView, 4);
+    insertDeleteButtonIntoView(discTypesTableModel_, ui->discTypesTableView, 4);
 
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });

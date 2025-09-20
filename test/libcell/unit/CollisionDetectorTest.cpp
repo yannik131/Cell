@@ -14,7 +14,7 @@ class ACollisionDetector : public Test
 protected:
     DiscTypeRegistry registry;
     DiscTypeResolver resolver;
-    DiscTypeID A;
+    DiscTypeID A = {};
     std::unique_ptr<CollisionDetector> collisionDetector;
 
     void SetUp() override

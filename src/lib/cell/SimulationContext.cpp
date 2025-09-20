@@ -218,7 +218,7 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
 
     for (int i = 0; i < simulationConfig.setup.discCount && !discPositions.empty(); ++i)
     {
-        double randomNumber = mathutils::getRandomNumber<double>(0, 1);
+        auto randomNumber = mathutils::getRandomNumber<double>(0, 1);
 
         for (const auto& [discType, percentage] : discTypes)
         {

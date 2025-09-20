@@ -36,7 +36,7 @@ private:
     QString text_;
 };
 
-template <typename T> void insertDeleteButtonIntoView(QDialog* dialog, T* model, QAbstractItemView* view, int column)
+template <typename T> void insertDeleteButtonIntoView(T* model, QAbstractItemView* view, int column)
 {
     auto* deleteButtonDelegate = new ButtonDelegate(view, "Delete");
     QObject::connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked,

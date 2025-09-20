@@ -95,7 +95,7 @@ template <typename T> T getRandomNumber(std::type_identity_t<T> low, std::type_i
  * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the
  * settings.
  */
-std::vector<sf::Vector2d> calculateGrid(int width, int height, int edgeLength);
+std::vector<sf::Vector2d> calculateGrid(double width, double height, double edgeLength);
 
 } // namespace cell::mathutils
 

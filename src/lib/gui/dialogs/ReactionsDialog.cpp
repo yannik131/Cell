@@ -38,7 +38,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
 
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
-    insertDeleteButtonIntoView(this, reactionsTableModel_, ui->reactionsTableView, 8);
+    insertDeleteButtonIntoView(reactionsTableModel_, ui->reactionsTableView, 8);
     insertDiscTypeComboboxIntoView(ui->reactionsTableView, abstractSimulationBuilder, 0, 2, 4, 6);
     insertProbabilitySpinBoxIntoView(ui->reactionsTableView, 7);
 
