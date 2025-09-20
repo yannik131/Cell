@@ -34,7 +34,8 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
     return rectangleCollision;
 }
 
-std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
+std::unordered_set<std::pair<Disc*, Disc*>, PairHasher>
+CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
     PositionNanoflannAdapter<Disc> adapter(discs);
     KDTree<Disc> kdtree(2, adapter);
@@ -43,15 +44,15 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
     // false: Don't sort results by distance
 
     static const nanoflann::SearchParameters searchParams(0, false);
-
-    std::set<std::pair<Disc*, Disc*>> collidingDiscs;
     static std::vector<nanoflann::ResultItem<uint32_t, double>> discsInRadius;
-    std::unordered_set<Disc*> discsInCollisions;
+    std::unordered_set<std::pair<Disc*, Disc*>, PairHasher> collidingDiscs;
+    std::vector<char> discsInCollisions(discs.size(), 0);
 
-    for (auto& disc : discs)
+    for (std::size_t i = 0; i < discs.size(); ++i)
     {
+        auto& disc = discs[i];
         // We do not support multiple simultaneous collisions
-        if (disc.isMarkedDestroyed() || discsInCollisions.contains(&disc))
+        if (disc.isMarkedDestroyed() || discsInCollisions[i])
             continue;
 
         const double maxCollisionDistance = discTypeResolver_(disc.getDiscTypeID()).getRadius() + maxRadiusProvider_();
@@ -64,7 +65,7 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
         for (const auto& result : discsInRadius)
         {
             auto& otherDisc = discs[result.first];
-            if (&otherDisc == &disc || discsInCollisions.contains(&otherDisc))
+            if (&otherDisc == &disc || discsInCollisions[result.first])
                 continue;
 
             const double radiusSum = discTypeResolver_(disc.getDiscTypeID()).getRadius() +
@@ -77,8 +78,8 @@ std::set<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(st
                 collisionCounts_[disc.getDiscTypeID()]++;
                 collisionCounts_[otherDisc.getDiscTypeID()]++;
 
-                discsInCollisions.insert(&disc);
-                discsInCollisions.insert(&otherDisc);
+                discsInCollisions[i] = 1;
+                discsInCollisions[result.first] = 1;
 
                 break;
             }

@@ -10,7 +10,8 @@ CollisionHandler::CollisionHandler(DiscTypeResolver discTypeResolver)
 {
 }
 
-void CollisionHandler::calculateDiscDiscCollisionResponse(std::set<std::pair<Disc*, Disc*>>& discDiscCollisions) const
+void CollisionHandler::calculateDiscDiscCollisionResponse(
+    std::unordered_set<std::pair<Disc*, Disc*>, PairHasher>& discDiscCollisions) const
 {
     for (const auto& [p1, p2] : discDiscCollisions)
     {

@@ -7,7 +7,7 @@
 
 #include <functional>
 #include <optional>
-#include <set>
+#include <unordered_set>
 
 namespace cell
 {
@@ -59,7 +59,7 @@ public:
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc) const;
 
-    void applyBimolecularReactions(const std::set<std::pair<Disc*, Disc*>>& collidingDiscs) const;
+    void applyBimolecularReactions(const std::unordered_set<std::pair<Disc*, Disc*>, PairHasher>& collidingDiscs) const;
 
 private:
     /**
