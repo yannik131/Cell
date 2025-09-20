@@ -44,6 +44,11 @@ void SetupModel::setCellHeight(int cellHeight)
     setup_.cellHeight = cellHeight;
 }
 
+void SetupModel::setMaxVelocity(int maxVelocity)
+{
+    setup_.maxVelocity = static_cast<double>(maxVelocity);
+}
+
 void SetupModel::commitChanges()
 {
     loadDiscsAndDistribution();

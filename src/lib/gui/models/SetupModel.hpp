@@ -22,6 +22,7 @@ public:
     void setTimeScale(double timeScale);
     void setCellWidth(int cellWidth);
     void setCellHeight(int cellHeight);
+    void setMaxVelocity(int maxVelocity);
 
     // TODO make an interface out of this, there's 3 dialogs and models doing the same shit
     void commitChanges();

@@ -58,6 +58,7 @@ struct Setup
      * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
     double simulationTimeScale = 1;
+    double maxVelocity = 600;
 
     bool useDistribution = true;
 

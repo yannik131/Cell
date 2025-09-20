@@ -191,7 +191,11 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
     std::vector<Disc> discs;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> velocityDistribution(-600.0, 600.0);
+
+    throwIfNotInRange(simulationConfig.setup.maxVelocity, SettingsLimits::MinMaxVelocity,
+                      SettingsLimits::MaxMaxVelocity, "Max. velocity");
+    std::uniform_real_distribution<double> velocityDistribution(-simulationConfig.setup.maxVelocity,
+                                                                simulationConfig.setup.maxVelocity);
 
     discs.reserve(simulationConfig.setup.discCount);
 

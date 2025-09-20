@@ -35,7 +35,7 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent, AbstractSimula
                               }));
 }
 
-void PlotDataSelectionDialog::showEvent(QShowEvent* event)
+void PlotDataSelectionDialog::showEvent(QShowEvent*)
 {
     const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
     ui->selectedDiscTypesListWidget->clear();
