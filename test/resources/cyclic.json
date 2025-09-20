@@ -1,0 +1,99 @@
+{
+    "colorMap": {
+        "Predator": [
+            255,
+            0,
+            0,
+            255
+        ],
+        "Prey": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Resource": [
+            0,
+            0,
+            255,
+            255
+        ]
+    },
+    "config": {
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Predator",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Prey",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Resource",
+                "radius": 5.0
+            }
+        ],
+        "reactions": [
+            {
+                "educt1": "Resource",
+                "educt2": "Prey",
+                "probability": 0.18,
+                "product1": "Prey",
+                "product2": "Prey"
+            },
+            {
+                "educt1": "Predator",
+                "educt2": "Prey",
+                "probability": 0.2,
+                "product1": "Predator",
+                "product2": "Predator"
+            },
+            {
+                "educt1": "Prey",
+                "educt2": "",
+                "probability": 0.08,
+                "product1": "Resource",
+                "product2": ""
+            },
+            {
+                "educt1": "Predator",
+                "educt2": "",
+                "probability": 0.3,
+                "product1": "Resource",
+                "product2": ""
+            },
+            {
+                "educt1": "Resource",
+                "educt2": "",
+                "probability": 0.01,
+                "product1": "Predator",
+                "product2": ""
+            },
+            {
+                "educt1": "Resource",
+                "educt2": "",
+                "probability": 0.01,
+                "product1": "Prey",
+                "product2": ""
+            }
+        ],
+        "setup": {
+            "cellHeight": 500.0,
+            "cellWidth": 500.0,
+            "discCount": 100,
+            "discs": [],
+            "distribution": {
+                "Predator": 0.333,
+                "Prey": 0.333,
+                "Resource": 0.333
+            },
+            "simulationTimeScale": 3.0,
+            "simulationTimeStep": 0.001,
+            "useDistribution": true
+        }
+    }
+}
