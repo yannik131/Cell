@@ -1,0 +1,104 @@
+#include "Disc.hpp"
+#include "ExceptionWithLocation.hpp"
+
+#include <cmath>
+#include <functional>
+#include <stdexcept>
+
+namespace cell
+{
+
+Disc::Disc(DiscTypeID discTypeID)
+    : discTypeID_(discTypeID)
+{
+}
+
+void Disc::setVelocity(const sf::Vector2d& velocity)
+{
+#ifdef DEBUG
+    if (std::isnan(velocity.x) || std::isnan(velocity.y) || std::isinf(velocity.x) || std::isinf(velocity.y))
+        throw ExceptionWithLocation("Trying to assign an invalid value to velocity");
+#endif
+    velocity_ = velocity;
+}
+
+void Disc::scaleVelocity(double factor)
+{
+    setVelocity(velocity_ * factor);
+}
+
+void Disc::accelerate(const sf::Vector2d& acceleration)
+{
+    velocity_ += acceleration;
+}
+
+void Disc::negateXVelocity()
+{
+    velocity_.x = -velocity_.x;
+}
+
+void Disc::negateYVelocity()
+{
+    velocity_.y = -velocity_.y;
+}
+
+void Disc::setPosition(const sf::Vector2d& position)
+{
+#ifdef DEBUG
+    if (std::isnan(position.x) || std::isnan(position.y) || std::isinf(position.x) || std::isinf(position.y))
+        throw ExceptionWithLocation("Trying to assign an invalid value to position");
+#endif
+    position_ = position;
+}
+
+void Disc::move(const sf::Vector2d& distance)
+{
+    setPosition(position_ + distance);
+}
+
+void Disc::setType(DiscTypeID discTypeID)
+{
+    discTypeID_ = discTypeID;
+}
+
+void Disc::markDestroyed()
+{
+    destroyed_ = true;
+}
+
+const sf::Vector2d& Disc::getVelocity() const
+{
+    return velocity_;
+}
+
+const sf::Vector2d& Disc::getPosition() const
+{
+    return position_;
+}
+
+DiscTypeID Disc::getDiscTypeID() const
+{
+    return discTypeID_;
+}
+
+bool Disc::isMarkedDestroyed() const
+{
+    return destroyed_;
+}
+
+double Disc::getAbsoluteMomentum(const DiscTypeResolver& discTypeResolver) const
+{
+    return discTypeResolver(discTypeID_).getMass() * std::hypot(velocity_.x, velocity_.y);
+}
+
+sf::Vector2d Disc::getMomentum(const DiscTypeResolver& discTypeResolver) const
+{
+    return discTypeResolver(discTypeID_).getMass() * velocity_;
+}
+
+double Disc::getKineticEnergy(const DiscTypeResolver& discTypeResolver) const
+{
+    return 0.5 * discTypeResolver(discTypeID_).getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+}
+
+} // namespace cell

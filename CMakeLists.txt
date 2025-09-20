@@ -26,15 +26,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
-find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
-file(GLOB LIBCELL_SRC src/libcell/*.cpp)
+file(GLOB LIBCELL_SRC src/lib/cell/*.cpp)
 add_library(libcell ${LIBCELL_SRC})
 
-target_include_directories(libcell PUBLIC ${CMAKE_SOURCE_DIR}/src/libcell/)
+target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
 
 target_link_libraries(libcell PUBLIC
     sfml-system
@@ -55,9 +55,9 @@ target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-file(GLOB_RECURSE QT_GUI_SRC RELATIVE ${CMAKE_SOURCE_DIR}
-    src/libcellgui/*.cpp 
-    src/libcellgui/*.hpp
+file(GLOB_RECURSE QT_GUI_SRC ${CMAKE_SOURCE_DIR}
+    src/lib/gui/*.cpp 
+    src/lib/gui/*.hpp
 )
 
 #the header files have to be added here as well for Q_OBJECT to work
@@ -66,24 +66,28 @@ add_library(libcellgui
 )
 
 target_include_directories(libcellgui PUBLIC 
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/core/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/delegates/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/dialogs/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/models/
-    ${CMAKE_SOURCE_DIR}/src/libcellgui/widgets/
+    ${CMAKE_SOURCE_DIR}/src/lib/gui/
+    ${CMAKE_SOURCE_DIR}/src/lib/
 )
 
-target_link_libraries(libcellgui libcell Qt6::Core Qt6::Widgets Qt6::OpenGLWidgets qcustomplot)
+target_link_libraries(libcellgui PUBLIC 
+    libcell 
+    Qt6::Core 
+    Qt6::Widgets 
+    Qt6::OpenGLWidgets 
+    qcustomplot
+)
 
-add_executable(cell-gui WIN32 src/cell-gui/Main.cpp)
+add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
-add_executable(benchmark src/benchmark/Main.cpp)
+add_executable(benchmark src/apps/benchmark/Main.cpp)
 target_link_libraries(benchmark libcell)
+target_include_directories(benchmark PUBLIC ${CMAKE_SOURCE_DIR}/src/lib/)
 
 # target for trying stuff out
-add_executable(playground src/playground/Main.cpp)
+add_executable(playground src/apps/playground/Main.cpp)
 target_link_libraries(playground PRIVATE
     sfml-system
     sfml-window
@@ -93,7 +97,7 @@ target_link_libraries(playground PRIVATE
     nlohmann_json::nlohmann_json
 )
 
-# testing
+# tests for cell
 enable_testing()
 
 find_package(GTest REQUIRED)
@@ -102,16 +106,23 @@ file(GLOB_RECURSE LIBCELL_TEST_SRC ${PROJECT_SOURCE_DIR}/test/libcell/*.cpp)
 
 add_executable(tests-libcell ${LIBCELL_TEST_SRC})
 
-set_target_properties(tests-libcell PROPERTIES 
-    SKIP_BUILD_RPATH TRUE
-    # Explicitly tell CMake not to watch these files for reconfigure
-    CMAKE_CONFIGURE_DEPENDS ""
-)
-
 target_link_libraries(tests-libcell
     libcell
     GTest::gtest
 )
 
+target_include_directories(tests-libcell PUBLIC 
+    ${PROJECT_SOURCE_DIR}/test/libcell/common
+    ${PROJECT_SOURCE_DIR}/src/lib/
+)
+
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)
+
+# tests for gui
+add_executable(tests-gui ${PROJECT_SOURCE_DIR}/test/libcellgui/e2e/DiscTypesTest.cpp)
+
+target_link_libraries(tests-gui PRIVATE 
+    libcellgui 
+    Qt::Test
+)

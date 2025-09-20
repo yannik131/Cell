@@ -1,47 +1,70 @@
-#include "ReactionTable.hpp"
-#include "MathUtils.hpp"
-#include "Reaction.hpp"
-#include "TestUtils.hpp"
+#include "cell/ReactionTable.hpp"
+#include "cell/DiscTypeRegistry.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 
 #include <gtest/gtest.h>
 
-TEST(ReactionTableTest, lookupMapsWork)
+using namespace cell;
+
+class AReactionTable : public ::testing::Test
 {
-    cell::Reaction transformation, decomposition, combination, exchange;
-    std::tie(transformation, decomposition, combination, exchange) = getDefaultReactions();
+protected:
+    DiscTypeRegistry registry;
+    DiscTypeResolver resolver;
+    DiscTypeID A{}, B{}, C{};
 
-    cell::ReactionTable reactionTable;
-    reactionTable.setReactions({transformation, decomposition, combination, exchange});
+    void SetUp() override
+    {
+        std::vector<DiscType> types;
+        types.emplace_back("A", Radius{5}, Mass{1});
+        types.emplace_back("B", Radius{5}, Mass{1});
+        types.emplace_back("C", Radius{5}, Mass{2});
 
-    EXPECT_EQ(reactionTable.getTransformationReactionLookupMap().size(), 1);
-    EXPECT_EQ(reactionTable.getTransformationReactionLookupMap().at(Mass5Radius5).front(), transformation);
+        registry.setDiscTypes(std::move(types));
+        resolver = registry.getDiscTypeResolver();
 
-    EXPECT_EQ(reactionTable.getDecompositionReactionLookupMap().size(), 1);
-    EXPECT_EQ(reactionTable.getDecompositionReactionLookupMap().at(Mass10).front(), decomposition);
+        A = registry.getIDFor("A");
+        B = registry.getIDFor("B");
+        C = registry.getIDFor("C");
+    }
+};
 
-    EXPECT_EQ(reactionTable.getCombinationReactionLookupMap().size(), 1);
-    EXPECT_EQ(reactionTable.getCombinationReactionLookupMap().at(std::make_pair(Mass5, Mass5)).front(), combination);
+TEST_F(AReactionTable, ThrowsOnDuplicateTransformation)
+{
+    ReactionTable table(resolver);
+    Reaction r(A, std::nullopt, B, std::nullopt, 1.0);
 
-    EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().size(), 2);
-    EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().at(std::make_pair(Mass5, Mass15)).front(), exchange);
-    EXPECT_EQ(reactionTable.getExchangeReactionLookupMap().at(std::make_pair(Mass15, Mass5)).front(), exchange);
+    table.addReaction(r);
+
+    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
 }
 
-TEST(ReactionTableTest, probabilitiesAddUp)
+TEST_F(AReactionTable, ThrowsOnDuplicateDecomposition)
 {
-    cell::Reaction transformation1{Mass5, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    cell::Reaction transformation2{Mass10, std::nullopt, Mass5Radius10, std::nullopt, 0.1f};
-    cell::Reaction transformation3{Mass15, std::nullopt, Mass5Radius10, std::nullopt, 0.9f};
-    cell::Reaction combination{Mass5, Mass5, Mass10, std::nullopt, 0.1f};
+    ReactionTable table(resolver);
+    Reaction r(C, std::nullopt, A, B, 1.0);
 
-    std::vector<cell::Reaction> transformations;
-    addReactionToVector(transformations, transformation1);
-    addReactionToVector(transformations, transformation2);
+    table.addReaction(r);
 
-    EXPECT_FLOAT_EQ(transformations[0].getProbability(), 0.1f);
-    EXPECT_FLOAT_EQ(transformations[1].getProbability(), 0.2f);
+    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+}
 
-    EXPECT_ANY_THROW(addReactionToVector(transformations, combination));
-    EXPECT_ANY_THROW(addReactionToVector(transformations, transformation1));
-    EXPECT_ANY_THROW(addReactionToVector(transformations, transformation3));
+TEST_F(AReactionTable, ThrowsOnDuplicateCombination)
+{
+    ReactionTable table(resolver);
+    Reaction r(A, B, C, std::nullopt, 1.0);
+
+    table.addReaction(r);
+
+    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+}
+
+TEST_F(AReactionTable, ThrowsOnDuplicateExchange)
+{
+    ReactionTable table(resolver);
+    Reaction r(C, B, C, A, 1.0);
+
+    table.addReaction(r);
+
+    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
 }
