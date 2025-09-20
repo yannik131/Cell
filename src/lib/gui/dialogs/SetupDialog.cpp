@@ -51,6 +51,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
     connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellWidth);
     connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellHeight);
+    connect(ui->maxVelocitySpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMaxVelocity);
 
     ui->numberOfDiscsSpinBox->setRange(cell::SettingsLimits::MinNumberOfDiscs, cell::SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
@@ -61,7 +62,8 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                                    static_cast<int>(cell::SettingsLimits::MaxCellWidth));
     ui->cellHeightSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinCellHeight),
                                     static_cast<int>(cell::SettingsLimits::MaxCellHeight));
-    ui->GUIFPSSpinBox->setRange(1, 120);
+    ui->maxVelocitySpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMaxVelocity),
+                                     static_cast<int>(cell::SettingsLimits::MaxMaxVelocity));
 
     insertDiscTypeComboboxIntoView(ui->discTypeDistributionTableView, abstractSimulationBuilder, 0);
     insertDiscTypeComboboxIntoView(ui->discsTableView, abstractSimulationBuilder, 0);
@@ -95,4 +97,5 @@ void SetupDialog::displayCurrentSetup()
     ui->timeScaleDoubleSpinBox->setValue(setup.simulationTimeScale);
     ui->cellWidthSpinBox->setValue(static_cast<int>(std::round(setup.cellWidth)));
     ui->cellHeightSpinBox->setValue(static_cast<int>(std::round(setup.cellHeight)));
+    ui->maxVelocitySpinBox->setValue(static_cast<int>(std::round(setup.maxVelocity)));
 }

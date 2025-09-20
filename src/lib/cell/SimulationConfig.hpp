@@ -58,6 +58,7 @@ struct Setup
      * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
     double simulationTimeScale = 1;
+    double maxVelocity = 600;
 
     bool useDistribution = true;
 
@@ -87,7 +88,7 @@ namespace config
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiscType, name, radius, mass)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale, maxVelocity,
                                    useDistribution, discCount, distribution, discs)
 
 } // namespace config

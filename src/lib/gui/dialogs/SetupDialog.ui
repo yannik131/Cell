@@ -3,14 +3,14 @@
  <class>SetupDialog</class>
  <widget class="QDialog" name="SetupDialog">
   <property name="windowModality">
-   <enum>Qt::WindowModality::ApplicationModal</enum>
+   <enum>Qt::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>845</width>
-    <height>656</height>
+    <height>691</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -281,30 +281,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="widget_12" native="true">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>50</height>
-         </size>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_12">
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>GUI FPS</string>
+            <string>Max. velocity</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="GUIFPSSpinBox">
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>100</number>
-           </property>
-          </widget>
+          <widget class="QSpinBox" name="maxVelocitySpinBox"/>
          </item>
         </layout>
        </widget>

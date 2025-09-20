@@ -23,6 +23,7 @@ public:
     void setCellDimensions(Width width, Height height);
     void setTimeStep(double simulationTimeStep);
     void setTimeScale(double simulationTimeScale);
+    void setMaxVelocity(double maxVelocity);
 
     const SimulationConfig& getSimulationConfig() const;
 

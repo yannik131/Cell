@@ -59,6 +59,11 @@ void SimulationConfigBuilder::setTimeScale(double simulationTimeScale)
     simulationConfig_.setup.simulationTimeScale = simulationTimeScale;
 }
 
+void SimulationConfigBuilder::setMaxVelocity(double maxVelocity)
+{
+    simulationConfig_.setup.maxVelocity = maxVelocity;
+}
+
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const
 {
     if (requiredCallsCount_ != 2)
