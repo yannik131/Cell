@@ -50,7 +50,7 @@ TEST_F(ACollisionHandler, SeparatesCollidingDiscs)
     d1.move(dt * d1.getVelocity());
     d2.move(dt * d2.getVelocity());
 
-    std::set<std::pair<Disc*, Disc*>> collision({std::make_pair(&d1, &d2)});
+    std::unordered_set<std::pair<Disc*, Disc*>, PairHasher> collision({std::make_pair(&d1, &d2)});
     collisionHandler->calculateDiscDiscCollisionResponse(collision);
 
     const double kineticEnergyAfter = d1.getKineticEnergy(resolver) + d2.getKineticEnergy(resolver);
