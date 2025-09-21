@@ -37,50 +37,61 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
 std::unordered_set<std::pair<Disc*, Disc*>, PairHasher>
 CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
-    PositionNanoflannAdapter<Disc> adapter(discs);
-    KDTree<Disc> kdtree(2, adapter);
-
-    // 0: Don't approximate neighbors during search
-    // false: Don't sort results by distance
-
-    static const nanoflann::SearchParameters searchParams(0, false);
-    static std::vector<nanoflann::ResultItem<uint32_t, double>> discsInRadius;
     std::unordered_set<std::pair<Disc*, Disc*>, PairHasher> collidingDiscs;
     std::vector<char> discsInCollisions(discs.size(), 0);
 
+    struct Entry
+    {
+        std::size_t index;
+        double radius;
+        sf::Vector2d position;
+        double minX, maxX;
+    };
+    std::vector<Entry> entries;
+    entries.reserve(discs.size());
     for (std::size_t i = 0; i < discs.size(); ++i)
     {
-        auto& disc = discs[i];
-        // We do not support multiple simultaneous collisions
-        if (disc.isMarkedDestroyed() || discsInCollisions[i])
+        Disc& d = discs[i];
+        if (d.isMarkedDestroyed())
             continue;
 
-        const double maxCollisionDistance = discTypeResolver_(disc.getDiscTypeID()).getRadius() + maxRadiusProvider_();
+        const double r = discTypeResolver_(d.getDiscTypeID()).getRadius();
+        const auto& p = d.getPosition();
+        entries.push_back(Entry{.index = i, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r});
+    }
 
-        // This is the most time consuming part of the whole application, next to the index build in the KDTree
-        // constructor
-        kdtree.radiusSearch(&disc.getPosition().x, maxCollisionDistance * maxCollisionDistance, discsInRadius,
-                            searchParams);
+    std::sort(entries.begin(), entries.end(), [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
 
-        for (const auto& result : discsInRadius)
+    for (std::size_t i = 0; i < entries.size(); ++i)
+    {
+        const auto& entry1 = entries[i];
+        if (discsInCollisions[entry1.index])
+            continue;
+
+        for (std::size_t j = i + 1; j < entries.size(); ++j)
         {
-            auto& otherDisc = discs[result.first];
-            if (&otherDisc == &disc || discsInCollisions[result.first])
+            const auto& entry2 = entries[j];
+
+            if (entry2.minX > entry1.maxX)
+                break;
+
+            if (discsInCollisions[entry2.index])
                 continue;
 
-            const double radiusSum = discTypeResolver_(disc.getDiscTypeID()).getRadius() +
-                                     discTypeResolver_(otherDisc.getDiscTypeID()).getRadius();
+            const double rSum = entry1.radius + entry2.radius;
+            const auto& diff = entry2.position - entry1.position;
 
-            if (result.second <= radiusSum * radiusSum)
+            if (diff.x * diff.x + diff.y * diff.y <= rSum * rSum)
             {
-                // Since all collisions are unique, the order doesn't really matter here
-                collidingDiscs.insert({&disc, &otherDisc});
-                collisionCounts_[disc.getDiscTypeID()]++;
-                collisionCounts_[otherDisc.getDiscTypeID()]++;
+                auto d1 = &discs[entry1.index];
+                auto d2 = &discs[entry2.index];
 
-                discsInCollisions[i] = 1;
-                discsInCollisions[result.first] = 1;
+                collidingDiscs.insert({d1, d2});
+                collisionCounts_[d1->getDiscTypeID()]++;
+                collisionCounts_[d2->getDiscTypeID()]++;
 
+                discsInCollisions[entry1.index] = 1;
+                discsInCollisions[entry2.index] = 1;
                 break;
             }
         }
