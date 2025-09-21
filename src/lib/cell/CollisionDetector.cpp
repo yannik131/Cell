@@ -34,10 +34,11 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
     return rectangleCollision;
 }
 
-std::unordered_set<std::pair<Disc*, Disc*>, PairHasher>
-CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
+std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
-    std::unordered_set<std::pair<Disc*, Disc*>, PairHasher> collidingDiscs;
+    std::vector<std::pair<Disc*, Disc*>> collidingDiscs;
+    collidingDiscs.reserve(discs.size() / 2);
+
     std::vector<char> discsInCollisions(discs.size(), 0);
 
     struct Entry
@@ -86,7 +87,7 @@ CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
                 auto d1 = &discs[entry1.index];
                 auto d2 = &discs[entry2.index];
 
-                collidingDiscs.insert({d1, d2});
+                collidingDiscs.push_back({d1, d2});
                 collisionCounts_[d1->getDiscTypeID()]++;
                 collisionCounts_[d2->getDiscTypeID()]++;
 

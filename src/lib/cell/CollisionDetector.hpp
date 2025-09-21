@@ -53,7 +53,7 @@ public:
     RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                     const sf::Vector2d& bottomRight) const;
 
-    std::unordered_set<std::pair<Disc*, Disc*>, PairHasher> detectDiscDiscCollisions(std::vector<Disc>& discs);
+    std::vector<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs);
 
     /**
      * @returns the collision counts for all disc types in the simulation and sets them to 0
