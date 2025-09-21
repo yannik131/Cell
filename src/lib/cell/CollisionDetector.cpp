@@ -90,7 +90,7 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
                 auto d1 = &discs[entry1.index];
                 auto d2 = &discs[entry2.index];
 
-                collidingDiscs.push_back({d1, d2});
+                collidingDiscs.emplace_back(d1, d2);
                 collisionCounts_[d1->getDiscTypeID()]++;
                 collisionCounts_[d2->getDiscTypeID()]++;
 
