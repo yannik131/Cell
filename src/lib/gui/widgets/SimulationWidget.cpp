@@ -89,7 +89,7 @@ void SimulationWidget::toggleFullscreen()
 void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
                               const std::map<std::string, sf::Color>& colorMap)
 {
-    const int FPS = 120;
+    const int FPS = 60;
     if (frame.elapsedSimulationTimeUs > 0 && clock_.getElapsedTime() < sf::seconds(1.f / FPS))
         return;
 

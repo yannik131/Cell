@@ -73,6 +73,9 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
         {
             const auto& entry2 = entries[j];
 
+            // sweep and prune: Since all elements are sorted by left x coordinate, if the current objects left x
+            // coordinate is greater than the right x coordinate of the object we're comparing with, no other objects
+            // can intersect with entry1 and we can stop
             if (entry2.minX > entry1.maxX)
                 break;
 

@@ -83,6 +83,7 @@
                 "Type0": 0.5,
                 "Type1": 0.5
             },
+            "maxVelocity": 600.0,
             "simulationTimeScale": 1.0,
             "simulationTimeStep": 0.0010000000474974513,
             "useDistribution": true
