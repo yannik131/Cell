@@ -58,7 +58,7 @@ TEST_F(ACollisionDetector, FindsCollidingDiscs)
     int count = 0;
     for (const auto& pair : createPossiblePairs(discs))
     {
-        if (collisions.contains(pair))
+        if (std::find(collisions.begin(), collisions.end(), pair) != collisions.end())
             ++count;
     }
 
