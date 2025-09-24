@@ -1,5 +1,5 @@
-#ifndef MATHUTILS_HPP
-#define MATHUTILS_HPP
+#ifndef F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP
+#define F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP
 
 /**
  * @brief The math utilities here are partly explained in the physics part of the documentation
@@ -99,4 +99,4 @@ std::vector<sf::Vector2d> calculateGrid(double width, double height, double edge
 
 } // namespace cell::mathutils
 
-#endif /* MATHUTILS_HPP */
+#endif /* F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP */

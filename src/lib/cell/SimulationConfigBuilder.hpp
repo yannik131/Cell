@@ -1,5 +1,5 @@
-#ifndef SIMULATIONCONFIGBUILDER_HPP
-#define SIMULATIONCONFIGBUILDER_HPP
+#ifndef D95EF9F4_79A0_4AC2_8A12_B2EB5D8F4202_HPP
+#define D95EF9F4_79A0_4AC2_8A12_B2EB5D8F4202_HPP
 
 #include "SimulationConfig.hpp"
 #include "Types.hpp"
@@ -34,4 +34,4 @@ private:
 
 } // namespace cell
 
-#endif /* SIMULATIONCONFIGBUILDER_HPP */
+#endif /* D95EF9F4_79A0_4AC2_8A12_B2EB5D8F4202_HPP */

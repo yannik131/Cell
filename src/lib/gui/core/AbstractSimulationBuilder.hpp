@@ -1,5 +1,5 @@
-#ifndef ABSTRACTSIMULATIONBUILDER_HPP
-#define ABSTRACTSIMULATIONBUILDER_HPP
+#ifndef B6033B12_555B_4FC6_861D_78AD534B193C_HPP
+#define B6033B12_555B_4FC6_861D_78AD534B193C_HPP
 
 #include "cell/SimulationConfig.hpp"
 #include "cell/Types.hpp"
@@ -35,4 +35,4 @@ public:
     virtual ~AbstractSimulationBuilder() = default;
 };
 
-#endif /* ABSTRACTSIMULATIONBUILDER_HPP */
+#endif /* B6033B12_555B_4FC6_861D_78AD534B193C_HPP */

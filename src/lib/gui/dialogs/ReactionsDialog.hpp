@@ -1,5 +1,5 @@
-#ifndef REACTIONSDIALOG_HPP
-#define REACTIONSDIALOG_HPP
+#ifndef FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP
+#define FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP
 
 #include <QDialog>
 
@@ -30,4 +30,4 @@ private:
     ReactionsTableModel* reactionsTableModel_;
 };
 
-#endif /* REACTIONSDIALOG_HPP */
+#endif /* FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP */

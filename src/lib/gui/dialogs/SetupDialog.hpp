@@ -1,5 +1,5 @@
-#ifndef SETUPDIALOG_HPP
-#define SETUPDIALOG_HPP
+#ifndef C4E43CD6_7DB6_4EBF_8134_6C676407AECA_HPP
+#define C4E43CD6_7DB6_4EBF_8134_6C676407AECA_HPP
 
 #include "models/SetupModel.hpp"
 
@@ -33,4 +33,4 @@ private:
     SetupModel* setupModel_;
 };
 
-#endif /* SETUPDIALOG_HPP */
+#endif /* C4E43CD6_7DB6_4EBF_8134_6C676407AECA_HPP */

@@ -1,5 +1,5 @@
-#ifndef SETTINGS_HPP
-#define SETTINGS_HPP
+#ifndef B6F87E72_2540_4C8C_89E9_E282B0972C52_HPP
+#define B6F87E72_2540_4C8C_89E9_E282B0972C52_HPP
 
 #include "ExceptionWithLocation.hpp"
 #include "StringUtils.hpp"
@@ -15,32 +15,32 @@ namespace cell
 
 namespace SettingsLimits
 {
-const sf::Time MinSimulationTimeStep = sf::microseconds(1);
-const sf::Time MaxSimulationTimeStep = sf::milliseconds(100);
+extern const sf::Time MinSimulationTimeStep;
+extern const sf::Time MaxSimulationTimeStep;
 
-const double MinSimulationTimeScale = 0.0001f;
-const double MaxSimulationTimeScale = 10.0;
+extern const double MinSimulationTimeScale;
+extern const double MaxSimulationTimeScale;
 
-const int MinNumberOfDiscs = 1;
-const int MaxNumberOfDiscs = 10000;
+extern const int MinNumberOfDiscs;
+extern const int MaxNumberOfDiscs;
 
-const double MinCellWidth = 100;
-const double MaxCellWidth = 100000;
+extern const double MinCellWidth;
+extern const double MaxCellWidth;
 
-const double MinCellHeight = 100;
-const double MaxCellHeight = 100000;
+extern const double MinCellHeight;
+extern const double MaxCellHeight;
 
-const double MinMaxVelocity = 0;
-const double MaxMaxVelocity = 1000;
+extern const double MinMaxVelocity;
+extern const double MaxMaxVelocity;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits
 {
-const double MinRadius = 1.0;
-const double MaxRadius = 100.0;
+extern const double MinRadius;
+extern const double MaxRadius;
 
-const double MinMass = 1.0;
-const double MaxMass = 10000.0;
+extern const double MinMass;
+extern const double MaxMass;
 } // namespace DiscTypeLimits
 
 /**
@@ -58,4 +58,4 @@ template <typename T> void throwIfNotInRange(const T& value, const T& min, const
 
 } // namespace cell
 
-#endif /* SETTINGS_HPP */
+#endif /* B6F87E72_2540_4C8C_89E9_E282B0972C52_HPP */

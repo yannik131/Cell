@@ -1,5 +1,5 @@
-#ifndef EXCEPTIONWITHLOCATION_HPP
-#define EXCEPTIONWITHLOCATION_HPP
+#ifndef DB3936AF_D015_42C0_9199_2F1767F8E56C_HPP
+#define DB3936AF_D015_42C0_9199_2F1767F8E56C_HPP
 
 #include <filesystem>
 #include <source_location>
@@ -23,4 +23,4 @@ private:
     static std::string buildMessage(const std::string& description, const std::source_location& location);
 };
 
-#endif /* EXCEPTIONWITHLOCATION_HPP */
+#endif /* DB3936AF_D015_42C0_9199_2F1767F8E56C_HPP */

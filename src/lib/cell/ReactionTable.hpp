@@ -1,5 +1,5 @@
-#ifndef REACTIONTABLE_HPP
-#define REACTIONTABLE_HPP
+#ifndef EBF12521_1715_4669_88B2_124B8D0C2AEA_HPP
+#define EBF12521_1715_4669_88B2_124B8D0C2AEA_HPP
 
 #include "AbstractReactionTable.hpp"
 #include "DiscType.hpp"
@@ -90,4 +90,4 @@ private:
 
 } // namespace cell
 
-#endif /* REACTIONTABLE_HPP */
+#endif /* EBF12521_1715_4669_88B2_124B8D0C2AEA_HPP */

@@ -1,5 +1,5 @@
-#ifndef SPINBOXDELEGATE_HPP
-#define SPINBOXDELEGATE_HPP
+#ifndef B08BC3D3_C04D_4F93_BB91_8575673B2CBF_HPP
+#define B08BC3D3_C04D_4F93_BB91_8575673B2CBF_HPP
 
 #include "core/SafeCast.hpp"
 
@@ -73,4 +73,4 @@ public:
 
 void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, int column);
 
-#endif /* SPINBOXDELEGATE_HPP */
+#endif /* B08BC3D3_C04D_4F93_BB91_8575673B2CBF_HPP */

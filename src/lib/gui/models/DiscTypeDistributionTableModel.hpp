@@ -1,5 +1,5 @@
-#ifndef DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
-#define DISCTYPEDISTRIBUTIONTABLEMODEL_HPP
+#ifndef C5A7F999_3DE1_4DFF_8512_AD7C6C768848_HPP
+#define C5A7F999_3DE1_4DFF_8512_AD7C6C768848_HPP
 
 #include "cell/SimulationConfig.hpp"
 
@@ -32,4 +32,4 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
-#endif /* DISCTYPEDISTRIBUTIONTABLEMODEL_HPP */
+#endif /* C5A7F999_3DE1_4DFF_8512_AD7C6C768848_HPP */

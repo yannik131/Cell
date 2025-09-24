@@ -1,5 +1,5 @@
-#ifndef COLLISIONDETECTOR_HPP
-#define COLLISIONDETECTOR_HPP
+#ifndef F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
+#define F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
 
 #include "PositionNanoflannAdapter.hpp"
 #include "Types.hpp"
@@ -68,4 +68,4 @@ private:
 
 } // namespace cell
 
-#endif /* COLLISIONDETECTOR_HPP */
+#endif /* F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP */

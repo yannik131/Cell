@@ -1,5 +1,5 @@
-#ifndef SIMULATIONCONTEXT_HPP
-#define SIMULATIONCONTEXT_HPP
+#ifndef EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP
+#define EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP
 
 #include "Cell.hpp"
 #include "CollisionDetector.hpp"
@@ -79,4 +79,4 @@ private:
 
 } // namespace cell
 
-#endif /* SIMULATIONCONTEXT_HPP */
+#endif /* EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP */

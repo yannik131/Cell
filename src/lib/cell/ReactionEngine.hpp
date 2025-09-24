@@ -1,5 +1,5 @@
-#ifndef REACTIONENGINE_HPP
-#define REACTIONENGINE_HPP
+#ifndef DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP
+#define DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP
 
 #include "AbstractReactionTable.hpp"
 #include "DiscTypeRegistry.hpp"
@@ -117,4 +117,4 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
 
 } // namespace cell
 
-#endif /* REACTIONENGINE_HPP */
+#endif /* DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP */

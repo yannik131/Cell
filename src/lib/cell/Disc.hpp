@@ -1,5 +1,5 @@
-#ifndef DISC_HPP
-#define DISC_HPP
+#ifndef EAE8DB08_087C_4EC5_AF13_54AECCF72615_HPP
+#define EAE8DB08_087C_4EC5_AF13_54AECCF72615_HPP
 
 #include "DiscType.hpp"
 #include "DiscTypeRegistry.hpp"
@@ -129,4 +129,4 @@ private:
 
 } // namespace cell
 
-#endif /* DISC_HPP */
+#endif /* EAE8DB08_087C_4EC5_AF13_54AECCF72615_HPP */
