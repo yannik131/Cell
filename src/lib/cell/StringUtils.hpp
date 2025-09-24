@@ -1,5 +1,5 @@
-#ifndef STRINGUTILS_HPP
-#define STRINGUTILS_HPP
+#ifndef E54887CD_F652_4F07_8CCB_961E814F1517_HPP
+#define E54887CD_F652_4F07_8CCB_961E814F1517_HPP
 
 #include <SFML/System/Time.hpp>
 #include <string>
@@ -30,4 +30,4 @@ template <> inline std::string toString<sf::Time>(const sf::Time& value)
 
 } // namespace cell::stringutils
 
-#endif /* STRINGUTILS_HPP */
+#endif /* E54887CD_F652_4F07_8CCB_961E814F1517_HPP */

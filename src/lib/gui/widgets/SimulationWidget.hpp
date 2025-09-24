@@ -1,5 +1,5 @@
-#ifndef SIMULATIONWIDGET_HPP
-#define SIMULATIONWIDGET_HPP
+#ifndef F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
+#define F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 
 #include "core/FrameDTO.hpp"
 #include "widgets/QSFMLWidget.hpp"
@@ -44,4 +44,4 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_ = nullptr;
 };
 
-#endif /* SIMULATIONWIDGET_HPP */
+#endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

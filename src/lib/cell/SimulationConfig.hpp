@@ -1,5 +1,5 @@
-#ifndef SIMULATIONCONFIG_HPP
-#define SIMULATIONCONFIG_HPP
+#ifndef CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
+#define CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 
 #include "Settings.hpp"
 #include "Vector2d.hpp"
@@ -97,4 +97,4 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, reactions, setup
 
 } // namespace cell
 
-#endif /* SIMULATIONCONFIG_HPP */
+#endif /* CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP */

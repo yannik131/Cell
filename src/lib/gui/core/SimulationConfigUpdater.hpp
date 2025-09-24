@@ -1,5 +1,5 @@
-#ifndef SIMULATIONCONFIGUPDATER_HPP
-#define SIMULATIONCONFIGUPDATER_HPP
+#ifndef B3854111_59D8_4367_AEF9_0248DAF108BC_HPP
+#define B3854111_59D8_4367_AEF9_0248DAF108BC_HPP
 
 #include "cell/SimulationConfig.hpp"
 
@@ -18,4 +18,4 @@ public:
     const std::map<std::string, std::string>& getChangeMap() const;
 };
 
-#endif /* SIMULATIONCONFIGUPDATER_HPP */
+#endif /* B3854111_59D8_4367_AEF9_0248DAF108BC_HPP */

@@ -1,5 +1,5 @@
-#ifndef PLOTCONTROLWIDGET_HPP
-#define PLOTCONTROLWIDGET_HPP
+#ifndef BC236487_5829_46C6_81D5_E7309D40F63E_HPP
+#define BC236487_5829_46C6_81D5_E7309D40F63E_HPP
 
 #include "models/PlotModel.hpp"
 
@@ -28,4 +28,4 @@ private:
     Ui::PlotControlWidget* ui;
 };
 
-#endif /* PLOTCONTROLWIDGET_HPP */
+#endif /* BC236487_5829_46C6_81D5_E7309D40F63E_HPP */

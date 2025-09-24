@@ -1,5 +1,5 @@
-#ifndef SFMLJSONSERIALIZER_HPP
-#define SFMLJSONSERIALIZER_HPP
+#ifndef B74265AF_DA38_444B_B26F_28D40D103D68_HPP
+#define B74265AF_DA38_444B_B26F_28D40D103D68_HPP
 
 #include "DiscType.hpp"
 
@@ -42,4 +42,4 @@ template <> struct adl_serializer<sf::Time>
 
 } // namespace nlohmann
 
-#endif
+#endif /* B74265AF_DA38_444B_B26F_28D40D103D68_HPP */

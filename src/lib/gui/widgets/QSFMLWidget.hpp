@@ -1,5 +1,5 @@
-#ifndef QSFMLWIDGET_HPP
-#define QSFMLWIDGET_HPP
+#ifndef FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP
+#define FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP
 
 #include <QTimer>
 #include <QWidget>
@@ -92,4 +92,4 @@ private:
     double currentZoom_ = 1;
 };
 
-#endif /* QSFMLWIDGET_HPP */
+#endif /* FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP */

@@ -1,5 +1,5 @@
-#ifndef MULTISELECTLISTWIDGET_HPP
-#define MULTISELECTLISTWIDGET_HPP
+#ifndef BE59FD3D_ACFF_471C_A2C7_448A912A0A2A_HPP
+#define BE59FD3D_ACFF_471C_A2C7_448A912A0A2A_HPP
 
 #include <QListWidget>
 
@@ -31,4 +31,4 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
 };
 
-#endif /* MULTISELECTLISTWIDGET_HPP */
+#endif /* BE59FD3D_ACFF_471C_A2C7_448A912A0A2A_HPP */

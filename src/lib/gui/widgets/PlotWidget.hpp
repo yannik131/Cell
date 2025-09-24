@@ -1,5 +1,5 @@
-#ifndef PLOT_WIDGET_HPP
-#define PLOT_WIDGET_HPP
+#ifndef EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP
+#define EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP
 
 #include "core/Types.hpp"
 #include "models/PlotModel.hpp"
@@ -48,4 +48,4 @@ private:
     int count_ = 0;
 };
 
-#endif
+#endif /* EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP */

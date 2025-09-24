@@ -1,5 +1,5 @@
-#ifndef COLLISIONHANDLER_HPP
-#define COLLISIONHANDLER_HPP
+#ifndef E0D5D573_BFE6_46C5_8B59_848C70859E48_HPP
+#define E0D5D573_BFE6_46C5_8B59_848C70859E48_HPP
 
 #include "CollisionDetector.hpp"
 #include "Types.hpp"
@@ -50,4 +50,4 @@ private:
 
 } // namespace cell
 
-#endif /* COLLISIONHANDLER_HPP */
+#endif /* E0D5D573_BFE6_46C5_8B59_848C70859E48_HPP */

@@ -1,5 +1,5 @@
-#ifndef COLORMAPPING_HPP
-#define COLORMAPPING_HPP
+#ifndef B9666EA7_02B2_4471_96B7_C53D3696A5E2_HPP
+#define B9666EA7_02B2_4471_96B7_C53D3696A5E2_HPP
 
 #include <QList>
 #include <QMap>
@@ -40,4 +40,4 @@ const QList<sf::Color>& getSupportedDiscColors();
  */
 const QStringList& getSupportedDiscColorNames();
 
-#endif /* COLORMAPPING_HPP */
+#endif /* B9666EA7_02B2_4471_96B7_C53D3696A5E2_HPP */

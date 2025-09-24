@@ -1,5 +1,5 @@
-#ifndef REACTIONSTABLEMODEL_HPP
-#define REACTIONSTABLEMODEL_HPP
+#ifndef C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP
+#define C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP
 
 #include "cell/Reaction.hpp"
 #include "cell/SimulationConfig.hpp"
@@ -71,4 +71,4 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_ = nullptr;
 };
 
-#endif /* REACTIONSTABLEMODEL_HPP */
+#endif /* C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP */

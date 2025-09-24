@@ -1,5 +1,5 @@
-#ifndef DISCTYPESDIALOG_HPP
-#define DISCTYPESDIALOG_HPP
+#ifndef EBD19D22_0EC6_4D52_8BBA_73271A5FE110_HPP
+#define EBD19D22_0EC6_4D52_8BBA_73271A5FE110_HPP
 
 #include <QDialog>
 #include <QStandardItemModel>
@@ -32,4 +32,4 @@ private:
     DiscTypesTableModel* discTypesTableModel_;
 };
 
-#endif /* DISCTYPESDIALOG_HPP */
+#endif /* EBD19D22_0EC6_4D52_8BBA_73271A5FE110_HPP */

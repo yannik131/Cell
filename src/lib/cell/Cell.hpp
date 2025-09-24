@@ -1,5 +1,5 @@
-#ifndef CELL_HPP
-#define CELL_HPP
+#ifndef AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
+#define AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
 
 #include "Types.hpp"
 
@@ -72,4 +72,4 @@ private:
 
 } // namespace cell
 
-#endif /* CELL_HPP */
+#endif /* AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP */

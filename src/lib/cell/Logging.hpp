@@ -1,5 +1,5 @@
-#ifndef LOGGING_HPP
-#define LOGGING_HPP
+#ifndef A0673BA5_EB6B_4B00_810D_2B7FE0295361_HPP
+#define A0673BA5_EB6B_4B00_810D_2B7FE0295361_HPP
 
 /**
  * Here we configure logging and expose the initLogging function that can also be called from the test executable
@@ -47,4 +47,4 @@ void initLogging(int argc, char** argv)
 
 } // namespace cell
 
-#endif /* LOGGING_HPP */
+#endif /* A0673BA5_EB6B_4B00_810D_2B7FE0295361_HPP */

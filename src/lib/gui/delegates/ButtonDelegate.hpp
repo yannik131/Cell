@@ -1,5 +1,5 @@
-#ifndef BUTTONDELEGATE_HPP
-#define BUTTONDELEGATE_HPP
+#ifndef AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP
+#define AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP
 
 #include <QAbstractItemView>
 #include <QDebug>
@@ -48,4 +48,4 @@ template <typename T> void insertDeleteButtonIntoView(T* model, QAbstractItemVie
     view->setItemDelegateForColumn(column, deleteButtonDelegate);
 }
 
-#endif /* BUTTONDELEGATE_HPP */
+#endif /* AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP */

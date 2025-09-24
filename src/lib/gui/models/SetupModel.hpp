@@ -1,5 +1,5 @@
-#ifndef SETUPMODEL_HPP
-#define SETUPMODEL_HPP
+#ifndef CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP
+#define CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP
 
 #include "cell/SimulationConfig.hpp"
 
@@ -40,4 +40,4 @@ private:
     cell::config::Setup setup_;
 };
 
-#endif /* SETUPMODEL_HPP */
+#endif /* CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP */
