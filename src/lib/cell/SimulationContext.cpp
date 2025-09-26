@@ -100,7 +100,7 @@ DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig
 
 ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simulationConfig,
                                                     const DiscTypeRegistry& discTypeRegistry,
-                                                    DiscTypeResolver discTypeResolver) const
+                                                    const DiscTypeRegistry& discTypeRegistry) const
 {
     ReactionTable reactionTable(discTypeResolver);
 
@@ -121,31 +121,31 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
     return reactionTable;
 }
 
-ReactionEngine SimulationContext::buildReactionEngine(DiscTypeResolver discTypeResolver,
+ReactionEngine SimulationContext::buildReactionEngine(const DiscTypeRegistry& discTypeRegistry,
                                                       SimulationTimeStepProvider simulationTimeStepProvider,
                                                       const ReactionTable& reactionTable) const
 {
     return ReactionEngine(discTypeResolver, simulationTimeStepProvider, reactionTable);
 }
 
-CollisionDetector SimulationContext::buildCollisionDetector(DiscTypeResolver discTypeResolver,
+CollisionDetector SimulationContext::buildCollisionDetector(const DiscTypeRegistry& discTypeRegistry,
                                                             MaxRadiusProvider maxRadiusProvider) const
 {
     return CollisionDetector(discTypeResolver, maxRadiusProvider);
 }
 
-CollisionHandler SimulationContext::buildCollisionHandler(DiscTypeResolver discTypeResolver) const
+CollisionHandler SimulationContext::buildCollisionHandler(const DiscTypeRegistry& discTypeRegistry) const
 {
     return CollisionHandler(discTypeResolver);
 }
 
 Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
                                   SimulationTimeStepProvider simulationTimeStepProvider,
-                                  DiscTypeResolver discTypeResolver) const
+                                  const DiscTypeRegistry& discTypeRegistry) const
 {
     std::vector<Disc> discs = getDiscsFromConfig(simulationConfig, maxRadiusProvider);
 
-    Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, simulationTimeStepProvider, discTypeResolver,
+    Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, std::as_const(*discTypeRegistry_),
               Dimensions{.width = simulationConfig.setup.cellWidth, .height = simulationConfig.setup.cellHeight},
               std::move(discs));
 

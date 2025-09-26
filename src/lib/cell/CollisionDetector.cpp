@@ -4,7 +4,7 @@
 
 namespace cell
 {
-CollisionDetector::CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider)
+CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry, MaxRadiusProvider maxRadiusProvider)
     : discTypeResolver_(std::move(discTypeResolver))
     , maxRadiusProvider_(std::move(maxRadiusProvider))
 {

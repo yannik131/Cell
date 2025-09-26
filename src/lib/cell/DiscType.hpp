@@ -1,7 +1,6 @@
 #ifndef CFE848F0_38AC_4182_9A69_D7C2AB0577CA_HPP
 #define CFE848F0_38AC_4182_9A69_D7C2AB0577CA_HPP
 
-#include "DiscTypeRegistry.hpp"
 #include "Hashing.hpp"
 
 #include <SFML/Graphics/Color.hpp>

@@ -6,7 +6,8 @@
 namespace cell
 {
 
-ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
+ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry,
+                               SimulationTimeStepProvider simulationTimeStepProvider,
                                const AbstractReactionTable& reactionTable)
     : discTypeResolver_(std::move(discTypeResolver))
     , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))

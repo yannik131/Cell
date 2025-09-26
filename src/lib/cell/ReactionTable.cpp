@@ -7,7 +7,7 @@
 namespace cell
 {
 
-ReactionTable::ReactionTable(DiscTypeResolver discTypeResolver)
+ReactionTable::ReactionTable(const DiscTypeRegistry& discTypeRegistry)
     : discTypeResolver_(std::move(discTypeResolver))
 {
 }

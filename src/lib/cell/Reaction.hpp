@@ -2,7 +2,6 @@
 #define ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
 
 #include "DiscType.hpp"
-#include "DiscTypeRegistry.hpp"
 
 #include <optional>
 #include <vector>

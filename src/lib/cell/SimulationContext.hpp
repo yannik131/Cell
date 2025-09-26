@@ -4,7 +4,6 @@
 #include "Cell.hpp"
 #include "CollisionDetector.hpp"
 #include "CollisionHandler.hpp"
-#include "DiscTypeRegistry.hpp"
 #include "ReactionEngine.hpp"
 #include "ReactionTable.hpp"
 #include "SimulationConfig.hpp"
@@ -43,18 +42,18 @@ public:
     DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
-    SimulationTimeStepProvider buildSimulationTimeStepProvider(const sf::Time& simulationTimeStep);
     DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
-    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig, const DiscTypeRegistry& discTypeRegistry,
-                                     DiscTypeResolver discTypeResolver) const;
-    ReactionEngine buildReactionEngine(DiscTypeResolver discTypeResolver,
+    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig,
+                                     const DiscTypeRegistry& discTypeRegistry) const;
+    ReactionEngine buildReactionEngine(const DiscTypeRegistry& discTypeRegistry,
                                        SimulationTimeStepProvider simulationTimeStepProvider,
                                        const ReactionTable& reactionTable) const;
-    CollisionDetector buildCollisionDetector(DiscTypeResolver discTypeResolver,
+    CollisionDetector buildCollisionDetector(const DiscTypeRegistry& discTypeRegistry,
                                              MaxRadiusProvider maxRadiusProvider) const;
-    CollisionHandler buildCollisionHandler(DiscTypeResolver discTypeResolver) const;
+    CollisionHandler buildCollisionHandler(const DiscTypeRegistry& discTypeRegistry) const;
     Cell buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
-                   SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver) const;
+                   SimulationTimeStepProvider simulationTimeStepProvider,
+                   const DiscTypeRegistry& discTypeRegistry) const;
 
     std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig,
                                          MaxRadiusProvider maxRadiusProvider) const;

@@ -10,13 +10,11 @@ namespace cell
 {
 
 Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-           SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver,
-           Dimensions dimensions, std::vector<Disc>&& discs)
+           const DiscTypeRegistry& discTypeRegistry, Dimensions dimensions, std::vector<Disc>&& discs)
     : reactionEngine_(reactionEngine)
     , collisionDetector_(collisionDetector)
     , collisionHandler_(collisionHandler)
-    , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
-    , discTypeResolver_(std::move(discTypeResolver))
+    , discTypeRegistry_(discTypeRegistry)
     , width_(dimensions.width)
     , height_(dimensions.height)
     , discs_(std::move(discs))
@@ -25,7 +23,7 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
     throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
 
     for (const auto& disc : discs_)
-        initialKineticEnergy_ += disc.getKineticEnergy(discTypeResolver_);
+        initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_.getByID(disc.getDiscTypeID()));
 }
 
 void Cell::update()

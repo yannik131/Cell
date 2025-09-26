@@ -14,7 +14,7 @@ class Disc;
 class CollisionHandler
 {
 public:
-    explicit CollisionHandler(DiscTypeResolver discTypeResolver);
+    explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
 
@@ -45,7 +45,7 @@ private:
     void updateVelocitiesAtCollision(Disc& d1, Disc& d2) const;
 
 private:
-    DiscTypeResolver discTypeResolver_;
+    const DiscTypeRegistry& discTypeRegistry_;
 };
 
 } // namespace cell

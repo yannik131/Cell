@@ -17,13 +17,13 @@ class Disc;
 class ReactionEngine;
 class CollisionDetector;
 class CollisionHandler;
+class DiscTypeRegistry;
 
 class Cell
 {
 public:
     Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-         SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver,
-         Dimensions dimensions, std::vector<Disc>&& discs);
+         const DiscTypeRegistry& discTypeRegistry, Dimensions dimensions, std::vector<Disc>&& discs);
 
     /**
      * @brief Advances the simulation by a single time step
@@ -56,9 +56,7 @@ private:
     ReactionEngine& reactionEngine_;
     CollisionDetector& collisionDetector_;
     CollisionHandler& collisionHandler_;
-
-    SimulationTimeStepProvider simulationTimeStepProvider_;
-    DiscTypeResolver discTypeResolver_;
+    const DiscTypeRegistry& discTypeRegistry_;
 
     double width_;
     double height_;

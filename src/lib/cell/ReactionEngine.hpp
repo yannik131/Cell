@@ -2,7 +2,6 @@
 #define DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP
 
 #include "AbstractReactionTable.hpp"
-#include "DiscTypeRegistry.hpp"
 #include "MathUtils.hpp"
 
 #include <functional>
@@ -22,7 +21,7 @@ public:
     using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
 
 public:
-    ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
+    ReactionEngine(const DiscTypeRegistry& discTypeRegistry, SimulationTimeStepProvider simulationTimeStepProvider,
                    const AbstractReactionTable& reactionTable);
 
     /**
@@ -72,7 +71,7 @@ private:
     const Reaction* selectReaction(const MapType& map, const KeyType& key) const;
 
 private:
-    DiscTypeResolver discTypeResolver_;
+    const DiscTypeRegistry& discTypeRegistry_;
     SimulationTimeStepProvider simulationTimeStepProvider_;
     const SingleLookupMap* transformations_;
     const SingleLookupMap* decompositions_;

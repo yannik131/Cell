@@ -3,7 +3,6 @@
 
 #include "AbstractReactionTable.hpp"
 #include "DiscType.hpp"
-#include "DiscTypeRegistry.hpp"
 #include "Reaction.hpp"
 
 #include <vector>
@@ -21,7 +20,7 @@ namespace cell
 class ReactionTable : public AbstractReactionTable
 {
 public:
-    ReactionTable(DiscTypeResolver discTypeResolver);
+    ReactionTable(const DiscTypeRegistry& discTypeRegistry);
 
     const DiscTypeMap<std::vector<Reaction>>& getTransformations() const override;
     const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const override;
@@ -85,7 +84,7 @@ private:
     DiscTypePairMap<std::vector<Reaction>> combinations_;
     DiscTypePairMap<std::vector<Reaction>> exchanges_;
 
-    DiscTypeResolver discTypeResolver_;
+    const DiscTypeRegistry& discTypeRegistry_;
 };
 
 } // namespace cell

@@ -5,7 +5,7 @@
 namespace cell
 {
 
-CollisionHandler::CollisionHandler(DiscTypeResolver discTypeResolver)
+CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry)
     : discTypeResolver_(std::move(discTypeResolver))
 {
 }

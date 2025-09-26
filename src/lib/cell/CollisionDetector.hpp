@@ -48,7 +48,7 @@ public:
     };
 
 public:
-    CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider);
+    CollisionDetector(const DiscTypeRegistry& discTypeRegistry);
 
     RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                     const sf::Vector2d& bottomRight) const;
@@ -62,8 +62,7 @@ public:
 
 private:
     DiscTypeMap<int> collisionCounts_;
-    DiscTypeResolver discTypeResolver_;
-    MaxRadiusProvider maxRadiusProvider_;
+    const DiscTypeRegistry& discTypeRegistry_;
 };
 
 } // namespace cell

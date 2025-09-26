@@ -2,7 +2,6 @@
 #define EAE8DB08_087C_4EC5_AF13_54AECCF72615_HPP
 
 #include "DiscType.hpp"
-#include "DiscTypeRegistry.hpp"
 #include "Vector2d.hpp"
 
 #include <SFML/System/Vector2.hpp>
