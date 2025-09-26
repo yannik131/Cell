@@ -1,5 +1,6 @@
 #include "Disc.hpp"
 #include "ExceptionWithLocation.hpp"
+#include "Types.hpp"
 
 #include <cmath>
 #include <functional>
@@ -86,19 +87,20 @@ bool Disc::isMarkedDestroyed() const
     return destroyed_;
 }
 
-double Disc::getAbsoluteMomentum(const DiscTypeResolver& discTypeResolver) const
+double Disc::getAbsoluteMomentum(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return discTypeResolver(discTypeID_).getMass() * std::hypot(velocity_.x, velocity_.y);
+    return discTypeRegistry.getByID(discTypeID_).getMass() * std::hypot(velocity_.x, velocity_.y);
 }
 
-sf::Vector2d Disc::getMomentum(const DiscTypeResolver& discTypeResolver) const
+sf::Vector2d Disc::getMomentum(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return discTypeResolver(discTypeID_).getMass() * velocity_;
+    return discTypeRegistry.getByID(discTypeID_).getMass() * velocity_;
 }
 
-double Disc::getKineticEnergy(const DiscTypeResolver& discTypeResolver) const
+double Disc::getKineticEnergy(const DiscTypeRegistry& discTypeRegistry) const
 {
-    return 0.5 * discTypeResolver(discTypeID_).getMass() * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+    return 0.5 * discTypeRegistry.getByID(discTypeID_).getMass() *
+           (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
 }
 
 } // namespace cell

@@ -9,6 +9,8 @@
 namespace cell
 {
 
+class DiscTypeRegistry;
+
 /**
  * @brief Represents a particle in the simulation that can collide with others and undergo reactions. Physical
  * properties are defined by its DiscType
@@ -91,17 +93,17 @@ public:
     /**
      * @returns |mv|
      */
-    double getAbsoluteMomentum(const DiscTypeResolver& discTypeResolver) const;
+    double getAbsoluteMomentum(const DiscTypeRegistry& discTypeResolver) const;
 
     /**
      * @returns mv
      */
-    sf::Vector2d getMomentum(const DiscTypeResolver& discTypeResolver) const;
+    sf::Vector2d getMomentum(const DiscTypeRegistry& discTypeResolver) const;
 
     /**
      * @returns 1/2*m*v^2
      */
-    double getKineticEnergy(const DiscTypeResolver& discTypeResolver) const;
+    double getKineticEnergy(const DiscTypeRegistry& discTypeResolver) const;
 
 private:
     /**

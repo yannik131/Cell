@@ -1,12 +1,12 @@
 #include "CollisionDetector.hpp"
 #include "Disc.hpp"
-#include "PositionNanoflannAdapter.hpp"
+
+#include <algorithm>
 
 namespace cell
 {
-CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry, MaxRadiusProvider maxRadiusProvider)
-    : discTypeResolver_(std::move(discTypeResolver))
-    , maxRadiusProvider_(std::move(maxRadiusProvider))
+CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry)
+    : discTypeRegistry_(discTypeRegistry)
 {
 }
 
@@ -16,7 +16,7 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
 {
     using Wall = RectangleCollision::Wall;
 
-    const double& R = discTypeResolver_(disc.getDiscTypeID()).getRadius();
+    const double& R = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
     const sf::Vector2d& r = disc.getPosition();
     RectangleCollision rectangleCollision;
     double l = NAN;
@@ -56,7 +56,7 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
         if (d.isMarkedDestroyed())
             continue;
 
-        const double r = discTypeResolver_(d.getDiscTypeID()).getRadius();
+        const double r = discTypeRegistry_.getByID(d.getDiscTypeID()).getRadius();
         const auto& p = d.getPosition();
         entries.push_back(Entry{.index = i, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r});
     }

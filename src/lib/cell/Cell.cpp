@@ -26,9 +26,8 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
         initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_.getByID(disc.getDiscTypeID()));
 }
 
-void Cell::update()
+void Cell::update(double dt)
 {
-    const double dt = simulationTimeStepProvider_();
     const sf::Vector2d topLeft{0, 0};
     const sf::Vector2d bottomRight{static_cast<double>(width_), static_cast<double>(height_)};
     std::vector<Disc> newDiscs;
@@ -36,7 +35,7 @@ void Cell::update()
     for (auto& disc : discs_)
     {
         // A -> B returns nothing, A -> B + C returns 1 new disc
-        if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc))
+        if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc, dt))
             newDiscs.push_back(std::move(*newDisc));
 
         disc.move(disc.getVelocity() * dt);

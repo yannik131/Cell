@@ -27,8 +27,9 @@ public:
 
     /**
      * @brief Advances the simulation by a single time step
+     * @param dt Time step in seconds
      */
-    void update();
+    void update(double dt);
 
     /**
      * @returns all discs currently part of this cell

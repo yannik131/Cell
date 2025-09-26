@@ -1,11 +1,8 @@
 #ifndef F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
 #define F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
 
-#include "PositionNanoflannAdapter.hpp"
 #include "Types.hpp"
 #include "Vector2d.hpp"
-
-#include <nanoflann.hpp>
 
 #include <optional>
 #include <set>
@@ -19,11 +16,6 @@ class Disc;
 class CollisionDetector
 {
 public:
-    template <typename T> using AdapterType = nanoflann::L2_Simple_Adaptor<double, PositionNanoflannAdapter<T>>;
-
-    template <typename T>
-    using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType<T>, PositionNanoflannAdapter<T>, 2>;
-
     struct RectangleCollision
     {
         enum class Wall

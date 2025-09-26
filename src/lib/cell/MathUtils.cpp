@@ -2,7 +2,6 @@
 #include "Disc.hpp"
 
 #include <glog/logging.h>
-#include <nanoflann.hpp>
 
 #include <cmath>
 #include <numeric>

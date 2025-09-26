@@ -6,7 +6,7 @@ namespace cell
 {
 
 CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry)
-    : discTypeResolver_(std::move(discTypeResolver))
+    : discTypeRegistry_(discTypeRegistry)
 {
 }
 
@@ -17,8 +17,6 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
     {
         if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
             continue;
-
-        // TODO The disc type resolver calls could be avoided here by caching the disc types as members
 
         const auto& overlap = calculateOverlap(*p1, *p2);
 
@@ -80,10 +78,10 @@ double CollisionHandler::keepKineticEnergyConstant(Disc& disc, const CollisionDe
     // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
     // not too much to make it look stupid
     auto randomNumber = mathutils::getRandomNumber<double>(0, 0.15);
-    double kineticEnergyBefore = disc.getKineticEnergy(discTypeResolver_);
+    double kineticEnergyBefore = disc.getKineticEnergy(discTypeRegistry_);
     disc.scaleVelocity(1.0 + randomNumber);
 
-    return disc.getKineticEnergy(discTypeResolver_) - kineticEnergyBefore;
+    return disc.getKineticEnergy(discTypeRegistry_) - kineticEnergyBefore;
 }
 
 double CollisionHandler::calculateOverlap(const Disc& d1, const Disc& d2) const
@@ -91,8 +89,8 @@ double CollisionHandler::calculateOverlap(const Disc& d1, const Disc& d2) const
     sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
     double distance = mathutils::abs(rVec);
 
-    return discTypeResolver_(d1.getDiscTypeID()).getRadius() + discTypeResolver_(d2.getDiscTypeID()).getRadius() -
-           distance;
+    return discTypeRegistry_.getByID(d1.getDiscTypeID()).getRadius() +
+           discTypeRegistry_.getByID(d2.getDiscTypeID()).getRadius() - distance;
 }
 
 double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc& d2) const
@@ -100,8 +98,8 @@ double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc
     const auto& r = d2.getPosition() - d1.getPosition();
     sf::Vector2d v = d2.getVelocity() - d1.getVelocity();
 
-    const auto& r1 = discTypeResolver_(d1.getDiscTypeID()).getRadius();
-    const auto& r2 = discTypeResolver_(d2.getDiscTypeID()).getRadius();
+    const auto& r1 = discTypeRegistry_.getByID(d1.getDiscTypeID()).getRadius();
+    const auto& r2 = discTypeRegistry_.getByID(d2.getDiscTypeID()).getRadius();
 
     return (-r.x * v.x - r.y * v.y -
             std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
@@ -120,8 +118,8 @@ void CollisionHandler::updateVelocitiesAtCollision(Disc& d1, Disc& d2) const
     sf::Vector2d nVec = rVec / mathutils::abs(rVec);
 
     double vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
-    const auto& m1 = discTypeResolver_(d1.getDiscTypeID()).getMass();
-    const auto& m2 = discTypeResolver_(d2.getDiscTypeID()).getMass();
+    const auto& m1 = discTypeRegistry_.getByID(d1.getDiscTypeID()).getMass();
+    const auto& m2 = discTypeRegistry_.getByID(d2.getDiscTypeID()).getMass();
 
     double impulse = -vrN * (e + 1) / (1. / m1 + 1. / m2);
 
