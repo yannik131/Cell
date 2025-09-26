@@ -14,7 +14,7 @@ class Disc;
 class CollisionHandler
 {
 public:
-    CollisionHandler(DiscTypeResolver discTypeResolver);
+    explicit CollisionHandler(DiscTypeResolver discTypeResolver);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
 

@@ -15,6 +15,7 @@ class DiscType;
 class Reaction;
 
 using DiscTypeID = std::uint16_t;
+using MembraneTypeID = std::uint16_t;
 using DiscTypeResolver = std::function<const DiscType&(DiscTypeID)>;
 using MaxRadiusProvider = std::function<double()>;
 using SimulationTimeStepProvider = std::function<double()>;
