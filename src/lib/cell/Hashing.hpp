@@ -1,5 +1,5 @@
-#ifndef HASHING_HPP
-#define HASHING_HPP
+#ifndef D1BF7155_C5F8_4887_9905_50C52859681F_HPP
+#define D1BF7155_C5F8_4887_9905_50C52859681F_HPP
 
 #include <string>
 #include <type_traits>
@@ -40,4 +40,4 @@ struct PairHasher
 
 } // namespace cell
 
-#endif /* HASHING_HPP */
+#endif /* D1BF7155_C5F8_4887_9905_50C52859681F_HPP */

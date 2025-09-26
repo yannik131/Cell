@@ -1,6 +1,6 @@
 #include "core/Simulation.hpp"
+#include "SFMLJsonSerializers.hpp"
 #include "cell/ExceptionWithLocation.hpp"
-#include "cell/SFMLJsonSerializers.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
 #include <QThread>
@@ -8,7 +8,6 @@
 #include <SFML/System/Clock.hpp>
 #include <nlohmann/json.hpp>
 
-#include "Simulation.hpp"
 #include <fstream>
 
 using json = nlohmann::json;

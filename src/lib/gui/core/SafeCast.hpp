@@ -1,5 +1,5 @@
-#ifndef SAFECAST_HPP
-#define SAFECAST_HPP
+#ifndef B542108E_9E93_455F_B728_C13EF16F20DA_HPP
+#define B542108E_9E93_455F_B728_C13EF16F20DA_HPP
 
 #include "cell/ExceptionWithLocation.hpp"
 
@@ -17,4 +17,4 @@ template <typename T> T safeCast(QWidget* widget)
     return result;
 }
 
-#endif /* SAFECAST_HPP */
+#endif /* B542108E_9E93_455F_B728_C13EF16F20DA_HPP */

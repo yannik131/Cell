@@ -1,5 +1,5 @@
-#ifndef SIMULATION_HPP
-#define SIMULATION_HPP
+#ifndef C79C95D4_043A_4803_8C77_D97B81275A0C_HPP
+#define C79C95D4_043A_4803_8C77_D97B81275A0C_HPP
 
 #include "cell/SimulationConfig.hpp"
 #include "cell/SimulationContext.hpp"
@@ -68,4 +68,4 @@ private:
     std::vector<ConfigObserver> configObservers_;
 };
 
-#endif /* SIMULATION_HPP */
+#endif /* C79C95D4_043A_4803_8C77_D97B81275A0C_HPP */

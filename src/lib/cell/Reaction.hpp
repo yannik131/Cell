@@ -1,5 +1,5 @@
-#ifndef REACTION_HPP
-#define REACTION_HPP
+#ifndef ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
+#define ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
 
 #include "DiscType.hpp"
 #include "DiscTypeRegistry.hpp"
@@ -112,4 +112,4 @@ Reaction::Type inferType(bool educt2, bool product2);
 
 } // namespace cell
 
-#endif /* REACTION_HPP */
+#endif /* ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP */

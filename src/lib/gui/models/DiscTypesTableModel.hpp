@@ -1,5 +1,5 @@
-#ifndef DISCTYPESTABLEMODEL_HPP
-#define DISCTYPESTABLEMODEL_HPP
+#ifndef B820F75C_97AE_4E27_9359_BBAADC72724F_HPP
+#define B820F75C_97AE_4E27_9359_BBAADC72724F_HPP
 
 #include "cell/SimulationConfig.hpp"
 
@@ -88,4 +88,4 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
-#endif /* DISCTYPESTABLEMODEL_HPP */
+#endif /* B820F75C_97AE_4E27_9359_BBAADC72724F_HPP */

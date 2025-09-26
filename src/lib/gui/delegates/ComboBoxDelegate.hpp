@@ -1,5 +1,5 @@
-#ifndef COMBOBOXDELEGATE_HPP
-#define COMBOBOXDELEGATE_HPP
+#ifndef ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
+#define ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
 
 #include "core/AbstractSimulationBuilder.hpp"
 
@@ -67,4 +67,4 @@ void insertDiscTypeComboboxIntoView(QAbstractItemView* view, AbstractSimulationB
                           QAbstractItemView::EditTrigger::SelectedClicked);
 }
 
-#endif /* COMBOBOXDELEGATE_HPP */
+#endif /* ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP */

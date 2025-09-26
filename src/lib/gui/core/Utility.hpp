@@ -1,5 +1,5 @@
-#ifndef UTILITY_HPP
-#define UTILITY_HPP
+#ifndef DCDB89B2_8FE4_4EB9_A8EA_6C13300ADEBA_HPP
+#define DCDB89B2_8FE4_4EB9_A8EA_6C13300ADEBA_HPP
 
 #include "delegates/ComboBoxDelegate.hpp"
 
@@ -59,4 +59,4 @@ template <typename F> auto safeSlot(QWidget* parent, F&& f)
 
 }; // namespace utility
 
-#endif /* UTILITY_HPP */
+#endif /* DCDB89B2_8FE4_4EB9_A8EA_6C13300ADEBA_HPP */

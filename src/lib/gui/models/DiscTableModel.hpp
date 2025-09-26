@@ -1,5 +1,5 @@
-#ifndef DISCTABLEMODEL_HPP
-#define DISCTABLEMODEL_HPP
+#ifndef AB3F4088_AF2F_4472_8BA3_E8165A0B4B30_HPP
+#define AB3F4088_AF2F_4472_8BA3_E8165A0B4B30_HPP
 
 #include "cell/SimulationConfig.hpp"
 
@@ -32,4 +32,4 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
-#endif /* DISCTABLEMODEL_HPP */
+#endif /* AB3F4088_AF2F_4472_8BA3_E8165A0B4B30_HPP */

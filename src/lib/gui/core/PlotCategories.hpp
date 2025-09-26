@@ -1,5 +1,5 @@
-#ifndef PLOTCATEGORIES_HPP
-#define PLOTCATEGORIES_HPP
+#ifndef D902B588_844F_4F0F_8893_E0001BB5976E_HPP
+#define D902B588_844F_4F0F_8893_E0001BB5976E_HPP
 
 #include <QMap>
 #include <QString>
@@ -35,4 +35,4 @@ extern const QList<PlotCategory> SupportedPlotCategories;
  */
 extern const QStringList SupportedPlotCategoryNames;
 
-#endif /* PLOTCATEGORIES_HPP */
+#endif /* D902B588_844F_4F0F_8893_E0001BB5976E_HPP */

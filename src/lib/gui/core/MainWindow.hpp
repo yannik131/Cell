@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
+#ifndef D1AD6103_488C_4F9A_BDFB_D2BC94801DCA_HPP
+#define D1AD6103_488C_4F9A_BDFB_D2BC94801DCA_HPP
 
 #include "core/Simulation.hpp"
 #include "models/PlotModel.hpp"
@@ -92,4 +92,4 @@ private:
     bool fullscreenIsToggled_ = false;
 };
 
-#endif /* MAINWINDOW_HPP */
+#endif /* D1AD6103_488C_4F9A_BDFB_D2BC94801DCA_HPP */

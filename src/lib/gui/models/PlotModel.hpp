@@ -1,5 +1,5 @@
-#ifndef PLOTMODEL_HPP
-#define PLOTMODEL_HPP
+#ifndef F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP
+#define F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP
 
 #include "cell/SimulationConfig.hpp"
 #include "core/FrameDTO.hpp"
@@ -105,4 +105,4 @@ private:
     std::map<std::string, bool> activePlotDiscTypes_;
 };
 
-#endif /* PLOTMODEL_HPP */
+#endif /* F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP */
