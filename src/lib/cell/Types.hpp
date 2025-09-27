@@ -1,5 +1,5 @@
-#ifndef CD2404D2_405E_4617_8483_0D8737CD5D63_HPP
-#define CD2404D2_405E_4617_8483_0D8737CD5D63_HPP
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
 #include "Hashing.hpp"
 #include "TypeRegistry.hpp"
@@ -81,4 +81,4 @@ struct Probability
 
 } // namespace cell
 
-#endif /* CD2404D2_405E_4617_8483_0D8737CD5D63_HPP */
+#endif /* TYPES_HPP */

@@ -8,7 +8,7 @@ namespace cell
 {
 
 ReactionTable::ReactionTable(const DiscTypeRegistry& discTypeRegistry)
-    : discTypeResolver_(std::move(discTypeResolver))
+    : discTypeRegistry_(discTypeRegistry)
 {
 }
 
@@ -34,7 +34,7 @@ const DiscTypePairMap<std::vector<Reaction>>& ReactionTable::getExchanges() cons
 
 void ReactionTable::addReaction(const Reaction& reaction)
 {
-    reaction.validate(discTypeResolver_);
+    reaction.validate(discTypeRegistry_);
     checkIfIsDuplicateReaction(reaction);
 
     reactions_.push_back(reaction);
@@ -122,7 +122,7 @@ void ReactionTable::checkIfIsDuplicateReaction(const Reaction& reaction) const
     for (const auto& existingReaction : *reactions)
     {
         if (existingReaction == reaction)
-            throw ExceptionWithLocation("Duplicate reaction \"" + toString(existingReaction, discTypeResolver_) + "\"");
+            throw ExceptionWithLocation("Duplicate reaction \"" + toString(existingReaction, discTypeRegistry_) + "\"");
     }
 }
 

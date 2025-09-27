@@ -42,24 +42,14 @@ public:
     DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
-    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
     ReactionTable buildReactionTable(const SimulationConfig& simulationConfig,
                                      const DiscTypeRegistry& discTypeRegistry) const;
-    ReactionEngine buildReactionEngine(const DiscTypeRegistry& discTypeRegistry,
-                                       SimulationTimeStepProvider simulationTimeStepProvider,
-                                       const ReactionTable& reactionTable) const;
-    CollisionDetector buildCollisionDetector(const DiscTypeRegistry& discTypeRegistry,
-                                             MaxRadiusProvider maxRadiusProvider) const;
-    CollisionHandler buildCollisionHandler(const DiscTypeRegistry& discTypeRegistry) const;
-    Cell buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
-                   SimulationTimeStepProvider simulationTimeStepProvider,
-                   const DiscTypeRegistry& discTypeRegistry) const;
+    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
+    Cell buildCell(const SimulationConfig& simulationConfig, const DiscTypeRegistry& discTypeRegistry) const;
 
-    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig,
-                                         MaxRadiusProvider maxRadiusProvider) const;
+    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig, double maxRadius) const;
     std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
-    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
-                                                     MaxRadiusProvider maxRadiusProvider) const;
+    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig, double maxRadius) const;
 
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
 

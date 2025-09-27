@@ -50,7 +50,6 @@ void SimulationConfigBuilder::setCellDimensions(Width width, Height height)
 
 void SimulationConfigBuilder::setTimeStep(double simulationTimeStep)
 {
-    ++requiredCallsCount_;
     simulationConfig_.setup.simulationTimeStep = simulationTimeStep;
 }
 
@@ -66,7 +65,7 @@ void SimulationConfigBuilder::setMaxVelocity(double maxVelocity)
 
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const
 {
-    if (requiredCallsCount_ != 2)
+    if (requiredCallsCount_ != 1)
         throw ExceptionWithLocation("Config has not been fully built yet");
 
     return simulationConfig_;

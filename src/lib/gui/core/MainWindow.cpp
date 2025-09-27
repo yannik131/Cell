@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame)
             {
-                ui->simulationWidget->render(frame, simulation_->getDiscTypeResolver(),
+                ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry(),
                                              simulation_->getDiscTypeColorMap());
             });
     ui->simulationWidget->injectAbstractSimulationBuilder(simulation_.get());

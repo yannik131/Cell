@@ -17,7 +17,7 @@ ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const A
 
 bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
 {
-    const Reaction* reaction = selectReaction(*transformations_, disc->getDiscTypeID(), dt);
+    const Reaction* reaction = selectUnimolecularReaction(*transformations_, disc->getDiscTypeID(), dt);
     if (!reaction)
         return false;
 
@@ -28,7 +28,7 @@ bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
 
 std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) const
 {
-    const Reaction* reaction = selectReaction(*decompositions_, d1->getDiscTypeID(), dt);
+    const Reaction* reaction = selectUnimolecularReaction(*decompositions_, d1->getDiscTypeID(), dt);
     if (!reaction)
         return {};
 
@@ -56,7 +56,8 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) c
 
 bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 {
-    const Reaction* reaction = selectReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction =
+        selectBimolecularReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
         return false;
 
@@ -80,7 +81,7 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction =
-        selectReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()), dt);
+        selectBimolecularReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
     if (!reaction)
         return false;
 
@@ -115,6 +116,21 @@ void ReactionEngine::applyBimolecularReactions(const std::vector<std::pair<Disc*
             continue;
         exchangeReaction(d1, d2);
     }
+}
+
+const Reaction* ReactionEngine::selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key,
+                                                           double dt) const
+{
+    return selectReaction(
+        map, key, [&](const Reaction& reaction)
+        { return mathutils::getRandomNumber<double>(0, 1) <= 1 - std::pow(1 - reaction.getProbability(), dt); });
+}
+
+const Reaction* ReactionEngine::selectBimolecularReaction(const PairLookupMap& map,
+                                                          const std::pair<DiscTypeID, DiscTypeID>& key) const
+{
+    return selectReaction(map, key, [](const Reaction& reaction)
+                          { return mathutils::getRandomNumber<double>(0, 1) <= reaction.getProbability(); });
 }
 
 } // namespace cell

@@ -12,7 +12,6 @@ class ACollisionDetector : public Test
 {
 protected:
     DiscTypeRegistry registry;
-    DiscTypeResolver resolver;
     DiscTypeID A = {};
     std::unique_ptr<CollisionDetector> collisionDetector;
 
@@ -21,9 +20,8 @@ protected:
         std::vector<DiscType> types;
         types.emplace_back("A", Radius{5}, Mass{5});
 
-        registry.setDiscTypes(std::move(types));
-        resolver = registry.getDiscTypeResolver();
-        collisionDetector = std::make_unique<CollisionDetector>(CollisionDetector(resolver, []() { return 5; }));
+        registry.setValues(std::move(types));
+        collisionDetector = std::make_unique<CollisionDetector>(CollisionDetector(registry));
 
         A = registry.getIDFor("A");
     }

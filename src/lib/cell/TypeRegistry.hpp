@@ -1,6 +1,7 @@
 #ifndef C9F0AFE7_2B64_483A_9B0A_9B7D7DA9DEFC_HPP
 #define C9F0AFE7_2B64_483A_9B0A_9B7D7DA9DEFC_HPP
 
+#include "ExceptionWithLocation.hpp"
 #include "Types.hpp"
 
 #include <cstdint>
@@ -21,11 +22,10 @@ public:
     TypeRegistry(TypeRegistry&&) = default;
 
     void setValues(std::vector<ValueType>&& values);
+    const std::vector<ValueType>& getValues() const;
 
     KeyType getIDFor(const std::string& name) const;
     const ValueType& getByID(KeyType ID) const;
-
-    auto getResolver() const;
 
 private:
     void buildNameIDMap(const std::vector<ValueType>& values);
@@ -55,6 +55,12 @@ inline void TypeRegistry<KeyType, ValueType>::setValues(std::vector<ValueType>&&
 }
 
 template <typename KeyType, typename ValueType>
+inline const std::vector<ValueType>& TypeRegistry<KeyType, ValueType>::getValues() const
+{
+    return values_;
+}
+
+template <typename KeyType, typename ValueType>
 inline KeyType TypeRegistry<KeyType, ValueType>::getIDFor(const std::string& name) const
 {
     auto iter = nameIDMap_.find(name);
@@ -74,11 +80,6 @@ inline const ValueType& TypeRegistry<KeyType, ValueType>::getByID(KeyType ID) co
 #endif
 
     return values_[ID];
-}
-
-template <typename KeyType, typename ValueType> inline auto TypeRegistry<KeyType, ValueType>::getResolver() const
-{
-    return [&](KeyType discTypeID) -> const ValueType& { return getByID(discTypeID); };
 }
 
 template <typename KeyType, typename ValueType>

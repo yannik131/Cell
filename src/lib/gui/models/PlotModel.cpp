@@ -141,19 +141,19 @@ void PlotModel::emitPlot()
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
-    auto discTypeResolver = abstractSimulationBuilder_->getDiscTypeResolver();
+    const auto& registry = abstractSimulationBuilder_->getDiscTypeRegistry();
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[discTypeResolver(discType).getName()] = static_cast<double>(collisionCount);
+        dataPoint.collisionCounts_[registry.getByID(discType).getName()] = static_cast<double>(collisionCount);
 
     dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000;
 
     for (const auto& disc : frameDTO.discs_)
     {
-        std::string discTypeName = discTypeResolver(disc.getDiscTypeID()).getName();
+        std::string discTypeName = registry.getByID(disc.getDiscTypeID()).getName();
         ++dataPoint.discTypeCountMap_[discTypeName];
-        dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(discTypeResolver);
-        dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(discTypeResolver);
+        dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(registry);
+        dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(registry);
     }
 
     return dataPoint;

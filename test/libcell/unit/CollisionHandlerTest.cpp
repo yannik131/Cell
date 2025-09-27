@@ -14,7 +14,6 @@ class ACollisionHandler : public Test
 {
 protected:
     DiscTypeRegistry registry;
-    DiscTypeResolver resolver;
     DiscTypeID A = {};
     std::unique_ptr<CollisionHandler> collisionHandler;
 
@@ -23,9 +22,8 @@ protected:
         std::vector<DiscType> types;
         types.emplace_back("A", Radius{1}, Mass{1});
 
-        registry.setDiscTypes(std::move(types));
-        resolver = registry.getDiscTypeResolver();
-        collisionHandler = std::make_unique<CollisionHandler>(CollisionHandler(resolver));
+        registry.setValues(std::move(types));
+        collisionHandler = std::make_unique<CollisionHandler>(CollisionHandler(registry));
 
         A = registry.getIDFor("A");
     }
@@ -44,7 +42,7 @@ TEST_F(ACollisionHandler, SeparatesCollidingDiscs)
     d2.setVelocity({1.2, 1});
 
     const double dt = 0.15;
-    const double kineticEnergyBefore = d1.getKineticEnergy(resolver) + d2.getKineticEnergy(resolver);
+    const double kineticEnergyBefore = d1.getKineticEnergy(registry) + d2.getKineticEnergy(registry);
 
     d1.move(dt * d1.getVelocity());
     d2.move(dt * d2.getVelocity());
@@ -52,7 +50,7 @@ TEST_F(ACollisionHandler, SeparatesCollidingDiscs)
     std::vector<std::pair<Disc*, Disc*>> collision({std::make_pair(&d1, &d2)});
     collisionHandler->calculateDiscDiscCollisionResponse(collision);
 
-    const double kineticEnergyAfter = d1.getKineticEnergy(resolver) + d2.getKineticEnergy(resolver);
+    const double kineticEnergyAfter = d1.getKineticEnergy(registry) + d2.getKineticEnergy(registry);
 
     ASSERT_THAT(kineticEnergyBefore, DoubleNear(kineticEnergyAfter, 1e-4));
 
@@ -70,12 +68,12 @@ TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
     const sf::Vector2d boundsBottomRight{100, 100};
 
     Disc d(A);
-    const double R = resolver(A).getRadius();
+    const double R = registry.getByID(A).getRadius();
 
     d.setPosition(boundsTopLeft);
     d.setVelocity({-1.0, 1.0});
 
-    CollisionDetector collisionDetector(resolver, []() { return 0; });
+    CollisionDetector collisionDetector(registry);
     auto collision = collisionDetector.detectDiscRectangleCollision(d, boundsTopLeft, boundsBottomRight);
 
     collisionHandler->calculateDiscRectangleCollisionResponse(d, collision);

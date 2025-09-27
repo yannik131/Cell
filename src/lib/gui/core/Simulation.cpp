@@ -21,23 +21,23 @@ Simulation::Simulation(QObject* parent)
 void Simulation::run()
 {
     sf::Clock clock;
-    sf::Time timeSinceLastUpdate;
+    double timeSinceLastUpdate;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
-    auto simulationTimeScale = static_cast<float>(simulationConfig_.setup.simulationTimeScale);
-    auto simulationTimeStep = sf::seconds(static_cast<float>(simulationConfig_.setup.simulationTimeStep));
+    auto simulationTimeScale = simulationConfig_.setup.simulationTimeScale;
+    auto simulationTimeStep = simulationConfig_.setup.simulationTimeStep;
 
     while (!simulationContext_.getCell().getDiscs().empty())
     {
         if (QThread::currentThread()->isInterruptionRequested())
             break;
 
-        timeSinceLastUpdate += clock.restart();
+        timeSinceLastUpdate += clock.restart().asSeconds();
 
         while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-            simulationContext_.getCell().update();
+            simulationContext_.getCell().update(simulationTimeStep);
 
             emitFrame(RedrawOnly{false});
         }
@@ -100,9 +100,9 @@ void Simulation::registerConfigObserver(ConfigObserver observer)
     configObservers_.push_back(std::move(observer));
 }
 
-cell::DiscTypeResolver Simulation::getDiscTypeResolver() const
+const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry() const
 {
-    return simulationContext_.getDiscTypeRegistry().getDiscTypeResolver();
+    return simulationContext_.getDiscTypeRegistry();
 }
 
 bool Simulation::contextIsBuilt() const

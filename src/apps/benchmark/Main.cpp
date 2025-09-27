@@ -20,7 +20,6 @@ int main(int argc, char** argv)
     SimulationConfigBuilder builder;
 
     builder.setCellDimensions(Width{1000.0}, Height{1000.0});
-    builder.setTimeStep(1e-3);
     builder.setDiscCount(800);
     builder.useDistribution(true);
 
@@ -39,14 +38,14 @@ int main(int argc, char** argv)
     simulationContext.buildContextFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    auto discTypeResolver = simulationContext.getDiscTypeRegistry().getDiscTypeResolver();
+    const auto& registry = simulationContext.getDiscTypeRegistry();
 
     const int N = 100000;
     LOG(INFO) << "Starting benchmark";
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < N; ++i)
-        cell.update();
+        cell.update(1e-3);
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -57,5 +56,5 @@ int main(int argc, char** argv)
     LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
 
     for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
-        LOG(INFO) << discTypeResolver(typeID).getName() << ": " << count << " collisions";
+        LOG(INFO) << registry.getByID(typeID).getName() << ": " << count << " collisions";
 }

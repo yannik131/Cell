@@ -2,6 +2,7 @@
 #define CFE848F0_38AC_4182_9A69_D7C2AB0577CA_HPP
 
 #include "Hashing.hpp"
+#include "Types.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 

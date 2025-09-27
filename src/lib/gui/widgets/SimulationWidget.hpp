@@ -34,7 +34,7 @@ public slots:
     /**
      * @brief Clears the render window and displays circles based on the given `FrameDTO`
      */
-    void render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
+    void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry,
                 const std::map<std::string, sf::Color>& colorMap);
 
 private:

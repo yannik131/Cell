@@ -30,7 +30,7 @@ public:
     virtual const std::map<std::string, sf::Color>& getDiscTypeColorMap() const = 0;
 
     virtual void registerConfigObserver(ConfigObserver observer) = 0;
-    virtual cell::DiscTypeResolver getDiscTypeResolver() const = 0;
+    virtual const cell::DiscTypeRegistry& getDiscTypeRegistry() const = 0;
 
     virtual ~AbstractSimulationBuilder() = default;
 };

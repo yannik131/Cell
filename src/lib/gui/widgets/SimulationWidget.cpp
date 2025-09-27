@@ -86,7 +86,7 @@ void SimulationWidget::toggleFullscreen()
     }
 }
 
-void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
+void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry,
                               const std::map<std::string, sf::Color>& colorMap)
 {
     const int FPS = 60;
@@ -100,7 +100,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolve
 
     for (const auto& disc : frame.discs_)
     {
-        const auto& discType = discTypeResolver(disc.getDiscTypeID());
+        const auto& discType = discTypeRegistry.getByID(disc.getDiscTypeID());
 
         circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
         circleShape.setRadius(static_cast<float>(discType.getRadius()));

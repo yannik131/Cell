@@ -23,7 +23,7 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
     throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
 
     for (const auto& disc : discs_)
-        initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_.getByID(disc.getDiscTypeID()));
+        initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_);
 }
 
 void Cell::update(double dt)
@@ -85,7 +85,7 @@ void Cell::removeDestroyedDiscs()
             iter = discs_.erase(iter);
         else
         {
-            currentKineticEnergy_ += iter->getKineticEnergy(discTypeResolver_);
+            currentKineticEnergy_ += iter->getKineticEnergy(discTypeRegistry_);
             ++iter;
         }
     }

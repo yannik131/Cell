@@ -18,7 +18,7 @@ std::map<std::string, int> countDiscTypes(const std::vector<Disc>& discs, const 
 {
     std::map<std::string, int> counts;
     for (const auto& disc : discs)
-        counts[discTypeResolver(disc.getDiscTypeID()).getName()]++;
+        counts[discTypeRegistry.getByID(disc.getDiscTypeID()).getName()]++;
 
     return counts;
 }
@@ -39,7 +39,6 @@ protected:
         builder.addDiscType("C", Radius{5}, Mass{2});
         builder.useDistribution(false);
         builder.setCellDimensions(Width{100}, Height{100});
-        builder.setTimeStep(timeStep);
     }
 };
 
@@ -50,7 +49,7 @@ TEST_F(ACell, SimulatesASingleDisc)
     simulationContext.buildContextFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    cell.update();
+    cell.update(timeStep);
 
     ASSERT_THAT(cell.getDiscs().size(), Eq(1u));
     ASSERT_THAT(cell.getDiscs().front().getPosition().x, DoubleNear(50 + timeStep, MaxPositionError));
@@ -70,10 +69,9 @@ TEST_F(ACell, SimulatesUnimolecularReactions)
     simulationContext.buildContextFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    cell.update();
+    cell.update(timeStep);
 
-    auto discTypeCounts =
-        countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry().getDiscTypeResolver());
+    auto discTypeCounts = countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry());
 
     ASSERT_THAT(discTypeCounts["A"], Eq(1));
     ASSERT_THAT(discTypeCounts["B"], Eq(2));
@@ -101,10 +99,9 @@ TEST_F(ACell, SimulatesBimolecularReactions)
     simulationContext.buildContextFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    cell.update();
+    cell.update(timeStep);
 
-    auto discTypeCounts =
-        countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry().getDiscTypeResolver());
+    auto discTypeCounts = countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry());
 
     ASSERT_THAT(discTypeCounts["A"], Eq(0));
     ASSERT_THAT(discTypeCounts["B"], Eq(1));

@@ -9,8 +9,6 @@
 namespace cell
 {
 
-class DiscTypeRegistry;
-
 /**
  * @brief Represents a particle in the simulation that can collide with others and undergo reactions. Physical
  * properties are defined by its DiscType

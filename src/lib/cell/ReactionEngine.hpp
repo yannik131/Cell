@@ -62,6 +62,7 @@ public:
 private:
     template <typename MapType, typename KeyType, typename Condition>
     const Reaction* selectReaction(const MapType& map, const KeyType& key, const Condition& condition) const;
+
     const Reaction* selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key, double dt) const;
     const Reaction* selectBimolecularReaction(const PairLookupMap& map,
                                               const std::pair<DiscTypeID, DiscTypeID>& key) const;
@@ -73,21 +74,6 @@ private:
     const PairLookupMap* combinations_;
     const PairLookupMap* exchanges_;
 };
-
-const Reaction* ReactionEngine::selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key,
-                                                           double dt) const
-{
-    return selectReaction(
-        map, key, [&](const Reaction& reaction)
-        { return mathutils::getRandomNumber<double>(0, 1) <= 1 - std::pow(1 - reaction.getProbability(), dt); });
-}
-
-const Reaction* ReactionEngine::selectBimolecularReaction(const PairLookupMap& map,
-                                                          const std::pair<DiscTypeID, DiscTypeID>& key) const
-{
-    return selectReaction(map, key, [](const Reaction& reaction)
-                          { return mathutils::getRandomNumber<double>(0, 1) <= reaction.getProbability(); });
-}
 
 template <typename MapType, typename KeyType, typename Condition>
 inline const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType& key,

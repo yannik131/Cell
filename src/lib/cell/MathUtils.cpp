@@ -1,12 +1,10 @@
 #include "MathUtils.hpp"
-#include "Disc.hpp"
-
-#include <glog/logging.h>
 
 #include <cmath>
 #include <numeric>
 #include <ostream>
 #include <random>
+#include <algorithm>
 
 sf::Time operator*(const sf::Time& time, double factor)
 {

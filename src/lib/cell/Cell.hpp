@@ -17,7 +17,6 @@ class Disc;
 class ReactionEngine;
 class CollisionDetector;
 class CollisionHandler;
-class DiscTypeRegistry;
 
 class Cell
 {
