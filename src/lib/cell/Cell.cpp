@@ -1,6 +1,7 @@
 #include "Cell.hpp"
 #include "CollisionDetector.hpp"
 #include "CollisionHandler.hpp"
+#include "Compartment.hpp"
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 #include "Membrane.hpp"
@@ -21,13 +22,21 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
     , width_(dimensions.width)
     , height_(dimensions.height)
     , discs_(std::move(discs))
-    , membranes_(std::move(membranes))
 {
     throwIfNotInRange(width_, SettingsLimits::MinCellWidth, SettingsLimits::MaxCellWidth, "cell width");
     throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
 
     for (const auto& disc : discs_)
         initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_);
+
+    while (!membranes.empty())
+    {
+        compartments_.emplace_back(std::move(membranes.back()));
+        membranes.pop_back();
+    }
+
+    std::sort(compartments_.begin(), compartments_.end(), [](const Compartment& lhs, const Compartment& rhs)
+              { return lhs.getMembrane().getPosition().x < rhs.getMembrane().getPosition().x; });
 }
 
 void Cell::update(double dt)
@@ -44,8 +53,8 @@ void Cell::update(double dt)
 
         disc.move(disc.getVelocity() * dt);
 
-        auto collision = collisionDetector_.detectDiscRectangleCollision(disc, topLeft, bottomRight);
-        collisionHandler_.calculateDiscRectangleCollisionResponse(disc, collision);
+        auto collision = collisionDetector_.detectRectangularBoundsCollision(disc, topLeft, bottomRight);
+        collisionHandler_.calculateRectangularBoundsCollisionResponse(disc, collision);
 
         // combination reactions are inelastic and consume energy
         currentKineticEnergy_ +=

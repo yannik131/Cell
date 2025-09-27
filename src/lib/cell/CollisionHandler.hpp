@@ -18,8 +18,9 @@ public:
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
 
-    void calculateDiscRectangleCollisionResponse(Disc& disc,
-                                                 CollisionDetector::RectangleCollision& rectangleCollision) const;
+    void calculateRectangularBoundsCollisionResponse(Disc& disc,
+                                                     CollisionDetector::RectangleCollision& rectangleCollision) const;
+    void calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const;
 
     /**
      * Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To

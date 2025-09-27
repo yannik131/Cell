@@ -14,7 +14,7 @@ namespace cell
 {
 
 class Disc;
-class Membrane;
+class Compartment;
 class ReactionEngine;
 class CollisionDetector;
 class CollisionHandler;
@@ -65,7 +65,7 @@ private:
     double height_;
 
     std::vector<Disc> discs_;
-    std::vector<Membrane> membranes_;
+    std::vector<Compartment> compartments_;
 
     // TODO remove, the simulation doesn't care about this
     double initialKineticEnergy_ = 0;

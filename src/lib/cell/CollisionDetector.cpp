@@ -11,8 +11,8 @@ CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry)
 }
 
 CollisionDetector::RectangleCollision
-CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
-                                                const sf::Vector2d& bottomRight) const
+CollisionDetector::detectRectangularBoundsCollision(const Disc& disc, const sf::Vector2d& topLeft,
+                                                    const sf::Vector2d& bottomRight) const
 {
     using Wall = RectangleCollision::Wall;
 
@@ -32,6 +32,14 @@ CollisionDetector::detectDiscRectangleCollision(const Disc& disc, const sf::Vect
         rectangleCollision.yCollision_ = {Wall::Bottom, l};
 
     return rectangleCollision;
+}
+
+bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const
+{
+    const auto& r = disc.getPosition();
+    const auto& Rc = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
+
+    return (M.x - r.x) * (M.x - r.x) + (M.y - r.y) * (M.y - r.y) >= (Rm - Rc) * (Rm - Rc);
 }
 
 std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)

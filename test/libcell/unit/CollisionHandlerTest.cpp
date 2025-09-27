@@ -74,9 +74,9 @@ TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
     d.setVelocity({-1.0, 1.0});
 
     CollisionDetector collisionDetector(registry);
-    auto collision = collisionDetector.detectDiscRectangleCollision(d, boundsTopLeft, boundsBottomRight);
+    auto collision = collisionDetector.detectRectangularBoundsCollision(d, boundsTopLeft, boundsBottomRight);
 
-    collisionHandler->calculateDiscRectangleCollisionResponse(d, collision);
+    collisionHandler->calculateRectangularBoundsCollisionResponse(d, collision);
 
     // The disc is already R units behind the wall, so the algorithm should move it back to where it should
     // have collided, calculate the new velocity, calculate how long it took the disc to travel R units, and then move
@@ -88,9 +88,9 @@ TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
     d.setPosition(boundsBottomRight);
     d.setVelocity({1.0, -1.0});
 
-    collision = collisionDetector.detectDiscRectangleCollision(d, boundsTopLeft, boundsBottomRight);
+    collision = collisionDetector.detectRectangularBoundsCollision(d, boundsTopLeft, boundsBottomRight);
 
-    collisionHandler->calculateDiscRectangleCollisionResponse(d, collision);
+    collisionHandler->calculateRectangularBoundsCollisionResponse(d, collision);
 
     EXPECT_NEAR(d.getPosition().x, boundsBottomRight.x - 2 * R, 1e-4f);
     EXPECT_NEAR(d.getPosition().y, boundsBottomRight.y - 2 * R, 1e-4f);

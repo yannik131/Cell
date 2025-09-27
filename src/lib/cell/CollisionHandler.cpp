@@ -26,6 +26,7 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
 
         double dt = calculateTimeBeforeCollision(*p1, *p2);
 
+        // dt is < 0: Move the disc back in time to first point of contact
         p1->move(dt * p1->getVelocity());
         p2->move(dt * p2->getVelocity());
 
@@ -36,7 +37,7 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
     }
 }
 
-void CollisionHandler::calculateDiscRectangleCollisionResponse(
+void CollisionHandler::calculateRectangularBoundsCollisionResponse(
     Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision) const
 {
     if (!rectangleCollision.isCollision())
@@ -67,6 +68,23 @@ void CollisionHandler::calculateDiscRectangleCollisionResponse(
     }
 
     disc.move(dr);
+}
+
+void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
+{
+    const auto& v = disc.getVelocity();
+    const auto& Rc = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
+
+    const double dt = (M.x * v.x + M.x * v.y -
+                       std::sqrt(((Rc - Rm) * (Rc - Rm)) * (v.x * v.x + v.y * v.y) -
+                                 (M.x * v.y - M.y * v.x) * (M.x * v.y - M.y * v.x))) /
+                      (v.x * v.x + v.y * v.y);
+
+    // dt is < 0: Move the disc back in time to first point of contact
+    disc.move(dt * v);
+    const sf::Vector2d n = (disc.getPosition() - M) / (Rc - Rm);
+    disc.accelerate(-2 * (v * n) * n);
+    disc.move(-dt * disc.getVelocity());
 }
 
 double CollisionHandler::keepKineticEnergyConstant(Disc& disc, const CollisionDetector::RectangleCollision& collision,
@@ -102,8 +120,8 @@ double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc
     const auto& r2 = discTypeRegistry_.getByID(d2.getDiscTypeID()).getRadius();
 
     return (-r.x * v.x - r.y * v.y -
-            std::sqrt(-r.x * r.x * v.y * v.y + 2 * r.x * r.y * v.x * v.y - r.y * r.y * v.x * v.x +
-                      ((r1 + r2) * (r1 + r2)) * (v.x * v.x + v.y * v.y))) /
+            std::sqrt(((r1 + r2) * (r1 + r2)) * (v.x * v.x + v.y * v.y) -
+                      (r.x * v.y - r.y * v.x) * (r.x * v.y - r.y * v.x))) /
            (v.x * v.x + v.y * v.y);
 }
 

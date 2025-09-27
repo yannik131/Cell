@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{cleveref}
 
 \lstset{
 	language=Python,
@@ -53,8 +54,49 @@
 		\Delta y &= - 2 l\\
 		v_y' &= -v_y
 	\end{align*}
+
+    \subsubsection{Circular bounds}
+    Bounds given by middle point $M$ and radius $R_m$. Circle at position $\vec{r} = (x(t), y(t))$ with radius $R_c$ and velocity $\vec{v}$. Penetration occurs when
+
+    \begin{align*}
+        |M - \vec{r}| + R_c &\ge R_m \\
+        \Leftrightarrow |M - \vec{r}| + R_c - R_m &\ge 0\\
+        \Rightarrow l(t) \ge 0 \text{\ with\ } l(t) &= |M - \vec{r}| + R_c - R_m
+    \end{align*}
+
+    where $l(t)$ is the penetration of the circle into the bounds. To avoid the root, numerical testing would use 
+    
+    \begin{align*}
+        |M - \vec{r}| &\ge R_m - R_c \\
+        &\Leftrightarrow \sqrt{(M_x - r_x)^2 + (M_y - r_y)^2} \ge R_m - R_c \\
+        &\Leftrightarrow (M_x - r_x)^2 + (M_y - r_y)^2 \ge (R_m - R_c)^2
+    \end{align*}
+    
+    Collision response: Bounds are stationary, no impulse is exchanged. First, solve for time $\Delta t$ when $l(t) = 0$ (see \cref{section_overlap_circles} for how it was solved):
+    
+    \begin{align*}
+        l(t) &= |M - \vec{r}| + R_c - R_m \\
+        &= \sqrt{(M_x - t\cdot v_x)^2 + (M_y - t\cdot v_y)^2} + R_c - R_m \overset{!}{=} 0\\
+        &\Leftrightarrow \Delta t = \frac{ M_x v_x + M_y v_y \pm \sqrt{ (R_c - R_m)^{2}(v_x^{2} + v_y^{2}) - (M_x v_y - M_y v_x)^{2}} }{ v_x^{2} + v_y^{2} }\\
+        &\Leftrightarrow \Delta t = \frac{ M\cdot\vec{v} \pm \sqrt{ (R_c - R_m)^{2}(v_x^{2} + v_y^{2}) - (M_x v_y - M_y v_x)^{2}} }{ v_x^{2} + v_y^{2} }
+    \end{align*}
+    
+    The first point of contact happened in the past, so $\Delta t \overset{!}{<} 0$, so select the solution with $- \sqrt{...}$. Move the circle by $\Delta t$. Now, the contact normal is given by the vector 
+    
+    \begin{align*}
+        \vec{n} = \frac{\vec{r} - M}{|\vec{r} - M|} = \frac{\vec{r} - M}{R_c - R_m}.
+    \end{align*}
+
+    Note that the contact normal has to point outward, so $M - \vec{r}$ would be wrong. Simply reflect $\vec{v}$ on $\vec{n}$ to get the new velocity:
+
+    \begin{align*}
+        \vec{v}' = \vec{v} - 2(\vec{v}\cdot\vec{n})\vec{n}
+    \end{align*}
+
+    Now just move the circle forward by $\Delta t$ again and it's done.
 	
 	\subsection{Overlap between circles}
+    \label{section_overlap_circles}
 	The overlap $l$ of 2 circles is the sum of their radii minus the distance between them. If the overlap is $> 0$, we have a collision. The current positions of the circles are $\vec{r}_{i, 0}$.
 	\begin{equation}
 		l = R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0}\right|
@@ -67,10 +109,11 @@
 	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0} + t\left(\vec{v_2} - \vec{v_1}\right)\right|\\
 	 &= R_1 + R_2 - \left|\vec{r} + t\cdot\vec{v}\right| \overset{!}{=} 0\\
 	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
-	 &\Rightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{-r_x^2 v_y^2 + 2 r_x r_y v_x v_y - r_y^2 v_x^2 + (R_1 + R_2)^2 (v_x^2 + v_y^2)}}{v_x^2 + v_y^2}
+	 &\Leftrightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{(R_1 + R_2)^2 (v_x^2 + v_y^2) - (r_x v_y - r_y v_x)^2}}{v_x^2 + v_y^2}\\
+     &\Leftrightarrow \Delta t = \frac{-\vec{r}\cdot\vec{v} \pm \sqrt{(R_1 + R_2)^2 (v_x^2 + v_y^2) - (r_x v_y - r_y v_x)^2}}{v_x^2 + v_y^2}
 	\end{align*}
 
-	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. The 2 solutions for $\Delta t$ refer to the first point of contact before overlap and the point in time exactly after the circles have passed through each other. The first contact happens at an earlier time, so we'll select the earlier of the 2 solutions, the one with $-\sqrt{...}$.\\
+	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. The 2 solutions for $\Delta t$ refer to the first point of contact before overlap and the point in time exactly after the circles have passed through each other. The first contact happened in the past, so $\Delta t \overset{!}{<} 0$, so select the solution with $-\sqrt{...}$.\\
 	Now the correct initial positions $\vec{r}_{i, c}$ at the time of collision can easily be calculated:
 	\begin{equation}
 		\vec{r}_{i, c} =\vec{r}_{i, 0} + \Delta t \cdot \vec{v}_i

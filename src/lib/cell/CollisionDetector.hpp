@@ -42,9 +42,9 @@ public:
 public:
     CollisionDetector(const DiscTypeRegistry& discTypeRegistry);
 
-    RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
-                                                    const sf::Vector2d& bottomRight) const;
-
+    RectangleCollision detectRectangularBoundsCollision(const Disc& disc, const sf::Vector2d& topLeft,
+                                                        const sf::Vector2d& bottomRight) const;
+    bool detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const;
     std::vector<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs);
 
     /**
