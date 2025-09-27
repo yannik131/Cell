@@ -8,7 +8,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>
 
-inline void expectNear(const sf::Vector2d& actual, const sf::Vector2d& expected, double epsilon)
+inline void expectNear(const sf::Vector2d& actual, const sf::Vector2d& expected, double epsilon = 1e-3)
 {
     EXPECT_NEAR(actual.x, expected.x, epsilon);
     EXPECT_NEAR(actual.y, expected.y, epsilon);

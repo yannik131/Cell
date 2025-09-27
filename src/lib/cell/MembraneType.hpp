@@ -2,6 +2,7 @@
 #define BF6AA0FA_191C_4C99_AE82_01625CBB6222_HPP
 
 #include "Types.hpp"
+#include "Vector2d.hpp"
 
 namespace cell
 {
@@ -17,8 +18,23 @@ public:
         None = 1 << 3
     };
 
+    using PermeabilityMap = std::unordered_map<DiscTypeID, Permeability>;
+
+public:
+    MembraneType(std::string name, double radius, PermeabilityMap permeabilityMap);
+
+    MembraneType(const MembraneType&) = delete;
+    MembraneType& operator=(const MembraneType&) = delete;
+    MembraneType(MembraneType&&) = default;
+    MembraneType& operator=(MembraneType&&) = default;
+
+    Permeability getPermeabilityFor(const DiscTypeID& discTypeID) const;
+
+    const std::string& getName() const;
+
 private:
-    std::unordered_map<DiscTypeID, Permeability> permeabilityMap_;
+    std::string name_;
+    PermeabilityMap permeabilityMap_;
     double radius_;
 };
 

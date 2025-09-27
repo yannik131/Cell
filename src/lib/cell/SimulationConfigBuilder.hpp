@@ -18,6 +18,9 @@ public:
     void setDiscCount(int count);
     void setDistribution(const std::map<std::string, double>& distribution);
     void addDiscType(const std::string& name, Radius radius, Mass mass);
+    void addMembraneType(const std::string& name, Radius radius,
+                         const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);
+    void addMembrane(const std::string& membraneTypeName, Position position);
     void addReaction(const std::string& educt1, const std::string& educt2, const std::string& product1,
                      const std::string& product2, Probability probability);
     void setCellDimensions(Width width, Height height);

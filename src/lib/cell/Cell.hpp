@@ -14,6 +14,7 @@ namespace cell
 {
 
 class Disc;
+class Membrane;
 class ReactionEngine;
 class CollisionDetector;
 class CollisionHandler;
@@ -22,7 +23,8 @@ class Cell
 {
 public:
     Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-         const DiscTypeRegistry& discTypeRegistry, Dimensions dimensions, std::vector<Disc>&& discs);
+         const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry,
+         Dimensions dimensions, std::vector<Disc>&& discs, std::vector<Membrane>&& membranes);
 
     /**
      * @brief Advances the simulation by a single time step
@@ -57,11 +59,13 @@ private:
     CollisionDetector& collisionDetector_;
     CollisionHandler& collisionHandler_;
     const DiscTypeRegistry& discTypeRegistry_;
+    const MembraneTypeRegistry& membraneTypeRegistry_;
 
     double width_;
     double height_;
 
     std::vector<Disc> discs_;
+    std::vector<Membrane> membranes_;
 
     // TODO remove, the simulation doesn't care about this
     double initialKineticEnergy_ = 0;

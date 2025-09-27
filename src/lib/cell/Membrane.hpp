@@ -11,9 +11,10 @@ namespace cell
 class Membrane
 {
 public:
-    explicit Membrane(const sf::Vector2d& position);
+    explicit Membrane(const MembraneTypeID& membraneTypeID);
 
     const sf::Vector2d& getPosition() const;
+    void setPosition(const sf::Vector2d& position);
 
 private:
     MembraneTypeID membraneTypeID_;

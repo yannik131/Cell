@@ -45,9 +45,11 @@ private:
     ReactionTable buildReactionTable(const SimulationConfig& simulationConfig,
                                      const DiscTypeRegistry& discTypeRegistry) const;
     DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
-    Cell buildCell(const SimulationConfig& simulationConfig, const DiscTypeRegistry& discTypeRegistry) const;
+    MembraneTypeRegistry buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const;
+    Cell buildCell(const SimulationConfig& simulationConfig) const;
+    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig) const;
+    std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig) const;
 
-    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig, double maxRadius) const;
     std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
     std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig, double maxRadius) const;
 
@@ -57,6 +59,7 @@ private:
 
 private:
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
+    std::unique_ptr<MembraneTypeRegistry> membraneTypeRegistry_;
     std::unique_ptr<ReactionTable> reactionTable_;
     std::unique_ptr<ReactionEngine> reactionEngine_;
     std::unique_ptr<CollisionDetector> collisionDetector_;

@@ -1,5 +1,6 @@
 #include "SimulationContext.hpp"
 #include "Disc.hpp"
+#include "Membrane.hpp"
 #include "Settings.hpp"
 
 #include <glog/logging.h>
@@ -39,7 +40,7 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
         collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_));
         collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_));
 
-        cell_ = std::make_unique<Cell>(buildCell(simulationConfig, std::as_const(*discTypeRegistry_)));
+        cell_ = std::make_unique<Cell>(buildCell(simulationConfig));
     }
     catch (const std::exception& e)
     {
@@ -82,6 +83,24 @@ DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig
     return discTypeRegistry;
 }
 
+MembraneTypeRegistry SimulationContext::buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const
+{
+    MembraneTypeRegistry registry;
+    std::vector<MembraneType> types;
+    for (const auto& type : simulationConfig.membraneTypes)
+    {
+        MembraneType::PermeabilityMap permeabilityMap;
+        for (const auto& [discTypeName, permeability] : type.permeabilityMap)
+            permeabilityMap[discTypeRegistry_->getIDFor(discTypeName)] = permeability;
+
+        types.emplace_back(type.name, type.radius, std::move(permeabilityMap));
+    }
+
+    registry.setValues(std::move(types));
+
+    return registry;
+}
+
 ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simulationConfig,
                                                     const DiscTypeRegistry& discTypeRegistry) const
 {
@@ -104,35 +123,50 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
     return reactionTable;
 }
 
-Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig,
-                                  const DiscTypeRegistry& discTypeRegistry) const
+Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) const
 {
-    std::vector<Disc> discs;
-    const auto& discTypes = discTypeRegistry.getValues();
-
-    if (!discTypes.empty())
-    {
-        double maxRadius =
-            std::max_element(discTypes.begin(), discTypes.end(),
-                             [](const DiscType& lhs, const DiscType& rhs) { return lhs.getRadius() < rhs.getRadius(); })
-                ->getRadius();
-
-        discs = getDiscsFromConfig(simulationConfig, maxRadius);
-    }
+    std::vector<Disc> discs = getDiscsFromConfig(simulationConfig);
+    std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
 
     Cell cell(*reactionEngine_, *collisionDetector_, *collisionHandler_, std::as_const(*discTypeRegistry_),
+              std::as_const(*membraneTypeRegistry_),
               Dimensions{.width = simulationConfig.setup.cellWidth, .height = simulationConfig.setup.cellHeight},
-              std::move(discs));
+              std::move(discs), std::move(membranes));
 
     return cell;
 }
-std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig,
-                                                        double maxRadius) const
+std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
 {
     if (simulationConfig.setup.useDistribution)
+    {
+        const auto& discTypes = simulationConfig.discTypes;
+        if (discTypes.empty())
+            return {};
+
+        double maxRadius = std::max_element(discTypes.begin(), discTypes.end(),
+                                            [](const config::DiscType& lhs, const config::DiscType& rhs)
+                                            { return lhs.radius < rhs.radius; })
+                               ->radius;
+
         return createDiscGridFromDistribution(simulationConfig, maxRadius);
+    }
 
     return createDiscsDirectly(simulationConfig);
+}
+
+std::vector<Membrane> SimulationContext::getMembranesFromConfig(const SimulationConfig& simulationConfig) const
+{
+    std::vector<Membrane> membranes;
+
+    for (const auto& membrane : simulationConfig.setup.membranes)
+    {
+        Membrane newMembrane(membraneTypeRegistry_->getIDFor(membrane.membraneTypeName));
+        newMembrane.setPosition({membrane.x, membrane.y});
+
+        membranes.push_back(std::move(newMembrane));
+    }
+
+    return membranes;
 }
 
 std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig& simulationConfig) const

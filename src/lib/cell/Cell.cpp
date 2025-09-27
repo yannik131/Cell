@@ -3,6 +3,7 @@
 #include "CollisionHandler.hpp"
 #include "Disc.hpp"
 #include "MathUtils.hpp"
+#include "Membrane.hpp"
 #include "ReactionEngine.hpp"
 #include "Settings.hpp"
 
@@ -10,14 +11,17 @@ namespace cell
 {
 
 Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-           const DiscTypeRegistry& discTypeRegistry, Dimensions dimensions, std::vector<Disc>&& discs)
+           const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry,
+           Dimensions dimensions, std::vector<Disc>&& discs, std::vector<Membrane>&& membranes)
     : reactionEngine_(reactionEngine)
     , collisionDetector_(collisionDetector)
     , collisionHandler_(collisionHandler)
     , discTypeRegistry_(discTypeRegistry)
+    , membraneTypeRegistry_(membraneTypeRegistry)
     , width_(dimensions.width)
     , height_(dimensions.height)
     , discs_(std::move(discs))
+    , membranes_(std::move(membranes))
 {
     throwIfNotInRange(width_, SettingsLimits::MinCellWidth, SettingsLimits::MaxCellWidth, "cell width");
     throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");

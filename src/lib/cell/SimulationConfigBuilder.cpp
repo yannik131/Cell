@@ -30,6 +30,20 @@ void SimulationConfigBuilder::addDiscType(const std::string& name, Radius radius
     simulationConfig_.discTypes.push_back(config::DiscType{.name = name, .radius = radius.value, .mass = mass.value});
 }
 
+void SimulationConfigBuilder::addMembraneType(
+    const std::string& name, Radius radius,
+    const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap)
+{
+    simulationConfig_.membraneTypes.push_back(
+        config::MembraneType{.name = name, .radius = radius.value, .permeabilityMap = permeabilityMap});
+}
+
+void SimulationConfigBuilder::addMembrane(const std::string& membraneTypeName, Position position)
+{
+    simulationConfig_.setup.membranes.push_back(
+        config::Membrane{.membraneTypeName = membraneTypeName, .x = position.x, .y = position.y});
+}
+
 void SimulationConfigBuilder::addReaction(const std::string& educt1, const std::string& educt2,
                                           const std::string& product1, const std::string& product2,
                                           Probability probability)

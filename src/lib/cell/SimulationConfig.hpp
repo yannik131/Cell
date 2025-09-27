@@ -1,6 +1,7 @@
 #ifndef CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 #define CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 
+#include "MembraneType.hpp"
 #include "Settings.hpp"
 #include "Vector2d.hpp"
 
@@ -30,6 +31,21 @@ struct Disc
     double x = 0, y = 0;
     double vx = 0, vy = 0;
     bool operator==(const Disc&) const = default;
+};
+
+struct MembraneType
+{
+    std::string name;
+    double radius = 0;
+    std::unordered_map<std::string, cell::MembraneType::Permeability> permeabilityMap;
+    bool operator==(const MembraneType&) const = default;
+};
+
+struct Membrane
+{
+    std::string membraneTypeName;
+    double x = 0, y = 0;
+    bool operator==(const Membrane&) const = default;
 };
 
 struct Reaction
@@ -69,6 +85,9 @@ struct Setup
     // In case not:
     std::vector<config::Disc> discs;
 
+    // These never use a distribution
+    std::vector<config::Membrane> membranes;
+
     bool operator==(const Setup&) const = default;
 };
 
@@ -77,6 +96,7 @@ struct Setup
 struct SimulationConfig
 {
     std::vector<config::DiscType> discTypes;
+    std::vector<config::MembraneType> membraneTypes;
     std::vector<config::Reaction> reactions;
     config::Setup setup;
     bool operator==(const SimulationConfig&) const = default;
@@ -87,6 +107,8 @@ namespace config
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiscType, name, radius, mass)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Membrane, membraneTypeName, x, y)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale, maxVelocity,
                                    useDistribution, discCount, distribution, discs)
