@@ -46,7 +46,7 @@ void Simulation::run()
 
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
-    simulationContext_.buildContextFromConfig(config);
+    simulationContext_.buildSimulationFromConfig(config);
 }
 
 void Simulation::rebuildContext()

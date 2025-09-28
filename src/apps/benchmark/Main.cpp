@@ -3,7 +3,7 @@
 #include "cell/Disc.hpp"
 #include "cell/Logging.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
-#include "cell/SimulationContext.hpp"
+#include "cell/SimulationFactory.hpp"
 #include "cell/StringUtils.hpp"
 #include "cell/Types.hpp"
 
@@ -34,8 +34,8 @@ int main(int argc, char** argv)
     builder.addReaction("B", "C", "A", "C", Probability{0.2});
     builder.addReaction("C", "", "A", "B", Probability{0.1});
 
-    SimulationContext simulationContext;
-    simulationContext.buildContextFromConfig(builder.getSimulationConfig());
+    SimulationFactory simulationContext;
+    simulationContext.buildSimulationFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
     const auto& registry = simulationContext.getDiscTypeRegistry();

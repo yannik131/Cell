@@ -2,6 +2,7 @@
 #define C4819342_4F4C_446A_9CDF_CA4AA5E00883_HPP
 
 #include "Membrane.hpp"
+#include "SimulationContext.hpp"
 
 #include <vector>
 
@@ -13,15 +14,31 @@ class Disc;
 class Compartment
 {
 public:
-    explicit Compartment(Membrane&& membrane);
+    Compartment(Compartment* parent, Membrane&& membrane, std::vector<Membrane>& membranes,
+                SimulationContext simulationContext);
     ~Compartment();
 
     const Membrane& getMembrane() const;
+    void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc&& disc);
+    const std::vector<Disc>& getDiscs() const;
+    const std::vector<Compartment>& getCompartments() const;
+    const Compartment* getParent() const;
+    void update(double dt);
 
 private:
+    /**
+     * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
+     * calculates the current kinetic energy based on the discs that are still in the cell
+     */
+    void removeDestroyedDiscs();
+
+private:
+    Compartment* parent_;
     Membrane membrane_;
     std::vector<Disc> discs_;
+    std::vector<Compartment> compartments_;
+    SimulationContext simulationContext_;
 };
 
 } // namespace cell

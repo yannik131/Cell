@@ -2,7 +2,7 @@
 #define C79C95D4_043A_4803_8C77_D97B81275A0C_HPP
 
 #include "cell/SimulationConfig.hpp"
-#include "cell/SimulationContext.hpp"
+#include "cell/SimulationFactory.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/FrameDTO.hpp"
 #include "core/Types.hpp"
@@ -62,7 +62,7 @@ private:
 
 private:
     cell::SimulationConfig simulationConfig_;
-    cell::SimulationContext simulationContext_;
+    cell::SimulationFactory simulationContext_;
     std::map<std::string, sf::Color> discTypeColorMap_;
 
     std::vector<ConfigObserver> configObservers_;

@@ -4,7 +4,7 @@
 #include "cell/MembraneType.hpp"
 #include "cell/Settings.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
-#include "cell/SimulationContext.hpp"
+#include "cell/SimulationFactory.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -24,7 +24,7 @@ class ACell : public Test
 protected:
     double timeStep = 1;
     SimulationConfigBuilder builder;
-    SimulationContext simulationContext;
+    SimulationFactory simulationContext;
 
     void SetUp() override
     {
@@ -38,7 +38,7 @@ protected:
 
     Cell& createAndUpdateCell()
     {
-        simulationContext.buildContextFromConfig(builder.getSimulationConfig());
+        simulationContext.buildSimulationFromConfig(builder.getSimulationConfig());
         auto& cell = simulationContext.getCell();
         cell.update(timeStep);
 

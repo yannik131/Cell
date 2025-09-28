@@ -13,96 +13,12 @@
 namespace cell
 {
 
-Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-           const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry,
-           Dimensions dimensions, std::vector<Disc>&& discs, std::vector<Membrane>&& membranes)
-    : reactionEngine_(reactionEngine)
-    , collisionDetector_(collisionDetector)
-    , collisionHandler_(collisionHandler)
-    , discTypeRegistry_(discTypeRegistry)
-    , membraneTypeRegistry_(membraneTypeRegistry)
-    , width_(dimensions.width)
-    , height_(dimensions.height)
-    , discs_(std::move(discs))
+Cell::Cell(Membrane&& membrane, std::vector<Membrane>&& membranes, SimulationContext simulationContext)
+    : Compartment(nullptr, std::move(membrane), membranes, std::move(simulationContext))
 {
-    throwIfNotInRange(width_, SettingsLimits::MinCellWidth, SettingsLimits::MaxCellWidth, "cell width");
-    throwIfNotInRange(height_, SettingsLimits::MinCellHeight, SettingsLimits::MaxCellHeight, "cell height");
-
-    for (const auto& disc : discs_)
-        initialKineticEnergy_ += disc.getKineticEnergy(discTypeRegistry_);
-
-    while (!membranes.empty())
-    {
-        compartments_.emplace_back(std::move(membranes.back()));
-        membranes.pop_back();
-    }
-
-    std::sort(compartments_.begin(), compartments_.end(), [](const Compartment& lhs, const Compartment& rhs)
-              { return lhs.getMembrane().getPosition().x < rhs.getMembrane().getPosition().x; });
-
-    // TODO This is a temporary measure, remove once disc creation is handled differently for compartments
-    for (auto iter = discs_.begin(); iter != discs_.end();)
-    {
-        bool wasPartOfCompartment = false;
-        for (auto compIter = compartments_.begin(); compIter != compartments_.end();)
-        {
-            auto& membrane = compIter->getMembrane();
-            double R = membraneTypeRegistry_.getByID(membrane.getMembraneTypeID()).getRadius();
-            if (mathutils::pointIsInCircle(iter->getPosition(), membrane.getPosition(), R))
-            {
-                compIter->addDisc(std::move(*iter));
-                iter = discs_.erase(iter);
-                wasPartOfCompartment = true;
-                break;
-            }
-        }
-
-        if (!wasPartOfCompartment)
-            ++iter;
-    }
-}
-
-Cell::~Cell() = default;
-Cell::Cell(const Cell&) = default;
-
-void Cell::update(double dt)
-{
-    const sf::Vector2d topLeft{0, 0};
-    const sf::Vector2d bottomRight{static_cast<double>(width_), static_cast<double>(height_)};
-    std::vector<Disc> newDiscs;
-
-    for (auto& disc : discs_)
-    {
-        // A -> B returns nothing, A -> B + C returns 1 new disc
-        if (auto newDisc = reactionEngine_.applyUnimolecularReactions(disc, dt))
-            newDiscs.push_back(std::move(*newDisc));
-
-        disc.move(disc.getVelocity() * dt);
-
-        auto collision = collisionDetector_.detectRectangularBoundsCollision(disc, topLeft, bottomRight);
-        collisionHandler_.calculateRectangularBoundsCollisionResponse(disc, collision);
-
-        // combination reactions are inelastic and consume energy
-        currentKineticEnergy_ +=
-            collisionHandler_.keepKineticEnergyConstant(disc, collision, initialKineticEnergy_ - currentKineticEnergy_);
-    }
-
-    discs_.insert(discs_.begin(), newDiscs.begin(), newDiscs.end());
-
-    auto collidingDiscs = collisionDetector_.detectDiscDiscCollisions(discs_);
-
-    // marks consumed discs as destroyed
-    reactionEngine_.applyBimolecularReactions(collidingDiscs);
-
-    // ignores marked discs
-    collisionHandler_.calculateDiscDiscCollisionResponse(collidingDiscs);
-
-    removeDestroyedDiscs();
-}
-
-const std::vector<Disc>& Cell::getDiscs() const
-{
-    return discs_;
+    if (!membranes.empty())
+        throw std::invalid_argument("There were " + std::to_string(membranes.size()) +
+                                    " membranes passed to the cell that were not contained by it");
 }
 
 double Cell::getInitialKineticEnergy() const
@@ -113,21 +29,6 @@ double Cell::getInitialKineticEnergy() const
 double Cell::getCurrentKineticEnergy() const
 {
     return currentKineticEnergy_;
-}
-
-void Cell::removeDestroyedDiscs()
-{
-    currentKineticEnergy_ = 0.0;
-    for (auto iter = discs_.begin(); iter != discs_.end();)
-    {
-        if (iter->isMarkedDestroyed())
-            iter = discs_.erase(iter);
-        else
-        {
-            currentKineticEnergy_ += iter->getKineticEnergy(discTypeRegistry_);
-            ++iter;
-        }
-    }
 }
 
 } // namespace cell

@@ -1,7 +1,13 @@
-#include "SimulationContext.hpp"
+#include "SimulationFactory.hpp"
+#include "Cell.hpp"
+#include "CollisionDetector.hpp"
+#include "CollisionHandler.hpp"
 #include "Disc.hpp"
 #include "Membrane.hpp"
+#include "ReactionEngine.hpp"
+#include "ReactionTable.hpp"
 #include "Settings.hpp"
+#include "SimulationContext.hpp"
 
 #include <glog/logging.h>
 
@@ -9,8 +15,9 @@
 
 namespace cell
 {
+SimulationFactory::SimulationFactory() = default;
 
-void SimulationContext::buildContextFromConfig(const SimulationConfig& simulationConfig)
+void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simulationConfig)
 {
     built_ = false;
 
@@ -50,28 +57,32 @@ void SimulationContext::buildContextFromConfig(const SimulationConfig& simulatio
     built_ = true;
 }
 
-const DiscTypeRegistry& SimulationContext::getDiscTypeRegistry() const
+SimulationContext SimulationFactory::getSimulationContext()
 {
     throwIfNotBuildYet();
 
-    return *discTypeRegistry_;
+    return SimulationContext{.discTypeRegistry = *discTypeRegistry_,
+                             .membraneTypeRegistry = *membraneTypeRegistry_,
+                             .reactionEngine = *reactionEngine_,
+                             .collisionDetector = *collisionDetector_,
+                             .collisionHandler = *collisionHandler_};
 }
 
-Cell& SimulationContext::getCell()
+Cell& SimulationFactory::getCell()
 {
     throwIfNotBuildYet();
 
     return *cell_;
 }
 
-DiscTypeMap<int> SimulationContext::getAndResetCollisionCounts()
+DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
 {
     throwIfNotBuildYet();
 
     return collisionDetector_->getAndResetCollisionCounts();
 }
 
-DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const
+DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const
 {
     DiscTypeRegistry discTypeRegistry;
     std::vector<DiscType> discTypes;
@@ -83,7 +94,7 @@ DiscTypeRegistry SimulationContext::buildDiscTypeRegistry(const SimulationConfig
     return discTypeRegistry;
 }
 
-MembraneTypeRegistry SimulationContext::buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const
+MembraneTypeRegistry SimulationFactory::buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const
 {
     MembraneTypeRegistry registry;
     std::vector<MembraneType> types;
@@ -101,7 +112,7 @@ MembraneTypeRegistry SimulationContext::buildMembraneTypeRegistry(const Simulati
     return registry;
 }
 
-ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simulationConfig,
+ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simulationConfig,
                                                     const DiscTypeRegistry& discTypeRegistry) const
 {
     ReactionTable reactionTable(discTypeRegistry);
@@ -123,7 +134,7 @@ ReactionTable SimulationContext::buildReactionTable(const SimulationConfig& simu
     return reactionTable;
 }
 
-Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) const
+Cell SimulationFactory::buildCell(const SimulationConfig& simulationConfig) const
 {
     std::vector<Disc> discs = getDiscsFromConfig(simulationConfig);
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
@@ -135,7 +146,7 @@ Cell SimulationContext::buildCell(const SimulationConfig& simulationConfig) cons
 
     return cell;
 }
-std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
+std::vector<Disc> SimulationFactory::getDiscsFromConfig(const SimulationConfig& simulationConfig) const
 {
     if (simulationConfig.setup.useDistribution)
     {
@@ -154,7 +165,7 @@ std::vector<Disc> SimulationContext::getDiscsFromConfig(const SimulationConfig& 
     return createDiscsDirectly(simulationConfig);
 }
 
-std::vector<Membrane> SimulationContext::getMembranesFromConfig(const SimulationConfig& simulationConfig) const
+std::vector<Membrane> SimulationFactory::getMembranesFromConfig(const SimulationConfig& simulationConfig) const
 {
     std::vector<Membrane> membranes;
 
@@ -169,7 +180,7 @@ std::vector<Membrane> SimulationContext::getMembranesFromConfig(const Simulation
     return membranes;
 }
 
-std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig& simulationConfig) const
+std::vector<Disc> SimulationFactory::createDiscsDirectly(const SimulationConfig& simulationConfig) const
 {
     std::vector<Disc> discs;
 
@@ -185,7 +196,7 @@ std::vector<Disc> SimulationContext::createDiscsDirectly(const SimulationConfig&
     return discs;
 }
 
-std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
+std::vector<Disc> SimulationFactory::createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
                                                                     double maxRadius) const
 {
     if (simulationConfig.setup.distribution.empty())
@@ -252,19 +263,19 @@ std::vector<Disc> SimulationContext::createDiscGridFromDistribution(const Simula
     return discs;
 }
 
-double SimulationContext::calculateDistributionSum(const std::map<std::string, double>& distribution) const
+double SimulationFactory::calculateDistributionSum(const std::map<std::string, double>& distribution) const
 {
     return std::accumulate(distribution.begin(), distribution.end(), 0.0,
                            [](double currentSum, auto& entryPair) { return currentSum + entryPair.second; });
 }
 
-void SimulationContext::throwIfNotBuildYet() const
+void SimulationFactory::throwIfNotBuildYet() const
 {
     if (!built_)
         throw ExceptionWithLocation("Simulation context was not yet fully built");
 }
 
-bool SimulationContext::isBuilt() const
+bool SimulationFactory::isBuilt() const
 {
     return built_;
 }

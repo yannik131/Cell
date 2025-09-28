@@ -2,7 +2,7 @@
 #include "TestUtils.hpp"
 #include "cell/MathUtils.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
-#include "cell/SimulationContext.hpp"
+#include "cell/SimulationFactory.hpp"
 
 #include <gtest/gtest.h>
 
@@ -23,7 +23,7 @@ const Compartment& getSingleChildCompartment(const Compartment& compartment)
 }
 
 bool notContainedInOthers(const Compartment& host, const std::vector<const Compartment*>& others,
-                          const SimulationContext& context)
+                          const SimulationFactory& context)
 {
     const MembraneTypeRegistry& membraneTypeRegistry = context.getMembraneTypeRegistry();
     const DiscTypeRegistry& discTypeRegistry = context.getDiscTypeRegistry();
@@ -52,6 +52,8 @@ bool notContainedInOthers(const Compartment& host, const std::vector<const Compa
                 return false;
         }
     }
+
+    return true;
 }
 
 } // namespace
@@ -60,14 +62,15 @@ class ACompartment : public Test
 {
 protected:
     SimulationConfigBuilder builder;
-    SimulationContext context;
+    SimulationFactory factory;
+    std::unique_ptr<SimulationContext> context;
 
     void SetUp() override
     {
         builder.addDiscType("A", Radius{1}, Mass{1});
         builder.addDiscType("B", Radius{1}, Mass{1});
 
-        builder.setCellDimensions(Width{1000}, Height{1000});
+        builder.addCell(Position{.x = 0, .y = 0}, Radius{1000});
         builder.addMembraneType("Large", Radius{200}, {});
         builder.addMembraneType("Small", Radius{50}, {});
         builder.addMembrane("Large", Position{.x = 500, .y = 500});
@@ -76,8 +79,8 @@ protected:
 
     auto& getCell()
     {
-        context.buildContextFromConfig(builder.getSimulationConfig());
-        return context.getCell();
+        factory.buildSimulationFromConfig(builder.getSimulationConfig());
+        return factory.getCell();
     }
 };
 
