@@ -17,6 +17,7 @@ public:
     ~Compartment();
 
     const Membrane& getMembrane() const;
+    void addDisc(Disc&& disc);
 
 private:
     Membrane membrane_;

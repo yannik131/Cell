@@ -4,6 +4,7 @@
 #include "cell/DiscType.hpp"
 #include "cell/Reaction.hpp"
 #include "cell/Vector2d.hpp"
+#include "cell/Disc.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <gtest/gtest.h>
@@ -12,6 +13,15 @@ inline void expectNear(const sf::Vector2d& actual, const sf::Vector2d& expected,
 {
     EXPECT_NEAR(actual.x, expected.x, epsilon);
     EXPECT_NEAR(actual.y, expected.y, epsilon);
+}
+
+std::map<std::string, int> countDiscTypes(const std::vector<Disc>& discs, const DiscTypeRegistry& discTypeRegistry)
+{
+    std::map<std::string, int> counts;
+    for (const auto& disc : discs)
+        counts[discTypeRegistry.getByID(disc.getDiscTypeID()).getName()]++;
+
+    return counts;
 }
 
 #endif /* TESTUTILS_HPP */

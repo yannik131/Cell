@@ -16,4 +16,9 @@ const Membrane& Compartment::getMembrane() const
     return membrane_;
 }
 
+void Compartment::addDisc(Disc&& disc)
+{
+    discs_.push_back(std::move(disc));
+}
+
 } // namespace cell

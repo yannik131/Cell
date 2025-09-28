@@ -8,6 +8,8 @@
 #include "ReactionEngine.hpp"
 #include "Settings.hpp"
 
+#include <algorithm>
+
 namespace cell
 {
 
@@ -37,6 +39,27 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
 
     std::sort(compartments_.begin(), compartments_.end(), [](const Compartment& lhs, const Compartment& rhs)
               { return lhs.getMembrane().getPosition().x < rhs.getMembrane().getPosition().x; });
+
+    // TODO This is a temporary measure, remove once disc creation is handled differently for compartments
+    for (auto iter = discs_.begin(); iter != discs_.end();)
+    {
+        bool wasPartOfCompartment = false;
+        for (auto compIter = compartments_.begin(); compIter != compartments_.end();)
+        {
+            auto& membrane = compIter->getMembrane();
+            double R = membraneTypeRegistry_.getByID(membrane.getMembraneTypeID()).getRadius();
+            if (mathutils::pointIsInCircle(iter->getPosition(), membrane.getPosition(), R))
+            {
+                compIter->addDisc(std::move(*iter));
+                iter = discs_.erase(iter);
+                wasPartOfCompartment = true;
+                break;
+            }
+        }
+
+        if (!wasPartOfCompartment)
+            ++iter;
+    }
 }
 
 Cell::~Cell() = default;

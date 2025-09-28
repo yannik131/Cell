@@ -15,6 +15,7 @@ public:
 
     const sf::Vector2d& getPosition() const;
     void setPosition(const sf::Vector2d& position);
+    MembraneTypeID getMembraneTypeID() const;
 
 private:
     MembraneTypeID membraneTypeID_;

@@ -18,4 +18,9 @@ void Membrane::setPosition(const sf::Vector2d& position)
     position_ = position;
 }
 
+MembraneTypeID Membrane::getMembraneTypeID() const
+{
+    return membraneTypeID_;
+}
+
 } // namespace cell

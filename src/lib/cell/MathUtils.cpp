@@ -1,10 +1,10 @@
 #include "MathUtils.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <numeric>
 #include <ostream>
 #include <random>
-#include <algorithm>
 
 sf::Time operator*(const sf::Time& time, double factor)
 {
@@ -48,6 +48,20 @@ std::vector<sf::Vector2d> calculateGrid(double width, double height, double edge
     std::shuffle(gridPoints.begin(), gridPoints.end(), gen);
 
     return gridPoints;
+}
+
+bool pointIsInCircle(const sf::Vector2d& point, const sf::Vector2d& M, double R)
+{
+    const auto diff = point - M;
+
+    return diff.x * diff.x + diff.y * diff.y <= R * R;
+}
+
+bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
+{
+    const auto diff = M1 - M2;
+
+    return diff.x * diff.x + diff.y * diff.y <= (R2 - R1) * (R2 - R1);
 }
 
 } // namespace cell::mathutils
