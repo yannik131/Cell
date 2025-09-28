@@ -14,6 +14,7 @@ namespace cell
 {
 
 class Disc;
+class Membrane;
 class Compartment;
 class ReactionEngine;
 class CollisionDetector;
@@ -25,6 +26,9 @@ public:
     Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
          const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry,
          Dimensions dimensions, std::vector<Disc>&& discs, std::vector<Membrane>&& membranes);
+
+    ~Cell();
+    Cell(const Cell&);
 
     /**
      * @brief Advances the simulation by a single time step

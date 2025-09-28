@@ -14,6 +14,7 @@ class Compartment
 {
 public:
     explicit Compartment(Membrane&& membrane);
+    ~Compartment();
 
     const Membrane& getMembrane() const;
 

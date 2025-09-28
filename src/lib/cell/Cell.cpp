@@ -39,6 +39,9 @@ Cell::Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector,
               { return lhs.getMembrane().getPosition().x < rhs.getMembrane().getPosition().x; });
 }
 
+Cell::~Cell() = default;
+Cell::Cell(const Cell&) = default;
+
 void Cell::update(double dt)
 {
     const sf::Vector2d topLeft{0, 0};
