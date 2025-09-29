@@ -25,7 +25,6 @@ public:
     double getCurrentKineticEnergy() const;
 
 private:
-    // TODO remove, the simulation doesn't care about this
     double initialKineticEnergy_ = 0;
     double currentKineticEnergy_ = 0;
 };

@@ -70,7 +70,6 @@ protected:
         builder.addDiscType("A", Radius{1}, Mass{1});
         builder.addDiscType("B", Radius{1}, Mass{1});
 
-        builder.addCell(Position{.x = 0, .y = 0}, Radius{1000});
         builder.addMembraneType("Large", Radius{200}, {});
         builder.addMembraneType("Small", Radius{50}, {});
         builder.addMembrane("Large", Position{.x = 500, .y = 500});

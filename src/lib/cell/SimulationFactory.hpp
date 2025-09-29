@@ -31,7 +31,7 @@ public:
     SimulationFactory();
 
     void buildSimulationFromConfig(const SimulationConfig& simulationConfig);
-    SimulationContext getSimulationContext();
+    SimulationContext getSimulationContext() const;
 
     Cell& getCell();
     bool isBuilt() const;
@@ -44,11 +44,7 @@ private:
     DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
     MembraneTypeRegistry buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const;
     Cell buildCell(const SimulationConfig& simulationConfig) const;
-    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig) const;
     std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig) const;
-
-    std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
-    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig, double maxRadius) const;
 
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
 

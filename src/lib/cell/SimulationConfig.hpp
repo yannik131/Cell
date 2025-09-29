@@ -57,8 +57,7 @@ struct Reaction
 
 struct Setup
 {
-    double cellWidth = SettingsLimits::MinCellWidth;
-    double cellHeight = SettingsLimits::MinCellHeight;
+    MembraneType cellMembraneType{.name = "Cell membrane", .radius = 1000, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -79,8 +78,8 @@ struct Setup
     bool useDistribution = true;
 
     // In case of distribution:
-    int discCount = SettingsLimits::MinNumberOfDiscs;
-    std::map<std::string, double> distribution;
+    std::map<std::string, int> discCounts;
+    std::map<std::string, std::map<std::string, double>> distributions;
 
     // In case not:
     std::vector<config::Disc> discs;
@@ -110,8 +109,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Membrane, membraneTypeName, x, y)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale, maxVelocity,
-                                   useDistribution, discCount, distribution, discs)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution,
+                                   discCounts, distributions, discs)
 
 } // namespace config
 

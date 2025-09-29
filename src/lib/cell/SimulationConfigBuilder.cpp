@@ -15,14 +15,15 @@ void SimulationConfigBuilder::useDistribution(bool useDistribution)
     simulationConfig_.setup.useDistribution = useDistribution;
 }
 
-void SimulationConfigBuilder::setDiscCount(int count)
+void SimulationConfigBuilder::setDiscCount(const std::string& membraneTypeName, int count)
 {
-    simulationConfig_.setup.discCount = count;
+    simulationConfig_.setup.discCounts[membraneTypeName] = count;
 }
 
-void SimulationConfigBuilder::setDistribution(const std::map<std::string, double>& distribution)
+void SimulationConfigBuilder::setDistribution(const std::string& membraneTypeName,
+                                              const std::map<std::string, double>& distribution)
 {
-    simulationConfig_.setup.distribution = distribution;
+    simulationConfig_.setup.distributions[membraneTypeName] = distribution;
 }
 
 void SimulationConfigBuilder::addDiscType(const std::string& name, Radius radius, Mass mass)
@@ -55,11 +56,11 @@ void SimulationConfigBuilder::addReaction(const std::string& educt1, const std::
                                                            .probability = probability.value});
 }
 
-void SimulationConfigBuilder::setCellDimensions(Width width, Height height)
+void SimulationConfigBuilder::setCellMembraneType(
+    Radius radius, const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap)
 {
-    ++requiredCallsCount_;
-    simulationConfig_.setup.cellWidth = width.value;
-    simulationConfig_.setup.cellHeight = height.value;
+    simulationConfig_.setup.cellMembraneType.radius = radius.value;
+    simulationConfig_.setup.cellMembraneType.permeabilityMap = permeabilityMap;
 }
 
 void SimulationConfigBuilder::setTimeStep(double simulationTimeStep)
@@ -79,9 +80,6 @@ void SimulationConfigBuilder::setMaxVelocity(double maxVelocity)
 
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const
 {
-    if (requiredCallsCount_ != 1)
-        throw ExceptionWithLocation("Config has not been fully built yet");
-
     return simulationConfig_;
 }
 
