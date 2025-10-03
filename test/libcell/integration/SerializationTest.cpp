@@ -28,8 +28,8 @@ TEST(ASimulationConfig, CanBeSerialized)
     builder.setDistribution("", {{"A", 0.5}, {"B", 0.5}});
     builder.setDistribution("Large", {{"A", 1}, {"B", 0}});
     builder.addDisc("C", Position{.x = 50, .y = 50}, Velocity{.x = 50, .y = 50});
-    builder.setCellDimensions(Width{100}, Height{200});
-    builder.setDiscCount(10);
+    builder.setDiscCount("", 10);
+    builder.setDiscCount("Large", 5);
     builder.setTimeScale(0.5);
     builder.setTimeStep(1e-3);
     builder.setMaxVelocity(100);

@@ -1,3 +1,4 @@
+#include "cell/Cell.hpp"
 #include "TestUtils.hpp"
 #include "cell/Disc.hpp"
 #include "cell/Membrane.hpp"
@@ -24,7 +25,7 @@ class ACell : public Test
 protected:
     double timeStep = 1;
     SimulationConfigBuilder builder;
-    SimulationFactory simulationContext;
+    SimulationFactory simulationFactory;
 
     void SetUp() override
     {
@@ -33,16 +34,20 @@ protected:
         builder.addDiscType("C", Radius{5}, Mass{2});
         builder.addDiscType("D", Radius{5}, Mass{1});
         builder.useDistribution(false);
-        builder.setCellDimensions(Width{1000}, Height{1000});
     }
 
     Cell& createAndUpdateCell()
     {
-        simulationContext.buildSimulationFromConfig(builder.getSimulationConfig());
-        auto& cell = simulationContext.getCell();
+        simulationFactory.buildSimulationFromConfig(builder.getSimulationConfig());
+        auto& cell = simulationFactory.getCell();
         cell.update(timeStep);
 
         return cell;
+    }
+
+    const DiscTypeRegistry& getDiscTypeRegistry() const
+    {
+        return simulationFactory.getSimulationContext().discTypeRegistry;
     }
 };
 
@@ -56,7 +61,7 @@ TEST_F(ACell, SimulatesASingleDisc)
     ASSERT_THAT(cell.getDiscs().front().getPosition().x, DoubleNear(50 + timeStep, MaxPositionError));
     ASSERT_THAT(cell.getDiscs().front().getPosition().y, DoubleNear(50 + timeStep, MaxPositionError));
 
-    ASSERT_THAT(simulationContext.getAndResetCollisionCounts().empty(), Eq(true));
+    ASSERT_THAT(simulationFactory.getAndResetCollisionCounts().empty(), Eq(true));
 }
 
 TEST_F(ACell, SimulatesUnimolecularReactions)
@@ -69,14 +74,14 @@ TEST_F(ACell, SimulatesUnimolecularReactions)
 
     auto& cell = createAndUpdateCell();
 
-    auto discTypeCounts = countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry());
+    auto discTypeCounts = countDiscTypes(cell.getDiscs(), getDiscTypeRegistry());
 
     ASSERT_THAT(discTypeCounts["A"], Eq(1));
     ASSERT_THAT(discTypeCounts["B"], Eq(2));
     ASSERT_THAT(discTypeCounts["C"], Eq(0));
 
-    auto collisionCounts = simulationContext.getAndResetCollisionCounts();
-    auto getIDFor = [&](const std::string& name) { return simulationContext.getDiscTypeRegistry().getIDFor(name); };
+    auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
+    auto getIDFor = [&](const std::string& name) { return getDiscTypeRegistry().getIDFor(name); };
 
     ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(1));
     ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
@@ -96,14 +101,14 @@ TEST_F(ACell, SimulatesBimolecularReactions)
 
     auto& cell = createAndUpdateCell();
 
-    auto discTypeCounts = countDiscTypes(cell.getDiscs(), simulationContext.getDiscTypeRegistry());
+    auto discTypeCounts = countDiscTypes(cell.getDiscs(), getDiscTypeRegistry());
 
     ASSERT_THAT(discTypeCounts["A"], Eq(0));
     ASSERT_THAT(discTypeCounts["B"], Eq(1));
     ASSERT_THAT(discTypeCounts["C"], Eq(2));
 
-    auto collisionCounts = simulationContext.getAndResetCollisionCounts();
-    auto getIDFor = [&](const std::string& name) { return simulationContext.getDiscTypeRegistry().getIDFor(name); };
+    auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
+    auto getIDFor = [&](const std::string& name) { return getDiscTypeRegistry().getIDFor(name); };
 
     ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(2));
     ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
@@ -131,9 +136,8 @@ TEST_F(ACell, SimulatesASingleMembrane)
 
     const auto& getDisc = [&](const std::string& typeName)
     {
-        auto iter = std::find_if(
-            discs.begin(), discs.end(), [&](const Disc& d)
-            { return simulationContext.getDiscTypeRegistry().getByID(d.getDiscTypeID()).getName() == typeName; });
+        auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
+                                 { return getDiscTypeRegistry().getByID(d.getDiscTypeID()).getName() == typeName; });
         if (iter == discs.end())
             throw std::logic_error("Couldn't find type " + typeName + " in discs");
 

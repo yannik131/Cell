@@ -91,7 +91,7 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
             if (discsInCollisions[entry2.index])
                 continue;
 
-            if (mathutils::circlesIntersect(entry1.position, entry1.radius, entry2.position, entry2.radius))
+            if (mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
             {
                 auto d1 = &discs[entry1.index];
                 auto d2 = &discs[entry2.index];

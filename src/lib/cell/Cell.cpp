@@ -17,8 +17,9 @@ Cell::Cell(Membrane&& membrane, std::vector<Membrane>&& membranes, SimulationCon
     : Compartment(nullptr, std::move(membrane), membranes, std::move(simulationContext))
 {
     if (!membranes.empty())
-        throw std::invalid_argument("There were " + std::to_string(membranes.size()) +
-                                    " membranes passed to the cell that were not contained by it");
+        throw std::invalid_argument(
+            std::to_string(membranes.size()) +
+            " membrane(s) were not fully contained by others. Intersecting membranes are not allowed.");
 }
 
 double Cell::getInitialKineticEnergy() const

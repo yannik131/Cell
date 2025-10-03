@@ -24,11 +24,18 @@ class InvalidSetupException : public std::runtime_error
 };
 
 struct SimulationContext;
+class Cell;
+class ReactionTable;
+class ReactionEngine;
+class CollisionDetector;
+class CollisionHandler;
+class Membrane;
 
 class SimulationFactory
 {
 public:
     SimulationFactory();
+    ~SimulationFactory();
 
     void buildSimulationFromConfig(const SimulationConfig& simulationConfig);
     SimulationContext getSimulationContext() const;

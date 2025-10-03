@@ -1,9 +1,13 @@
 #include "CellPopulator.hpp"
 #include "Cell.hpp"
-#include "Compartment.hpp"
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 
+#include <glog/logging.h>
+
+#include <algorithm>
+#include <numbers>
+#include <random>
 #include <vector>
 
 namespace cell
@@ -39,97 +43,33 @@ void CellPopulator::populateCell()
 
 void CellPopulator::populateWithDistributions()
 {
+    if (simulationConfig_.setup.distributions.empty())
+        return;
+
+    if (!simulationConfig_.setup.distributions.contains(""))
+        throw ExceptionWithLocation("No default distribution available for cell population");
+
     const auto& discTypes = simulationConfig_.discTypes;
     double maxRadius = std::max_element(discTypes.begin(), discTypes.end(),
                                         [](const config::DiscType& lhs, const config::DiscType& rhs)
                                         { return lhs.radius < rhs.radius; })
                            ->radius;
 
-    if (simulationConfig_.setup.distributions.empty())
-        return;
-
-    if (!simulationConfig_.setup.distributions.contains(""))
-        throw ExceptionWithLocation("No default distribution available for cell population");
+    populateCompartmentWithDistribution(cell_, maxRadius);
 }
 
 void CellPopulator::populateDirectly()
 {
-    std::vector<Disc> discs;
-
     for (const auto& disc : simulationConfig_.setup.discs)
     {
         Disc newDisc(simulationContext_.discTypeRegistry.getIDFor(disc.discTypeName));
         newDisc.setPosition({disc.x, disc.y});
         newDisc.setVelocity({disc.vx, disc.vy});
 
-        discs.push_back(std::move(newDisc));
+        auto& compartment = findDeepestContainingCompartment(newDisc);
+        compartment.addDisc(std::move(newDisc));
     }
 }
-
-/*std::vector<Disc> SimulationFactory::createDiscGridFromDistribution(const SimulationConfig& simulationConfig_,
-                                                                    double maxRadius) const
-{
-
-    if (double total = calculateDistributionSum(simulationConfig_.setup.distribution); std::abs(total - 1) > 1e-3)
-    {
-        throw ExceptionWithLocation("Percentages for disc type distribution don't add up to 100%. They add up to " +
-                                    std::to_string(total));
-    }
-
-    std::vector<Disc> discs;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    throwIfNotInRange(simulationConfig_.setup.maxVelocity, SettingsLimits::MinMaxVelocity,
-                      SettingsLimits::MaxMaxVelocity, "Max. velocity");
-    std::uniform_real_distribution<double> velocityDistribution(-simulationConfig_.setup.maxVelocity,
-                                                                simulationConfig_.setup.maxVelocity);
-
-    discs.reserve(simulationConfig_.setup.discCount);
-
-    std::vector<sf::Vector2d> discPositions =
-        mathutils::calculateGrid(simulationConfig_.setup.cellWidth, simulationConfig_.setup.cellHeight, maxRadius);
-
-    if (simulationConfig_.setup.discCount > static_cast<int>(discPositions.size()))
-    {
-        LOG(WARNING) << "According to the settings, " << std::to_string(simulationConfig_.setup.discCount)
-                     << " discs should be created, but the grid can only fit " << std::to_string(discPositions.size())
-                     << ". " << std::to_string(simulationConfig_.setup.discCount - discPositions.size())
-                     << " discs will not be created.";
-    }
-
-    // We need the accumulated percentages sorted in ascending order for the random number approach to work
-    std::vector<std::pair<DiscTypeID, double>> discTypes;
-    for (const auto& pair : simulationConfig_.setup.distribution)
-    {
-        DiscTypeID ID = discTypeRegistry_->getIDFor(pair.first);
-        discTypes.emplace_back(ID, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
-    }
-
-    std::ranges::sort(discTypes, [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    for (int i = 0; i < simulationConfig_.setup.discCount && !discPositions.empty(); ++i)
-    {
-        auto randomNumber = mathutils::getRandomNumber<double>(0, 1);
-
-        for (const auto& [discType, percentage] : discTypes)
-        {
-            if (randomNumber < percentage)
-            {
-                Disc newDisc(discType);
-                newDisc.setPosition(discPositions.back());
-                newDisc.setVelocity(sf::Vector2d(velocityDistribution(gen), velocityDistribution(gen)));
-
-                discs.push_back(newDisc);
-                discPositions.pop_back();
-
-                break;
-            }
-        }
-    }
-
-    return discs;
-}*/
 
 double CellPopulator::calculateDistributionSum(const std::map<std::string, double>& distribution) const
 {
@@ -161,7 +101,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
             const auto& M = membrane.getPosition();
             const auto& R = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID()).getRadius();
 
-            if (mathutils::circlesIntersect(gridPoints[i], maxRadius, M, R))
+            if (mathutils::circlesOverlap(gridPoints[i], maxRadius, M, R))
                 valid = false;
         }
 
@@ -175,6 +115,112 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
     }
 
     return gridPoints;
+}
+
+void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment, double maxRadius)
+{
+    auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius);
+
+    const auto& membrane = compartment.getMembrane();
+    const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID());
+
+    const auto& discCount = simulationConfig_.setup.discCounts[membraneType.getName()];
+    if (gridPoints.size() < discCount)
+    {
+        LOG(WARNING) << "According to the settings, " << std::to_string(discCount)
+                     << " discs should be created for membranes of type\"" + membraneType.getName() +
+                            "\", but the grid can only fit "
+                     << std::to_string(gridPoints.size()) << ". " << std::to_string(discCount - gridPoints.size())
+                     << " discs will not be created.";
+    }
+
+    std::vector<std::pair<DiscTypeID, double>> discTypes;
+    for (const auto& pair : simulationConfig_.setup.distributions[membraneType.getName()])
+    {
+        DiscTypeID ID = simulationContext_.discTypeRegistry.getIDFor(pair.first);
+        discTypes.emplace_back(ID, pair.second + (discTypes.empty() ? 0 : discTypes.back().second));
+    }
+
+    // We need the accumulated percentages sorted in ascending order for the random number approach to work
+    std::sort(discTypes.begin(), discTypes.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
+
+    for (int i = 0; i < discCount && !gridPoints.empty(); ++i)
+    {
+        auto randomNumber = mathutils::getRandomNumber<double>(0, 1);
+
+        for (const auto& [discType, percentage] : discTypes)
+        {
+            if (randomNumber < percentage)
+            {
+                Disc newDisc(discType);
+                newDisc.setPosition(gridPoints.back());
+                newDisc.setVelocity(sampleVelocityFromDistribution());
+
+                compartment.addDisc(std::move(newDisc));
+                gridPoints.pop_back();
+
+                break;
+            }
+        }
+    }
+
+    for (auto& subCompartment : compartment.getCompartments())
+        populateCompartmentWithDistribution(compartment, maxRadius);
+}
+
+sf::Vector2d CellPopulator::sampleVelocityFromDistribution() const
+{
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 gen(rd());
+
+    const auto sigma = simulationConfig_.setup.maxVelocity;
+
+    // 2D maxwell distribution is a rayleigh distribution
+    // weibull distribution with k=2 and lambda = sigma*sqrt(2) is rayleigh distribution
+
+    std::uniform_real_distribution<double> angleDistribution(0, 2 * std::numbers::pi);
+    std::weibull_distribution<double> speedDistribution(2, std::numbers::sqrt2 * sigma);
+
+    const auto angle = angleDistribution(gen);
+    const auto speed = speedDistribution(gen);
+
+    return sf::Vector2d{speed * std::cos(angle), speed * std::sin(angle)};
+}
+
+Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
+{
+    const auto& M = disc.getPosition();
+    const auto& R = simulationContext_.discTypeRegistry.getByID(disc.getDiscTypeID()).getRadius();
+
+    auto isFullyContainedIn = [&](const Compartment& compartment)
+    {
+        const auto& membrane = compartment.getMembrane();
+        const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID());
+
+        return mathutils::circleIsFullyContainedByCircle(M, R, membrane.getPosition(), membraneType.getRadius());
+    };
+
+    if (!isFullyContainedIn(cell_))
+        throw ExceptionWithLocation("Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) +
+                                    ") is not contained by the cell");
+
+    Compartment* compartment = &cell_;
+    bool continueSearch = true;
+
+    while (continueSearch)
+    {
+        continueSearch = false;
+        for (auto& subCompartment : compartment->getCompartments())
+        {
+            if (isFullyContainedIn(subCompartment))
+            {
+                compartment = &subCompartment;
+                continueSearch = true;
+            }
+        }
+    }
+
+    return *compartment;
 }
 
 } // namespace cell

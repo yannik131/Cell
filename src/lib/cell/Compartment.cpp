@@ -65,6 +65,11 @@ const std::vector<Disc>& Compartment::getDiscs() const
     return discs_;
 }
 
+std::vector<Compartment>& Compartment::getCompartments()
+{
+    return compartments_;
+}
+
 const std::vector<Compartment>& Compartment::getCompartments() const
 {
     return compartments_;

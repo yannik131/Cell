@@ -1,5 +1,6 @@
 #include "SimulationFactory.hpp"
 #include "Cell.hpp"
+#include "CellPopulator.hpp"
 #include "CollisionDetector.hpp"
 #include "CollisionHandler.hpp"
 #include "Disc.hpp"
@@ -15,7 +16,9 @@
 
 namespace cell
 {
+
 SimulationFactory::SimulationFactory() = default;
+SimulationFactory::~SimulationFactory() = default;
 
 void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simulationConfig)
 {
@@ -145,11 +148,13 @@ ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simu
 Cell SimulationFactory::buildCell(const SimulationConfig& simulationConfig) const
 {
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
-    SimulationContext context = getSimulationContext();
     Membrane cellMembrane(membraneTypeRegistry_->getIDFor(simulationConfig.setup.cellMembraneType.name));
     cellMembrane.setPosition({0, 0});
 
-    Cell cell(std::move(cellMembrane), std::move(membranes), std::move(context));
+    Cell cell(std::move(cellMembrane), std::move(membranes), getSimulationContext());
+
+    CellPopulator cellPopulator(*cell_, simulationConfig, getSimulationContext());
+    cellPopulator.populateCell();
 
     return cell;
 }

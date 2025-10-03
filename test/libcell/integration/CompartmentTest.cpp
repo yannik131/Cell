@@ -1,5 +1,6 @@
 #include "cell/Compartment.hpp"
 #include "TestUtils.hpp"
+#include "cell/Cell.hpp"
 #include "cell/MathUtils.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
 #include "cell/SimulationFactory.hpp"
@@ -23,19 +24,16 @@ const Compartment& getSingleChildCompartment(const Compartment& compartment)
 }
 
 bool notContainedInOthers(const Compartment& host, const std::vector<const Compartment*>& others,
-                          const SimulationFactory& context)
+                          const SimulationContext& context)
 {
-    const MembraneTypeRegistry& membraneTypeRegistry = context.getMembraneTypeRegistry();
-    const DiscTypeRegistry& discTypeRegistry = context.getDiscTypeRegistry();
-
     // d = disc, h = host, o = other, M = circle center, R = radius
     const auto Mh = host.getMembrane().getPosition();
-    const auto Rh = membraneTypeRegistry.getByID(host.getMembrane().getMembraneTypeID()).getRadius();
+    const auto Rh = context.membraneTypeRegistry.getByID(host.getMembrane().getMembraneTypeID()).getRadius();
 
     for (const auto& disc : host.getDiscs())
     {
         const auto Md = disc.getPosition();
-        const auto Rd = discTypeRegistry.getByID(disc.getDiscTypeID()).getRadius();
+        const auto Rd = context.discTypeRegistry.getByID(disc.getDiscTypeID()).getRadius();
 
         if (!mathutils::circleIsFullyContainedByCircle(Md, Rd, Mh, Rh))
             return false;
@@ -46,7 +44,8 @@ bool notContainedInOthers(const Compartment& host, const std::vector<const Compa
         for (const auto& compartment : others)
         {
             const auto Mo = compartment->getMembrane().getPosition();
-            const auto& Ro = membraneTypeRegistry.getByID(compartment->getMembrane().getMembraneTypeID()).getRadius();
+            const auto& Ro =
+                context.membraneTypeRegistry.getByID(compartment->getMembrane().getMembraneTypeID()).getRadius();
 
             if (mathutils::circleIsFullyContainedByCircle(Md, Rd, Mo, Ro))
                 return false;
@@ -62,8 +61,7 @@ class ACompartment : public Test
 {
 protected:
     SimulationConfigBuilder builder;
-    SimulationFactory factory;
-    std::unique_ptr<SimulationContext> context;
+    SimulationFactory simulationFactory;
 
     void SetUp() override
     {
@@ -78,8 +76,13 @@ protected:
 
     auto& getCell()
     {
-        factory.buildSimulationFromConfig(builder.getSimulationConfig());
-        return factory.getCell();
+        simulationFactory.buildSimulationFromConfig(builder.getSimulationConfig());
+        return simulationFactory.getCell();
+    }
+
+    const DiscTypeRegistry& getDiscTypeRegistry() const
+    {
+        return simulationFactory.getSimulationContext().discTypeRegistry;
     }
 };
 
@@ -122,9 +125,9 @@ TEST_F(ACompartment, CanHaveADiscDistribution)
     builder.setDiscCount("Large", static_cast<int>(N));
     builder.setDiscCount("Small", static_cast<int>(N));
 
-    builder.setDistribution("", {"A", 0.5}, {"B", 0.5});
-    builder.setDistribution("Large", {"A", 1}, {"B", 0});
-    builder.setDistribution("Small", {"A", 0}, {"B", 1});
+    builder.setDistribution("", {{"A", 0.5}, {"B", 0.5}});
+    builder.setDistribution("Large", {{"A", 1}, {"B", 0}});
+    builder.setDistribution("Small", {{"A", 0}, {"B", 1}});
 
     auto& cell = getCell();
     const auto& largeCompartment = getSingleChildCompartment(cell);
@@ -136,9 +139,9 @@ TEST_F(ACompartment, CanHaveADiscDistribution)
     ASSERT_EQ(smallCompartment.getDiscs().size(), N);
 
     // Disc type counts
-    auto countsCell = countDiscTypes(cell.getDiscs(), context.getDiscTypeRegistry());
-    auto countsLarge = countDiscTypes(largeCompartment.getDiscs(), context.getDiscTypeRegistry());
-    auto countsSmall = countDiscTypes(smallCompartment.getDiscs(), context.getDiscTypeRegistry());
+    auto countsCell = countDiscTypes(cell.getDiscs(), getDiscTypeRegistry());
+    auto countsLarge = countDiscTypes(largeCompartment.getDiscs(), getDiscTypeRegistry());
+    auto countsSmall = countDiscTypes(smallCompartment.getDiscs(), getDiscTypeRegistry());
 
     EXPECT_EQ(countsCell["A"], N / 2);
     EXPECT_EQ(countsCell["B"], N / 2);
@@ -146,6 +149,7 @@ TEST_F(ACompartment, CanHaveADiscDistribution)
     EXPECT_EQ(countsSmall["B"], N);
 
     // Disc containment
+    auto context = simulationFactory.getSimulationContext();
     ASSERT_TRUE(notContainedInOthers(cell, {&largeCompartment, &smallCompartment}, context));
     ASSERT_TRUE(notContainedInOthers(largeCompartment, {&cell, &smallCompartment}, context));
     ASSERT_TRUE(notContainedInOthers(smallCompartment, {&cell, &largeCompartment}, context));

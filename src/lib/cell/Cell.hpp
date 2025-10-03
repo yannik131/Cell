@@ -1,12 +1,12 @@
 #ifndef AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
 #define AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
 
+#include "Compartment.hpp"
 #include "Types.hpp"
 
 namespace cell
 {
 
-class Compartment;
 struct SimulationContext;
 
 class Cell : public Compartment

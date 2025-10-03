@@ -22,6 +22,7 @@ public:
     void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc&& disc);
     const std::vector<Disc>& getDiscs() const;
+    std::vector<Compartment>& getCompartments();
     const std::vector<Compartment>& getCompartments() const;
     const Compartment* getParent() const;
     void update(double dt);

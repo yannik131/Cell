@@ -10,6 +10,7 @@ namespace cell
 class Cell;
 class Compartment;
 struct SimulationConfig;
+class Disc;
 
 class CellPopulator
 {
@@ -23,6 +24,9 @@ private:
     void populateDirectly();
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
     std::vector<sf::Vector2d> calculateCompartmentGridPoints(Compartment& compartment, double maxRadius);
+    void populateCompartmentWithDistribution(Compartment& compartment, double maxRadius);
+    sf::Vector2d sampleVelocityFromDistribution() const;
+    Compartment& findDeepestContainingCompartment(const Disc& disc);
 
 private:
     Cell& cell_;
