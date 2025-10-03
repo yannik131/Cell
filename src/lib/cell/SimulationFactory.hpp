@@ -8,7 +8,7 @@
 namespace cell
 {
 
-class InvalidDiscTypesException : public std::runtime_error
+class InvalidTypesException : public std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
@@ -52,10 +52,7 @@ private:
     MembraneTypeRegistry buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const;
     Cell buildCell(const SimulationConfig& simulationConfig) const;
     std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig) const;
-
-    double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
-
-    void throwIfNotBuildYet() const;
+    void reset();
 
 private:
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
@@ -65,8 +62,6 @@ private:
     std::unique_ptr<CollisionDetector> collisionDetector_;
     std::unique_ptr<CollisionHandler> collisionHandler_;
     std::unique_ptr<Cell> cell_;
-
-    bool built_ = false;
 };
 
 } // namespace cell

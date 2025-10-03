@@ -22,15 +22,16 @@ SimulationFactory::~SimulationFactory() = default;
 
 void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simulationConfig)
 {
-    built_ = false;
+    reset();
 
     try
     {
         discTypeRegistry_ = std::make_unique<DiscTypeRegistry>(buildDiscTypeRegistry(simulationConfig));
+        membraneTypeRegistry_ = std::make_unique<MembraneTypeRegistry>(buildMembraneTypeRegistry(simulationConfig));
     }
     catch (const std::exception& e)
     {
-        throw InvalidDiscTypesException(e.what());
+        throw InvalidTypesException(e.what());
     }
 
     try
@@ -56,13 +57,12 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     {
         throw InvalidSetupException(e.what());
     }
-
-    built_ = true;
 }
 
 SimulationContext SimulationFactory::getSimulationContext() const
 {
-    throwIfNotBuildYet();
+    if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionDetector_ || !collisionHandler_)
+        throw ExceptionWithLocation("Can't get simulation context, dependencies haven't been fully created yet");
 
     return SimulationContext{.discTypeRegistry = *discTypeRegistry_,
                              .membraneTypeRegistry = *membraneTypeRegistry_,
@@ -73,14 +73,16 @@ SimulationContext SimulationFactory::getSimulationContext() const
 
 Cell& SimulationFactory::getCell()
 {
-    throwIfNotBuildYet();
+    if (!cell_)
+        throw ExceptionWithLocation("Can't access cell, it hasn't been created yet");
 
     return *cell_;
 }
 
 DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
 {
-    throwIfNotBuildYet();
+    if (!collisionDetector_)
+        throw ExceptionWithLocation("Can't access collision detector, it hasn't been created yet");
 
     return collisionDetector_->getAndResetCollisionCounts();
 }
@@ -148,12 +150,12 @@ ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simu
 Cell SimulationFactory::buildCell(const SimulationConfig& simulationConfig) const
 {
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
-    Membrane cellMembrane(membraneTypeRegistry_->getIDFor(simulationConfig.setup.cellMembraneType.name));
+    Membrane cellMembrane(membraneTypeRegistry_->getIDFor(config::cellMembraneTypeName));
     cellMembrane.setPosition({0, 0});
 
     Cell cell(std::move(cellMembrane), std::move(membranes), getSimulationContext());
 
-    CellPopulator cellPopulator(*cell_, simulationConfig, getSimulationContext());
+    CellPopulator cellPopulator(cell, simulationConfig, getSimulationContext());
     cellPopulator.populateCell();
 
     return cell;
@@ -174,15 +176,15 @@ std::vector<Membrane> SimulationFactory::getMembranesFromConfig(const Simulation
     return membranes;
 }
 
-void SimulationFactory::throwIfNotBuildYet() const
+void SimulationFactory::reset()
 {
-    if (!built_)
-        throw ExceptionWithLocation("Simulation context was not yet fully built");
-}
-
-bool SimulationFactory::isBuilt() const
-{
-    return built_;
+    discTypeRegistry_.reset();
+    membraneTypeRegistry_.reset();
+    reactionTable_.reset();
+    reactionEngine_.reset();
+    collisionDetector_.reset();
+    collisionHandler_.reset();
+    cell_.reset();
 }
 
 } // namespace cell
