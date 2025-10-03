@@ -15,14 +15,19 @@ void SimulationConfigBuilder::useDistribution(bool useDistribution)
     simulationConfig_.setup.useDistribution = useDistribution;
 }
 
-void SimulationConfigBuilder::setDiscCount(const std::string& membraneTypeName, int count)
+void SimulationConfigBuilder::setDiscCount(std::string membraneTypeName, int count)
 {
+    if (membraneTypeName == "")
+        membraneTypeName = config::cellMembraneTypeName;
+
     simulationConfig_.setup.discCounts[membraneTypeName] = count;
 }
 
-void SimulationConfigBuilder::setDistribution(const std::string& membraneTypeName,
+void SimulationConfigBuilder::setDistribution(std::string membraneTypeName,
                                               const std::map<std::string, double>& distribution)
 {
+    if (membraneTypeName == "")
+        membraneTypeName = config::cellMembraneTypeName;
     simulationConfig_.setup.distributions[membraneTypeName] = distribution;
 }
 

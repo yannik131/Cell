@@ -107,6 +107,8 @@ bool pointIsInCircle(const sf::Vector2d& point, const sf::Vector2d& M, double R)
  */
 bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
 
+bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+
 } // namespace cell::mathutils
 
 #endif /* F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP */

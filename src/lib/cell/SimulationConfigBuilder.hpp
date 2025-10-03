@@ -15,8 +15,8 @@ class SimulationConfigBuilder
 public:
     void addDisc(const std::string& discType, Position position, Velocity velocity);
     void useDistribution(bool useDistribution);
-    void setDiscCount(const std::string& membraneTypeName, int count);
-    void setDistribution(const std::string& membraneTypeName, const std::map<std::string, double>& distribution);
+    void setDiscCount(std::string membraneTypeName, int count);
+    void setDistribution(std::string membraneTypeName, const std::map<std::string, double>& distribution);
     void addDiscType(const std::string& name, Radius radius, Mass mass);
     void addMembraneType(const std::string& name, Radius radius,
                          const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);

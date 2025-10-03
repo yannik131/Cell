@@ -8,6 +8,7 @@ namespace cell
 {
 
 class Cell;
+class Compartment;
 struct SimulationConfig;
 
 class CellPopulator
@@ -21,6 +22,7 @@ private:
     void populateWithDistributions();
     void populateDirectly();
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
+    std::vector<sf::Vector2d> calculateCompartmentGridPoints(Compartment& compartment, double maxRadius);
 
 private:
     Cell& cell_;

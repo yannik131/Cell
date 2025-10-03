@@ -64,4 +64,11 @@ bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf:
     return diff.x * diff.x + diff.y * diff.y <= (R2 - R1) * (R2 - R1);
 }
 
+bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
+{
+    const auto& diff = M1 - M2;
+
+    return diff.x * diff.x + diff.y * diff.y <= (R1 + R2) * (R1 + R2);
+}
+
 } // namespace cell::mathutils

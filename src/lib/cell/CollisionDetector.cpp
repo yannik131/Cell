@@ -1,5 +1,6 @@
 #include "CollisionDetector.hpp"
 #include "Disc.hpp"
+#include "MathUtils.hpp"
 
 #include <algorithm>
 
@@ -90,10 +91,7 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
             if (discsInCollisions[entry2.index])
                 continue;
 
-            const double rSum = entry1.radius + entry2.radius;
-            const auto& diff = entry2.position - entry1.position;
-
-            if (diff.x * diff.x + diff.y * diff.y <= rSum * rSum)
+            if (mathutils::circlesIntersect(entry1.position, entry1.radius, entry2.position, entry2.radius))
             {
                 auto d1 = &discs[entry1.index];
                 auto d2 = &discs[entry2.index];

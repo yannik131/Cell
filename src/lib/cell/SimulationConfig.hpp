@@ -55,9 +55,11 @@ struct Reaction
     bool operator==(const Reaction&) const = default;
 };
 
+inline const std::string cellMembraneTypeName = "Cell membrane";
+
 struct Setup
 {
-    MembraneType cellMembraneType{.name = "Cell membrane", .radius = 1000, .permeabilityMap = {}};
+    MembraneType cellMembraneType{.name = cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
