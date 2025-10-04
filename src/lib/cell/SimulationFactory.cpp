@@ -153,7 +153,7 @@ Cell SimulationFactory::buildCell(const SimulationConfig& simulationConfig) cons
     Membrane cellMembrane(membraneTypeRegistry_->getIDFor(config::cellMembraneTypeName));
     cellMembrane.setPosition({0, 0});
 
-    Cell cell(std::move(cellMembrane), std::move(membranes), getSimulationContext());
+    Cell cell(std::move(cellMembrane), membranes, getSimulationContext());
 
     CellPopulator cellPopulator(cell, simulationConfig, getSimulationContext());
     cellPopulator.populateCell();

@@ -23,10 +23,15 @@ private:
     void populateWithDistributions();
     void populateDirectly();
     double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
-    std::vector<sf::Vector2d> calculateCompartmentGridPoints(Compartment& compartment, double maxRadius);
+    std::vector<sf::Vector2d> calculateCompartmentGridPoints(Compartment& compartment, double maxRadius,
+                                                             int discCount) const;
     void populateCompartmentWithDistribution(Compartment& compartment, double maxRadius);
     sf::Vector2d sampleVelocityFromDistribution() const;
     Compartment& findDeepestContainingCompartment(const Disc& disc);
+    double calculateValueSum(const std::map<std::string, double>& distribution) const;
+    std::vector<std::pair<DiscTypeID, double>>
+    calculateAccumulatedPercentages(const std::map<std::string, double>& distribution,
+                                    const std::string& membraneTypeName) const;
 
 private:
     Cell& cell_;
