@@ -4,6 +4,7 @@
 #include "Membrane.hpp"
 #include "SimulationContext.hpp"
 
+#include <list>
 #include <vector>
 
 namespace cell
@@ -14,18 +15,18 @@ class Disc;
 class Compartment
 {
 public:
-    Compartment(Compartment* parent, Membrane&& membrane, std::vector<Membrane>& membranes,
-                SimulationContext simulationContext);
+    Compartment(Compartment* parent, Membrane membrane, SimulationContext simulationContext);
     ~Compartment();
 
     const Membrane& getMembrane() const;
     void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc&& disc);
     const std::vector<Disc>& getDiscs() const;
-    std::vector<Compartment>& getCompartments();
-    const std::vector<Compartment>& getCompartments() const;
+    std::vector<std::unique_ptr<Compartment>>& getCompartments();
+    const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
     void update(double dt);
+    Compartment* createSubCompartment(Membrane membrane);
 
 private:
     /**
@@ -38,7 +39,7 @@ private:
     Compartment* parent_;
     Membrane membrane_;
     std::vector<Disc> discs_;
-    std::vector<Compartment> compartments_;
+    std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
     SimulationContext simulationContext_;
 };
 

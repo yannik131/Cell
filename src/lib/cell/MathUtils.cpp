@@ -54,14 +54,14 @@ bool pointIsInCircle(const sf::Vector2d& point, const sf::Vector2d& M, double R)
 {
     const auto diff = point - M;
 
-    return diff.x * diff.x + diff.y * diff.y <= R * R;
+    return diff.x * diff.x + diff.y * diff.y < R * R;
 }
 
 bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
 {
     const auto diff = M1 - M2;
 
-    return diff.x * diff.x + diff.y * diff.y <= (R2 - R1) * (R2 - R1);
+    return diff.x * diff.x + diff.y * diff.y < (R2 - R1) * (R2 - R1);
 }
 
 bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)

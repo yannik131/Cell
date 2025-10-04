@@ -38,21 +38,21 @@ public:
     ~SimulationFactory();
 
     void buildSimulationFromConfig(const SimulationConfig& simulationConfig);
-    SimulationContext getSimulationContext() const;
+    SimulationContext getSimulationContext();
 
     Cell& getCell();
-    bool isBuilt() const;
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
     ReactionTable buildReactionTable(const SimulationConfig& simulationConfig,
-                                     const DiscTypeRegistry& discTypeRegistry) const;
-    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
-    MembraneTypeRegistry buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const;
-    Cell buildCell(const SimulationConfig& simulationConfig) const;
-    std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig) const;
+                                     const DiscTypeRegistry& discTypeRegistry);
+    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig);
+    MembraneTypeRegistry buildMembraneTypeRegistry(const SimulationConfig& simulationConfig);
+    std::unique_ptr<Cell> buildCell(const SimulationConfig& simulationConfig);
+    std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig);
     void reset();
+    void createCompartments(Cell& cell, std::vector<Membrane> membranes);
 
 private:
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;

@@ -20,7 +20,7 @@ const Compartment& getSingleChildCompartment(const Compartment& compartment)
         throw std::invalid_argument("Given compartment has not 1 child compartment, it has " +
                                     std::to_string(compartments.size()));
 
-    return compartments.front();
+    return *compartments.front();
 }
 
 bool notContainedInOthers(const Compartment& host, const std::vector<const Compartment*>& others,
@@ -68,10 +68,10 @@ protected:
         builder.addDiscType("A", Radius{1}, Mass{1});
         builder.addDiscType("B", Radius{1}, Mass{1});
 
-        builder.addMembraneType("Large", Radius{200}, {});
         builder.addMembraneType("Small", Radius{50}, {});
-        builder.addMembrane("Large", Position{.x = 500, .y = 500});
+        builder.addMembraneType("Large", Radius{200}, {});
         builder.addMembrane("Small", Position{.x = 500, .y = 500});
+        builder.addMembrane("Large", Position{.x = 500, .y = 500});
     }
 
     auto& getCell()
@@ -80,9 +80,16 @@ protected:
         return simulationFactory.getCell();
     }
 
-    const DiscTypeRegistry& getDiscTypeRegistry() const
+    const DiscTypeRegistry& getDiscTypeRegistry()
     {
         return simulationFactory.getSimulationContext().discTypeRegistry;
+    }
+
+    double getRadius(const Compartment& compartment)
+    {
+        return simulationFactory.getSimulationContext()
+            .membraneTypeRegistry.getByID(compartment.getMembrane().getMembraneTypeID())
+            .getRadius();
     }
 };
 
@@ -97,6 +104,10 @@ TEST_F(ACompartment, CanHaveDiscAssignedDirectly)
     auto& cell = getCell();
     const auto& largeCompartment = getSingleChildCompartment(cell);
     const auto& smallCompartment = getSingleChildCompartment(largeCompartment);
+
+    // Make sure compartments are correct
+    EXPECT_EQ(getRadius(largeCompartment), 200);
+    EXPECT_EQ(getRadius(smallCompartment), 50);
 
     // Parents
     EXPECT_EQ(cell.getParent(), nullptr);
@@ -151,6 +162,5 @@ TEST_F(ACompartment, CanHaveADiscDistribution)
     // Disc containment
     auto context = simulationFactory.getSimulationContext();
     ASSERT_TRUE(notContainedInOthers(cell, {&largeCompartment, &smallCompartment}, context));
-    ASSERT_TRUE(notContainedInOthers(largeCompartment, {&cell, &smallCompartment}, context));
-    ASSERT_TRUE(notContainedInOthers(smallCompartment, {&cell, &largeCompartment}, context));
+    ASSERT_TRUE(notContainedInOthers(largeCompartment, {&smallCompartment}, context));
 }

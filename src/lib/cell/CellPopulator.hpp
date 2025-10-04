@@ -29,9 +29,6 @@ private:
     sf::Vector2d sampleVelocityFromDistribution() const;
     Compartment& findDeepestContainingCompartment(const Disc& disc);
     double calculateValueSum(const std::map<std::string, double>& distribution) const;
-    std::vector<std::pair<DiscTypeID, double>>
-    calculateAccumulatedPercentages(const std::map<std::string, double>& distribution,
-                                    const std::string& membraneTypeName) const;
 
 private:
     Cell& cell_;

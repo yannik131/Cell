@@ -12,7 +12,7 @@ struct SimulationContext;
 class Cell : public Compartment
 {
 public:
-    Cell(Membrane&& membrane, std::vector<Membrane>& membranes, SimulationContext simulationContext);
+    Cell(Membrane membrane, SimulationContext simulationContext);
 
     /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
@@ -23,10 +23,6 @@ public:
      * @brief The current kinetc energy of all discs in this cell
      */
     double getCurrentKineticEnergy() const;
-
-private:
-    static std::vector<Membrane>& sortedDescendingByRadius(std::vector<Membrane>& membranes,
-                                                           const MembraneTypeRegistry& membraneTypeRegistry);
 
 private:
     double initialKineticEnergy_ = 0;

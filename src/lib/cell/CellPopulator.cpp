@@ -80,9 +80,10 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
         if (!mathutils::circleIsFullyContainedByCircle(gridPoints[i], maxRadius, membraneCenter, membraneRadius))
             valid = false;
 
-        for (std::size_t j = 0; valid && j < compartment.getCompartments().size(); ++j)
+        const auto& subCompartments = compartment.getCompartments();
+        for (auto iter = subCompartments.begin(); valid && iter != subCompartments.end(); ++iter)
         {
-            const auto& membrane = compartment.getCompartments()[j].getMembrane();
+            const auto& membrane = (*iter)->getMembrane();
             const auto& M = membrane.getPosition();
             const auto& R = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID()).getRadius();
 
@@ -124,31 +125,30 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
 
     const auto& discCount = simulationConfig_.setup.discCounts[membraneTypeName];
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, discCount);
-    const auto& accumulatedDistribution =
-        calculateAccumulatedPercentages(simulationConfig_.setup.distributions[membraneTypeName], membraneTypeName);
+    const auto& distribution = simulationConfig_.setup.distributions[membraneTypeName];
 
-    for (int i = 0; i < discCount && !gridPoints.empty(); ++i)
+    if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
+        throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
+                                    " doesn't add up to 100%, it adds up to " + std::to_string(sum));
+
+    for (const auto& [discTypeName, frequency] : distribution)
     {
-        auto randomNumber = mathutils::getRandomNumber<double>(0, 1);
+        const auto count = static_cast<int>(std::round(frequency * discCount));
+        const auto discTypeID = simulationContext_.discTypeRegistry.getIDFor(discTypeName);
 
-        for (const auto& [discType, percentage] : accumulatedDistribution)
+        for (int i = 0; i < count && !gridPoints.empty(); ++i)
         {
-            if (randomNumber < percentage)
-            {
-                Disc newDisc(discType);
-                newDisc.setPosition(gridPoints.back());
-                newDisc.setVelocity(sampleVelocityFromDistribution());
+            Disc newDisc(discTypeID);
+            newDisc.setPosition(gridPoints.back());
+            newDisc.setVelocity(sampleVelocityFromDistribution());
 
-                compartment.addDisc(std::move(newDisc));
-                gridPoints.pop_back();
-
-                break;
-            }
+            compartment.addDisc(std::move(newDisc));
+            gridPoints.pop_back();
         }
     }
 
     for (auto& subCompartment : compartment.getCompartments())
-        populateCompartmentWithDistribution(subCompartment, maxRadius);
+        populateCompartmentWithDistribution(*subCompartment, maxRadius);
 }
 
 sf::Vector2d CellPopulator::sampleVelocityFromDistribution() const
@@ -195,9 +195,9 @@ Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
         continueSearch = false;
         for (auto& subCompartment : compartment->getCompartments())
         {
-            if (isFullyContainedIn(subCompartment))
+            if (isFullyContainedIn(*subCompartment))
             {
-                compartment = &subCompartment;
+                compartment = subCompartment.get();
                 continueSearch = true;
             }
         }
@@ -210,29 +210,6 @@ double CellPopulator::calculateValueSum(const std::map<std::string, double>& dis
 {
     return std::accumulate(distribution.begin(), distribution.end(), 0.0,
                            [](double partialSum, const auto& entry) { return partialSum + entry.second; });
-}
-
-std::vector<std::pair<DiscTypeID, double>>
-CellPopulator::calculateAccumulatedPercentages(const std::map<std::string, double>& distribution,
-                                               const std::string& membraneTypeName) const
-{
-    if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
-        throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
-                                    " doesn't add up to 100%, it adds up to " + std::to_string(sum));
-
-    std::vector<std::pair<DiscTypeID, double>> accumulatedDistribution;
-    for (const auto& pair : distribution)
-    {
-        DiscTypeID ID = simulationContext_.discTypeRegistry.getIDFor(pair.first);
-        accumulatedDistribution.emplace_back(
-            ID, pair.second + (accumulatedDistribution.empty() ? 0 : accumulatedDistribution.back().second));
-    }
-
-    // We need the accumulated percentages sorted in ascending order for the random number approach to work
-    std::sort(accumulatedDistribution.begin(), accumulatedDistribution.end(),
-              [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    return accumulatedDistribution;
 }
 
 } // namespace cell

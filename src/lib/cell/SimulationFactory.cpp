@@ -51,7 +51,7 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
         collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_));
         collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_));
 
-        cell_ = std::make_unique<Cell>(buildCell(simulationConfig));
+        cell_ = buildCell(simulationConfig);
     }
     catch (const std::exception& e)
     {
@@ -59,7 +59,7 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     }
 }
 
-SimulationContext SimulationFactory::getSimulationContext() const
+SimulationContext SimulationFactory::getSimulationContext()
 {
     if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionDetector_ || !collisionHandler_)
         throw ExceptionWithLocation("Can't get simulation context, dependencies haven't been fully created yet");
@@ -87,7 +87,7 @@ DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
     return collisionDetector_->getAndResetCollisionCounts();
 }
 
-DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const
+DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig)
 {
     DiscTypeRegistry discTypeRegistry;
     std::vector<DiscType> discTypes;
@@ -99,7 +99,7 @@ DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig
     return discTypeRegistry;
 }
 
-MembraneTypeRegistry SimulationFactory::buildMembraneTypeRegistry(const SimulationConfig& simulationConfig) const
+MembraneTypeRegistry SimulationFactory::buildMembraneTypeRegistry(const SimulationConfig& simulationConfig)
 {
     MembraneTypeRegistry registry;
     std::vector<MembraneType> types;
@@ -126,7 +126,7 @@ MembraneTypeRegistry SimulationFactory::buildMembraneTypeRegistry(const Simulati
 }
 
 ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simulationConfig,
-                                                    const DiscTypeRegistry& discTypeRegistry) const
+                                                    const DiscTypeRegistry& discTypeRegistry)
 {
     ReactionTable reactionTable(discTypeRegistry);
 
@@ -147,21 +147,27 @@ ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simu
     return reactionTable;
 }
 
-Cell SimulationFactory::buildCell(const SimulationConfig& simulationConfig) const
+std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simulationConfig)
 {
+    const auto& configMembranes = simulationConfig.setup.membranes;
+    if (std::find_if(configMembranes.begin(), configMembranes.end(), [&](const auto& membrane)
+                     { return membrane.membraneTypeName == config::cellMembraneTypeName; }) != configMembranes.end())
+        throw ExceptionWithLocation("There can't be more than 1 cell membrane in the simulation");
+
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
     Membrane cellMembrane(membraneTypeRegistry_->getIDFor(config::cellMembraneTypeName));
     cellMembrane.setPosition({0, 0});
 
-    Cell cell(std::move(cellMembrane), membranes, getSimulationContext());
+    std::unique_ptr<Cell> cell(std::make_unique<Cell>(std::move(cellMembrane), getSimulationContext()));
+    createCompartments(*cell, std::move(membranes));
 
-    CellPopulator cellPopulator(cell, simulationConfig, getSimulationContext());
+    CellPopulator cellPopulator(*cell, simulationConfig, getSimulationContext());
     cellPopulator.populateCell();
 
     return cell;
 }
 
-std::vector<Membrane> SimulationFactory::getMembranesFromConfig(const SimulationConfig& simulationConfig_) const
+std::vector<Membrane> SimulationFactory::getMembranesFromConfig(const SimulationConfig& simulationConfig_)
 {
     std::vector<Membrane> membranes;
 
@@ -185,6 +191,44 @@ void SimulationFactory::reset()
     collisionDetector_.reset();
     collisionHandler_.reset();
     cell_.reset();
+}
+
+void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> membranes)
+{
+    std::sort(membranes.begin(), membranes.end(),
+              [&](const Membrane& lhs, const Membrane& rhs)
+              {
+                  return membraneTypeRegistry_->getByID(lhs.getMembraneTypeID()).getRadius() <
+                         membraneTypeRegistry_->getByID(rhs.getMembraneTypeID()).getRadius();
+              });
+
+    std::vector<Compartment*> compartments({&cell});
+    while (!membranes.empty())
+    {
+        auto membrane = std::move(membranes.back());
+        membranes.pop_back();
+
+        const auto& M = membrane.getPosition();
+        const auto& R = membraneTypeRegistry_->getByID(membrane.getMembraneTypeID()).getRadius();
+
+        bool parentFound = false;
+        for (auto iter = compartments.rbegin(); !parentFound && iter != compartments.rend(); ++iter)
+        {
+            const auto& Mo = (*iter)->getMembrane().getPosition();
+            const auto& Ro = membraneTypeRegistry_->getByID((*iter)->getMembrane().getMembraneTypeID()).getRadius();
+
+            if (!mathutils::circleIsFullyContainedByCircle(M, R, Mo, Ro))
+                continue;
+
+            auto compartment = (*iter)->createSubCompartment(std::move(membrane));
+            compartments.push_back(compartment);
+            parentFound = true;
+        }
+
+        if (!parentFound)
+            throw ExceptionWithLocation("Couldn't find a compartment that fully contains the membrane at (" +
+                                        std::to_string(M.x) + "," + std::to_string(M.y) + ")");
+    }
 }
 
 } // namespace cell

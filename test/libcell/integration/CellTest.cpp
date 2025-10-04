@@ -45,7 +45,7 @@ protected:
         return cell;
     }
 
-    const DiscTypeRegistry& getDiscTypeRegistry() const
+    const DiscTypeRegistry& getDiscTypeRegistry()
     {
         return simulationFactory.getSimulationContext().discTypeRegistry;
     }

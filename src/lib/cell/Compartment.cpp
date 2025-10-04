@@ -8,39 +8,11 @@
 namespace cell
 {
 
-Compartment::Compartment(Compartment* parent, Membrane&& membrane, std::vector<Membrane>& membranes,
-                         SimulationContext simulationContext)
+Compartment::Compartment(Compartment* parent, Membrane membrane, SimulationContext simulationContext)
     : parent_(parent)
     , membrane_(std::move(membrane))
     , simulationContext_(std::move(simulationContext))
 {
-    auto getMembraneType = [&](const Membrane& membrane) -> const MembraneType&
-    { return simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID()); };
-
-    const auto M = membrane_.getPosition();
-    const auto R = getMembraneType(membrane_).getRadius();
-
-    std::vector<Membrane> containedMembranes;
-    for (auto iter = membranes.begin(); iter != membranes.end();)
-    {
-        const auto Mo = iter->getPosition();
-        const auto Ro = getMembraneType(*iter).getRadius();
-
-        if (mathutils::circleIsFullyContainedByCircle(Mo, Ro, M, R))
-        {
-            containedMembranes.push_back(std::move(*iter));
-            iter = membranes.erase(iter);
-            continue;
-        }
-        ++iter;
-    }
-
-    while (!containedMembranes.empty())
-    {
-        auto containedMembrane = std::move(containedMembranes.back());
-        containedMembranes.pop_back();
-        compartments_.emplace_back(this, std::move(containedMembrane), containedMembranes, simulationContext_);
-    }
 }
 
 Compartment::~Compartment() = default;
@@ -65,12 +37,12 @@ const std::vector<Disc>& Compartment::getDiscs() const
     return discs_;
 }
 
-std::vector<Compartment>& Compartment::getCompartments()
+std::vector<std::unique_ptr<Compartment>>& Compartment::getCompartments()
 {
     return compartments_;
 }
 
-const std::vector<Compartment>& Compartment::getCompartments() const
+const std::vector<std::unique_ptr<Compartment>>& Compartment::getCompartments() const
 {
     return compartments_;
 }
@@ -111,7 +83,14 @@ void Compartment::update(double dt)
     removeDestroyedDiscs();
 
     for (auto& compartment : compartments_)
-        compartment.update(dt);
+        compartment->update(dt);
+}
+
+Compartment* Compartment::createSubCompartment(Membrane membrane)
+{
+    compartments_.push_back(std::make_unique<Compartment>(this, std::move(membrane), simulationContext_));
+
+    return compartments_.back().get();
 }
 
 void Compartment::removeDestroyedDiscs()
