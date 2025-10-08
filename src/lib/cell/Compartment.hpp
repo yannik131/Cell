@@ -20,8 +20,9 @@ public:
 
     const Membrane& getMembrane() const;
     void setDiscs(std::vector<Disc>&& discs);
-    void addDisc(Disc&& disc);
+    void addDisc(Disc disc);
     const std::vector<Disc>& getDiscs() const;
+    void addIntrudingDisc(Disc& disc);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
@@ -35,10 +36,13 @@ private:
      */
     void removeDestroyedDiscs();
 
+    void handleOuterMembraneCollision(Disc& disc);
+
 private:
     Compartment* parent_;
     Membrane membrane_;
     std::vector<Disc> discs_;
+    std::vector<Disc*> intrudingDiscs_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;

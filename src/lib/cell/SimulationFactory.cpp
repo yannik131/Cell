@@ -155,7 +155,13 @@ std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simul
                      { return membrane.membraneTypeName == config::cellMembraneTypeName; }) != configMembranes.end())
         throw ExceptionWithLocation("There can't be more than 1 cell membrane in the simulation");
 
+    for(const auto& [discTypeID, permeability] : simulationConfig.setup.cellMembraneType.permeabilityMap)
+    {
+        if(permeability != MembraneType::Permeability::None)
+            throw ExceptionWithLocation("Currently the outer cell membrane does not support permeability");
+    }
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
+
     Membrane cellMembrane(membraneTypeRegistry_->getIDFor(config::cellMembraneTypeName));
     cellMembrane.setPosition({0, 0});
 

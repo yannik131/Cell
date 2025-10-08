@@ -45,10 +45,35 @@ bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf
     return (M.x - r.x) * (M.x - r.x) + (M.y - r.y) * (M.y - r.y) >= (Rm - Rc) * (Rm - Rc);
 }
 
-void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes)
+void CollisionDetector::buildDiscEntries(const std::vector<Disc>& discs)
 {
-    membraneEntries_ = createEntries(membranes, membraneTypeRegistry_);
-    discEntries_ = createEntries(discs, discTypeRegistry_);
+    discEntries_.clear();
+    discEntries_.reserve(discs.size());
+
+    // Collision detection happens before reactions -> no destroyed check necessary
+    for (std::size_t i = 0; i < discs.size(); ++i)
+        discEntries_.push_back(createEntry(discs[i], discTypeRegistry_, i));
+
+    std::sort(discEntries_.begin(), discEntries_.end(),
+              [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
+}
+
+void CollisionDetector::buildForeignEntries(const std::vector<Membrane>& membranes,
+                                            const std::vector<Disc*>& intrudingDiscs)
+{
+    foreignEntries_.clear();
+    foreignEntries_.reserve(membranes.size() + intrudingDiscs.size());
+
+    for (std::size_t i = 0; i < membranes.size(); ++i)
+        foreignEntries_.push_back(
+            ForeignEntry{createEntry(membranes[i], membraneTypeRegistry_, i), .type_ = EntryType::Membrane});
+
+    for (std::size_t i = 0; i < intrudingDiscs.size(); ++i)
+        foreignEntries_.push_back(
+            ForeignEntry{createEntry(*intrudingDiscs[i], discTypeRegistry_, i), .type_ = EntryType::IntrudingDisc});
+
+    std::sort(foreignEntries_.begin(), foreignEntries_.end(),
+              [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
 }
 
 std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
