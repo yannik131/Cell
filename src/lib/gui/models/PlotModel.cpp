@@ -150,7 +150,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 
     for (const auto& disc : frameDTO.discs_)
     {
-        std::string discTypeName = registry.getByID(disc.getDiscTypeID()).getName();
+        std::string discTypeName = registry.getByID(disc.getTypeID()).getName();
         ++dataPoint.discTypeCountMap_[discTypeName];
         dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(registry);
         dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(registry);

@@ -1,5 +1,6 @@
 // configure using cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. and profile with VerySleepy
 
+#include "cell/Cell.hpp"
 #include "cell/Disc.hpp"
 #include "cell/Logging.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
@@ -19,15 +20,15 @@ int main(int argc, char** argv)
 
     SimulationConfigBuilder builder;
 
-    builder.setCellDimensions(Width{1000.0}, Height{1000.0});
-    builder.setDiscCount(800);
+    builder.setDiscCount("", 800);
     builder.useDistribution(true);
 
+    builder.setCellMembraneType(Radius{100}, {});
     builder.addDiscType("A", Radius{10}, Mass{5});
     builder.addDiscType("B", Radius{10}, Mass{5});
     builder.addDiscType("C", Radius{12}, Mass{10});
 
-    builder.setDistribution({{"A", 1}});
+    builder.setDistribution("", {{"A", 1}});
 
     builder.addReaction("A", "", "B", "", Probability{0.1});
     builder.addReaction("A", "B", "C", "", Probability{0.1});
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
     simulationContext.buildSimulationFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    const auto& registry = simulationContext.getDiscTypeRegistry();
+    const auto& registry = simulationContext.getSimulationContext().discTypeRegistry;
 
     const int N = 100000;
     LOG(INFO) << "Starting benchmark";

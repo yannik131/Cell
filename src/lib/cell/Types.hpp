@@ -15,12 +15,14 @@ namespace cell
 class DiscType;
 class MembraneType;
 class Reaction;
+class Disc;
+class Membrane;
 
-using DiscTypeID = std::uint16_t;
-using MembraneTypeID = std::uint16_t;
+using DiscTypeID = TypeRegistry<Disc>::KeyType;
+using MembraneTypeID = TypeRegistry<Membrane>::KeyType;
 
-using DiscTypeRegistry = TypeRegistry<DiscTypeID, DiscType>;
-using MembraneTypeRegistry = TypeRegistry<MembraneTypeID, MembraneType>;
+using DiscTypeRegistry = TypeRegistry<DiscType>;
+using MembraneTypeRegistry = TypeRegistry<MembraneType>;
 
 /**
  * @brief Type to be used for reaction and disc type distribution tables

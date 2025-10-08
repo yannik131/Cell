@@ -17,6 +17,7 @@ public:
     explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
+    void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions) const;
 
     void calculateRectangularBoundsCollisionResponse(Disc& disc,
                                                      CollisionDetector::RectangleCollision& rectangleCollision) const;

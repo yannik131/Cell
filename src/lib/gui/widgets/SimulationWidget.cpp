@@ -100,7 +100,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
 
     for (const auto& disc : frame.discs_)
     {
-        const auto& discType = discTypeRegistry.getByID(disc.getDiscTypeID());
+        const auto& discType = discTypeRegistry.getByID(disc.getTypeID());
 
         circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
         circleShape.setRadius(static_cast<float>(discType.getRadius()));

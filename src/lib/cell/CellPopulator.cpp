@@ -64,12 +64,11 @@ double CellPopulator::calculateDistributionSum(const std::map<std::string, doubl
 std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment& compartment, double maxRadius,
                                                                         int discCount) const
 {
-    const auto& membraneType =
-        simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getMembraneTypeID());
+    const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
     const auto& membraneCenter = compartment.getMembrane().getPosition();
     const auto& membraneRadius = membraneType.getRadius();
 
-    auto gridPoints = mathutils::calculateGrid(membraneRadius, membraneRadius, maxRadius);
+    auto gridPoints = mathutils::calculateGrid(2 * membraneRadius, 2 * membraneRadius, 2 * maxRadius);
 
     const auto& topLeft = membraneCenter - sf::Vector2d{membraneRadius, membraneRadius};
     for (size_t i = 0; i < gridPoints.size();)
@@ -85,7 +84,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
         {
             const auto& membrane = (*iter)->getMembrane();
             const auto& M = membrane.getPosition();
-            const auto& R = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID()).getRadius();
+            const auto& R = simulationContext_.membraneTypeRegistry.getByID(membrane.getTypeID()).getRadius();
 
             if (mathutils::circlesOverlap(gridPoints[i], maxRadius, M, R))
                 valid = false;
@@ -103,7 +102,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
     if (gridPoints.size() < discCount)
     {
         LOG(WARNING) << std::to_string(discCount)
-                     << " discs should be created for membrane of type\"" + membraneType.getName() +
+                     << " discs should be created for membrane of type \"" + membraneType.getName() +
                             "\", but the grid can only fit "
                      << std::to_string(gridPoints.size()) << ". " << std::to_string(discCount - gridPoints.size())
                      << " discs will not be created.";
@@ -115,7 +114,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
 void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment, double maxRadius)
 {
     const auto& membraneTypeName =
-        simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getMembraneTypeID()).getName();
+        simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
     if (!simulationConfig_.setup.discCounts.contains(membraneTypeName))
         throw ExceptionWithLocation("No disc counts for membrane type " + membraneTypeName);
@@ -173,12 +172,12 @@ sf::Vector2d CellPopulator::sampleVelocityFromDistribution() const
 Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
 {
     const auto& M = disc.getPosition();
-    const auto& R = simulationContext_.discTypeRegistry.getByID(disc.getDiscTypeID()).getRadius();
+    const auto& R = simulationContext_.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
 
     auto isFullyContainedIn = [&](const Compartment& compartment)
     {
         const auto& membrane = compartment.getMembrane();
-        const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane.getMembraneTypeID());
+        const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane.getTypeID());
 
         return mathutils::circleIsFullyContainedByCircle(M, R, membrane.getPosition(), membraneType.getRadius());
     };

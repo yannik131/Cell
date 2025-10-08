@@ -5,8 +5,8 @@ namespace cell
 
 MembraneType::MembraneType(std::string name, double radius, MembraneType::PermeabilityMap permeabilityMap)
     : name_(std::move(name))
-    , radius_(radius)
     , permeabilityMap_(std::move(permeabilityMap))
+    , radius_(radius)
 {
 }
 

@@ -6,8 +6,10 @@
 
 namespace cell
 {
-CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry)
+CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry,
+                                     const MembraneTypeRegistry& membraneTypeRegistry)
     : discTypeRegistry_(discTypeRegistry)
+    , membraneTypeRegistry_(membraneTypeRegistry)
 {
 }
 
@@ -17,7 +19,7 @@ CollisionDetector::detectRectangularBoundsCollision(const Disc& disc, const sf::
 {
     using Wall = RectangleCollision::Wall;
 
-    const double& R = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
+    const double& R = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
     const sf::Vector2d& r = disc.getPosition();
     RectangleCollision rectangleCollision;
     double l = NAN;
@@ -38,49 +40,33 @@ CollisionDetector::detectRectangularBoundsCollision(const Disc& disc, const sf::
 bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const
 {
     const auto& r = disc.getPosition();
-    const auto& Rc = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
+    const auto& Rc = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
     return (M.x - r.x) * (M.x - r.x) + (M.y - r.y) * (M.y - r.y) >= (Rm - Rc) * (Rm - Rc);
 }
 
+void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes)
+{
+    membraneEntries_ = createEntries(membranes, membraneTypeRegistry_);
+    discEntries_ = createEntries(discs, discTypeRegistry_);
+}
+
 std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
 {
-    std::vector<std::pair<Disc*, Disc*>> collidingDiscs;
-    collidingDiscs.reserve(discs.size() / 2);
+    std::vector<std::pair<Disc*, Disc*>> collisions;
+    collisions.reserve(discs.size() / 2);
 
     std::vector<char> discsInCollisions(discs.size(), 0);
 
-    struct Entry
+    for (std::size_t i = 0; i < discEntries_.size(); ++i)
     {
-        std::size_t index;
-        double radius;
-        sf::Vector2d position;
-        double minX, maxX;
-    };
-    std::vector<Entry> entries;
-    entries.reserve(discs.size());
-    for (std::size_t i = 0; i < discs.size(); ++i)
-    {
-        Disc& d = discs[i];
-        if (d.isMarkedDestroyed())
-            continue;
-
-        const double r = discTypeRegistry_.getByID(d.getDiscTypeID()).getRadius();
-        const auto& p = d.getPosition();
-        entries.push_back(Entry{.index = i, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r});
-    }
-
-    std::sort(entries.begin(), entries.end(), [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
-
-    for (std::size_t i = 0; i < entries.size(); ++i)
-    {
-        const auto& entry1 = entries[i];
+        const auto& entry1 = discEntries_[i];
         if (discsInCollisions[entry1.index])
             continue;
 
-        for (std::size_t j = i + 1; j < entries.size(); ++j)
+        for (std::size_t j = i + 1; j < discEntries_.size(); ++j)
         {
-            const auto& entry2 = entries[j];
+            const auto& entry2 = discEntries_[j];
 
             // sweep and prune: Since all elements are sorted by left x coordinate, if the current objects left x
             // coordinate is greater than the right x coordinate of the object we're comparing with, no other objects
@@ -96,9 +82,9 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
                 auto d1 = &discs[entry1.index];
                 auto d2 = &discs[entry2.index];
 
-                collidingDiscs.emplace_back(d1, d2);
-                collisionCounts_[d1->getDiscTypeID()]++;
-                collisionCounts_[d2->getDiscTypeID()]++;
+                collisions.emplace_back(d1, d2);
+                collisionCounts_[d1->getTypeID()]++;
+                collisionCounts_[d2->getTypeID()]++;
 
                 discsInCollisions[entry1.index] = 1;
                 discsInCollisions[entry2.index] = 1;
@@ -107,7 +93,45 @@ std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions
         }
     }
 
-    return collidingDiscs;
+    return collisions;
+}
+
+std::vector<std::pair<Membrane*, Disc*>>
+CollisionDetector::detectMembraneDiscCollisions(std::vector<Membrane>& membranes, std::vector<Disc>& discs)
+{
+    std::vector<std::pair<Membrane*, Disc*>> collisions;
+
+    std::size_t startIndex = 0;
+    for (const auto& membraneEntry : membraneEntries_)
+    {
+        while (startIndex < discEntries_.size())
+        {
+            if (discEntries_[startIndex].maxX >= membraneEntry.minX)
+                break;
+
+            ++startIndex;
+        }
+
+        for (std::size_t i = startIndex; i < discEntries_.size(); ++i)
+        {
+            const auto& discEntry = discEntries_[i];
+
+            if (discEntry.minX > membraneEntry.maxX)
+                break;
+
+            if (mathutils::circlesIntersect(membraneEntry.position, membraneEntry.radius, discEntry.position,
+                                            discEntry.radius))
+            {
+                auto m = &membranes[membraneEntry.index];
+                auto d = &discs[discEntry.index];
+
+                collisions.emplace_back(m, d);
+                break;
+            }
+        }
+    }
+
+    return collisions;
 }
 
 DiscTypeMap<int> CollisionDetector::getAndResetCollisionCounts()

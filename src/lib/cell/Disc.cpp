@@ -17,7 +17,7 @@ Disc::Disc(DiscTypeID discTypeID)
 void Disc::setVelocity(const sf::Vector2d& velocity)
 {
 #ifdef DEBUG
-    if (std::isnan(velocity.x) || std::isnan(velocity.y) || std::isinf(velocity.x) || std::isinf(velocity.y))
+    if (isNanOrInf(velocity))
         throw ExceptionWithLocation("Trying to assign an invalid value to velocity");
 #endif
     velocity_ = velocity;
@@ -30,7 +30,7 @@ void Disc::scaleVelocity(double factor)
 
 void Disc::accelerate(const sf::Vector2d& acceleration)
 {
-    velocity_ += acceleration;
+    setVelocity(velocity_ + acceleration);
 }
 
 void Disc::negateXVelocity()
@@ -46,7 +46,7 @@ void Disc::negateYVelocity()
 void Disc::setPosition(const sf::Vector2d& position)
 {
 #ifdef DEBUG
-    if (std::isnan(position.x) || std::isnan(position.y) || std::isinf(position.x) || std::isinf(position.y))
+    if (isNanOrInf(position))
         throw ExceptionWithLocation("Trying to assign an invalid value to position");
 #endif
     position_ = position;
@@ -77,7 +77,7 @@ const sf::Vector2d& Disc::getPosition() const
     return position_;
 }
 
-DiscTypeID Disc::getDiscTypeID() const
+DiscTypeID Disc::getTypeID() const
 {
     return discTypeID_;
 }
@@ -101,6 +101,11 @@ double Disc::getKineticEnergy(const DiscTypeRegistry& discTypeRegistry) const
 {
     return 0.5 * discTypeRegistry.getByID(discTypeID_).getMass() *
            (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+}
+
+bool Disc::isNanOrInf(const sf::Vector2d& vec) const
+{
+    return std::isnan(vec.x) || std::isnan(vec.y) || std::isinf(vec.x) || std::isinf(vec.y);
 }
 
 } // namespace cell

@@ -13,6 +13,7 @@ Compartment::Compartment(Compartment* parent, Membrane membrane, SimulationConte
     , membrane_(std::move(membrane))
     , simulationContext_(std::move(simulationContext))
 {
+    membrane_.setCompartment(this);
 }
 
 Compartment::~Compartment() = default;
@@ -56,7 +57,7 @@ void Compartment::update(double dt)
 {
     std::vector<Disc> newDiscs;
     const auto M = membrane_.getPosition();
-    const auto R = simulationContext_.membraneTypeRegistry.getByID(membrane_.getMembraneTypeID()).getRadius();
+    const auto R = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID()).getRadius();
 
     for (auto& disc : discs_)
     {
@@ -72,13 +73,18 @@ void Compartment::update(double dt)
 
     discs_.insert(discs_.begin(), newDiscs.begin(), newDiscs.end());
 
-    auto collidingDiscs = simulationContext_.collisionDetector.detectDiscDiscCollisions(discs_);
+    simulationContext_.collisionDetector.buildEntries(discs_, membranes_);
+    auto membraneDiscCollisions = simulationContext_.collisionDetector.detectMembraneDiscCollisions(membranes_, discs_);
+
+    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(membraneDiscCollisions);
+
+    auto discDiscCollisions = simulationContext_.collisionDetector.detectDiscDiscCollisions(discs_);
 
     // marks consumed discs as destroyed
-    simulationContext_.reactionEngine.applyBimolecularReactions(collidingDiscs);
+    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
 
     // ignores marked discs
-    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collidingDiscs);
+    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(discDiscCollisions);
 
     removeDestroyedDiscs();
 
@@ -88,7 +94,9 @@ void Compartment::update(double dt)
 
 Compartment* Compartment::createSubCompartment(Membrane membrane)
 {
-    compartments_.push_back(std::make_unique<Compartment>(this, std::move(membrane), simulationContext_));
+    auto compartment = std::make_unique<Compartment>(this, std::move(membrane), simulationContext_);
+    membranes_.push_back(compartment->getMembrane());
+    compartments_.push_back(std::move(compartment));
 
     return compartments_.back().get();
 }

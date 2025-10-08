@@ -40,6 +40,7 @@ private:
     Membrane membrane_;
     std::vector<Disc> discs_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
+    std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
 };
 

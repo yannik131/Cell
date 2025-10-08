@@ -15,9 +15,6 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
 {
     for (const auto& [p1, p2] : discDiscCollisions)
     {
-        if (p1->isMarkedDestroyed() || p2->isMarkedDestroyed())
-            continue;
-
         const auto& overlap = calculateOverlap(*p1, *p2);
 
         // No overlap -> no collision
@@ -34,6 +31,14 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
 
         p1->move(-dt * p1->getVelocity());
         p2->move(-dt * p2->getVelocity());
+    }
+}
+
+void CollisionHandler::calculateMembraneDiscCollisionResponse(
+    std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions) const
+{
+    for (const auto& [membrane, disc] : membraneDiscCollisions)
+    {
     }
 }
 
@@ -73,12 +78,15 @@ void CollisionHandler::calculateRectangularBoundsCollisionResponse(
 void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
 {
     const auto& v = disc.getVelocity();
-    const auto& Rc = discTypeRegistry_.getByID(disc.getDiscTypeID()).getRadius();
+    const auto& Rc = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
     const double dt = (M.x * v.x + M.x * v.y -
                        std::sqrt(((Rc - Rm) * (Rc - Rm)) * (v.x * v.x + v.y * v.y) -
                                  (M.x * v.y - M.y * v.x) * (M.x * v.y - M.y * v.x))) /
                       (v.x * v.x + v.y * v.y);
+
+    if (std::abs(dt) < 1e-8)
+        return;
 
     // dt is < 0: Move the disc back in time to first point of contact
     disc.move(dt * v);
@@ -107,8 +115,8 @@ double CollisionHandler::calculateOverlap(const Disc& d1, const Disc& d2) const
     sf::Vector2d rVec = d2.getPosition() - d1.getPosition();
     double distance = mathutils::abs(rVec);
 
-    return discTypeRegistry_.getByID(d1.getDiscTypeID()).getRadius() +
-           discTypeRegistry_.getByID(d2.getDiscTypeID()).getRadius() - distance;
+    return discTypeRegistry_.getByID(d1.getTypeID()).getRadius() +
+           discTypeRegistry_.getByID(d2.getTypeID()).getRadius() - distance;
 }
 
 double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc& d2) const
@@ -116,8 +124,8 @@ double CollisionHandler::calculateTimeBeforeCollision(const Disc& d1, const Disc
     const auto& r = d2.getPosition() - d1.getPosition();
     sf::Vector2d v = d2.getVelocity() - d1.getVelocity();
 
-    const auto& r1 = discTypeRegistry_.getByID(d1.getDiscTypeID()).getRadius();
-    const auto& r2 = discTypeRegistry_.getByID(d2.getDiscTypeID()).getRadius();
+    const auto& r1 = discTypeRegistry_.getByID(d1.getTypeID()).getRadius();
+    const auto& r2 = discTypeRegistry_.getByID(d2.getTypeID()).getRadius();
 
     return (-r.x * v.x - r.y * v.y -
             std::sqrt(((r1 + r2) * (r1 + r2)) * (v.x * v.x + v.y * v.y) -
@@ -136,8 +144,8 @@ void CollisionHandler::updateVelocitiesAtCollision(Disc& d1, Disc& d2) const
     sf::Vector2d nVec = rVec / mathutils::abs(rVec);
 
     double vrN = (d1.getVelocity() - d2.getVelocity()) * nVec;
-    const auto& m1 = discTypeRegistry_.getByID(d1.getDiscTypeID()).getMass();
-    const auto& m2 = discTypeRegistry_.getByID(d2.getDiscTypeID()).getMass();
+    const auto& m1 = discTypeRegistry_.getByID(d1.getTypeID()).getMass();
+    const auto& m2 = discTypeRegistry_.getByID(d2.getTypeID()).getMass();
 
     double impulse = -vrN * (e + 1) / (1. / m1 + 1. / m2);
 

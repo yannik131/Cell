@@ -39,10 +39,10 @@ std::vector<sf::Vector2d> calculateGrid(double width, double height, double edge
                                                 (static_cast<double>(height) / edgeLength)));
     double spacing = edgeLength + 1;
 
-    for (int i = 0; i < static_cast<int>(width / (2 * spacing)); ++i)
+    for (int i = 0; i < static_cast<int>(width / spacing); ++i)
     {
-        for (int j = 0; j < static_cast<int>(height / (2 * spacing)); ++j)
-            gridPoints.emplace_back(spacing * static_cast<double>(2 * i + 1), spacing * static_cast<double>(2 * j + 1));
+        for (int j = 0; j < static_cast<int>(height / spacing); ++j)
+            gridPoints.emplace_back(spacing * static_cast<double>(i + 1), spacing * static_cast<double>(j + 1));
     }
 
     std::shuffle(gridPoints.begin(), gridPoints.end(), gen);
@@ -69,6 +69,22 @@ bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, d
     const auto& diff = M1 - M2;
 
     return diff.x * diff.x + diff.y * diff.y <= (R1 + R2) * (R1 + R2);
+}
+
+bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
+{
+    // equivalent to: return circlesOverlap(...) && !circleIsFullyContainedByCircle(...)
+    const auto& diff = M1 - M2;
+    const auto& distanceSquared = diff.x * diff.x + diff.y * diff.y;
+
+    return (distanceSquared <= (R1 + R2) * (R1 + R2)) && !(distanceSquared < (R2 - R1) * (R2 - R1));
+}
+
+bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, const sf::Vector2d& point)
+{
+    const auto& diff = point - pos1;
+
+    return velocity * diff > 0;
 }
 
 } // namespace cell::mathutils

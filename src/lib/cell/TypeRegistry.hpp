@@ -12,9 +12,10 @@
 namespace cell
 {
 
-template <typename KeyType, typename ValueType> class TypeRegistry
+template <typename ValueType> class TypeRegistry
 {
-    static_assert(std::is_integral_v<KeyType>, "KeyType must be an integral type");
+public:
+    using KeyType = std::uint16_t;
 
 public:
     TypeRegistry() = default;
@@ -35,8 +36,8 @@ private:
     std::unordered_map<std::string, KeyType> nameIDMap_;
 };
 
-template <typename KeyType, typename ValueType>
-inline void TypeRegistry<KeyType, ValueType>::setValues(std::vector<ValueType>&& values)
+template <typename ValueType>
+inline void TypeRegistry<ValueType>::setValues(std::vector<ValueType>&& values)
 {
     if (values.empty())
     {
@@ -54,14 +55,14 @@ inline void TypeRegistry<KeyType, ValueType>::setValues(std::vector<ValueType>&&
     values_ = std::move(values);
 }
 
-template <typename KeyType, typename ValueType>
-inline const std::vector<ValueType>& TypeRegistry<KeyType, ValueType>::getValues() const
+template <typename ValueType>
+inline const std::vector<ValueType>& TypeRegistry<ValueType>::getValues() const
 {
     return values_;
 }
 
-template <typename KeyType, typename ValueType>
-inline KeyType TypeRegistry<KeyType, ValueType>::getIDFor(const std::string& name) const
+template <typename ValueType>
+inline TypeRegistry<ValueType>::KeyType TypeRegistry<ValueType>::getIDFor(const std::string& name) const
 {
     auto iter = nameIDMap_.find(name);
     if (iter == nameIDMap_.end())
@@ -70,8 +71,8 @@ inline KeyType TypeRegistry<KeyType, ValueType>::getIDFor(const std::string& nam
     return iter->second;
 }
 
-template <typename KeyType, typename ValueType>
-inline const ValueType& TypeRegistry<KeyType, ValueType>::getByID(KeyType ID) const
+template <typename ValueType>
+inline const ValueType& TypeRegistry<ValueType>::getByID(KeyType ID) const
 {
 #ifdef DEBUG
     if (static_cast<std::size_t>(ID) >= values_.size())
@@ -82,8 +83,8 @@ inline const ValueType& TypeRegistry<KeyType, ValueType>::getByID(KeyType ID) co
     return values_[ID];
 }
 
-template <typename KeyType, typename ValueType>
-inline void TypeRegistry<KeyType, ValueType>::buildNameIDMap(const std::vector<ValueType>& values)
+template <typename ValueType>
+inline void TypeRegistry<ValueType>::buildNameIDMap(const std::vector<ValueType>& values)
 {
     std::unordered_map<std::string, KeyType> nameIDMap;
 

@@ -48,7 +48,8 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     {
         reactionEngine_ =
             std::make_unique<ReactionEngine>(std::as_const(*discTypeRegistry_), std::as_const(*reactionTable_));
-        collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_));
+        collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_),
+                                                                 std::as_const(*membraneTypeRegistry_));
         collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_));
 
         cell_ = buildCell(simulationConfig);
@@ -198,8 +199,8 @@ void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> mem
     std::sort(membranes.begin(), membranes.end(),
               [&](const Membrane& lhs, const Membrane& rhs)
               {
-                  return membraneTypeRegistry_->getByID(lhs.getMembraneTypeID()).getRadius() <
-                         membraneTypeRegistry_->getByID(rhs.getMembraneTypeID()).getRadius();
+                  return membraneTypeRegistry_->getByID(lhs.getTypeID()).getRadius() <
+                         membraneTypeRegistry_->getByID(rhs.getTypeID()).getRadius();
               });
 
     std::vector<Compartment*> compartments({&cell});
@@ -209,13 +210,13 @@ void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> mem
         membranes.pop_back();
 
         const auto& M = membrane.getPosition();
-        const auto& R = membraneTypeRegistry_->getByID(membrane.getMembraneTypeID()).getRadius();
+        const auto& R = membraneTypeRegistry_->getByID(membrane.getTypeID()).getRadius();
 
         bool parentFound = false;
         for (auto iter = compartments.rbegin(); !parentFound && iter != compartments.rend(); ++iter)
         {
             const auto& Mo = (*iter)->getMembrane().getPosition();
-            const auto& Ro = membraneTypeRegistry_->getByID((*iter)->getMembrane().getMembraneTypeID()).getRadius();
+            const auto& Ro = membraneTypeRegistry_->getByID((*iter)->getMembrane().getTypeID()).getRadius();
 
             if (!mathutils::circleIsFullyContainedByCircle(M, R, Mo, Ro))
                 continue;

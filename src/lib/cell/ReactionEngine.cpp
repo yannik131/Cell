@@ -17,7 +17,7 @@ ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const A
 
 bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
 {
-    const Reaction* reaction = selectUnimolecularReaction(*transformations_, disc->getDiscTypeID(), dt);
+    const Reaction* reaction = selectUnimolecularReaction(*transformations_, disc->getTypeID(), dt);
     if (!reaction)
         return false;
 
@@ -28,7 +28,7 @@ bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
 
 std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) const
 {
-    const Reaction* reaction = selectUnimolecularReaction(*decompositions_, d1->getDiscTypeID(), dt);
+    const Reaction* reaction = selectUnimolecularReaction(*decompositions_, d1->getTypeID(), dt);
     if (!reaction)
         return {};
 
@@ -57,13 +57,13 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) c
 bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction =
-        selectBimolecularReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+        selectBimolecularReaction(*combinations_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
         return false;
 
     const auto& resultType = discTypeRegistry_.getByID(reaction->getProduct1());
-    const auto& d1Type = discTypeRegistry_.getByID(d1->getDiscTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(d2->getDiscTypeID());
+    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
+    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
 
     // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
     if (std::abs(resultType.getRadius() - d1Type.getRadius()) > std::abs(resultType.getRadius() - d2Type.getRadius()))
@@ -80,13 +80,12 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 
 bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 {
-    const Reaction* reaction =
-        selectBimolecularReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction = selectBimolecularReaction(*exchanges_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
         return false;
 
-    const auto& d1Type = discTypeRegistry_.getByID(d1->getDiscTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(d2->getDiscTypeID());
+    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
+    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
     const auto& product1Type = discTypeRegistry_.getByID(reaction->getProduct1());
     const auto& product2Type = discTypeRegistry_.getByID(reaction->getProduct2());
 

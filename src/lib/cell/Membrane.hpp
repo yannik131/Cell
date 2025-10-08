@@ -8,6 +8,8 @@
 namespace cell
 {
 
+class Compartment;
+
 class Membrane
 {
 public:
@@ -15,11 +17,15 @@ public:
 
     const sf::Vector2d& getPosition() const;
     void setPosition(const sf::Vector2d& position);
-    MembraneTypeID getMembraneTypeID() const;
+    MembraneTypeID getTypeID() const;
+
+    void setCompartment(Compartment* compartment);
+    Compartment* getCompartment() const;
 
 private:
     MembraneTypeID membraneTypeID_;
     sf::Vector2d position_;
+    Compartment* compartment_ = nullptr;
 };
 
 } // namespace cell

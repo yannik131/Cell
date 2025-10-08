@@ -109,6 +109,13 @@ bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf:
 
 bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
 
+bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+
+/**
+ * @return `true` if the moving object at position `pos1` with velocity `velocity` is moving towards the point `point`
+ */
+bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, const sf::Vector2d& point);
+
 } // namespace cell::mathutils
 
 #endif /* F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP */

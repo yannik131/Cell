@@ -80,7 +80,7 @@ public:
     /**
      * @returns DiscType of the disc
      */
-    DiscTypeID getDiscTypeID() const;
+    DiscTypeID getTypeID() const;
 
     /**
      * @returns `true` if `markDestroyed()` has been called
@@ -102,6 +102,9 @@ public:
      * @returns 1/2*m*v^2
      */
     double getKineticEnergy(const DiscTypeRegistry& discTypeResolver) const;
+
+private:
+    bool isNanOrInf(const sf::Vector2d& vec) const;
 
 private:
     /**
