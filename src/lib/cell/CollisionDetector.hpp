@@ -39,11 +39,19 @@ public:
         }
     };
 
+    struct Collisions
+    {
+        std::vector<std::pair<Disc*, Disc*>> discDiscCollisions;
+        std::vector<std::pair<Disc*, Disc*>> discIntrudingDiscCollisions;
+        std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions;
+    };
+
 private:
     enum class EntryType
     {
-        Membrane,
-        IntrudingDisc
+        Disc = 1 << 0,
+        Membrane = 1 << 1,
+        IntrudingDisc = 1 << 2
     };
 
     struct Entry
@@ -52,11 +60,7 @@ private:
         double radius;
         sf::Vector2d position;
         double minX, maxX;
-    };
-
-    struct ForeignEntry : public Entry
-    {
-        EntryType type_;
+        EntryType type;
     };
 
 public:
@@ -65,11 +69,10 @@ public:
     RectangleCollision detectRectangularBoundsCollision(const Disc& disc, const sf::Vector2d& topLeft,
                                                         const sf::Vector2d& bottomRight) const;
     bool detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const;
-    void buildDiscEntries(const std::vector<Disc>& discs);
-    void buildForeignEntries(const std::vector<Membrane>& membranes, const std::vector<Disc*>& intrudingDiscs);
-    std::vector<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs);
-    std::vector<std::pair<Membrane*, Disc*>> detectMembraneDiscCollisions(std::vector<Membrane>& membranes,
-                                                                          std::vector<Disc>& discs);
+    void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
+                      const std::vector<Disc*>& intrudingDiscs);
+    Collisions detectCollisions(std::vector<Disc>& discs, std::vector<Membrane>& membranes,
+                                std::vector<Disc*>& intrudingDiscs);
 
     /**
      * @returns the collision counts for all disc types in the simulation and sets them to 0
@@ -78,7 +81,8 @@ public:
 
 private:
     template <typename ElementType, typename RegistryType>
-    Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index) const;
+    Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index,
+                      EntryType entryType) const;
 
 private:
     DiscTypeMap<int> collisionCounts_;
@@ -86,18 +90,17 @@ private:
     const DiscTypeRegistry& discTypeRegistry_;
     const MembraneTypeRegistry& membraneTypeRegistry_;
 
-    std::vector<Entry> discEntries_;
-    std::vector<ForeignEntry> foreignEntries_; // Membranes and intruding discs
+    std::vector<Entry> entries_;
 };
 
 template <typename ElementType, typename RegistryType>
 inline CollisionDetector::Entry CollisionDetector::createEntry(const ElementType& element, const RegistryType& registry,
-                                                               std::size_t index) const
+                                                               std::size_t index, EntryType entryType) const
 {
     const double r = registry.getByID(element.getTypeID()).getRadius();
     const auto& p = element.getPosition();
-    
-    return Entry{.index = index, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r};
+
+    return Entry{.index = index, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r, .type = entryType};
 }
 
 } // namespace cell

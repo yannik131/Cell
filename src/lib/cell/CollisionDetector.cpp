@@ -45,114 +45,76 @@ bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf
     return (M.x - r.x) * (M.x - r.x) + (M.y - r.y) * (M.y - r.y) >= (Rm - Rc) * (Rm - Rc);
 }
 
-void CollisionDetector::buildDiscEntries(const std::vector<Disc>& discs)
+void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
+                                     const std::vector<Disc*>& intrudingDiscs)
 {
-    discEntries_.clear();
-    discEntries_.reserve(discs.size());
+    entries_.clear();
+    entries_.reserve(discs.size() + membranes.size() + intrudingDiscs.size());
 
-    // Collision detection happens before reactions -> no destroyed check necessary
     for (std::size_t i = 0; i < discs.size(); ++i)
-        discEntries_.push_back(createEntry(discs[i], discTypeRegistry_, i));
-
-    std::sort(discEntries_.begin(), discEntries_.end(),
-              [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
-}
-
-void CollisionDetector::buildForeignEntries(const std::vector<Membrane>& membranes,
-                                            const std::vector<Disc*>& intrudingDiscs)
-{
-    foreignEntries_.clear();
-    foreignEntries_.reserve(membranes.size() + intrudingDiscs.size());
+        entries_.push_back(createEntry(discs[i], discTypeRegistry_, i, EntryType::Disc));
 
     for (std::size_t i = 0; i < membranes.size(); ++i)
-        foreignEntries_.push_back(
-            ForeignEntry{createEntry(membranes[i], membraneTypeRegistry_, i), .type_ = EntryType::Membrane});
+        entries_.push_back(createEntry(membranes[i], membraneTypeRegistry_, i, EntryType::Membrane));
 
     for (std::size_t i = 0; i < intrudingDiscs.size(); ++i)
-        foreignEntries_.push_back(
-            ForeignEntry{createEntry(*intrudingDiscs[i], discTypeRegistry_, i), .type_ = EntryType::IntrudingDisc});
+        entries_.push_back(createEntry(*intrudingDiscs[i], discTypeRegistry_, i, EntryType::IntrudingDisc));
 
-    std::sort(foreignEntries_.begin(), foreignEntries_.end(),
-              [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
+    std::sort(entries_.begin(), entries_.end(), [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
 }
 
-std::vector<std::pair<Disc*, Disc*>> CollisionDetector::detectDiscDiscCollisions(std::vector<Disc>& discs)
+CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Disc>& discs,
+                                                                  std::vector<Membrane>& membranes,
+                                                                  std::vector<Disc*>& intrudingDiscs)
 {
-    std::vector<std::pair<Disc*, Disc*>> collisions;
-    collisions.reserve(discs.size() / 2);
+    Collisions collisions;
+    collisions.discDiscCollisions.reserve(discs.size() / 2);
 
-    std::vector<char> discsInCollisions(discs.size(), 0);
+    std::vector<char> discsInCollisions(discs.size() + intrudingDiscs.size(), 0);
 
-    for (std::size_t i = 0; i < discEntries_.size(); ++i)
+    for (std::size_t i = 0; i < entries_.size(); ++i)
     {
-        const auto& entry1 = discEntries_[i];
-        if (discsInCollisions[entry1.index])
+        const auto& entry1 = entries_[i];
+
+        if (entry1.type != EntryType::Disc || discsInCollisions[entry1.index])
             continue;
 
-        for (std::size_t j = i + 1; j < discEntries_.size(); ++j)
+        for (std::size_t j = i + 1; j < entries_.size(); ++j)
         {
-            const auto& entry2 = discEntries_[j];
+            const auto& entry2 = entries_[j];
 
-            // sweep and prune: Since all elements are sorted by left x coordinate, if the current objects left x
-            // coordinate is greater than the right x coordinate of the object we're comparing with, no other objects
-            // can intersect with entry1 and we can stop
             if (entry2.minX > entry1.maxX)
                 break;
 
-            if (discsInCollisions[entry2.index])
+            if (entry2.type == EntryType::Disc && discsInCollisions[entry2.index] ||
+                entry2.type == EntryType::IntrudingDisc && discsInCollisions[entry2.index + discs.size()])
                 continue;
 
-            if (mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
-            {
-                auto d1 = &discs[entry1.index];
-                auto d2 = &discs[entry2.index];
+            if (!mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
+                continue;
 
-                collisions.emplace_back(d1, d2);
+            if (entry2.type == EntryType::Membrane)
+            {
+                auto membrane = &membranes[entry2.index];
+                auto disc = &discs[entry1.index];
+
+                collisions.membraneDiscCollisions.emplace_back(membrane, disc);
+            }
+            else
+            {
+                const bool isIntruder = entry2.type == EntryType::IntrudingDisc;
+                auto d1 = &discs[entry1.index];
+                auto d2 = isIntruder ? intrudingDiscs[entry2.index] : &discs[entry2.index];
+
+                collisions.discDiscCollisions.emplace_back(d1, d2);
                 collisionCounts_[d1->getTypeID()]++;
                 collisionCounts_[d2->getTypeID()]++;
 
                 discsInCollisions[entry1.index] = 1;
-                discsInCollisions[entry2.index] = 1;
-                break;
+                discsInCollisions[isIntruder ? entry2.index + discs.size() : entry2.index] = 1;
             }
-        }
-    }
 
-    return collisions;
-}
-
-std::vector<std::pair<Membrane*, Disc*>>
-CollisionDetector::detectMembraneDiscCollisions(std::vector<Membrane>& membranes, std::vector<Disc>& discs)
-{
-    std::vector<std::pair<Membrane*, Disc*>> collisions;
-
-    std::size_t startIndex = 0;
-    for (const auto& membraneEntry : membraneEntries_)
-    {
-        while (startIndex < discEntries_.size())
-        {
-            if (discEntries_[startIndex].maxX >= membraneEntry.minX)
-                break;
-
-            ++startIndex;
-        }
-
-        for (std::size_t i = startIndex; i < discEntries_.size(); ++i)
-        {
-            const auto& discEntry = discEntries_[i];
-
-            if (discEntry.minX > membraneEntry.maxX)
-                break;
-
-            if (mathutils::circlesIntersect(membraneEntry.position, membraneEntry.radius, discEntry.position,
-                                            discEntry.radius))
-            {
-                auto m = &membranes[membraneEntry.index];
-                auto d = &discs[discEntry.index];
-
-                collisions.emplace_back(m, d);
-                break;
-            }
+            break;
         }
     }
 
