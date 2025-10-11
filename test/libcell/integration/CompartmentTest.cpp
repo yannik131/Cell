@@ -33,7 +33,7 @@ bool notContainedInOthers(const Compartment& host, const std::vector<const Compa
     for (const auto& disc : host.getDiscs())
     {
         const auto Md = disc.getPosition();
-        const auto Rd = context.discTypeRegistry.getByID(disc.getDiscTypeID()).getRadius();
+        const auto Rd = context.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
 
         if (!mathutils::circleIsFullyContainedByCircle(Md, Rd, Mh, Rh))
             return false;

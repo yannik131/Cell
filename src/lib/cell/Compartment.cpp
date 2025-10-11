@@ -102,22 +102,18 @@ void Compartment::update(double dt)
 
     // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    auto membraneDiscCollisions = simulationContext_.collisionDetector.detectMembraneDiscCollisions(membranes_, discs_);
+    auto collisions = simulationContext_.collisionDetector.detectCollisions(discs_, membranes_, intrudingDiscs_);
 
     // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
-    // TODO iterate once for both membranes and intruding discs as "foreign" objects, create entries for both: Entry
-    // contains pointer to data structure?
 
-    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(membraneDiscCollisions);
-
-    auto discDiscCollisions = simulationContext_.collisionDetector.detectDiscDiscCollisions(discs_);
+    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.membraneDiscCollisions);
 
     // marks consumed discs as destroyed
-    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
+    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
 
     removeDestroyedDiscs();
 
-    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(discDiscCollisions);
+    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
 
     for (auto& compartment : compartments_)
         compartment->update(dt);

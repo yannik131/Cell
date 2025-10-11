@@ -23,7 +23,7 @@ protected:
         types.emplace_back("A", Radius{1}, Mass{1});
 
         registry.setValues(std::move(types));
-        collisionHandler = std::make_unique<CollisionHandler>(CollisionHandler(registry));
+        collisionHandler = std::make_unique<CollisionHandler>(CollisionHandler(registry, MembraneTypeRegistry()));
 
         A = registry.getIDFor("A");
     }
@@ -73,7 +73,7 @@ TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
     d.setPosition(boundsTopLeft);
     d.setVelocity({-1.0, 1.0});
 
-    CollisionDetector collisionDetector(registry);
+    CollisionDetector collisionDetector(registry, MembraneTypeRegistry());
     auto collision = collisionDetector.detectRectangularBoundsCollision(d, boundsTopLeft, boundsBottomRight);
 
     collisionHandler->calculateRectangularBoundsCollisionResponse(d, collision);

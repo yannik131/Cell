@@ -18,7 +18,7 @@ inline std::map<std::string, int> countDiscTypes(const std::vector<cell::Disc>& 
 {
     std::map<std::string, int> counts;
     for (const auto& disc : discs)
-        counts[discTypeRegistry.getByID(disc.getDiscTypeID()).getName()]++;
+        counts[discTypeRegistry.getByID(disc.getTypeID()).getName()]++;
 
     return counts;
 }

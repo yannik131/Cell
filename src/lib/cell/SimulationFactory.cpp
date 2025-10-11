@@ -50,7 +50,8 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
             std::make_unique<ReactionEngine>(std::as_const(*discTypeRegistry_), std::as_const(*reactionTable_));
         collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_),
                                                                  std::as_const(*membraneTypeRegistry_));
-        collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_));
+        collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_),
+                                                               std::as_const(*membraneTypeRegistry_));
 
         cell_ = buildCell(simulationConfig);
     }
@@ -155,9 +156,9 @@ std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simul
                      { return membrane.membraneTypeName == config::cellMembraneTypeName; }) != configMembranes.end())
         throw ExceptionWithLocation("There can't be more than 1 cell membrane in the simulation");
 
-    for(const auto& [discTypeID, permeability] : simulationConfig.setup.cellMembraneType.permeabilityMap)
+    for (const auto& [discTypeID, permeability] : simulationConfig.setup.cellMembraneType.permeabilityMap)
     {
-        if(permeability != MembraneType::Permeability::None)
+        if (permeability != MembraneType::Permeability::None)
             throw ExceptionWithLocation("Currently the outer cell membrane does not support permeability");
     }
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);

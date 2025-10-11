@@ -131,13 +131,15 @@ TEST_F(ACell, SimulatesASingleMembrane)
     builder.addDisc("C", Position{.x = 610, .y = 500}, Velocity{.x = -20, .y = 0}); // Right
     builder.addDisc("D", Position{.x = 500, .y = 610}, Velocity{.x = 0, .y = -20}); // Bottom
 
+    // TODO tests for Inside -> outside
+
     auto& cell = createAndUpdateCell();
     const auto& discs = cell.getDiscs();
 
     const auto& getDisc = [&](const std::string& typeName)
     {
         auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
-                                 { return getDiscTypeRegistry().getByID(d.getDiscTypeID()).getName() == typeName; });
+                                 { return getDiscTypeRegistry().getByID(d.getTypeID()).getName() == typeName; });
         if (iter == discs.end())
             throw std::logic_error("Couldn't find type " + typeName + " in discs");
 

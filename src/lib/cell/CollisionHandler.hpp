@@ -14,7 +14,8 @@ class Disc;
 class CollisionHandler
 {
 public:
-    explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry);
+    explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
+                              const MembraneTypeRegistry& membraneTypeRegistry);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
     void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions) const;
@@ -48,6 +49,7 @@ private:
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;
+    const MembraneTypeRegistry& membraneTypeRegistry_;
 };
 
 } // namespace cell

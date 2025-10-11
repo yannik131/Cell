@@ -5,8 +5,10 @@
 namespace cell
 {
 
-CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry)
+CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
+                                   const MembraneTypeRegistry& membraneTypeRegistry)
     : discTypeRegistry_(discTypeRegistry)
+    , membraneTypeRegistry_(membraneTypeRegistry)
 {
 }
 
@@ -15,12 +17,6 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
 {
     for (const auto& [p1, p2] : discDiscCollisions)
     {
-        const auto& overlap = calculateOverlap(*p1, *p2);
-
-        // No overlap -> no collision
-        if (overlap <= 0)
-            continue;
-
         double dt = calculateTimeBeforeCollision(*p1, *p2);
 
         // dt is < 0: Move the disc back in time to first point of contact
@@ -39,6 +35,16 @@ void CollisionHandler::calculateMembraneDiscCollisionResponse(
 {
     for (const auto& [membrane, disc] : membraneDiscCollisions)
     {
+        const auto& membraneType = membraneTypeRegistry_.getByID(membrane->getTypeID());
+        const auto& permeability = membraneType.getPermeabilityFor(disc->getTypeID());
+
+        // TODO If angle < X degree, always collide
+
+        if (permeability == MembraneType::Permeability::Bidirectional ||
+            permeability == MembraneType::Permeability::Inward)
+            continue;
+
+        calculateCircularBoundsCollisionResponse(*disc, membrane->getPosition(), membraneType.getRadius());
     }
 }
 
@@ -78,10 +84,10 @@ void CollisionHandler::calculateRectangularBoundsCollisionResponse(
 void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
 {
     const auto& v = disc.getVelocity();
-    const auto& Rc = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
+    const auto& Rd = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
     const double dt = (M.x * v.x + M.x * v.y -
-                       std::sqrt(((Rc - Rm) * (Rc - Rm)) * (v.x * v.x + v.y * v.y) -
+                       std::sqrt(((Rd - Rm) * (Rd - Rm)) * (v.x * v.x + v.y * v.y) -
                                  (M.x * v.y - M.y * v.x) * (M.x * v.y - M.y * v.x))) /
                       (v.x * v.x + v.y * v.y);
 
@@ -90,7 +96,7 @@ void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, cons
 
     // dt is < 0: Move the disc back in time to first point of contact
     disc.move(dt * v);
-    const sf::Vector2d n = (disc.getPosition() - M) / (Rc - Rm);
+    const sf::Vector2d n = (disc.getPosition() - M) / (Rd - Rm);
     disc.accelerate(-2 * (v * n) * n);
     disc.move(-dt * disc.getVelocity());
 }
