@@ -21,7 +21,7 @@ protected:
         types.emplace_back("A", Radius{5}, Mass{5});
 
         registry.setValues(std::move(types));
-        collisionDetector = std::make_unique<CollisionDetector>(CollisionDetector(registry));
+        collisionDetector = std::make_unique<CollisionDetector>(CollisionDetector(registry, MembraneTypeRegistry()));
 
         A = registry.getIDFor("A");
     }
@@ -47,7 +47,8 @@ TEST_F(ACollisionDetector, FindsCollidingDiscs)
 {
     Disc d1(A), d2(A), d3(A);
     std::vector<Disc> discs = {d1, d2, d3};
-    auto collisions = collisionDetector->detectDiscDiscCollisions(discs);
+    collisionDetector->buildEntries(discs, {}, {});
+    auto collisions = collisionDetector->detectCollisions(&discs, nullptr, nullptr).discDiscCollisions;
 
     // In theory we have: (d1, d2), (d1, d3), (d2, d3) (or swapped versions of these)
     // In practice we don't support multiple collisions, so we get just one of the above
@@ -68,7 +69,8 @@ TEST_F(ACollisionDetector, IgnoreDiscsThatArentColliding)
     d1.setPosition({100, 100});
     std::vector<Disc> discs = {d1, d2};
 
-    auto collisions = collisionDetector->detectDiscDiscCollisions(discs);
+    collisionDetector->buildEntries(discs, {}, {});
+    auto collisions = collisionDetector->detectCollisions(&discs, nullptr, nullptr).discDiscCollisions;
 
     ASSERT_THAT(collisions.empty(), Eq(true));
 }

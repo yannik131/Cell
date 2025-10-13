@@ -70,8 +70,8 @@ public:
     bool detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const;
     void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
                       const std::vector<Disc*>& intrudingDiscs);
-    Collisions detectCollisions(std::vector<Disc>& discs, std::vector<Membrane>& membranes,
-                                std::vector<Disc*>& intrudingDiscs);
+    Collisions detectCollisions(std::vector<Disc>* discs, std::vector<Membrane>* membranes,
+                                std::vector<Disc*>* intrudingDiscs);
 
     /**
      * @returns the collision counts for all disc types in the simulation and sets them to 0

@@ -28,7 +28,7 @@ bool notContainedInOthers(const Compartment& host, const std::vector<const Compa
 {
     // d = disc, h = host, o = other, M = circle center, R = radius
     const auto Mh = host.getMembrane().getPosition();
-    const auto Rh = context.membraneTypeRegistry.getByID(host.getMembrane().getMembraneTypeID()).getRadius();
+    const auto Rh = context.membraneTypeRegistry.getByID(host.getMembrane().getTypeID()).getRadius();
 
     for (const auto& disc : host.getDiscs())
     {
@@ -44,8 +44,7 @@ bool notContainedInOthers(const Compartment& host, const std::vector<const Compa
         for (const auto& compartment : others)
         {
             const auto Mo = compartment->getMembrane().getPosition();
-            const auto& Ro =
-                context.membraneTypeRegistry.getByID(compartment->getMembrane().getMembraneTypeID()).getRadius();
+            const auto& Ro = context.membraneTypeRegistry.getByID(compartment->getMembrane().getTypeID()).getRadius();
 
             if (mathutils::circleIsFullyContainedByCircle(Md, Rd, Mo, Ro))
                 return false;
@@ -88,7 +87,7 @@ protected:
     double getRadius(const Compartment& compartment)
     {
         return simulationFactory.getSimulationContext()
-            .membraneTypeRegistry.getByID(compartment.getMembrane().getMembraneTypeID())
+            .membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID())
             .getRadius();
     }
 };

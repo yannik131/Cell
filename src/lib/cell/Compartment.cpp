@@ -102,7 +102,7 @@ void Compartment::update(double dt)
 
     // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    auto collisions = simulationContext_.collisionDetector.detectCollisions(discs_, membranes_, intrudingDiscs_);
+    auto collisions = simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
 
     // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
 
