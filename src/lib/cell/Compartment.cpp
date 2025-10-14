@@ -106,7 +106,7 @@ void Compartment::update(double dt)
 
     // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
 
-    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.membraneDiscCollisions);
+    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.discMembraneCollisions);
 
     // marks consumed discs as destroyed
     simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);

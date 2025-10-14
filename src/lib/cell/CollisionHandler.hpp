@@ -18,7 +18,7 @@ public:
                               const MembraneTypeRegistry& membraneTypeRegistry);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
-    void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions) const;
+    void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Disc*, Membrane*>> discMembraneCollisions) const;
 
     void calculateRectangularBoundsCollisionResponse(Disc& disc,
                                                      CollisionDetector::RectangleCollision& rectangleCollision) const;
@@ -34,18 +34,8 @@ public:
                                      double deficiency) const;
 
 private:
-    double calculateOverlap(const Disc& d1, const Disc& d2) const;
-
-    /**
-     * @brief Given 2 circles, returns the earlier of the 2 times where they just started touching
-     * @note If the overlap was calculated with `calculateOverlap()`, same ordering of parameters is required
-     */
-    double calculateTimeBeforeCollision(const Disc& d1, const Disc& d2) const;
-
-    /**
-     * @brief Given 2 colliding discs, calculates their new velocities based on a classical collision response
-     */
-    void updateVelocitiesAtCollision(Disc& d1, Disc& d2) const;
+    void updateVelocitiesDiscDiscCollision(Disc& d1, Disc& d2) const;
+    void updateVelocitiesDiscMembraneCollision(Disc& disc, const Membrane& membrane) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;

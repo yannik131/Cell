@@ -116,6 +116,23 @@ bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2,
  */
 bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, const sf::Vector2d& point);
 
+double calculateOverlap(const sf::Vector2d& r, double R1, double R2);
+
+/**
+ * @brief Given 2 circles, returns the earlier of the 2 times where they just started touching
+ * @param r Relative position vector
+ * @param v Relative velocity vector
+ * @param R1 Radius of circle 1
+ * @param R2 Radius of circle 2
+ */
+double calculateTimeBeforeCollision(const sf::Vector2d& r, const sf::Vector2d& v, double R1, double R2);
+
+/**
+ * @brief Reflects `v` on `n` with |n| = `l`. `v` and `n` need to point in opposing directions, i. e. v * n < 0 is
+ * assumed.
+ */
+sf::Vector2d reflectVector(const sf::Vector2d& v, sf::Vector2d n, double l);
+
 } // namespace cell::mathutils
 
 #endif /* F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP */

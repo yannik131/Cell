@@ -70,14 +70,19 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Di
     Collisions collisions;
     collisions.discDiscCollisions.reserve(discs->size() / 2);
 
-    std::vector<char> discsInCollisions(discs->size() + (intrudingDiscs ? intrudingDiscs->size() : 0), 0);
+    std::vector<char> discsInCollisions(discs->size(), 0);
+    std::vector<char> intrudingDiscsInCollisions(intrudingDiscs ? intrudingDiscs->size() : 0, 0);
+
+    const auto isInCollision = [&](const Entry& entry)
+    {
+        return (entry.type == EntryType::Disc && discsInCollisions[entry.index]) ||
+               (entry.type == EntryType::IntrudingDisc && intrudingDiscsInCollisions[entry.index]);
+    };
 
     for (std::size_t i = 0; i < entries_.size(); ++i)
     {
         const auto& entry1 = entries_[i];
-
-        if (entry1.type == EntryType::Disc && discsInCollisions[entry1.index] ||
-            entry1.type == EntryType::IntrudingDisc && discsInCollisions[entry1.index + discs->size()])
+        if (isInCollision(entry1))
             continue;
 
         for (std::size_t j = i + 1; j < entries_.size(); ++j)
@@ -87,39 +92,53 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Di
             if (entry2.minX > entry1.maxX)
                 break;
 
-            if (entry2.type == EntryType::Membrane)
+            // Intruding disc-intruding disc: No overlap should occur here because intruders come from the parent
+            // compartment and collisions are handled from parent to child
+            // Membrane-intruding disc, intruding disc-membrane: Again, handled by parent
+            // Membrane-membrane: Overlapping membranes aren't allowed to occur
+
+            const bool neitherEntryIsDisc = entry1.type != EntryType::Disc && entry2.type != EntryType::Disc;
+            const bool alreadyInCollision = isInCollision(entry2);
+            const bool noOverlap =
+                !mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius);
+
+            if (neitherEntryIsDisc || alreadyInCollision || noOverlap)
                 continue;
 
-            if (entry2.type == EntryType::Disc && discsInCollisions[entry2.index] ||
-                entry2.type == EntryType::IntrudingDisc && discsInCollisions[entry2.index + discs->size()])
-                continue;
-
-            if (!mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
-                continue;
-
-            // TODO entry1 could be any type, entry2 can only be disc or intruding disc
-            if (entry1.type == EntryType::Membrane)
+            if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)
             {
-                auto membrane = &(*membranes)[entry1.index];
-                auto disc = &(*discs)[entry2.index];
+                const bool firstIsMembrane = (entry1.type == EntryType::Membrane);
+                auto disc = firstIsMembrane ? &(*discs)[entry2.index] : &(*discs)[entry1.index];
+                auto membrane = firstIsMembrane ? &(*membranes)[entry1.index] : &(*membranes)[entry2.index];
 
-                collisions.membraneDiscCollisions.emplace_back(membrane, disc);
+                collisions.discMembraneCollisions.emplace_back(disc, membrane);
+                continue;
             }
             else
             {
-                const bool isIntruder = entry2.type == EntryType::IntrudingDisc;
-                auto d1 = &(*discs)[entry1.index];
-                auto d2 = isIntruder ? (*intrudingDiscs)[entry2.index] : &(*discs)[entry2.index];
+                const bool firstIsIntruder = (entry1.type == EntryType::IntrudingDisc);
+                const bool secondIsIntruder = (entry2.type == EntryType::IntrudingDisc);
+
+                auto d1 = firstIsIntruder ? (*intrudingDiscs)[entry1.index] : &(*discs)[entry1.index];
+                auto d2 = secondIsIntruder ? (*intrudingDiscs)[entry2.index] : &(*discs)[entry2.index];
 
                 collisions.discDiscCollisions.emplace_back(d1, d2);
-                collisionCounts_[d1->getTypeID()]++;
-                collisionCounts_[d2->getTypeID()]++;
+                ++collisionCounts_[d1->getTypeID()];
+                ++collisionCounts_[d2->getTypeID()];
 
-                discsInCollisions[entry1.index] = 1;
-                discsInCollisions[isIntruder ? entry2.index + discs->size() : entry2.index] = 1;
+                if (firstIsIntruder)
+                    intrudingDiscsInCollisions[entry1.index] = 1;
+                else
+                    discsInCollisions[entry1.index] = 1;
+
+                if (secondIsIntruder)
+                    intrudingDiscsInCollisions[entry2.index] = 1;
+                else
+                    discsInCollisions[entry2.index] = 1;
+
+                // Multiple collisions for discs aren't supported, so stop searching further
+                break;
             }
-
-            break;
         }
     }
 

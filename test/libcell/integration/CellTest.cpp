@@ -126,10 +126,10 @@ TEST_F(ACell, SimulatesASingleMembrane)
     builder.addMembrane("M", Position{.x = 500, .y = 500});
 
     // Outside -> inside
-    builder.addDisc("A", Position{.x = 390, .y = 500}, Velocity{.x = 20, .y = 0});  // Left
-    builder.addDisc("B", Position{.x = 500, .y = 390}, Velocity{.x = 0, .y = 20});  // Top
-    builder.addDisc("C", Position{.x = 610, .y = 500}, Velocity{.x = -20, .y = 0}); // Right
-    builder.addDisc("D", Position{.x = 500, .y = 610}, Velocity{.x = 0, .y = -20}); // Bottom
+    builder.addDisc("A", Position{.x = 390, .y = 500}, Velocity{.x = 10, .y = 0});  // Left
+    builder.addDisc("B", Position{.x = 500, .y = 390}, Velocity{.x = 0, .y = 10});  // Top
+    builder.addDisc("C", Position{.x = 610, .y = 500}, Velocity{.x = -10, .y = 0}); // Right
+    builder.addDisc("D", Position{.x = 500, .y = 610}, Velocity{.x = 0, .y = -10}); // Bottom
 
     // TODO tests for Inside -> outside
 
@@ -146,8 +146,8 @@ TEST_F(ACell, SimulatesASingleMembrane)
         return *iter;
     };
 
-    expectNear(getDisc("A").getPosition(), {410, 500});
+    expectNear(getDisc("A").getPosition(), {400, 500});
     expectNear(getDisc("B").getPosition(), {500, 390});
-    expectNear(getDisc("C").getPosition(), {590, 500});
+    expectNear(getDisc("C").getPosition(), {600, 500});
     expectNear(getDisc("D").getPosition(), {500, 610}); // Undefined permeability, should collide
 }

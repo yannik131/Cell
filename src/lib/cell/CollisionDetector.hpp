@@ -42,7 +42,7 @@ public:
     struct Collisions
     {
         std::vector<std::pair<Disc*, Disc*>> discDiscCollisions;
-        std::vector<std::pair<Membrane*, Disc*>> membraneDiscCollisions;
+        std::vector<std::pair<Disc*, Membrane*>> discMembraneCollisions;
     };
 
 private:

@@ -87,4 +87,26 @@ bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, con
     return velocity * diff > 0;
 }
 
+double calculateOverlap(const sf::Vector2d& r, double R1, double R2)
+{
+    double distance = mathutils::abs(r);
+
+    return R1 + R2 - distance;
+}
+
+double calculateTimeBeforeCollision(const sf::Vector2d& r, const sf::Vector2d& v, double R1, double R2)
+{
+    return (-r.x * v.x - r.y * v.y -
+            std::sqrt(((R1 + R2) * (R1 + R2)) * (v.x * v.x + v.y * v.y) -
+                      (r.x * v.y - r.y * v.x) * (r.x * v.y - r.y * v.x))) /
+           (v.x * v.x + v.y * v.y);
+}
+
+sf::Vector2d reflectVector(const sf::Vector2d& v, sf::Vector2d n, double l)
+{
+    n /= l;
+
+    return v - 2 * (v * n) * n;
+}
+
 } // namespace cell::mathutils
