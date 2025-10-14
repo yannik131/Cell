@@ -9,6 +9,7 @@
 #include "ReactionTable.hpp"
 #include "Settings.hpp"
 #include "SimulationContext.hpp"
+#include "StringUtils.hpp"
 
 #include <glog/logging.h>
 
@@ -161,6 +162,9 @@ std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simul
         if (permeability != MembraneType::Permeability::None)
             throw ExceptionWithLocation("Currently the outer cell membrane does not support permeability");
     }
+
+    throwIfDiscsCanBeLargerThanMembranes(simulationConfig);
+
     std::vector<Membrane> membranes = getMembranesFromConfig(simulationConfig);
 
     Membrane cellMembrane(membraneTypeRegistry_->getIDFor(config::cellMembraneTypeName));
@@ -203,6 +207,10 @@ void SimulationFactory::reset()
 
 void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> membranes)
 {
+    // We'll sort ascending by size and convert membranes to compartments from large to small
+    // This way, compartments are sorted descending by size, and finding a parent compartment is simple:
+    // Iterate from small to large and find the first compartment that contains the current fully
+
     std::sort(membranes.begin(), membranes.end(),
               [&](const Membrane& lhs, const Membrane& rhs)
               {
@@ -237,6 +245,43 @@ void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> mem
             throw ExceptionWithLocation("Couldn't find a compartment that fully contains the membrane at (" +
                                         std::to_string(M.x) + "," + std::to_string(M.y) + ")");
     }
+
+    // We do it here to include the cell itself in the check
+    throwIfCompartmentsIntersect(compartments);
+}
+
+void SimulationFactory::throwIfCompartmentsIntersect(const std::vector<Compartment*>& compartments) const
+{
+    // This is done once, so no worries about O(n^2)
+    for (std::size_t i = 0; i < compartments.size(); ++i)
+    {
+        const auto R1 = membraneTypeRegistry_->getByID(compartments[i]->getMembrane().getTypeID()).getRadius();
+        const auto M1 = compartments[i]->getMembrane().getPosition();
+
+        for (std::size_t j = i + 1; j < compartments.size(); ++j)
+        {
+            const auto R2 = membraneTypeRegistry_->getByID(compartments[j]->getMembrane().getTypeID()).getRadius();
+            const auto M2 = compartments[j]->getMembrane().getPosition();
+
+            if (mathutils::circlesIntersect(M1, R1, M2, R2))
+                throw ExceptionWithLocation("Overlapping membranes at " + stringutils::toString(M1) + " and " +
+                                            stringutils::toString(M2) + " not allowed");
+        }
+    }
+}
+
+void SimulationFactory::throwIfDiscsCanBeLargerThanMembranes(const SimulationConfig& config) const
+{
+    const auto maxDiscRadius = std::max_element(config.discTypes.begin(), config.discTypes.end(),
+                                                [](const auto& t1, const auto& t2) { return t1.radius < t2.radius; })
+                                   ->radius;
+
+    auto minMembraneRadius = config.setup.cellMembraneType.radius;
+    for (const auto& membraneType : config.membraneTypes)
+        minMembraneRadius = std::min(minMembraneRadius, membraneType.radius);
+
+    if (maxDiscRadius >= minMembraneRadius)
+        throw ExceptionWithLocation("At least one disc type has a radius larger than at least one membrane type.");
 }
 
 } // namespace cell

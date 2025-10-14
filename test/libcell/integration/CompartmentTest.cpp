@@ -163,3 +163,21 @@ TEST_F(ACompartment, CanHaveADiscDistribution)
     ASSERT_TRUE(notContainedInOthers(cell, {&largeCompartment, &smallCompartment}, context));
     ASSERT_TRUE(notContainedInOthers(largeCompartment, {&smallCompartment}, context));
 }
+
+TEST_F(ACompartment, CantOverlapWithAnotherCompartment)
+{
+    builder.addMembraneType("M", Radius{100}, {});
+    builder.addMembrane("M", Position{.x = 500, .y = 500});
+    builder.addMembrane("M", Position{.x = 500, .y = 500});
+
+    ASSERT_ANY_THROW(getCell());
+}
+
+TEST_F(ACompartment, MustBeLargerThanTheLargestDiscType)
+{
+    builder.addDiscType("Large", Radius{50}, Mass{1});
+    builder.addMembraneType("M", Radius{10}, {});
+    builder.addMembrane("M", Position{.x = 500, .y = 500});
+
+    ASSERT_ANY_THROW(getCell());
+}

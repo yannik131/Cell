@@ -25,6 +25,7 @@ class InvalidSetupException : public std::runtime_error
 
 struct SimulationContext;
 class Cell;
+class Compartment;
 class ReactionTable;
 class ReactionEngine;
 class CollisionDetector;
@@ -53,6 +54,8 @@ private:
     std::vector<Membrane> getMembranesFromConfig(const SimulationConfig& simulationConfig);
     void reset();
     void createCompartments(Cell& cell, std::vector<Membrane> membranes);
+    void throwIfCompartmentsIntersect(const std::vector<Compartment*>& compartments) const;
+    void throwIfDiscsCanBeLargerThanMembranes(const SimulationConfig& config) const;
 
 private:
     std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
