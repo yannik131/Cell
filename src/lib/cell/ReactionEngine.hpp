@@ -57,7 +57,7 @@ public:
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc, double dt) const;
 
-    void applyBimolecularReactions(const std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const;
+    void applyBimolecularReactions(std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const;
 
 private:
     template <typename MapType, typename KeyType, typename Condition>

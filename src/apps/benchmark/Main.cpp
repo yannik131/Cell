@@ -20,15 +20,22 @@ int main(int argc, char** argv)
 
     SimulationConfigBuilder builder;
 
-    builder.setDiscCount("", 800);
-    builder.useDistribution(true);
+    builder.addMembraneType(
+        "M", Radius{100},
+        {{"A", MembraneType::Permeability::Inward}, {"B", MembraneType::Permeability::Bidirectional}});
+    builder.addMembrane("M", Position{.x = 500, .y = 500});
 
-    builder.setCellMembraneType(Radius{100}, {});
+    builder.setCellMembraneType(Radius{1000}, {});
     builder.addDiscType("A", Radius{10}, Mass{5});
     builder.addDiscType("B", Radius{10}, Mass{5});
     builder.addDiscType("C", Radius{12}, Mass{10});
 
     builder.setDistribution("", {{"A", 1}});
+    builder.setDistribution("M", {{"A", 1}});
+
+    builder.setDiscCount("", 800);
+    builder.setDiscCount("M", 30);
+    builder.useDistribution(true);
 
     builder.addReaction("A", "", "B", "", Probability{0.1});
     builder.addReaction("A", "B", "C", "", Probability{0.1});

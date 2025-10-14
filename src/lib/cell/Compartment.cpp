@@ -111,9 +111,9 @@ void Compartment::update(double dt)
     // marks consumed discs as destroyed
     simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
 
-    removeDestroyedDiscs();
-
     simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
+
+    removeDestroyedDiscs();
 
     for (auto& compartment : compartments_)
         compartment->update(dt);

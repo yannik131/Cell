@@ -97,12 +97,8 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Di
             // Membrane-intruding disc, intruding disc-membrane: Again, handled by parent
             // Membrane-membrane: Overlapping membranes aren't allowed to occur
 
-            const bool neitherEntryIsDisc = entry1.type != EntryType::Disc && entry2.type != EntryType::Disc;
-            const bool alreadyInCollision = isInCollision(entry2);
-            const bool noOverlap =
-                !mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius);
-
-            if (neitherEntryIsDisc || alreadyInCollision || noOverlap)
+            if ((entry1.type != EntryType::Disc && entry2.type != EntryType::Disc) || isInCollision(entry2) ||
+                !mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
                 continue;
 
             if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)
