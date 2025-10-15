@@ -17,7 +17,7 @@ const Compartment& getSingleChildCompartment(const Compartment& compartment)
     const auto& compartments = compartment.getCompartments();
 
     if (compartments.size() != 1)
-        throw std::invalid_argument("Given compartment has not 1 child compartment, it has " +
+        throw ExceptionWithLocation("Given compartment has not 1 child compartment, it has " +
                                     std::to_string(compartments.size()));
 
     return *compartments.front();
@@ -181,3 +181,5 @@ TEST_F(ACompartment, MustBeLargerThanTheLargestDiscType)
 
     ASSERT_ANY_THROW(getCell());
 }
+
+// TODO add test for circular bounds handling

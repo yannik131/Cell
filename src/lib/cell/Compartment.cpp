@@ -98,7 +98,7 @@ void Compartment::update(double dt)
             parent_->addIntrudingDisc(disc);
     }
 
-    discs_.insert(discs_.begin(), newDiscs.begin(), newDiscs.end());
+    discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
 
     // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);

@@ -74,3 +74,17 @@ TEST_F(ACollisionDetector, IgnoreDiscsThatArentColliding)
 
     ASSERT_THAT(collisions.empty(), Eq(true));
 }
+
+TEST_F(ACollisionDetector, DetectsCircularBoundsCollisions)
+{
+    Disc d(A);
+
+    const sf::Vector2d M({0, 0});
+    const double Rm = 100;
+
+    d.setPosition({100, 100});
+    ASSERT_THAT(collisionDetector->detectCircularBoundsCollision(d, M, Rm), Eq(true));
+
+    d.setPosition({50, 50});
+    ASSERT_THAT(collisionDetector->detectCircularBoundsCollision(d, M, Rm), Eq(false));
+}

@@ -62,7 +62,7 @@ TEST_F(ACollisionHandler, SeparatesCollidingDiscs)
     expectNear(d2.getVelocity(), {2.15, 0.05}, 1e-4);
 }
 
-TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
+TEST_F(ACollisionHandler, SeparatesDiscsFromRectangularBounds)
 {
     const sf::Vector2d boundsTopLeft{0, 0};
     const sf::Vector2d boundsBottomRight{100, 100};
@@ -94,4 +94,23 @@ TEST_F(ACollisionHandler, SeparatesDiscsFromBounds)
 
     EXPECT_NEAR(d.getPosition().x, boundsBottomRight.x - 2 * R, 1e-4f);
     EXPECT_NEAR(d.getPosition().y, boundsBottomRight.y - 2 * R, 1e-4f);
+}
+
+TEST_F(ACollisionHandler, SeparatesDiscsFromCircularBounds)
+{
+    Disc d(A);
+
+    d.setPosition({100, 0});
+    d.setVelocity({10, 0});
+
+    const sf::Vector2d M({0, 0});
+    const double R = 100;
+
+    collisionHandler->calculateCircularBoundsCollisionResponse(d, M, R);
+
+    EXPECT_NEAR(d.getPosition().x, 98, 1e-4);
+    EXPECT_NEAR(d.getPosition().y, 0, 1e-4);
+
+    EXPECT_NEAR(d.getVelocity().x, -10, 1e-4);
+    EXPECT_NEAR(d.getVelocity().y, 0, 1e-4);
 }

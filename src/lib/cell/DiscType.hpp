@@ -7,9 +7,6 @@
 #include <SFML/Graphics/Color.hpp>
 
 #include <string>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
 
 namespace cell
 {

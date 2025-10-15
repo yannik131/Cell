@@ -42,7 +42,7 @@ bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf
     const auto& r = disc.getPosition();
     const auto& Rc = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
-    return (M.x - r.x) * (M.x - r.x) + (M.y - r.y) * (M.y - r.y) >= (Rm - Rc) * (Rm - Rc);
+    return (M - r) * (M - r) >= (Rm - Rc) * (Rm - Rc);
 }
 
 void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,

@@ -51,10 +51,10 @@ void PlotModel::setPlotTimeInterval(int valueMilliseconds)
 {
     // To reduce the number of datapoints, we store 100ms intervals
     if (valueMilliseconds < 100)
-        throw std::invalid_argument("The plot time interval must be at least 100ms");
+        throw ExceptionWithLocation("The plot time interval must be at least 100ms");
 
     if (valueMilliseconds % 100 != 0)
-        throw std::invalid_argument("The plot time interval must be a multiple of 100ms");
+        throw ExceptionWithLocation("The plot time interval must be a multiple of 100ms");
 
     plotTimeInterval_ = static_cast<double>(valueMilliseconds) / 1000.0;
     emitPlot();

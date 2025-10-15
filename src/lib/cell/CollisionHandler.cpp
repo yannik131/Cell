@@ -72,13 +72,14 @@ void CollisionHandler::calculateRectangularBoundsCollisionResponse(
 
 void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
 {
+    const auto& r = disc.getPosition();
     const auto& v = disc.getVelocity();
-    const auto& Rd = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
+    const auto Rd = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
-    const double dt = (M.x * v.x + M.y * v.y -
-                       std::sqrt(((Rd - Rm) * (Rd - Rm)) * (v.x * v.x + v.y * v.y) -
-                                 (M.x * v.y - M.y * v.x) * (M.x * v.y - M.y * v.x))) /
-                      (v.x * v.x + v.y * v.y);
+    const double p = -2.0 * (M - r) * v / (v * v);
+    const double q = ((M - r) * (M - r) - (Rm - Rd) * (Rm - Rd)) / (v * v);
+
+    const double dt = 0.5 * (-p + std::sqrt(p * p - 4 * q));
 
 #ifdef DEBUG
     if (std::isnan(dt))
@@ -90,7 +91,7 @@ void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, cons
 
     // dt is < 0: Move the disc back in time to first point of contact
     disc.move(dt * v);
-    disc.setVelocity(mathutils::reflectVector(disc.getVelocity(), disc.getPosition() - M, Rm + Rd));
+    disc.setVelocity(mathutils::reflectVector(disc.getVelocity(), disc.getPosition() - M, Rm - Rd));
     disc.move(-dt * disc.getVelocity());
 }
 
