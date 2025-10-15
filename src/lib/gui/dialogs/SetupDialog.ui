@@ -3,14 +3,14 @@
  <class>SetupDialog</class>
  <widget class="QDialog" name="SetupDialog">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>845</width>
-    <height>691</height>
+    <height>725</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Use distribution</string>
+         <string>Use distributions</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -39,7 +39,7 @@
       <item>
        <widget class="QRadioButton" name="manualSetupRadioButton">
         <property name="text">
-         <string>Manual setup</string>
+         <string>Use manual disc positions</string>
         </property>
        </widget>
       </item>
@@ -54,39 +54,13 @@
        <height>300</height>
       </size>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,1">
+     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
       <item>
-       <widget class="QWidget" name="distributionWidget" native="true">
+       <widget class="QGroupBox" name="distributionGroupBox">
+        <property name="title">
+         <string>Membranes</string>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QWidget" name="widget_3" native="true">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>50</height>
-            </size>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Discs</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="numberOfDiscsSpinBox">
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>5000</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
          <item>
           <widget class="QTableView" name="discTypeDistributionTableView"/>
          </item>
@@ -94,7 +68,7 @@
           <widget class="QWidget" name="widget_13" native="true">
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
-             <widget class="QPushButton" name="addDistributionEntryPushButton">
+             <widget class="QPushButton" name="addMembranePushButton">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -113,7 +87,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="clearDistributionPushButton">
+             <widget class="QPushButton" name="clearMembranesPushButton">
               <property name="maximumSize">
                <size>
                 <width>75</width>
@@ -132,7 +106,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="manualWidget" native="true">
+       <widget class="QGroupBox" name="manualGroupBox">
+        <property name="title">
+         <string>Discs</string>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QTableView" name="discsTableView"/>
@@ -254,28 +231,12 @@
          <item>
           <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>Cell height</string>
+            <string>Cell radius</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QSpinBox" name="cellHeightSpinBox"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="widget_6" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Cell width</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="cellWidthSpinBox"/>
          </item>
         </layout>
        </widget>
