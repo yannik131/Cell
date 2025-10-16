@@ -112,8 +112,10 @@ void DiscTypesTableModel::removeRow(int row)
     endRemoveRows();
 
     const auto& originalDiscTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-    if (row < originalDiscTypes.size())
-        removedDiscTypes_.insert(originalDiscTypes[row].name);
+    auto originalIndex = row + removedDiscTypes_.size();
+
+    if (originalIndex < originalDiscTypes.size())
+        removedDiscTypes_.insert(originalDiscTypes[originalIndex].name);
 }
 
 void DiscTypesTableModel::clearRows()
