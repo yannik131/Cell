@@ -43,6 +43,12 @@ extern const double MinMass;
 extern const double MaxMass;
 } // namespace DiscTypeLimits
 
+namespace MembraneTypeLimits
+{
+extern const double MinRadius;
+extern const double MaxRadius;
+} // namespace MembraneTypeLimits
+
 /**
  * @brief Helper function for range checking
  * @note Example: `throwIfNotInRange(theAge, 0, 120, "age");`

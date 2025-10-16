@@ -60,3 +60,32 @@ QVector<QString> DiscTypeComboBoxDelegate::getDiscTypeNames(const std::vector<ce
 
     return names;
 }
+
+MembraneTypeComboBoxDelegate::MembraneTypeComboBoxDelegate(QObject* parent,
+                                                           AbstractSimulationBuilder* abstractSimulationBuilder)
+    : ComboBoxDelegate(parent)
+    , abstractSimulationBuilder_(abstractSimulationBuilder)
+{
+}
+
+QWidget* MembraneTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
+                                                    const QModelIndex&) const
+{
+    auto* editor = new QComboBox(parent);
+    editor->addItems(getMembraneTypeNames(abstractSimulationBuilder_->getSimulationConfig().membraneTypes));
+    emit editorCreated(editor);
+
+    return editor;
+}
+
+QVector<QString>
+MembraneTypeComboBoxDelegate::getMembraneTypeNames(const std::vector<cell::config::MembraneType>& membraneTypes) const
+{
+    QVector<QString> names;
+    names.reserve(static_cast<qsizetype>(membraneTypes.size()));
+
+    for (const auto& membraneType : membraneTypes)
+        names.push_back(QString::fromStdString(membraneType.name));
+
+    return names;
+}

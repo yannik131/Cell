@@ -33,4 +33,10 @@ const double MinMass = 1.0;
 const double MaxMass = 10000.0;
 } // namespace DiscTypeLimits
 
+namespace MembraneTypeLimits
+{
+const double MinRadius = 1.0;
+const double MaxRadius = 1000.0;
+} // namespace MembraneTypeLimits
+
 } // namespace cell

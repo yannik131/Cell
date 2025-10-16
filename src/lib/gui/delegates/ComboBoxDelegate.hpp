@@ -57,12 +57,37 @@ private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
+// TODO Fix DRY violation here once everything is running
+class MembraneTypeComboBoxDelegate : public ComboBoxDelegate
+{
+    Q_OBJECT
+public:
+    MembraneTypeComboBoxDelegate(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override;
+
+private:
+    QVector<QString> getMembraneTypeNames(const std::vector<cell::config::MembraneType>& membraneTypes) const;
+
+private:
+    AbstractSimulationBuilder* abstractSimulationBuilder_;
+};
+
 template <std::integral... Columns>
 void insertDiscTypeComboboxIntoView(QAbstractItemView* view, AbstractSimulationBuilder* abstractSimulationBuilder,
                                     Columns... columns)
 {
     auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(view, abstractSimulationBuilder);
     (view->setItemDelegateForColumn(columns, discTypeComboBoxDelegate), ...);
+    view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
+                          QAbstractItemView::EditTrigger::SelectedClicked);
+}
+
+inline void insertMembraneTypeComboBoxIntoView(QAbstractItemView* view,
+                                               AbstractSimulationBuilder* abstractSimulationBuilder, int column)
+{
+    auto* membraneTypeComboBoxDelegate = new MembraneTypeComboBoxDelegate(view, abstractSimulationBuilder);
+    view->setItemDelegateForColumn(column, membraneTypeComboBoxDelegate);
     view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                           QAbstractItemView::EditTrigger::SelectedClicked);
 }

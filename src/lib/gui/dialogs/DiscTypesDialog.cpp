@@ -9,7 +9,6 @@
 #include "models/DiscTypesTableModel.hpp"
 #include "ui_DiscTypesDialog.h"
 
-#include "DiscTypesDialog.hpp"
 #include <QCloseEvent>
 #include <QMessageBox>
 
@@ -35,8 +34,6 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
 
-    insertDeleteButtonIntoView(discTypesTableModel_, ui->discTypesTableView, 4);
-
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
     connect(radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated,
@@ -55,6 +52,8 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
     ui->discTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
     ui->discTypesTableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
     ui->discTypesTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
+    insertDeleteButtonIntoView(discTypesTableModel_, ui->discTypesTableView, 4);
+
     ui->discTypesTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                                             QAbstractItemView::EditTrigger::SelectedClicked);
     ui->discTypesTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
