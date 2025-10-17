@@ -61,8 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
 
                 const auto& widgetSize = ui->simulationWidget->size();
                 auto config = simulation_->getSimulationConfig();
-                config.setup.cellWidth = widgetSize.width();
-                config.setup.cellHeight = widgetSize.height();
+                config.setup.cellMembraneType.radius = std::min(widgetSize.height(), widgetSize.width());
                 simulation_->setSimulationConfig(config);
 
                 ui->simulationWidget->resetView();

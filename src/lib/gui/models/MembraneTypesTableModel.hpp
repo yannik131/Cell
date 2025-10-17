@@ -43,6 +43,8 @@ public:
 
     void reload();
 
+    std::string getMembraneTypeNameForRow(int row) const;
+
 private:
     void updateMembraneTypeName(const std::string& newName, int row);
 

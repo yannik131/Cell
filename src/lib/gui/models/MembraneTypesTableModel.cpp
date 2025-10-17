@@ -1,4 +1,5 @@
 #include "models/MembraneTypesTableModel.hpp"
+#include "MembraneTypesTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
 
@@ -144,6 +145,11 @@ void MembraneTypesTableModel::reload()
     rows_ = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
     membraneTypeColorMap_ = abstractSimulationBuilder_->getMembraneTypeColorMap();
     endResetModel();
+}
+
+std::string MembraneTypesTableModel::getMembraneTypeNameForRow(int row) const
+{
+    // TODO use updater to get possibly changed name here
 }
 
 void MembraneTypesTableModel::updateMembraneTypeName(const std::string& newName, int row)

@@ -14,6 +14,7 @@ class MainWindow;
 }
 
 class DiscTypesDialog;
+class MembraneTypesDialog;
 class ReactionsDialog;
 class SetupDialog;
 class PlotDataSelectionDialog;

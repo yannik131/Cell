@@ -10,6 +10,7 @@ class MembraneTypesDialog;
 
 class MembraneTypesTableModel;
 class AbstractSimulationBuilder;
+class PermeabilityDialog;
 
 class MembraneTypesDialog : public QDialog
 {
@@ -19,10 +20,12 @@ public:
 
 private:
     void showEvent(QShowEvent* event) override;
+    void showPermeabilityDialog(int row);
 
 private:
     Ui::MembraneTypesDialog* ui;
     MembraneTypesTableModel* membraneTypesTableModel_;
+    PermeabilityDialog* permeabilityDialog_;
 };
 
 #endif /* C8FA243B_5843_4BD9_9E3A_0C6297CED23C_HPP */

@@ -40,9 +40,9 @@ public:
 
     virtual void setMembraneTypes(const std::vector<cell::config::MembraneType>& membraneTypes,
                                   const std::unordered_set<std::string>& removedMembraneTypes,
-                                  const std::map<std::string, sf::Color>& membraneTypeColorMap) = 0;
+                                  const std::map<std::string, sf::Color>& membraneTypeColorMap);
 
-    virtual const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const = 0;
+    virtual const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const;
 
     void registerConfigObserver(ConfigObserver observer) override;
     const cell::DiscTypeRegistry& getDiscTypeRegistry() override;

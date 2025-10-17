@@ -4,12 +4,15 @@
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
+#include "dialogs/PermeabilityDialog.hpp"
+#include "models/MembraneTypesTableModel.hpp"
 #include "ui_MembraneTypesDialog.h"
 
 MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QDialog(parent)
     , ui(new Ui::MembraneTypesDialog)
     , membraneTypesTableModel_(new MembraneTypesTableModel(this, abstractSimulationBuilder))
+    , permeabilityDialog_(new PermeabilityDialog(this, abstractSimulationBuilder))
 {
     ui->setupUi(this);
 
@@ -40,7 +43,11 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, AbstractSimulationBuil
     connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
     connect(editPermeabilityPushButtonDelegate, &ButtonDelegate::buttonClicked, this,
-            &MembraneTypesDialog::showPermeabilityDialog);
+            [&](int row)
+            {
+                const auto& membraneTypeName = membraneTypesTableModel_->getMembraneTypeNameForRow(row);
+                permeabilityDialog_->showDialogWithPermeabilitiesFor(membraneTypeName);
+            });
 
     ui->membraneTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
     ui->membraneTypesTableView->setItemDelegateForColumn(2, colorComboBoxDelegate);

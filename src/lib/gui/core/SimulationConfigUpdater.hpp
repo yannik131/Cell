@@ -27,6 +27,9 @@ public:
     createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldTypes,
                     const std::unordered_set<std::string>& removedTypes) const;
 
+    const auto& getDiscTypeChangeMap() const;
+    const auto& getMembraneTypeChangeMap() const;
+
 private:
     std::unordered_map<std::string, std::string> discTypeChangeMap_;
     std::unordered_map<std::string, std::string> membraneTypeChangeMap_;

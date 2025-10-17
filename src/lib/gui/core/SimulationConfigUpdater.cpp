@@ -90,3 +90,13 @@ void SimulationConfigUpdater::updateMembraneTypes(cell::SimulationConfig& config
     for (auto& membrane : config.setup.membranes)
         membrane.membraneTypeName = membraneTypeChangeMap_.at(membrane.membraneTypeName);
 }
+
+const auto& SimulationConfigUpdater::getDiscTypeChangeMap() const
+{
+    return discTypeChangeMap_;
+}
+
+const auto& SimulationConfigUpdater::getMembraneTypeChangeMap() const
+{
+    return membraneTypeChangeMap_;
+}

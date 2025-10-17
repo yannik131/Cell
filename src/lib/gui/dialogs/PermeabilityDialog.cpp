@@ -5,14 +5,14 @@
 #include "models/PermeabilityTableModel.hpp"
 #include "ui_PermeabilityDialog.h"
 
+#include "PermeabilityDialog.hpp"
 #include <QCloseEvent>
 #include <QMessageBox>
 
-PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder,
-                                       PermeabilityTableModel* permeabilityTableModel)
+PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QDialog(parent)
     , ui(new Ui::PermeabilityDialog)
-    , permeabilityTableModel_(permeabilityTableModel)
+    , permeabilityTableModel_(new PermeabilityTableModel(this, abstractSimulationBuilder))
 {
     ui->setupUi(this);
 
@@ -39,7 +39,13 @@ PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilde
     ui->permeabilityTableView->setModel(permeabilityTableModel_);
 }
 
-void DiscTypesDialog::showEvent(QShowEvent*)
+void PermeabilityDialog::showDialogWithPermeabilitiesFor(const std::string& membraneTypeName)
+{
+    permeabilityTableModel_->loadMembraneType(membraneTypeName);
+    show();
+}
+
+void PermeabilityDialog::showEvent(QShowEvent*)
 {
     permeabilityTableModel_->reload();
 }

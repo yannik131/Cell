@@ -96,22 +96,28 @@ void PermeabilityTableModel::loadMembraneType(const std::string& membraneTypeNam
     const auto& membraneTypes = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
     const auto membraneTypeIter = std::find_if(membraneTypes.begin(), membraneTypes.end(),
                                                [&](const auto& type) { return type.name == membraneTypeName; });
-    if (membraneTypeIter == membraneTypes.end())
-        throw ExceptionWithLocation("Membrane type name not found in config: " + membraneTypeName);
-
-    const auto& permeabilityMap = membraneTypeIter->permeabilityMap;
     const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
 
     beginResetModel();
-
     rows_.clear();
-    for (const auto& discType : discTypes)
+
+    if (membraneTypeIter == membraneTypes.end())
     {
-        const auto iter = permeabilityMap.find(discType.name);
-        if (iter == permeabilityMap.end())
+        for (const auto& discType : discTypes)
             rows_.push_back(cell::MembraneType::Permeability::None);
-        else
-            rows_.push_back(iter->second);
+    }
+    else
+    {
+        const auto& permeabilityMap = membraneTypeIter->permeabilityMap;
+
+        for (const auto& discType : discTypes)
+        {
+            const auto iter = permeabilityMap.find(discType.name);
+            if (iter == permeabilityMap.end())
+                rows_.push_back(cell::MembraneType::Permeability::None);
+            else
+                rows_.push_back(iter->second);
+        }
     }
 
     endResetModel();
