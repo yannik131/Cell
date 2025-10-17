@@ -1,5 +1,6 @@
 #include "core/Simulation.hpp"
 #include "SFMLJsonSerializers.hpp"
+#include "cell/Cell.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
@@ -27,7 +28,7 @@ void Simulation::run()
     auto simulationTimeScale = simulationConfig_.setup.simulationTimeScale;
     auto simulationTimeStep = simulationConfig_.setup.simulationTimeStep;
 
-    while (!simulationContext_.getCell().getDiscs().empty())
+    while (!simulationFactory_.getCell().getDiscs().empty())
     {
         if (QThread::currentThread()->isInterruptionRequested())
             break;
@@ -37,7 +38,7 @@ void Simulation::run()
         while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-            simulationContext_.getCell().update(simulationTimeStep);
+            simulationFactory_.getCell().update(simulationTimeStep);
 
             emitFrame(RedrawOnly{false});
         }
@@ -46,7 +47,7 @@ void Simulation::run()
 
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
-    simulationContext_.buildSimulationFromConfig(config);
+    simulationFactory_.buildSimulationFromConfig(config);
 }
 
 void Simulation::rebuildContext()
@@ -66,12 +67,12 @@ void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTyp
                               const std::map<std::string, sf::Color>& discTypeColorMap)
 {
     SimulationConfigUpdater updater;
-    auto changeMap = updater.createChangeMap(discTypes, simulationConfig_.discTypes, removedDiscTypes);
+    updater.createDiscTypeChangeMap(discTypes, simulationConfig_.discTypes, removedDiscTypes);
 
     auto newConfig = simulationConfig_;
     newConfig.discTypes = discTypes;
     updater.removeDiscTypes(newConfig, removedDiscTypes);
-    updater.updateDiscTypes(newConfig, changeMap);
+    updater.updateDiscTypes(newConfig);
 
     buildContext(newConfig);
 
@@ -95,19 +96,47 @@ const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
     return discTypeColorMap_;
 }
 
+void Simulation::setMembraneTypes(const std::vector<cell::config::MembraneType>& membraneTypes,
+                                  const std::unordered_set<std::string>& removedMembraneTypes,
+                                  const std::map<std::string, sf::Color>& membraneTypeColorMap)
+{
+    // TODO DRY violation with setDiscTypes
+    SimulationConfigUpdater updater;
+    updater.createMembraneTypeChangeMap(membraneTypes, simulationConfig_.membraneTypes, removedMembraneTypes);
+
+    auto newConfig = simulationConfig_;
+    newConfig.membraneTypes = membraneTypes;
+    updater.removeMembraneTypes(newConfig, removedMembraneTypes);
+    updater.updateMembraneTypes(newConfig);
+
+    buildContext(newConfig);
+
+    // If the above line didn't throw, we're safe to actually change the config now
+
+    simulationConfig_ = std::move(newConfig);
+    membraneTypeColorMap_ = membraneTypeColorMap;
+
+    notifyConfigObservers();
+}
+
+const std::map<std::string, sf::Color>& Simulation::getMembraneTypeColorMap() const
+{
+    return membraneTypeColorMap_;
+}
+
 void Simulation::registerConfigObserver(ConfigObserver observer)
 {
     configObservers_.push_back(std::move(observer));
 }
 
-const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry() const
+const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
 {
-    return simulationContext_.getDiscTypeRegistry();
+    return simulationFactory_.getSimulationContext().discTypeRegistry;
 }
 
-bool Simulation::contextIsBuilt() const
+bool Simulation::cellIsBuilt() const
 {
-    return simulationContext_.isBuilt();
+    return simulationFactory_.cellIsBuilt();
 }
 
 void Simulation::loadDefaultConfig()
@@ -119,7 +148,8 @@ void Simulation::saveConfigToFile(const fs::path& path) const
 {
     json j;
     j["config"] = simulationConfig_;
-    j["colorMap"] = discTypeColorMap_;
+    j["discTypeColorMap"] = discTypeColorMap_;
+    j["membraneTypeColorMap"] = membraneTypeColorMap_;
 
     std::ofstream file(path);
     file << j.dump(4);
@@ -133,6 +163,7 @@ void Simulation::loadConfigFromFile(const fs::path& path)
 
     simulationConfig_ = j["config"].get<cell::SimulationConfig>();
     discTypeColorMap_ = j["colorMap"].get<std::map<std::string, sf::Color>>();
+    membraneTypeColorMap_ = j["membraneTypeColorMap"].get<std::map<std::string, sf::Color>>();
 
     rebuildContext();
 }
@@ -147,11 +178,11 @@ void Simulation::notifyConfigObservers()
 
 void Simulation::emitFrame(RedrawOnly redrawOnly)
 {
-    if (!simulationContext_.isBuilt())
+    if (!simulationFactory_.cellIsBuilt())
         return;
 
     FrameDTO frameDTO;
-    frameDTO.discs_ = simulationContext_.getCell().getDiscs();
+    frameDTO.discs_ = simulationFactory_.getCell().getDiscs();
 
     if (redrawOnly.value)
     {
@@ -160,7 +191,7 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
     }
 
     frameDTO.elapsedSimulationTimeUs = static_cast<long long>(simulationConfig_.setup.simulationTimeStep * 1e6);
-    frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
+    frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);
 }

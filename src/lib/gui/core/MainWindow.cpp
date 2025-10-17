@@ -188,8 +188,8 @@ void MainWindow::startSimulation()
     if (simulationThread_ != nullptr)
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
-    if (!simulation_->contextIsBuilt())
-        throw ExceptionWithLocation("Can't start simulation: Simulation context has not been built yet.");
+    if (!simulation_->cellIsBuilt())
+        throw ExceptionWithLocation("Can't start simulation: Cell has not been built yet.");
 
     simulationThread_ = new QThread();
     simulation_->moveToThread(simulationThread_);

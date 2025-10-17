@@ -119,12 +119,9 @@ void DiscTableModel::addRow()
 
 void DiscTableModel::clearRows()
 {
-    if (rows_.empty())
-        return;
-
-    beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
+    beginResetModel();
     rows_.clear();
-    endRemoveRows();
+    endResetModel();
 }
 
 const std::vector<cell::config::Disc>& DiscTableModel::getRows() const

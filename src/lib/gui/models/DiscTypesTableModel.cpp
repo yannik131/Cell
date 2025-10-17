@@ -2,7 +2,6 @@
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
 
-#include "DiscTypesTableModel.hpp"
 #include <set>
 
 DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)

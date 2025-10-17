@@ -82,6 +82,11 @@ Cell& SimulationFactory::getCell()
     return *cell_;
 }
 
+bool SimulationFactory::cellIsBuilt() const
+{
+    return static_cast<bool>(cell_);
+}
+
 DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
 {
     if (!collisionDetector_)

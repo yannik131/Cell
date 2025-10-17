@@ -38,10 +38,16 @@ public:
 
     const std::map<std::string, sf::Color>& getDiscTypeColorMap() const override;
 
-    void registerConfigObserver(ConfigObserver observer) override;
-    const cell::DiscTypeRegistry& getDiscTypeRegistry() const override;
+    virtual void setMembraneTypes(const std::vector<cell::config::MembraneType>& membraneTypes,
+                                  const std::unordered_set<std::string>& removedMembraneTypes,
+                                  const std::map<std::string, sf::Color>& membraneTypeColorMap) = 0;
 
-    bool contextIsBuilt() const;
+    virtual const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const = 0;
+
+    void registerConfigObserver(ConfigObserver observer) override;
+    const cell::DiscTypeRegistry& getDiscTypeRegistry() override;
+
+    bool cellIsBuilt() const;
 
     /**
      * @todo Resets the internal config to a default constructed object and sends signals to all observers so that they
@@ -62,8 +68,9 @@ private:
 
 private:
     cell::SimulationConfig simulationConfig_;
-    cell::SimulationFactory simulationContext_;
+    cell::SimulationFactory simulationFactory_;
     std::map<std::string, sf::Color> discTypeColorMap_;
+    std::map<std::string, sf::Color> membraneTypeColorMap_;
 
     std::vector<ConfigObserver> configObservers_;
 };

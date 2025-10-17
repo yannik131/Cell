@@ -25,7 +25,7 @@ const QMap<sf::Color, QString>& getColorNameMapping()
 
 const QMap<QString, sf::Color>& getNameColorMapping()
 {
-    static const QMap<QString, sf::Color> nameColorMapping = utility::invertMap(getColorNameMapping());
+    static const auto nameColorMapping = utility::invertMap(getColorNameMapping());
     return nameColorMapping;
 }
 

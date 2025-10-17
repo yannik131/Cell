@@ -15,6 +15,8 @@ namespace cell
 class Disc;
 }
 
+// TODO apply Interface Segregation Principle
+
 using ConfigObserver =
     std::function<void(const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& discTypeColorMap)>;
 
@@ -29,8 +31,14 @@ public:
 
     virtual const std::map<std::string, sf::Color>& getDiscTypeColorMap() const = 0;
 
+    virtual void setMembraneTypes(const std::vector<cell::config::MembraneType>& membraneTypes,
+                                  const std::unordered_set<std::string>& removedMembraneTypes,
+                                  const std::map<std::string, sf::Color>& membraneTypeColorMap) = 0;
+
+    virtual const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const = 0;
+
     virtual void registerConfigObserver(ConfigObserver observer) = 0;
-    virtual const cell::DiscTypeRegistry& getDiscTypeRegistry() const = 0;
+    virtual const cell::DiscTypeRegistry& getDiscTypeRegistry() = 0;
 
     virtual ~AbstractSimulationBuilder() = default;
 };

@@ -42,6 +42,7 @@ public:
     SimulationContext getSimulationContext();
 
     Cell& getCell();
+    bool cellIsBuilt() const;
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 

@@ -1,8 +1,23 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "SimulationConfigUpdater.hpp"
 
+void SimulationConfigUpdater::createDiscTypeChangeMap(const std::vector<cell::config::DiscType>& newDiscTypes,
+                                                      const std::vector<cell::config::DiscType>& oldDiscTypes,
+                                                      const std::unordered_set<std::string>& removedDiscTypes)
+{
+    discTypeChangeMap_ = createChangeMap(newDiscTypes, oldDiscTypes, removedDiscTypes);
+}
+
+void SimulationConfigUpdater::createMembraneTypeChangeMap(
+    const std::vector<cell::config::MembraneType>& newMembraneTypes,
+    const std::vector<cell::config::MembraneType>& oldMembraneTypes,
+    const std::unordered_set<std::string>& removedMembraneTypes)
+{
+    membraneTypeChangeMap_ = createChangeMap(newMembraneTypes, oldMembraneTypes, removedMembraneTypes);
+}
+
 void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
-                                              const std::unordered_set<std::string>& removedDiscTypes)
+                                              const std::unordered_set<std::string>& removedDiscTypes) const
 {
     if (removedDiscTypes.empty())
         return;
@@ -17,12 +32,15 @@ void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
                                           }),
                            config.reactions.end());
 
-    for (auto iter = config.setup.distribution.begin(); iter != config.setup.distribution.end();)
+    for (auto& [membraneTypeName, distribution] : config.setup.distributions)
     {
-        if (removedDiscTypes.contains(iter->first))
-            iter = config.setup.distribution.erase(iter);
-        else
-            ++iter;
+        for (auto iter = distribution.begin(); iter != distribution.end();)
+        {
+            if (removedDiscTypes.contains(iter->first))
+                iter = distribution.erase(iter);
+            else
+                ++iter;
+        }
     }
 
     config.setup.discs.erase(std::remove_if(config.setup.discs.begin(), config.setup.discs.end(),
@@ -31,48 +49,44 @@ void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
                              config.setup.discs.end());
 }
 
-std::map<std::string, std::string>
-SimulationConfigUpdater::createChangeMap(const std::vector<cell::config::DiscType>& newDiscTypes,
-                                         const std::vector<cell::config::DiscType>& oldDiscTypes,
-                                         const std::unordered_set<std::string>& removedDiscTypes)
+void SimulationConfigUpdater::removeMembraneTypes(cell::SimulationConfig& config,
+                                                  const std::unordered_set<std::string>& removedMembraneTypes) const
 {
-    // Since new disc types are always appended to the table, iterating both arrays in order gives the changes
-    // We'll map "" to "" to accomodate empty strings like in reactions
-
-    std::map<std::string, std::string> changeMap({{"", ""}});
-    for (std::size_t i = 0; i < oldDiscTypes.size() && i < newDiscTypes.size(); ++i)
-    {
-        if (removedDiscTypes.contains(oldDiscTypes[i].name))
-            continue;
-
-        changeMap[oldDiscTypes[i].name] = newDiscTypes[i].name;
-    }
-
-    if (changeMap.size() == 1)
-        return {};
-
-    return changeMap;
+    config.setup.membranes.erase(std::remove_if(config.setup.membranes.begin(), config.setup.membranes.end(),
+                                                [&](const cell::config::Disc& disc)
+                                                { return removedMembraneTypes.contains(disc.discTypeName); }),
+                                 config.setup.membranes.end());
 }
 
-void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
-                                              const std::map<std::string, std::string>& changeMap)
+void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config) const
 {
-    if (changeMap.empty())
+    if (discTypeChangeMap_.empty())
         return;
 
     for (auto& reaction : config.reactions)
     {
-        reaction.educt1 = changeMap.at(reaction.educt1);
-        reaction.educt2 = changeMap.at(reaction.educt2);
-        reaction.product1 = changeMap.at(reaction.product1);
-        reaction.product2 = changeMap.at(reaction.product2);
+        reaction.educt1 = discTypeChangeMap_.at(reaction.educt1);
+        reaction.educt2 = discTypeChangeMap_.at(reaction.educt2);
+        reaction.product1 = discTypeChangeMap_.at(reaction.product1);
+        reaction.product2 = discTypeChangeMap_.at(reaction.product2);
     }
 
-    std::map<std::string, double> newDistribution;
-    for (const auto& [discType, frequency] : config.setup.distribution)
-        newDistribution[changeMap.at(discType)] = frequency;
-    config.setup.distribution = std::move(newDistribution);
+    for (auto& [membraneTypeName, distribution] : config.setup.distributions)
+    {
+        std::map<std::string, double> newDistribution;
+
+        for (const auto& [discType, frequency] : distribution)
+            newDistribution[discTypeChangeMap_.at(discType)] = frequency;
+
+        distribution = std::move(newDistribution);
+    }
 
     for (auto& disc : config.setup.discs)
-        disc.discTypeName = changeMap.at(disc.discTypeName);
+        disc.discTypeName = discTypeChangeMap_.at(disc.discTypeName);
+}
+
+void SimulationConfigUpdater::updateMembraneTypes(cell::SimulationConfig& config) const
+{
+    for (auto& membrane : config.setup.membranes)
+        membrane.membraneTypeName = membraneTypeChangeMap_.at(membrane.membraneTypeName);
 }
