@@ -91,33 +91,36 @@ Qt::ItemFlags PermeabilityTableModel::flags(const QModelIndex& index) const
     return Qt::ItemIsSelectable;
 }
 
-void PermeabilityTableModel::loadMembraneType(const std::string& membraneTypeName)
+void PermeabilityTableModel::setPermeabilityMap(
+    std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
 {
-    const auto& membraneTypes = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
-    const auto membraneTypeIter = std::find_if(membraneTypes.begin(), membraneTypes.end(),
-                                               [&](const auto& type) { return type.name == membraneTypeName; });
+    permeabilityMap_ = &permeabilityMap;
+}
+
+void PermeabilityTableModel::commitChanges()
+{
+    const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
+    permeabilityMap_->clear();
+
+    for (std::size_t i = 0; i < discTypes.size(); ++i)
+        permeabilityMap_[discTypes[i].getName()] = rows_[i];
+}
+
+void PermeabilityTableModel::convertMapToRows(
+    const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
+{
     const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
 
     beginResetModel();
     rows_.clear();
 
-    if (membraneTypeIter == membraneTypes.end())
+    for (const auto& discType : discTypes)
     {
-        for (const auto& discType : discTypes)
+        const auto iter = permeabilityMap_.find(discType.name);
+        if (iter == permeabilityMap_.end())
             rows_.push_back(cell::MembraneType::Permeability::None);
-    }
-    else
-    {
-        const auto& permeabilityMap = membraneTypeIter->permeabilityMap;
-
-        for (const auto& discType : discTypes)
-        {
-            const auto iter = permeabilityMap.find(discType.name);
-            if (iter == permeabilityMap.end())
-                rows_.push_back(cell::MembraneType::Permeability::None);
-            else
-                rows_.push_back(iter->second);
-        }
+        else
+            rows_.push_back(iter->second);
     }
 
     endResetModel();

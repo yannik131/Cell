@@ -43,7 +43,8 @@ SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const s
     // Since new types are always appended to the table in the GUI, iterating both arrays in order gives the changes
     // We'll map "" to "" to accomodate empty strings like in reactions
 
-    std::map<std::string, std::string> changeMap({{"", ""}});
+    std::unordered_map<std::string, std::string> changeMap({{"", ""}});
+
     for (std::size_t i = 0; i < oldTypes.size() && i < newTypes.size(); ++i)
     {
         if (removedTypes.contains(oldTypes[i].name))

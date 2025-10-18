@@ -2,6 +2,7 @@
 #include "MembraneTypesTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 // TODO Massive DRY violation here with the DiscTypesTableModel and possible other models, fix as soon as everything in
 // the PR works
@@ -147,9 +148,9 @@ void MembraneTypesTableModel::reload()
     endResetModel();
 }
 
-std::string MembraneTypesTableModel::getMembraneTypeNameForRow(int row) const
+cell::config::MembraneType& MembraneTypesTableModel::getRow(int row)
 {
-    // TODO use updater to get possibly changed name here
+    return rows_[row];
 }
 
 void MembraneTypesTableModel::updateMembraneTypeName(const std::string& newName, int row)

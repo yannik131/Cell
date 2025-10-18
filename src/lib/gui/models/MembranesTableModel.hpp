@@ -26,6 +26,7 @@ public:
     void addRow();
     void clearRows();
     const std::vector<cell::config::Membrane>& getRows() const;
+
     void reload();
 
 private:

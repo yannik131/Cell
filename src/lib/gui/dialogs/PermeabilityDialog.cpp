@@ -39,6 +39,12 @@ PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilde
     ui->permeabilityTableView->setModel(permeabilityTableModel_);
 }
 
+void PermeabilityDialog::setPermeabilityMap(
+    std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
+{
+    permeabilityTableModel_->setPermeabilityMap(permeabilityMap);
+}
+
 void PermeabilityDialog::showDialogWithPermeabilitiesFor(const std::string& membraneTypeName)
 {
     permeabilityTableModel_->loadMembraneType(membraneTypeName);

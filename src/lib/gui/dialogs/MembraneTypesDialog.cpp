@@ -45,8 +45,10 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, AbstractSimulationBuil
     connect(editPermeabilityPushButtonDelegate, &ButtonDelegate::buttonClicked, this,
             [&](int row)
             {
-                const auto& membraneTypeName = membraneTypesTableModel_->getMembraneTypeNameForRow(row);
-                permeabilityDialog_->showDialogWithPermeabilitiesFor(membraneTypeName);
+                selectedRowForPermeabilityEditing_ = row;
+                auto& permeabilityMap = membraneTypesTableModel_->getRow(row).permeabilityMap;
+                permeabilityDialog_->setPermeabilityMap(permeabilityMap);
+                permeabilityDialog_->show();
             });
 
     ui->membraneTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);

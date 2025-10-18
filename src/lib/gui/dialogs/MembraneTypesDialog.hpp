@@ -20,7 +20,6 @@ public:
 
 private:
     void showEvent(QShowEvent* event) override;
-    void showPermeabilityDialog(int row);
 
 private:
     Ui::MembraneTypesDialog* ui;

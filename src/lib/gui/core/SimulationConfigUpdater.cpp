@@ -53,8 +53,8 @@ void SimulationConfigUpdater::removeMembraneTypes(cell::SimulationConfig& config
                                                   const std::unordered_set<std::string>& removedMembraneTypes) const
 {
     config.setup.membranes.erase(std::remove_if(config.setup.membranes.begin(), config.setup.membranes.end(),
-                                                [&](const cell::config::Disc& disc)
-                                                { return removedMembraneTypes.contains(disc.discTypeName); }),
+                                                [&](const cell::config::Membrane& membrane)
+                                                { return removedMembraneTypes.contains(membrane.membraneTypeName); }),
                                  config.setup.membranes.end());
 }
 
@@ -82,13 +82,23 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config) co
     }
 
     for (auto& disc : config.setup.discs)
+    {
+        if (!discTypeChangeMap_.contains(disc.discTypeName))
+            continue;
+
         disc.discTypeName = discTypeChangeMap_.at(disc.discTypeName);
+    }
 }
 
 void SimulationConfigUpdater::updateMembraneTypes(cell::SimulationConfig& config) const
 {
     for (auto& membrane : config.setup.membranes)
+    {
+        if (!membraneTypeChangeMap_.contains(membrane.membraneTypeName))
+            continue;
+
         membrane.membraneTypeName = membraneTypeChangeMap_.at(membrane.membraneTypeName);
+    }
 }
 
 const auto& SimulationConfigUpdater::getDiscTypeChangeMap() const

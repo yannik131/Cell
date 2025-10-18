@@ -43,7 +43,7 @@ public:
 
     void reload();
 
-    std::string getMembraneTypeNameForRow(int row) const;
+    cell::config::MembraneType& getRow(int row);
 
 private:
     void updateMembraneTypeName(const std::string& newName, int row);

@@ -27,26 +27,18 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
                               }));
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
 
-    auto updateWidgets = [this](bool on)
-    {
-        setupModel_->setUseDistribution(on);
-        ui->distributionWidget->setEnabled(on);
-        ui->manualWidget->setDisabled(on);
-    };
-
-    connect(ui->useDistributionRadioButton, &QRadioButton::toggled, this, updateWidgets);
+    connect(ui->useDistributionRadioButton, &QRadioButton::toggled, this,
+            [&](bool on)
+            {
+                ui->discsGroupBox->setEnabled(!on);
+                setupModel_->setUseDistribution(on);
+            });
     updateWidgets(ui->useDistributionRadioButton->isChecked());
-
-    connect(ui->addDistributionEntryPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
-            utility::safeSlot(this, [this]() { discTypeDistributionTableModel_->addRow(); }));
-    connect(ui->clearDistributionPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
-            &DiscTypeDistributionTableModel::clearRows);
 
     connect(ui->addDiscPushButton, &QPushButton::clicked, discTableModel_,
             utility::safeSlot(this, [this]() { discTableModel_->addRow(); }));
     connect(ui->clearDiscsPushButton, &QPushButton::clicked, discTableModel_, &DiscTableModel::clearRows);
 
-    connect(ui->numberOfDiscsSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setNumberOfDiscs);
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
     connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellWidth);

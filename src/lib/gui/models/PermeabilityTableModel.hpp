@@ -19,12 +19,15 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
+    void setPermeabilityMap(std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap);
+    void commitChanges();
 
-    void loadMembraneType(const std::string& membraneTypeName);
+private:
+    void convertMapToRows(const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap);
 
 private:
     std::vector<cell::MembraneType::Permeability> rows_;
-    std::string membraneTypeName_;
+    std::unordered_map<std::string, cell::MembraneType::Permeability>* permeabilityMap_ = nullptr;
 
     AbstractSimulationBuilder* abstractSimulationBuilder_;
 };

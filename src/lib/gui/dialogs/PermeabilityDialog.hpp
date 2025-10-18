@@ -16,7 +16,7 @@ class PermeabilityDialog : public QDialog
     Q_OBJECT
 public:
     PermeabilityDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
-    void showDialogWithPermeabilitiesFor(const std::string& membraneTypeName);
+    void setPermeabilityMap(std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap);
 
 private:
     void showEvent(QShowEvent* event) override;
