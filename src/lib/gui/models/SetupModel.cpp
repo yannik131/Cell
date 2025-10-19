@@ -62,7 +62,6 @@ void SetupModel::commitChanges()
 void SetupModel::reload()
 {
     setup_ = abstractSimulationBuilder_->getSimulationConfig().setup;
-    discTypeDistributionTableModel_->reload();
     discTableModel_->reload();
 }
 

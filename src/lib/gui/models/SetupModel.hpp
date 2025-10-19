@@ -33,7 +33,6 @@ private:
 
 private:
     AbstractSimulationBuilder* abstractSimulationBuilder_;
-    DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
     DiscTableModel* discTableModel_;
 
     cell::config::Setup setup_;

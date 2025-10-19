@@ -57,18 +57,11 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
     ui->maxVelocitySpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMaxVelocity),
                                      static_cast<int>(cell::SettingsLimits::MaxMaxVelocity));
 
-    insertDiscTypeComboboxIntoView(ui->discTypeDistributionTableView, abstractSimulationBuilder, 0);
-    insertDiscTypeComboboxIntoView(ui->discsTableView, abstractSimulationBuilder, 0);
-
-    insertProbabilitySpinBoxIntoView(ui->discTypeDistributionTableView, 1);
-
-    insertDeleteButtonIntoView(discTypeDistributionTableModel_, ui->discTypeDistributionTableView, 2);
-    insertDeleteButtonIntoView(discTableModel_, ui->discsTableView, 5);
-
-    ui->discTypeDistributionTableView->setModel(discTypeDistributionTableModel_);
     ui->discsTableView->setModel(discTableModel_);
 
-    ui->discTypeDistributionTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    insertDiscTypeComboboxIntoView(ui->discsTableView, abstractSimulationBuilder, 0);
+    insertDeleteButtonIntoView(discTableModel_, ui->discsTableView, 5);
+
     ui->discsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     displayCurrentSetup();
