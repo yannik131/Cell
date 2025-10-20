@@ -6,6 +6,20 @@
 
 // TODO Massive DRY violation here with the DiscTypesTableModel and possible other models, fix as soon as everything in
 // the PR works
+// TODO Models should behave like this:
+// - Have an internal representation of the GUI data in rows_
+// - When the dialog opens, it calls model_->reload(), causing the model to turn the relevant part of the current
+// simulation config into rows_
+// - When OK is clicked, rows_ is converted back into the relevant part of the config, the current config is taken and
+// updated Classes:
+// - SimulationConfigUpdater:
+//      - cell::SimulationConfig getCurrentConfig() const
+//      - void setSimulationConfig(cell::SimulationConfig)
+// - SimulationConfigTableModel:
+//      - reload()
+//      - commitChanges()
+// - SimulationConfigDialog:
+//      - SimulationConfigTableModel* model_
 
 MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
     : QAbstractTableModel(parent)

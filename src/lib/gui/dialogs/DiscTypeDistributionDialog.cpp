@@ -1,4 +1,8 @@
 #include "dialogs/DiscTypeDistributionDialog.hpp"
+#include "core/Utility.hpp"
+#include "delegates/ButtonDelegate.hpp"
+#include "delegates/ComboBoxDelegate.hpp"
+#include "delegates/SpinBoxDelegate.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "ui_DiscTypeDistributionDialog.h"
 
@@ -19,7 +23,7 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
                               }));
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(ui->addPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
-            &DiscTypeDistributionTableModel::addEmptyRow);
+            &DiscTypeDistributionTableModel::addRow);
     connect(ui->clearPushButton, &QPushButton::clicked, discTypeDistributionTableModel_,
             &DiscTypeDistributionTableModel::clearRows);
 

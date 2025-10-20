@@ -45,12 +45,6 @@ void PermeabilityDialog::setPermeabilityMap(
     permeabilityTableModel_->setPermeabilityMap(permeabilityMap);
 }
 
-void PermeabilityDialog::showDialogWithPermeabilitiesFor(const std::string& membraneTypeName)
-{
-    permeabilityTableModel_->loadMembraneType(membraneTypeName);
-    show();
-}
-
 void PermeabilityDialog::showEvent(QShowEvent*)
 {
     permeabilityTableModel_->reload();
