@@ -3,43 +3,85 @@
 
 #include "cell/SimulationConfig.hpp"
 
+#include <QObject>
+#include <SFML/Graphics/Color.hpp>
+
 #include <unordered_set>
 
 class SimulationConfigUpdater
 {
+    Q_OBJECT
 public:
-    void createDiscTypeChangeMap(const std::vector<cell::config::DiscType>& newDiscTypes,
-                                 const std::vector<cell::config::DiscType>& oldDiscTypes,
-                                 const std::unordered_set<std::string>& removedDiscTypes);
-    void createMembraneTypeChangeMap(const std::vector<cell::config::MembraneType>& newMembraneTypes,
-                                     const std::vector<cell::config::MembraneType>& oldMembraneTypes,
-                                     const std::unordered_set<std::string>& removedMembraneTypes);
+    const cell::SimulationConfig& getSimulationConfig() const;
+    void setSimulationConfig(const cell::SimulationConfig& simulationConfig);
 
+    template <typename T>
+    void setTypes(const std::vector<T>& newTypes, const std::unordered_set<std::string>& removedTypes,
+                  const std::map<std::string, sf::Color>& colorMap);
+
+    const std::map<std::string, sf::Color>& getDiscTypeColorMap() const;
+    const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const;
+
+    void saveConfigToFile(const fs::path& path) const;
+    void loadConfigFromFile(const fs::path& path);
+
+signals:
+    void discTypesChanged();
+
+private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;
     void removeMembraneTypes(cell::SimulationConfig& config,
                              const std::unordered_set<std::string>& removedMembraneTypes) const;
 
-    void updateDiscTypes(cell::SimulationConfig& config) const;
-    void updateMembraneTypes(cell::SimulationConfig& config) const;
+    void updateDiscTypes(cell::SimulationConfig& config,
+                         const std::unordered_map<std::string, std::string>& changeMap) const;
+    void updateMembraneTypes(cell::SimulationConfig& config,
+                             const std::unordered_map<std::string, std::string>& changeMap) const;
+    void testConfig(const cell::SimulationConfig& simulationConfig) const;
 
     template <typename T>
     std::unordered_map<std::string, std::string>
-    createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldTypes,
+    createChangeMap(const std::vector<T>& newDiscTypes, const std::vector<T>& oldDiscTypes,
                     const std::unordered_set<std::string>& removedTypes) const;
 
-    const auto& getDiscTypeChangeMap() const;
-    const auto& getMembraneTypeChangeMap() const;
-
 private:
-    std::unordered_map<std::string, std::string> discTypeChangeMap_;
-    std::unordered_map<std::string, std::string> membraneTypeChangeMap_;
+    cell::SimulationConfig simulationConfig_;
+    std::map<std::string, sf::Color> discTypeColorMap_;
+    std::map<std::string, sf::Color> membraneTypeColorMap_;
 };
 
 template <typename T>
+inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
+                                              const std::unordered_set<std::string>& removedTypes,
+                                              const std::map<std::string, sf::Color>& colorMap)
+{
+    auto simulationConfigCopy = simulationConfig_;
+
+    if constexpr (std::is_same_v<T, cell::config::DiscType>)
+    {
+        removeDiscTypes(simulationConfigCopy, removedTypes);
+        auto changeMap = createChangeMap(newTypes, simulationConfig_.discTypes, removedTypes);
+        updateDiscTypes(simulationConfigCopy, changeMap);
+        emit discTypesChanged();
+    }
+    else if constexpr (std::is_same_v<T, cell::config::MembraneType>)
+    {
+        removeMembraneTypes(simulationConfigCopy, updatedTypes.removedTypes);
+        auto changeMap = createChangeMap(newTypes, simulationConfig_.membraneTypes, removedTypes);
+        updateDiscTypes(simulationConfigCopy, changeMap);
+    }
+
+    setSimulationConfig(simulationConfigCopy);
+}
+
+template <typename T>
 inline std::unordered_map<std::string, std::string>
-SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldTypes,
+SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldDiscTypes,
                                          const std::unordered_set<std::string>& removedTypes) const
 {
+    static_assert(std::is_same_v<T, cell::config::DiscType> || std::is_same_v<T, cell::config::MembraneType>,
+                  "Unsupported type");
+
     // Since new types are always appended to the table in the GUI, iterating both arrays in order gives the changes
     // We'll map "" to "" to accomodate empty strings like in reactions
 
