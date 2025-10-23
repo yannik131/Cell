@@ -40,20 +40,13 @@ QVariant ReactionsTableModel::data(const QModelIndex& index, int role) const
 
     switch (index.column())
     {
-    case 0:
-        return QString::fromStdString(reaction.educt1);
-    case 2:
-        return QString::fromStdString(reaction.educt2);
-    case 4:
-        return QString::fromStdString(reaction.product1);
-    case 6:
-        return QString::fromStdString(reaction.product2);
-    case 7:
-        return reaction.probability;
-    case 8:
-        return "Delete";
-    default:
-        return {};
+    case 0: return QString::fromStdString(reaction.educt1);
+    case 2: return QString::fromStdString(reaction.educt2);
+    case 4: return QString::fromStdString(reaction.product1);
+    case 6: return QString::fromStdString(reaction.product2);
+    case 7: return reaction.probability;
+    case 8: return "Delete";
+    default: return {};
     }
 }
 
@@ -117,8 +110,7 @@ Qt::ItemFlags ReactionsTableModel::flags(const QModelIndex& index) const
         if (!exchangeFlags[index.column()])
             return defaultFlags;
         break;
-    case cell::Reaction::Type::None:
-        throw ExceptionWithLocation("Invalid reaction type");
+    case cell::Reaction::Type::None: throw ExceptionWithLocation("Invalid reaction type");
     }
 
     return defaultFlags | Qt::ItemIsEditable;
@@ -139,15 +131,9 @@ void ReactionsTableModel::addRow(cell::Reaction::Type type)
         .educt1 = defaultName, .educt2 = defaultName, .product1 = defaultName, .product2 = defaultName};
     switch (type)
     {
-    case cell::Reaction::Transformation:
-        newReaction.educt2 = newReaction.product2 = "";
-        break;
-    case cell::Reaction::Decomposition:
-        newReaction.educt2 = "";
-        break;
-    case cell::Reaction::Combination:
-        newReaction.product2 = "";
-        break;
+    case cell::Reaction::Transformation: newReaction.educt2 = newReaction.product2 = ""; break;
+    case cell::Reaction::Decomposition: newReaction.educt2 = ""; break;
+    case cell::Reaction::Combination: newReaction.product2 = ""; break;
     default:;
     }
     rows_.push_back(newReaction);

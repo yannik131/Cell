@@ -43,21 +43,16 @@ QVariant PermeabilityTableModel::data(const QModelIndex& index, int role) const
 
     switch (index.column())
     {
-    case 0:
-        return QString::fromStdString(discTypes[index.row()].getName());
-    case 1:
-        return discTypes[index.row()].getRadius();
-    case 2:
-        return discTypes[index.row()].getMass();
+    case 0: return QString::fromStdString(discTypes[index.row()].getName());
+    case 1: return discTypes[index.row()].getRadius();
+    case 2: return discTypes[index.row()].getMass();
     case 3:
     {
         const auto& color = abstractSimulationBuilder_->getDiscTypeColorMap().at(discTypes[index.row()].getName());
         return getColorNameMapping()[color];
     }
-    case 4:
-        return getPermeabilityNameMapping()[permeability];
-    default:
-        return {};
+    case 4: return getPermeabilityNameMapping()[permeability];
+    default: return {};
     }
 }
 
@@ -70,11 +65,8 @@ bool PermeabilityTableModel::setData(const QModelIndex& index, const QVariant& v
 
     switch (index.column())
     {
-    case 4:
-        permeability = getNamePermeabilityMapping()[value.toString()];
-        break;
-    default:
-        return false;
+    case 4: permeability = getNamePermeabilityMapping()[value.toString()]; break;
+    default: return false;
     }
 
     if (index.column() == 4)

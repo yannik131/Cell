@@ -7,6 +7,6 @@ AccessModifierOffset: -4    #LLVM style for access modifiers (public, private, p
                             #confuses VS Code tabulator handling
 BreakConstructorInitializers: BeforeComma
 AllowShortLoopsOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
 PointerAlignment: Left

@@ -31,20 +31,13 @@ QVariant DiscTableModel::getField(const cell::config::Disc& row, int column) con
 {
     switch (column)
     {
-    case 0:
-        return QString::fromStdString(row.discTypeName);
-    case 1:
-        return row.x;
-    case 2:
-        return row.y;
-    case 3:
-        return row.vx;
-    case 4:
-        return row.vy;
-    case 5:
-        return "Delete";
-    default:
-        return {};
+    case 0: return QString::fromStdString(row.discTypeName);
+    case 1: return row.x;
+    case 2: return row.y;
+    case 3: return row.vx;
+    case 4: return row.vy;
+    case 5: return "Delete";
+    default: return {};
     }
 }
 
@@ -52,23 +45,12 @@ bool DiscTableModel::setField(cell::config::Disc& row, int column, const QVarian
 {
     switch (column)
     {
-    case 0:
-        row.discTypeName = value.toString().toStdString();
-        break;
-    case 1:
-        row.x = value.toDouble();
-        break;
-    case 2:
-        row.y = value.toDouble();
-        break;
-    case 3:
-        row.vx = value.toDouble();
-        break;
-    case 4:
-        row.vy = value.toDouble();
-        break;
-    default:
-        return false;
+    case 0: row.discTypeName = value.toString().toStdString(); break;
+    case 1: row.x = value.toDouble(); break;
+    case 2: row.y = value.toDouble(); break;
+    case 3: row.vx = value.toDouble(); break;
+    case 4: row.vy = value.toDouble(); break;
+    default: return false;
     }
 
     return true;

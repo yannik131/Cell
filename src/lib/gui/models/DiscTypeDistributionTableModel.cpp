@@ -41,14 +41,10 @@ QVariant DiscTypeDistributionTableModel::data(const QModelIndex& index, int role
 
     switch (index.column())
     {
-    case 0:
-        return QString::fromStdString(discType);
-    case 1:
-        return frequency;
-    case 2:
-        return "Delete";
-    default:
-        return {};
+    case 0: return QString::fromStdString(discType);
+    case 1: return frequency;
+    case 2: return "Delete";
+    default: return {};
     }
 }
 

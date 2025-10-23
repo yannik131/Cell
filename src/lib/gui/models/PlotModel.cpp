@@ -165,20 +165,11 @@ std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint&
 
     switch (plotCategory_)
     {
-    case PlotCategory::TypeCounts:
-        activeMap = dataPoint.discTypeCountMap_;
-        break;
-    case PlotCategory::CollisionCounts:
-        activeMap = dataPoint.collisionCounts_;
-        break;
-    case PlotCategory::AbsoluteMomentum:
-        activeMap = dataPoint.totalMomentumMap_;
-        break;
-    case PlotCategory::KineticEnergy:
-        activeMap = dataPoint.totalKineticEnergyMap_;
-        break;
-    default:
-        activeMap = {};
+    case PlotCategory::TypeCounts: activeMap = dataPoint.discTypeCountMap_; break;
+    case PlotCategory::CollisionCounts: activeMap = dataPoint.collisionCounts_; break;
+    case PlotCategory::AbsoluteMomentum: activeMap = dataPoint.totalMomentumMap_; break;
+    case PlotCategory::KineticEnergy: activeMap = dataPoint.totalKineticEnergyMap_; break;
+    default: activeMap = {};
     }
 
     for (auto iter = activeMap.begin(); iter != activeMap.end();)

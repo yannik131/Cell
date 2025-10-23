@@ -36,8 +36,7 @@ private:
     std::unordered_map<std::string, KeyType> nameIDMap_;
 };
 
-template <typename ValueType>
-inline void TypeRegistry<ValueType>::setValues(std::vector<ValueType>&& values)
+template <typename ValueType> inline void TypeRegistry<ValueType>::setValues(std::vector<ValueType>&& values)
 {
     if (values.empty())
     {
@@ -55,8 +54,7 @@ inline void TypeRegistry<ValueType>::setValues(std::vector<ValueType>&& values)
     values_ = std::move(values);
 }
 
-template <typename ValueType>
-inline const std::vector<ValueType>& TypeRegistry<ValueType>::getValues() const
+template <typename ValueType> inline const std::vector<ValueType>& TypeRegistry<ValueType>::getValues() const
 {
     return values_;
 }
@@ -71,8 +69,7 @@ inline TypeRegistry<ValueType>::KeyType TypeRegistry<ValueType>::getIDFor(const 
     return iter->second;
 }
 
-template <typename ValueType>
-inline const ValueType& TypeRegistry<ValueType>::getByID(KeyType ID) const
+template <typename ValueType> inline const ValueType& TypeRegistry<ValueType>::getByID(KeyType ID) const
 {
 #ifdef DEBUG
     if (static_cast<std::size_t>(ID) >= values_.size())
@@ -83,8 +80,7 @@ inline const ValueType& TypeRegistry<ValueType>::getByID(KeyType ID) const
     return values_[ID];
 }
 
-template <typename ValueType>
-inline void TypeRegistry<ValueType>::buildNameIDMap(const std::vector<ValueType>& values)
+template <typename ValueType> inline void TypeRegistry<ValueType>::buildNameIDMap(const std::vector<ValueType>& values)
 {
     std::unordered_map<std::string, KeyType> nameIDMap;
 

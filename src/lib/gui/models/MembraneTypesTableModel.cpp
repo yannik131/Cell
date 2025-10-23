@@ -56,18 +56,12 @@ QVariant MembraneTypesTableModel::data(const QModelIndex& index, int role) const
 
     switch (index.column())
     {
-    case 0:
-        return QString::fromStdString(membraneType.name);
-    case 1:
-        return membraneType.radius;
-    case 2:
-        return "Edit";
-    case 3:
-        return getColorNameMapping()[membraneTypeColorMap_.at(membraneType.name)];
-    case 4:
-        return "Delete";
-    default:
-        return {};
+    case 0: return QString::fromStdString(membraneType.name);
+    case 1: return membraneType.radius;
+    case 2: return "Edit";
+    case 3: return getColorNameMapping()[membraneTypeColorMap_.at(membraneType.name)];
+    case 4: return "Delete";
+    default: return {};
     }
 }
 
@@ -80,17 +74,10 @@ bool MembraneTypesTableModel::setData(const QModelIndex& index, const QVariant& 
 
     switch (index.column())
     {
-    case 0:
-        updateMembraneTypeName(value.toString().toStdString(), index.row());
-        break;
-    case 1:
-        membraneType.radius = value.toDouble();
-        break;
-    case 2:
-        membraneTypeColorMap_[membraneType.name] = getNameColorMapping()[value.toString()];
-        break;
-    default:
-        return false;
+    case 0: updateMembraneTypeName(value.toString().toStdString(), index.row()); break;
+    case 1: membraneType.radius = value.toDouble(); break;
+    case 2: membraneTypeColorMap_[membraneType.name] = getNameColorMapping()[value.toString()]; break;
+    default: return false;
     }
 
     if (index.column() < 4)

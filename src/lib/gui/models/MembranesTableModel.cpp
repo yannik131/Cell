@@ -36,16 +36,11 @@ QVariant MembranesTableModel::data(const QModelIndex& index, int role) const
 
     switch (index.column())
     {
-    case 0:
-        return QString::fromStdString(membrane.membraneTypeName);
-    case 1:
-        return membrane.x;
-    case 2:
-        return membrane.y;
-    case 3:
-        return "Delete";
-    default:
-        return {};
+    case 0: return QString::fromStdString(membrane.membraneTypeName);
+    case 1: return membrane.x;
+    case 2: return membrane.y;
+    case 3: return "Delete";
+    default: return {};
     }
 }
 
@@ -58,17 +53,10 @@ bool MembranesTableModel::setData(const QModelIndex& index, const QVariant& valu
 
     switch (index.column())
     {
-    case 0:
-        membrane.membraneTypeName = value.toString().toStdString();
-        break;
-    case 1:
-        membrane.x = value.toDouble();
-        break;
-    case 2:
-        membrane.y = value.toDouble();
-        break;
-    default:
-        return false;
+    case 0: membrane.membraneTypeName = value.toString().toStdString(); break;
+    case 1: membrane.x = value.toDouble(); break;
+    case 2: membrane.y = value.toDouble(); break;
+    default: return false;
     }
 
     emit dataChanged(index, index);

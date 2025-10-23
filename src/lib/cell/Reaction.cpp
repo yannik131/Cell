@@ -11,18 +11,12 @@ std::string toString(Reaction::Type type)
 {
     switch (type)
     {
-    case Reaction::Decomposition:
-        return "Decomposition";
-    case Reaction::Transformation:
-        return "Transformation";
-    case Reaction::Combination:
-        return "Combination";
-    case Reaction::Exchange:
-        return "Exchange";
-    case Reaction::None:
-        return "None";
-    default:
-        throw ExceptionWithLocation("Invalid reaction type");
+    case Reaction::Decomposition: return "Decomposition";
+    case Reaction::Transformation: return "Transformation";
+    case Reaction::Combination: return "Combination";
+    case Reaction::Exchange: return "Exchange";
+    case Reaction::None: return "None";
+    default: throw ExceptionWithLocation("Invalid reaction type");
     }
 }
 } // namespace
