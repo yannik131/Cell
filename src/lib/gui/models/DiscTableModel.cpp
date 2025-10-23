@@ -1,114 +1,17 @@
 #include "models/DiscTableModel.hpp"
+#include "DiscTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "models/DiscTableModel.hpp"
 
-DiscTableModel::DiscTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QAbstractTableModel(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+DiscTableModel::DiscTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : AbstractSimulationConfigTableModel<cell::config::Disc>(
+          parent, simulationConfigUpdater, {Columns{6}, Headers{{"Type", "x", "y", "vx", "vy", "Delete"}}})
 {
-}
-
-int DiscTableModel::rowCount(const QModelIndex& parent) const
-{
-    return static_cast<int>(rows_.size());
-}
-
-int DiscTableModel::columnCount(const QModelIndex& parent) const
-{
-    return 6;
-}
-
-QVariant DiscTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
-        return {};
-
-    static const QStringList Headers{"Disc type", "x", "y", "v_x", "v_y", "Delete"};
-
-    return Headers[section];
-}
-
-QVariant DiscTableModel::data(const QModelIndex& index, int role) const
-{
-    if (index.row() >= static_cast<int>(rows_.size()) || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return {};
-
-    const auto& disc = rows_.at(index.row());
-
-    switch (index.column())
-    {
-    case 0:
-        return QString::fromStdString(disc.discTypeName);
-    case 1:
-        return disc.x;
-    case 2:
-        return disc.y;
-    case 3:
-        return disc.vx;
-    case 4:
-        return disc.vy;
-    case 5:
-        return "Delete";
-    default:
-        return {};
-    }
-}
-
-bool DiscTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
-        return false;
-
-    auto& disc = rows_[index.row()];
-
-    switch (index.column())
-    {
-    case 0:
-        disc.discTypeName = value.toString().toStdString();
-        break;
-    case 1:
-        disc.x = value.toDouble();
-        break;
-    case 2:
-        disc.y = value.toDouble();
-        break;
-    case 3:
-        disc.vx = value.toDouble();
-        break;
-    case 4:
-        disc.vy = value.toDouble();
-        break;
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index);
-
-    return true;
-}
-
-Qt::ItemFlags DiscTableModel::flags(const QModelIndex& index) const
-{
-    const auto& defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 5)
-        return defaultFlags;
-
-    return defaultFlags | Qt::ItemIsEditable;
-}
-
-void DiscTableModel::removeRow(int row)
-{
-    if (row < 0 || row >= static_cast<int>(rows_.size()))
-        return;
-
-    beginRemoveRows(QModelIndex(), row, row);
-    rows_.erase(rows_.begin() + row);
-    endRemoveRows();
 }
 
 void DiscTableModel::addRow()
 {
-    const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
+    const auto& discTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
     if (discTypes.empty())
         throw ExceptionWithLocation("No disc types available. Define some first.");
 
@@ -117,21 +20,66 @@ void DiscTableModel::addRow()
     endInsertRows();
 }
 
-void DiscTableModel::clearRows()
+void DiscTableModel::reload()
 {
     beginResetModel();
-    rows_.clear();
+    rows_ = simulationConfigUpdater_->getSimulationConfig().setup.discs;
     endResetModel();
+}
+
+QVariant DiscTableModel::getField(const cell::config::Disc& row, int column) const
+{
+    switch (column)
+    {
+    case 0:
+        return QString::fromStdString(row.discTypeName);
+    case 1:
+        return row.x;
+    case 2:
+        return row.y;
+    case 3:
+        return row.vx;
+    case 4:
+        return row.vy;
+    case 5:
+        return "Delete";
+    default:
+        return {};
+    }
+}
+
+bool DiscTableModel::setField(cell::config::Disc& row, int column, const QVariant& value)
+{
+    switch (column)
+    {
+    case 0:
+        row.discTypeName = value.toString().toStdString();
+        break;
+    case 1:
+        row.x = value.toDouble();
+        break;
+    case 2:
+        row.y = value.toDouble();
+        break;
+    case 3:
+        row.vx = value.toDouble();
+        break;
+    case 4:
+        row.vy = value.toDouble();
+        break;
+    default:
+        return false;
+    }
+
+    return true;
+}
+
+bool DiscTableModel::isEditable(const QModelIndex& index) const
+{
+    return index.column() != 5;
 }
 
 const std::vector<cell::config::Disc>& DiscTableModel::getRows() const
 {
     return rows_;
-}
-
-void DiscTableModel::reload()
-{
-    beginResetModel();
-    rows_ = abstractSimulationBuilder_->getSimulationConfig().setup.discs;
-    endResetModel();
 }
