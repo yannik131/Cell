@@ -1,11 +1,12 @@
 #include "models/DiscTableModel.hpp"
 #include "DiscTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTableModel.hpp"
 
 DiscTableModel::DiscTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : AbstractSimulationConfigTableModel<cell::config::Disc>(
-          parent, simulationConfigUpdater, {Columns{6}, Headers{{"Type", "x", "y", "vx", "vy", "Delete"}}})
+    : AbstractSimulationConfigTableModel<cell::config::Disc>(parent, {{"Type", "x", "y", "vx", "vy", "Delete"}},
+                                                             simulationConfigUpdater)
 {
 }
 
@@ -20,11 +21,16 @@ void DiscTableModel::addRow()
     endInsertRows();
 }
 
-void DiscTableModel::reload()
+void DiscTableModel::loadFromConfig()
 {
-    beginResetModel();
-    rows_ = simulationConfigUpdater_->getSimulationConfig().setup.discs;
-    endResetModel();
+    setRows(simulationConfigUpdater_->getSimulationConfig().setup.discs);
+}
+
+void DiscTableModel::saveToConfig()
+{
+    auto currentConfig = simulationConfigUpdater_->getSimulationConfig();
+    currentConfig.setup.discs = rows_;
+    simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
 QVariant DiscTableModel::getField(const cell::config::Disc& row, int column) const
@@ -59,9 +65,4 @@ bool DiscTableModel::setField(cell::config::Disc& row, int column, const QVarian
 bool DiscTableModel::isEditable(const QModelIndex& index) const
 {
     return index.column() != 5;
-}
-
-const std::vector<cell::config::Disc>& DiscTableModel::getRows() const
-{
-    return rows_;
 }
