@@ -1,81 +1,39 @@
 #include "models/DiscTypesTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
+#include "DiscTypesTableModel.hpp"
 #include <set>
 
-DiscTypesTableModel::DiscTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QAbstractTableModel(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : Base(parent, {{"Name", "Radius", "Mass", "Color", "Delete"}}, simulationConfigUpdater)
 {
 }
 
-int DiscTypesTableModel::rowCount(const QModelIndex&) const
+void DiscTypesTableModel::removeRow(int row)
+
 {
-    return static_cast<int>(rows_.size());
+    Base::removeRow(row);
+    discTypeColorMap_.erase(rows_[row].name);
+
+    const auto& originalDiscTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
+    const auto originalIndex = row + removedDiscTypes_.size();
+
+    if (originalIndex < originalDiscTypes.size())
+        removedDiscTypes_.insert(originalDiscTypes[originalIndex].name);
 }
 
-int DiscTypesTableModel::columnCount(const QModelIndex&) const
+void DiscTypesTableModel::clearRows()
 {
-    return 5;
+    Base::clearRows();
+    discTypeColorMap_.clear();
+
+    for (const auto& discType : simulationConfigUpdater_->getSimulationConfig().discTypes)
+        removedDiscTypes_.insert(discType.name);
 }
 
-QVariant DiscTypesTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
-        return {};
-
-    static const QStringList Headers{"Name", "Radius", "Mass", "Color", "Delete"};
-
-    return Headers[section];
-}
-
-QVariant DiscTypesTableModel::data(const QModelIndex& index, int role) const
-{
-    if (index.row() >= rows_.size() || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return {};
-
-    const auto& discType = rows_.at(index.row());
-
-    switch (index.column())
-    {
-    case 0: return QString::fromStdString(discType.name);
-    case 1: return discType.radius;
-    case 2: return discType.mass;
-    case 3: return getColorNameMapping()[discTypeColorMap_.at(discType.name)];
-    case 4: return "Delete";
-    default: return {};
-    }
-}
-
-bool DiscTypesTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (index.row() >= rows_.size() || role != Qt::EditRole)
-        return false;
-
-    auto& discType = rows_[index.row()];
-
-    switch (index.column())
-    {
-    case 0: updateDiscTypeName(value.toString().toStdString(), index.row()); break;
-    case 1: discType.radius = value.toDouble(); break;
-    case 2: discType.mass = value.toDouble(); break;
-    case 3: discTypeColorMap_[discType.name] = getNameColorMapping()[value.toString()]; break;
-    default: return false;
-    }
-
-    if (index.column() < 4)
-        emit dataChanged(index, index);
-
-    return true;
-}
-
-Qt::ItemFlags DiscTypesTableModel::flags(const QModelIndex&) const
-{
-    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-void DiscTypesTableModel::addEmptyRow()
+void DiscTypesTableModel::addRow()
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
 
@@ -85,56 +43,58 @@ void DiscTypesTableModel::addEmptyRow()
     endInsertRows();
 }
 
-void DiscTypesTableModel::removeRow(int row)
-{
-    if (row < 0 || row >= rows_.size())
-        return;
-
-    beginRemoveRows(QModelIndex(), row, row);
-    discTypeColorMap_.erase(rows_[row].name);
-    rows_.erase(rows_.begin() + row);
-    endRemoveRows();
-
-    const auto& originalDiscTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-    const auto originalIndex = row + removedDiscTypes_.size();
-
-    if (originalIndex < originalDiscTypes.size())
-        removedDiscTypes_.insert(originalDiscTypes[originalIndex].name);
-}
-
-void DiscTypesTableModel::clearRows()
-{
-    if (rows_.empty())
-        return;
-
-    beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
-    rows_.clear();
-    discTypeColorMap_.clear();
-    endRemoveRows();
-
-    for (const auto& discType : abstractSimulationBuilder_->getSimulationConfig().discTypes)
-        removedDiscTypes_.insert(discType.name);
-}
-
-void DiscTypesTableModel::commitChanges()
-{
-    abstractSimulationBuilder_->setDiscTypes(rows_, removedDiscTypes_, discTypeColorMap_);
-
-    removedDiscTypes_.clear();
-}
-
-void DiscTypesTableModel::reload()
+void DiscTypesTableModel::loadFromConfig()
 {
     removedDiscTypes_.clear();
+
     beginResetModel();
-    rows_ = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-    discTypeColorMap_ = abstractSimulationBuilder_->getDiscTypeColorMap();
+    rows_ = simulationConfigUpdater_->getSimulationConfig().discTypes;
+    discTypeColorMap_ = simulationConfigUpdater_->getDiscTypeColorMap();
     endResetModel();
 }
 
-void DiscTypesTableModel::updateDiscTypeName(const std::string& newName, int row)
+void DiscTypesTableModel::saveToConfig()
 {
-    auto& discType = rows_[row];
+    auto currentConfig = simulationConfigUpdater_->getSimulationConfig();
+    simulationConfigUpdater_->setTypes(rows_, removedDiscTypes_, discTypeColorMap_);
+
+    removedDiscTypes_.clear();
+}
+
+QVariant DiscTypesTableModel::getField(const cell::config::DiscType& row, int column) const
+{
+    switch (column)
+    {
+    case 0: return QString::fromStdString(row.name);
+    case 1: return row.radius;
+    case 2: return row.mass;
+    case 3: return getColorNameMapping()[discTypeColorMap_.at(row.name)];
+    case 4: return "Delete";
+    default: return {};
+    }
+}
+
+bool DiscTypesTableModel::setField(cell::config::DiscType& row, int column, const QVariant& value)
+{
+    switch (column)
+    {
+    case 0: updateDiscTypeName(row, value.toString().toStdString()); break;
+    case 1: row.radius = value.toDouble(); break;
+    case 2: row.mass = value.toDouble(); break;
+    case 3: discTypeColorMap_[row.name] = getNameColorMapping()[value.toString()]; break;
+    default: return false;
+    }
+
+    return true;
+}
+
+bool DiscTypesTableModel::isEditable(const QModelIndex& index) const
+{
+    return true;
+}
+
+void DiscTypesTableModel::updateDiscTypeName(cell::config::DiscType& discType, const std::string& newName)
+{
     auto color = discTypeColorMap_.at(discType.name);
     discTypeColorMap_.erase(discType.name);
 

@@ -8,7 +8,7 @@
 DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,
                                                                SimulationConfigUpdater* simulationConfigUpdater)
     : AbstractSimulationConfigPartTableModel<std::pair<std::string, double>>(
-          parent, {{"Type", "x", "y", "vx", "vy", "Delete"}}, simulationConfigUpdater)
+          parent, {{"Disc type", "Frequency", "Delete"}}, simulationConfigUpdater)
 {
 }
 

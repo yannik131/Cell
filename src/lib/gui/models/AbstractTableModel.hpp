@@ -23,8 +23,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     // Necessary methods with default implementations
-    void removeRow(int row);
-    void clearRows();
+    virtual void removeRow(int row);
+    virtual void clearRows();
 
     // Necessary methods without default implementations
     virtual void addRow() = 0;
@@ -32,9 +32,9 @@ public:
     void setRows(std::vector<T> rows);
 
 protected:
-    virtual QVariant getField(const T& row, int column) const = 0;        // Helper for data(...)
-    virtual bool setField(T& row, int column, const QVariant& value) = 0; // Helper for setData(...)
-    virtual bool isEditable(const QModelIndex& index) const = 0;          // Helper for flags(...)
+    virtual QVariant getField(const T& row, int column) const = 0;        // for data(...)
+    virtual bool setField(T& row, int column, const QVariant& value) = 0; // for setData(...)
+    virtual bool isEditable(const QModelIndex& index) const = 0;          // for flags(...)
 
 protected:
     std::vector<T> rows_;
