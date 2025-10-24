@@ -1,7 +1,6 @@
 #ifndef AB3F4088_AF2F_4472_8BA3_E8165A0B4B30_HPP
 #define AB3F4088_AF2F_4472_8BA3_E8165A0B4B30_HPP
 
-#include "cell/SimulationConfig.hpp"
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
 class DiscTableModel : public AbstractSimulationConfigTableModel<cell::config::Disc>

@@ -2,37 +2,22 @@
 #define C1D94502_857B_4E2A_9378_0F448C9C4303_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
-#include <QAbstractTableModel>
-
-// TODO Dry violation with DiscTableModel
-
-class AbstractSimulationBuilder;
-
-class MembranesTableModel : public QAbstractTableModel
+class MembranesTableModel : public AbstractSimulationConfigTableModel<cell::config::Membrane>
 {
     Q_OBJECT
 public:
-    explicit MembranesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    MembranesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-    void removeRow(int row);
-    void addRow();
-    void clearRows();
-    const std::vector<cell::config::Membrane>& getRows() const;
-
-    void reload();
+    void addRow() override;
+    void loadFromConfig() override;
+    void saveToConfig() override;
 
 private:
-    std::vector<cell::config::Membrane> rows_;
-
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
+    QVariant getField(const cell::config::Membrane& row, int column) const override;
+    bool setField(cell::config::Membrane& row, int column, const QVariant& value) override;
+    bool isEditable(const QModelIndex& index) const override;
 };
 
 #endif /* C1D94502_857B_4E2A_9378_0F448C9C4303_HPP */

@@ -121,7 +121,7 @@ MembraneTypeRegistry SimulationFactory::buildMembraneTypeRegistry(const Simulati
         return permeabilityMap;
     };
 
-    const auto& cellMembraneType = simulationConfig.setup.cellMembraneType;
+    const auto& cellMembraneType = simulationConfig.cellMembraneType;
     types.emplace_back(cellMembraneType.name, cellMembraneType.radius,
                        convertPermeabilityMap(cellMembraneType.permeabilityMap));
 
@@ -157,12 +157,12 @@ ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simu
 
 std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simulationConfig)
 {
-    const auto& configMembranes = simulationConfig.setup.membranes;
+    const auto& configMembranes = simulationConfig.membranes;
     if (std::find_if(configMembranes.begin(), configMembranes.end(), [&](const auto& membrane)
                      { return membrane.membraneTypeName == config::cellMembraneTypeName; }) != configMembranes.end())
         throw ExceptionWithLocation("There can't be more than 1 cell membrane in the simulation");
 
-    for (const auto& [discTypeID, permeability] : simulationConfig.setup.cellMembraneType.permeabilityMap)
+    for (const auto& [discTypeID, permeability] : simulationConfig.cellMembraneType.permeabilityMap)
     {
         if (permeability != MembraneType::Permeability::None)
             throw ExceptionWithLocation("Currently the outer cell membrane does not support permeability");
@@ -188,7 +188,7 @@ std::vector<Membrane> SimulationFactory::getMembranesFromConfig(const Simulation
 {
     std::vector<Membrane> membranes;
 
-    for (const auto& membrane : simulationConfig_.setup.membranes)
+    for (const auto& membrane : simulationConfig_.membranes)
     {
         Membrane newMembrane(membraneTypeRegistry_->getIDFor(membrane.membraneTypeName));
         newMembrane.setPosition({membrane.x, membrane.y});
@@ -281,7 +281,7 @@ void SimulationFactory::throwIfDiscsCanBeLargerThanMembranes(const SimulationCon
                                                 [](const auto& t1, const auto& t2) { return t1.radius < t2.radius; })
                                    ->radius;
 
-    auto minMembraneRadius = config.setup.cellMembraneType.radius;
+    auto minMembraneRadius = config.cellMembraneType.radius;
     for (const auto& membraneType : config.membraneTypes)
         minMembraneRadius = std::min(minMembraneRadius, membraneType.radius);
 

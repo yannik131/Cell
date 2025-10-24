@@ -1,119 +1,63 @@
 #include "models/PermeabilityTableModel.hpp"
-#include "cell/DiscType.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
-#include "core/ColorMapping.hpp"
 #include "core/PermeabilityMapping.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 #include "PermeabilityTableModel.hpp"
-#include <algorithm>
+#include <unordered_set>
 
-PermeabilityTableModel::PermeabilityTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QAbstractTableModel(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+// TODO DRY violation with DiscTypeDistributionTableModel
+
+PermeabilityTableModel::PermeabilityTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : AbstractSimulationConfigPartTableModel<std::pair<std::string, cell::MembraneType::Permeability>>(
+          parent, {{"Disc type", "Permeability", "Delete"}}, simulationConfigUpdater)
 {
 }
 
-int PermeabilityTableModel::rowCount(const QModelIndex& parent) const
+void PermeabilityTableModel::addRow()
 {
-    return static_cast<int>(rows_.size());
+    const auto& discTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
+    std::unordered_set<std::string> availableNames;
+
+    for (const auto& discType : discTypes)
+        availableNames.insert(discType.name);
+
+    for (const auto& [name, frequency] : rows_)
+        availableNames.erase(name);
+
+    if (availableNames.empty())
+        throw ExceptionWithLocation("There are no remaining disc types available.");
+
+    beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
+    rows_.emplace_back(*availableNames.begin(), 0);
+    endInsertRows();
 }
 
-int PermeabilityTableModel::columnCount(const QModelIndex& parent) const
+QVariant PermeabilityTableModel::getField(const std::pair<std::string, cell::MembraneType::Permeability>& row,
+                                          int column) const
 {
-    return 5;
-}
-
-QVariant PermeabilityTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
-        return {};
-
-    static const QStringList Headers{"Disc type", "Radius", "Mass", "Color", "Permeability"};
-
-    return Headers[section];
-}
-
-QVariant PermeabilityTableModel::data(const QModelIndex& index, int role) const
-{
-    if (index.row() >= static_cast<int>(rows_.size()) || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return {};
-
-    const auto& discTypes = abstractSimulationBuilder_->getDiscTypeRegistry().getValues();
-    const auto& permeability = rows_.at(index.row());
-
-    switch (index.column())
+    switch (column)
     {
-    case 0: return QString::fromStdString(discTypes[index.row()].getName());
-    case 1: return discTypes[index.row()].getRadius();
-    case 2: return discTypes[index.row()].getMass();
-    case 3:
-    {
-        const auto& color = abstractSimulationBuilder_->getDiscTypeColorMap().at(discTypes[index.row()].getName());
-        return getColorNameMapping()[color];
-    }
-    case 4: return getPermeabilityNameMapping()[permeability];
+    case 0: return QString::fromStdString(row.first);
+    case 1: return getPermeabilityNameMapping()[row.second];
+    case 2: return "Delete";
     default: return {};
     }
 }
 
-bool PermeabilityTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool PermeabilityTableModel::setField(std::pair<std::string, cell::MembraneType::Permeability>& row, int column,
+                                      const QVariant& value)
 {
-    if (index.row() >= rows_.size() || role != Qt::EditRole)
-        return false;
-
-    auto& permeability = rows_[index.row()];
-
-    switch (index.column())
+    switch (column)
     {
-    case 4: permeability = getNamePermeabilityMapping()[value.toString()]; break;
+    case 0: row.first = value.toString().toStdString(); break;
+    case 1: row.second = getNamePermeabilityMapping()[value.toString()]; break;
     default: return false;
     }
-
-    if (index.column() == 4)
-        emit dataChanged(index, index);
 
     return true;
 }
 
-Qt::ItemFlags PermeabilityTableModel::flags(const QModelIndex& index) const
+bool PermeabilityTableModel::isEditable(const QModelIndex& index) const
 {
-    if (index.column() == 4)
-        return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-
-    return Qt::ItemIsSelectable;
-}
-
-void PermeabilityTableModel::setPermeabilityMap(
-    std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
-{
-    permeabilityMap_ = &permeabilityMap;
-}
-
-void PermeabilityTableModel::commitChanges()
-{
-    const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-    permeabilityMap_->clear();
-
-    for (std::size_t i = 0; i < discTypes.size(); ++i)
-        permeabilityMap_[discTypes[i].getName()] = rows_[i];
-}
-
-void PermeabilityTableModel::convertMapToRows(
-    const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
-{
-    const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
-
-    beginResetModel();
-    rows_.clear();
-
-    for (const auto& discType : discTypes)
-    {
-        const auto iter = permeabilityMap_.find(discType.name);
-        if (iter == permeabilityMap_.end())
-            rows_.push_back(cell::MembraneType::Permeability::None);
-        else
-            rows_.push_back(iter->second);
-    }
-
-    endResetModel();
+    return index.column() != 2;
 }

@@ -24,7 +24,7 @@ void SimulationWidget::injectAbstractSimulationBuilder(AbstractSimulationBuilder
         [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
         {
             boundingRect_.setSize(
-                sf::Vector2f{static_cast<float>(config.setup.cellWidth), static_cast<float>(config.setup.cellHeight)});
+                sf::Vector2f{static_cast<float>(config.cellWidth), static_cast<float>(config.cellHeight)});
         });
 }
 

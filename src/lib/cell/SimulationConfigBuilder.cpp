@@ -6,13 +6,13 @@ namespace cell
 
 void SimulationConfigBuilder::addDisc(const std::string& discType, Position position, Velocity velocity)
 {
-    simulationConfig_.setup.discs.push_back(
+    simulationConfig_.discs.push_back(
         config::Disc{.discTypeName = discType, .x = position.x, .y = position.y, .vx = velocity.x, .vy = velocity.y});
 }
 
 void SimulationConfigBuilder::useDistribution(bool useDistribution)
 {
-    simulationConfig_.setup.useDistribution = useDistribution;
+    simulationConfig_.useDistribution = useDistribution;
 }
 
 void SimulationConfigBuilder::setDiscCount(std::string membraneTypeName, int count)
@@ -20,7 +20,7 @@ void SimulationConfigBuilder::setDiscCount(std::string membraneTypeName, int cou
     if (membraneTypeName == "")
         membraneTypeName = config::cellMembraneTypeName;
 
-    simulationConfig_.setup.discCounts[membraneTypeName] = count;
+    simulationConfig_.discCounts[membraneTypeName] = count;
 }
 
 void SimulationConfigBuilder::setDistribution(std::string membraneTypeName,
@@ -28,7 +28,7 @@ void SimulationConfigBuilder::setDistribution(std::string membraneTypeName,
 {
     if (membraneTypeName == "")
         membraneTypeName = config::cellMembraneTypeName;
-    simulationConfig_.setup.distributions[membraneTypeName] = distribution;
+    simulationConfig_.distributions[membraneTypeName] = distribution;
 }
 
 void SimulationConfigBuilder::addDiscType(const std::string& name, Radius radius, Mass mass)
@@ -46,7 +46,7 @@ void SimulationConfigBuilder::addMembraneType(
 
 void SimulationConfigBuilder::addMembrane(const std::string& membraneTypeName, Position position)
 {
-    simulationConfig_.setup.membranes.push_back(
+    simulationConfig_.membranes.push_back(
         config::Membrane{.membraneTypeName = membraneTypeName, .x = position.x, .y = position.y});
 }
 
@@ -64,23 +64,23 @@ void SimulationConfigBuilder::addReaction(const std::string& educt1, const std::
 void SimulationConfigBuilder::setCellMembraneType(
     Radius radius, const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap)
 {
-    simulationConfig_.setup.cellMembraneType.radius = radius.value;
-    simulationConfig_.setup.cellMembraneType.permeabilityMap = permeabilityMap;
+    simulationConfig_.cellMembraneType.radius = radius.value;
+    simulationConfig_.cellMembraneType.permeabilityMap = permeabilityMap;
 }
 
 void SimulationConfigBuilder::setTimeStep(double simulationTimeStep)
 {
-    simulationConfig_.setup.simulationTimeStep = simulationTimeStep;
+    simulationConfig_.simulationTimeStep = simulationTimeStep;
 }
 
 void SimulationConfigBuilder::setTimeScale(double simulationTimeScale)
 {
-    simulationConfig_.setup.simulationTimeScale = simulationTimeScale;
+    simulationConfig_.simulationTimeScale = simulationTimeScale;
 }
 
 void SimulationConfigBuilder::setMaxVelocity(double maxVelocity)
 {
-    simulationConfig_.setup.maxVelocity = maxVelocity;
+    simulationConfig_.maxVelocity = maxVelocity;
 }
 
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const

@@ -2,9 +2,7 @@
 #define DD933800_4FD0_4D74_8399_33BE7E519C69_HPP
 
 #include "cell/SimulationConfig.hpp"
-
-#include <QAbstractTableModel>
-#include <QVector>
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 
@@ -12,48 +10,29 @@
 
 class AbstractSimulationBuilder;
 
-class MembraneTypesTableModel : public QAbstractTableModel
+class MembraneTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::MembraneType>
 {
     Q_OBJECT
+    using Base = AbstractSimulationConfigTableModel<cell::config::MembraneType>;
+
 public:
-    explicit MembraneTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    MembraneTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-
-    /**
-     * @returns 5: Name, radius, color, permeabilities, delete
-     */
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-    void addEmptyRow();
-
-    void removeRow(int row);
-
-    void clearRows();
-
-    void commitChanges();
-
-    void reload();
-
-    cell::config::MembraneType& getRow(int row);
+    void removeRow(int row) override;
+    void clearRows() override;
+    void addRow() override;
+    void loadFromConfig() override;
+    void saveToConfig() override;
 
 private:
-    void updateMembraneTypeName(const std::string& newName, int row);
+    QVariant getField(const cell::config::MembraneType& row, int column) const override;
+    bool setField(cell::config::MembraneType& row, int column, const QVariant& value) override;
+    bool isEditable(const QModelIndex& index) const override;
+    void updateMembraneTypeName(cell::config::MembraneType& membraneType, const std::string& newName);
 
 private:
-    std::vector<cell::config::MembraneType> rows_;
     std::map<std::string, sf::Color> membraneTypeColorMap_;
     std::unordered_set<std::string> removedMembraneTypes_;
-
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
 };
 
 #endif /* DD933800_4FD0_4D74_8399_33BE7E519C69_HPP */

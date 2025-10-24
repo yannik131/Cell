@@ -4,94 +4,35 @@
 #include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-// TODO Massive DRY violation here with the DiscTypesTableModel and possible other models, fix as soon as everything in
-// the PR works
-// TODO Models should behave like this:
-// - Have an internal representation of the GUI data in rows_
-// - When the dialog opens, it calls model_->reload(), causing the model to turn the relevant part of the current
-// simulation config into rows_
-// - When OK is clicked, rows_ is converted back into the relevant part of the config, the current config is taken and
-// updated Classes:
-// - SimulationConfigUpdater:
-//      - cell::SimulationConfig getCurrentConfig() const
-//      - void setSimulationConfig(cell::SimulationConfig)
-// - SimulationConfigTableModel:
-//      - reload()
-//      - commitChanges()
-// - SimulationConfigDialog:
-//      - SimulationConfigTableModel* model_
+// TODO DRY violation with DiscTypesTableModel
 
-MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QAbstractTableModel(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : Base(parent, {{"Name", "Radius", "Color", "Permeabilities", "Delete"}}, simulationConfigUpdater)
 {
 }
 
-int MembraneTypesTableModel::rowCount(const QModelIndex& parent) const
+void MembraneTypesTableModel::removeRow(int row)
 {
-    return static_cast<int>(rows_.size());
+    Base::removeRow(row);
+    membraneTypeColorMap_.erase(rows_[row].name);
+
+    const auto& originalMembraneTypes = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
+    const auto originalIndex = row + removedMembraneTypes_.size();
+
+    if (originalIndex < originalMembraneTypes.size())
+        removedMembraneTypes_.insert(originalMembraneTypes[originalIndex].name);
 }
 
-int MembraneTypesTableModel::columnCount(const QModelIndex& parent) const
+void MembraneTypesTableModel::clearRows()
 {
-    return 5;
+    Base::clearRows();
+    membraneTypeColorMap_.clear();
+
+    for (const auto& membraneType : simulationConfigUpdater_->getSimulationConfig().membraneTypes)
+        removedMembraneTypes_.insert(membraneType.name);
 }
 
-QVariant MembraneTypesTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
-        return {};
-
-    static const QStringList Headers{"Name", "Radius", "Color", "Permeabilities", "Delete"};
-
-    return Headers[section];
-}
-
-QVariant MembraneTypesTableModel::data(const QModelIndex& index, int role) const
-{
-    if (index.row() >= rows_.size() || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return {};
-
-    const auto& membraneType = rows_.at(index.row());
-
-    switch (index.column())
-    {
-    case 0: return QString::fromStdString(membraneType.name);
-    case 1: return membraneType.radius;
-    case 2: return "Edit";
-    case 3: return getColorNameMapping()[membraneTypeColorMap_.at(membraneType.name)];
-    case 4: return "Delete";
-    default: return {};
-    }
-}
-
-bool MembraneTypesTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (index.row() >= rows_.size() || role != Qt::EditRole)
-        return false;
-
-    auto& membraneType = rows_[index.row()];
-
-    switch (index.column())
-    {
-    case 0: updateMembraneTypeName(value.toString().toStdString(), index.row()); break;
-    case 1: membraneType.radius = value.toDouble(); break;
-    case 2: membraneTypeColorMap_[membraneType.name] = getNameColorMapping()[value.toString()]; break;
-    default: return false;
-    }
-
-    if (index.column() < 4)
-        emit dataChanged(index, index);
-
-    return true;
-}
-
-Qt::ItemFlags MembraneTypesTableModel::flags(const QModelIndex& index) const
-{
-    return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-void MembraneTypesTableModel::addEmptyRow()
+void MembraneTypesTableModel::addRow()
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
 
@@ -102,61 +43,57 @@ void MembraneTypesTableModel::addEmptyRow()
     endInsertRows();
 }
 
-void MembraneTypesTableModel::removeRow(int row)
-{
-    if (row < 0 || row >= rows_.size())
-        return;
-
-    beginRemoveRows(QModelIndex(), row, row);
-    membraneTypeColorMap_.erase(rows_[row].name);
-    rows_.erase(rows_.begin() + row);
-    endRemoveRows();
-
-    const auto& originalMembraneTypes = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
-    const auto originalIndex = row + removedMembraneTypes_.size();
-
-    if (originalIndex < originalMembraneTypes.size())
-        removedMembraneTypes_.insert(originalMembraneTypes[originalIndex].name);
-}
-
-void MembraneTypesTableModel::clearRows()
-{
-    if (rows_.empty())
-        return;
-
-    beginRemoveRows(QModelIndex(), 0, static_cast<int>(rows_.size()) - 1);
-    rows_.clear();
-    membraneTypeColorMap_.clear();
-    endRemoveRows();
-
-    for (const auto& membraneType : abstractSimulationBuilder_->getSimulationConfig().membraneTypes)
-        removedMembraneTypes_.insert(membraneType.name);
-}
-
-void MembraneTypesTableModel::commitChanges()
-{
-    abstractSimulationBuilder_->setMembraneTypes(rows_, removedMembraneTypes_, membraneTypeColorMap_);
-
-    removedMembraneTypes_.clear();
-}
-
-void MembraneTypesTableModel::reload()
+void MembraneTypesTableModel::loadFromConfig()
 {
     removedMembraneTypes_.clear();
+
     beginResetModel();
-    rows_ = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
-    membraneTypeColorMap_ = abstractSimulationBuilder_->getMembraneTypeColorMap();
+    rows_ = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
+    membraneTypeColorMap_ = simulationConfigUpdater_->getMembraneTypeColorMap();
     endResetModel();
 }
 
-cell::config::MembraneType& MembraneTypesTableModel::getRow(int row)
+void MembraneTypesTableModel::saveToConfig()
 {
-    return rows_[row];
+    simulationConfigUpdater_->setTypes(rows_, removedMembraneTypes_, membraneTypeColorMap_);
+
+    removedMembraneTypes_.clear();
 }
 
-void MembraneTypesTableModel::updateMembraneTypeName(const std::string& newName, int row)
+QVariant MembraneTypesTableModel::getField(const cell::config::MembraneType& row, int column) const
 {
-    auto& membraneType = rows_[row];
+    switch (column)
+    {
+    case 0: return QString::fromStdString(row.name);
+    case 1: return row.radius;
+    case 2: return "Edit";
+    case 3: return getColorNameMapping()[membraneTypeColorMap_.at(row.name)];
+    case 4: return "Delete";
+    default: return {};
+    }
+}
+
+bool MembraneTypesTableModel::setField(cell::config::MembraneType& row, int column, const QVariant& value)
+{
+    switch (column)
+    {
+    case 0: updateMembraneTypeName(row, value.toString().toStdString()); break;
+    case 1: row.radius = value.toDouble(); break;
+    case 2: membraneTypeColorMap_[row.name] = getNameColorMapping()[value.toString()]; break;
+    default: return false;
+    }
+
+    return true;
+}
+
+bool MembraneTypesTableModel::isEditable(const QModelIndex& index) const
+{
+    return index.column() != 4;
+}
+
+void MembraneTypesTableModel::updateMembraneTypeName(cell::config::MembraneType& membraneType,
+                                                     const std::string& newName)
+{
     auto color = membraneTypeColorMap_.at(membraneType.name);
     membraneTypeColorMap_.erase(membraneType.name);
 

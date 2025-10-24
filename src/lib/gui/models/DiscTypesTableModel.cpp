@@ -12,7 +12,6 @@ DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdate
 }
 
 void DiscTypesTableModel::removeRow(int row)
-
 {
     Base::removeRow(row);
     discTypeColorMap_.erase(rows_[row].name);
@@ -90,7 +89,7 @@ bool DiscTypesTableModel::setField(cell::config::DiscType& row, int column, cons
 
 bool DiscTypesTableModel::isEditable(const QModelIndex& index) const
 {
-    return true;
+    return index.column() != 4;
 }
 
 void DiscTypesTableModel::updateDiscTypeName(cell::config::DiscType& discType, const std::string& newName)

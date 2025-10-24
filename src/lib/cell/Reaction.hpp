@@ -107,7 +107,7 @@ std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeR
  */
 bool contains(const Reaction& reaction, DiscTypeID discType);
 
-Reaction::Type inferType(bool educt2, bool product2);
+Reaction::Type inferReactionType(bool educt2, bool product2);
 
 } // namespace cell
 

@@ -1,91 +1,16 @@
 #include "models/MembranesTableModel.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
+#include "MembranesTableModel.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
-MembranesTableModel::MembranesTableModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QAbstractTableModel(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+MembranesTableModel::MembranesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : AbstractSimulationConfigTableModel<cell::config::Membrane>(parent, {{"Membrane type", "x", "y", "Delete"}},
+                                                                 simulationConfigUpdater)
 {
-}
-
-int MembranesTableModel::rowCount(const QModelIndex& parent) const
-{
-    return static_cast<int>(rows_.size());
-}
-
-int MembranesTableModel::columnCount(const QModelIndex& parent) const
-{
-    return 4;
-}
-
-QVariant MembranesTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section > columnCount() - 1)
-        return {};
-
-    static const QStringList Headers{"Membrane type", "x", "y", "Delete"};
-
-    return Headers[section];
-}
-
-QVariant MembranesTableModel::data(const QModelIndex& index, int role) const
-{
-    if (index.row() >= static_cast<int>(rows_.size()) || (role != Qt::DisplayRole && role != Qt::EditRole))
-        return {};
-
-    const auto& membrane = rows_.at(index.row());
-
-    switch (index.column())
-    {
-    case 0: return QString::fromStdString(membrane.membraneTypeName);
-    case 1: return membrane.x;
-    case 2: return membrane.y;
-    case 3: return "Delete";
-    default: return {};
-    }
-}
-
-bool MembranesTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    if (index.row() >= static_cast<int>(rows_.size()) || role != Qt::EditRole)
-        return false;
-
-    auto& membrane = rows_[index.row()];
-
-    switch (index.column())
-    {
-    case 0: membrane.membraneTypeName = value.toString().toStdString(); break;
-    case 1: membrane.x = value.toDouble(); break;
-    case 2: membrane.y = value.toDouble(); break;
-    default: return false;
-    }
-
-    emit dataChanged(index, index);
-
-    return true;
-}
-
-Qt::ItemFlags MembranesTableModel::flags(const QModelIndex& index) const
-{
-    const auto& defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 3)
-        return defaultFlags;
-
-    return defaultFlags | Qt::ItemIsEditable;
-}
-
-void MembranesTableModel::removeRow(int row)
-{
-    if (row < 0 || row >= static_cast<int>(rows_.size()))
-        return;
-
-    beginRemoveRows(QModelIndex(), row, row);
-    rows_.erase(rows_.begin() + row);
-    endRemoveRows();
 }
 
 void MembranesTableModel::addRow()
 {
-    const auto& membraneTypes = abstractSimulationBuilder_->getSimulationConfig().membraneTypes;
+    const auto& membraneTypes = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
     if (membraneTypes.empty())
         throw ExceptionWithLocation("No membrane types available. Define some first.");
 
@@ -94,21 +19,44 @@ void MembranesTableModel::addRow()
     endInsertRows();
 }
 
-void MembranesTableModel::clearRows()
+void MembranesTableModel::loadFromConfig()
 {
-    beginResetModel();
-    rows_.clear();
-    endResetModel();
+    setRows(simulationConfigUpdater_->getSimulationConfig().membranes);
 }
 
-const std::vector<cell::config::Membrane>& MembranesTableModel::getRows() const
+void MembranesTableModel::saveToConfig()
 {
-    return rows_;
+    auto currentConfig = simulationConfigUpdater_->getSimulationConfig();
+    currentConfig.membranes = rows_;
+    simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
-void MembranesTableModel::reload()
+QVariant MembranesTableModel::getField(const cell::config::Membrane& row, int column) const
 {
-    beginResetModel();
-    rows_ = abstractSimulationBuilder_->getSimulationConfig().setup.membranes;
-    endResetModel();
+    switch (column)
+    {
+    case 0: return QString::fromStdString(row.membraneTypeName);
+    case 1: return row.x;
+    case 2: return row.y;
+    case 3: return "Delete";
+    default: return {};
+    }
+}
+
+bool MembranesTableModel::setField(cell::config::Membrane& row, int column, const QVariant& value)
+{
+    switch (column)
+    {
+    case 0: row.membraneTypeName = value.toString().toStdString(); break;
+    case 1: row.x = value.toDouble(); break;
+    case 2: row.y = value.toDouble(); break;
+    default: return false;
+    }
+
+    return true;
+}
+
+bool MembranesTableModel::isEditable(const QModelIndex& index) const
+{
+    return index.column() != 3;
 }

@@ -68,7 +68,7 @@ void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
                                           }),
                            config.reactions.end());
 
-    for (auto& [membraneTypeName, distribution] : config.setup.distributions)
+    for (auto& [membraneTypeName, distribution] : config.distributions)
     {
         for (auto iter = distribution.begin(); iter != distribution.end();)
         {
@@ -79,19 +79,18 @@ void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
         }
     }
 
-    config.setup.discs.erase(std::remove_if(config.setup.discs.begin(), config.setup.discs.end(),
-                                            [&](const cell::config::Disc& disc)
-                                            { return removedDiscTypes.contains(disc.discTypeName); }),
-                             config.setup.discs.end());
+    config.discs.erase(std::remove_if(config.discs.begin(), config.discs.end(), [&](const cell::config::Disc& disc)
+                                      { return removedDiscTypes.contains(disc.discTypeName); }),
+                       config.discs.end());
 }
 
 void SimulationConfigUpdater::removeMembraneTypes(cell::SimulationConfig& config,
                                                   const std::unordered_set<std::string>& removedMembraneTypes) const
 {
-    config.setup.membranes.erase(std::remove_if(config.setup.membranes.begin(), config.setup.membranes.end(),
-                                                [&](const cell::config::Membrane& membrane)
-                                                { return removedMembraneTypes.contains(membrane.membraneTypeName); }),
-                                 config.setup.membranes.end());
+    config.membranes.erase(std::remove_if(config.membranes.begin(), config.membranes.end(),
+                                          [&](const cell::config::Membrane& membrane)
+                                          { return removedMembraneTypes.contains(membrane.membraneTypeName); }),
+                           config.membranes.end());
 }
 
 void SimulationConfigUpdater::testConfig(const cell::SimulationConfig& simulationConfig) const
@@ -114,7 +113,7 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
         reaction.product2 = changeMap.at(reaction.product2);
     }
 
-    for (auto& [membraneTypeName, distribution] : config.setup.distributions)
+    for (auto& [membraneTypeName, distribution] : config.distributions)
     {
         std::map<std::string, double> newDistribution;
 
@@ -124,7 +123,7 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
         distribution = std::move(newDistribution);
     }
 
-    for (auto& disc : config.setup.discs)
+    for (auto& disc : config.discs)
     {
         if (!changeMap.contains(disc.discTypeName))
             continue;
@@ -136,7 +135,7 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
 void SimulationConfigUpdater::updateMembraneTypes(cell::SimulationConfig& config,
                                                   const std::unordered_map<std::string, std::string>& changeMap) const
 {
-    for (auto& membrane : config.setup.membranes)
+    for (auto& membrane : config.membranes)
     {
         if (!changeMap.contains(membrane.membraneTypeName))
             continue;

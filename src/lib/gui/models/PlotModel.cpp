@@ -107,7 +107,7 @@ void PlotModel::emitPlot()
     std::vector<std::unordered_map<std::string, double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
-    double timeStep = abstractSimulationBuilder_->getSimulationConfig().setup.simulationTimeStep;
+    double timeStep = abstractSimulationBuilder_->getSimulationConfig().simulationTimeStep;
     const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
 
     for (const auto& dataPoint : dataPoints_)

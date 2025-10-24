@@ -2,7 +2,6 @@
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include "DiscTypeDistributionTableModel.hpp"
 #include <unordered_set>
 
 DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,

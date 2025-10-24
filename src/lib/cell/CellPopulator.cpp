@@ -22,7 +22,7 @@ CellPopulator::CellPopulator(Cell& cell, SimulationConfig simulationConfig, Simu
 
 void CellPopulator::populateCell()
 {
-    if (simulationConfig_.setup.useDistribution)
+    if (simulationConfig_.useDistribution)
         populateWithDistributions();
     else
         populateDirectly();
@@ -30,7 +30,7 @@ void CellPopulator::populateCell()
 
 void CellPopulator::populateWithDistributions()
 {
-    if (simulationConfig_.setup.distributions.empty())
+    if (simulationConfig_.distributions.empty())
         return;
 
     const auto& discTypes = simulationConfig_.discTypes;
@@ -44,7 +44,7 @@ void CellPopulator::populateWithDistributions()
 
 void CellPopulator::populateDirectly()
 {
-    for (const auto& disc : simulationConfig_.setup.discs)
+    for (const auto& disc : simulationConfig_.discs)
     {
         Disc newDisc(simulationContext_.discTypeRegistry.getIDFor(disc.discTypeName));
         newDisc.setPosition({disc.x, disc.y});
@@ -116,15 +116,15 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     const auto& membraneTypeName =
         simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
-    if (!simulationConfig_.setup.discCounts.contains(membraneTypeName))
+    if (!simulationConfig_.discCounts.contains(membraneTypeName))
         throw ExceptionWithLocation("No disc counts for membrane type " + membraneTypeName);
 
-    if (!simulationConfig_.setup.distributions.contains(membraneTypeName))
+    if (!simulationConfig_.distributions.contains(membraneTypeName))
         throw ExceptionWithLocation("No distribution for membrane type " + membraneTypeName);
 
-    const auto& discCount = simulationConfig_.setup.discCounts[membraneTypeName];
+    const auto& discCount = simulationConfig_.discCounts[membraneTypeName];
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, discCount);
-    const auto& distribution = simulationConfig_.setup.distributions[membraneTypeName];
+    const auto& distribution = simulationConfig_.distributions[membraneTypeName];
 
     if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
         throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
@@ -155,7 +155,7 @@ sf::Vector2d CellPopulator::sampleVelocityFromDistribution() const
     static thread_local std::random_device rd;
     static thread_local std::mt19937 gen(rd());
 
-    const auto sigma = simulationConfig_.setup.maxVelocity;
+    const auto sigma = simulationConfig_.maxVelocity;
 
     // 2D maxwell distribution is a rayleigh distribution
     // weibull distribution with k=2 and lambda = sigma*sqrt(2) is rayleigh distribution

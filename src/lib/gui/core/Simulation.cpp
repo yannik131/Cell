@@ -19,8 +19,8 @@ void Simulation::run()
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
     const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
-    const auto simulationTimeScale = simulationConfig.setup.simulationTimeScale;
-    const auto simulationTimeStep = simulationConfig.setup.simulationTimeStep;
+    const auto simulationTimeScale = simulationConfig.simulationTimeScale;
+    const auto simulationTimeStep = simulationConfig.simulationTimeStep;
 
     while (!simulationFactory_.getCell().getDiscs().empty())
     {
@@ -80,7 +80,7 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
     }
 
     frameDTO.elapsedSimulationTimeUs =
-        static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().setup.simulationTimeStep * 1e6);
+        static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().simulationTimeStep * 1e6);
     frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);

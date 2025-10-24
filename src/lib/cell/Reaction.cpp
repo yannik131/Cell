@@ -49,7 +49,7 @@ bool contains(const Reaction& reaction, DiscTypeID discType)
            reaction.getProduct2() == discType;
 }
 
-Reaction::Type inferType(bool educt2, bool product2)
+Reaction::Type inferReactionType(bool educt2, bool product2)
 {
     if (!educt2 && !product2)
         return Reaction::Type::Transformation;
@@ -80,7 +80,7 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     , educt2_(educt2)
     , product1_(product1)
     , product2_(product2)
-    , type_(inferType(educt2.has_value(), product2.has_value()))
+    , type_(inferReactionType(educt2.has_value(), product2.has_value()))
 {
     setProbability(probability);
 }

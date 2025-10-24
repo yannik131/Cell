@@ -55,11 +55,17 @@ struct Reaction
     bool operator==(const Reaction&) const = default;
 };
 
+} // namespace config
+
 inline const std::string cellMembraneTypeName = "Cell membrane";
 
-struct Setup
+struct SimulationConfig
 {
-    MembraneType cellMembraneType{.name = cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
+    std::vector<config::DiscType> discTypes;
+    std::vector<config::MembraneType> membraneTypes;
+    std::vector<config::Reaction> reactions;
+
+    config::MembraneType cellMembraneType{.name = cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -89,17 +95,6 @@ struct Setup
     // These never use a distribution
     std::vector<config::Membrane> membranes;
 
-    bool operator==(const Setup&) const = default;
-};
-
-} // namespace config
-
-struct SimulationConfig
-{
-    std::vector<config::DiscType> discTypes;
-    std::vector<config::MembraneType> membraneTypes;
-    std::vector<config::Reaction> reactions;
-    config::Setup setup;
     bool operator==(const SimulationConfig&) const = default;
 };
 

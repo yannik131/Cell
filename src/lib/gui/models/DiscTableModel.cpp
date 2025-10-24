@@ -23,13 +23,13 @@ void DiscTableModel::addRow()
 
 void DiscTableModel::loadFromConfig()
 {
-    setRows(simulationConfigUpdater_->getSimulationConfig().setup.discs);
+    setRows(simulationConfigUpdater_->getSimulationConfig().discs);
 }
 
 void DiscTableModel::saveToConfig()
 {
     auto currentConfig = simulationConfigUpdater_->getSimulationConfig();
-    currentConfig.setup.discs = rows_;
+    currentConfig.discs = rows_;
     simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
