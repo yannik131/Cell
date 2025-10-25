@@ -30,9 +30,6 @@ void CellPopulator::populateCell()
 
 void CellPopulator::populateWithDistributions()
 {
-    if (simulationConfig_.distributions.empty())
-        return;
-
     const auto& discTypes = simulationConfig_.discTypes;
     double maxRadius = std::max_element(discTypes.begin(), discTypes.end(),
                                         [](const config::DiscType& lhs, const config::DiscType& rhs)
@@ -116,15 +113,16 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     const auto& membraneTypeName =
         simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
-    if (!simulationConfig_.discCounts.contains(membraneTypeName))
-        throw ExceptionWithLocation("No disc counts for membrane type " + membraneTypeName);
+    const auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
 
-    if (!simulationConfig_.distributions.contains(membraneTypeName))
-        throw ExceptionWithLocation("No distribution for membrane type " + membraneTypeName);
+    const auto& discCount = membraneType.discCount;
+    const auto& distribution = membraneType.discTypeDistribution;
 
-    const auto& discCount = simulationConfig_.discCounts[membraneTypeName];
+    if (discCount < 0)
+        throw ExceptionWithLocation("Disc count for membrane type " + membraneTypeName + " is negative (" +
+                                    std::to_string(discCount) + ")");
+
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, discCount);
-    const auto& distribution = simulationConfig_.distributions[membraneTypeName];
 
     if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
         throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
@@ -205,7 +203,7 @@ Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
     return *compartment;
 }
 
-double CellPopulator::calculateValueSum(const std::map<std::string, double>& distribution) const
+double CellPopulator::calculateValueSum(const std::unordered_map<std::string, double>& distribution) const
 {
     return std::accumulate(distribution.begin(), distribution.end(), 0.0,
                            [](double partialSum, const auto& entry) { return partialSum + entry.second; });

@@ -40,6 +40,11 @@ struct MembraneType
     std::string name;
     double radius = 0;
     std::unordered_map<std::string, cell::MembraneType::Permeability> permeabilityMap;
+
+    // Only used if distributions are enabled, not part of the actual membrane type:
+    int discCount;
+    std::unordered_map<std::string, double> discTypeDistribution;
+
     bool operator==(const MembraneType&) const = default;
 };
 
@@ -85,10 +90,6 @@ struct SimulationConfig
 
     bool useDistribution = true;
 
-    // In case of distribution:
-    std::map<std::string, int> discCounts;
-    std::map<std::string, std::map<std::string, double>> distributions;
-
     // In case not:
     std::vector<config::Disc> discs;
 
@@ -103,15 +104,18 @@ namespace config
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiscType, name, radius, mass)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap, discCount, discTypeDistribution)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Membrane, membraneTypeName, x, y)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
 
 } // namespace config
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
-                                   simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution, discCounts,
-                                   distributions, discs, membranes)
+                                   simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution, discs,
+                                   membranes)
+
+cell::config::MembraneType& findMembraneTypeByName(cell::SimulationConfig& simulationConfig,
+                                                   std::string membraneTypeName);
 
 } // namespace cell
 

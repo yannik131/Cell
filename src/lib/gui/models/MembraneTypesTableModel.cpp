@@ -7,7 +7,7 @@
 // TODO DRY violation with DiscTypesTableModel
 
 MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, {{"Name", "Radius", "Color", "Permeabilities", "Delete"}}, simulationConfigUpdater)
+    : Base(parent, {{"Name", "Radius", "Color", "Permeabilities", "Distribution", "Delete"}}, simulationConfigUpdater)
 {
 }
 
@@ -66,9 +66,10 @@ QVariant MembraneTypesTableModel::getField(const cell::config::MembraneType& row
     {
     case 0: return QString::fromStdString(row.name);
     case 1: return row.radius;
-    case 2: return "Edit";
-    case 3: return getColorNameMapping()[membraneTypeColorMap_.at(row.name)];
-    case 4: return "Delete";
+    case 2: return getColorNameMapping()[membraneTypeColorMap_.at(row.name)];
+    case 3:
+    case 4: return "Edit";
+    case 5: return "Delete";
     default: return {};
     }
 }
@@ -88,7 +89,7 @@ bool MembraneTypesTableModel::setField(cell::config::MembraneType& row, int colu
 
 bool MembraneTypesTableModel::isEditable(const QModelIndex& index) const
 {
-    return index.column() != 4;
+    return index.column() != 5;
 }
 
 void MembraneTypesTableModel::updateMembraneTypeName(cell::config::MembraneType& membraneType,

@@ -6,6 +6,7 @@
 
 class MembraneTypesTableModel;
 class PermeabilityDialog;
+class DiscTypeDistributionDialog;
 
 class MembraneTypesDialog : public TableViewDialog<MembraneTypesTableModel::RowType>
 {
@@ -17,6 +18,7 @@ public:
 
 private:
     PermeabilityDialog* permeabilityDialog_;
+    DiscTypeDistributionDialog* discTypeDistributionDialog_;
     int selectedRowForPermeabilityEditing_;
 };
 

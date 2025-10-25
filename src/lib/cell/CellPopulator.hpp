@@ -28,7 +28,7 @@ private:
     void populateCompartmentWithDistribution(Compartment& compartment, double maxRadius);
     sf::Vector2d sampleVelocityFromDistribution() const;
     Compartment& findDeepestContainingCompartment(const Disc& disc);
-    double calculateValueSum(const std::map<std::string, double>& distribution) const;
+    double calculateValueSum(const std::unordered_map<std::string, double>& distribution) const;
 
 private:
     Cell& cell_;
