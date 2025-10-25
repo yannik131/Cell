@@ -8,7 +8,7 @@
 
 #include <unordered_set>
 
-class SimulationConfigUpdater
+class SimulationConfigUpdater : public QObject
 {
     Q_OBJECT
 public:

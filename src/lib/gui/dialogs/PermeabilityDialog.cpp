@@ -3,16 +3,15 @@
 #include "delegates/ComboBoxDelegate.hpp"
 #include "dialogs/DiscTypesDialog.hpp"
 #include "models/PermeabilityTableModel.hpp"
-#include "ui_PermeabilityDialog.h"
 
 #include "PermeabilityDialog.hpp"
 #include <QCloseEvent>
 #include <QMessageBox>
 
-PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
+PermeabilityDialog::PermeabilityDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::PermeabilityDialog)
-    , permeabilityTableModel_(new PermeabilityTableModel(this, abstractSimulationBuilder))
+    , permeabilityTableModel_(new PermeabilityTableModel(this, simulationConfigUpdater))
 {
     ui->setupUi(this);
 
@@ -40,12 +39,9 @@ PermeabilityDialog::PermeabilityDialog(QWidget* parent, AbstractSimulationBuilde
 }
 
 void PermeabilityDialog::setPermeabilityMap(
-    std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
+    const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
 {
-    permeabilityTableModel_->setPermeabilityMap(permeabilityMap);
-}
-
-void PermeabilityDialog::showEvent(QShowEvent*)
-{
-    permeabilityTableModel_->reload();
+    std::vector<std::pair<std::string, cell::MembraneType::Permeability>> rows(permeabilityMap.begin(),
+                                                                               permeabilityMap.end());
+    permeabilityTableModel_->setRows(std::move(rows));
 }

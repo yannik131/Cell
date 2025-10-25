@@ -6,33 +6,14 @@
 #include "delegates/SpinBoxDelegate.hpp"
 #include "dialogs/PermeabilityDialog.hpp"
 #include "models/MembraneTypesTableModel.hpp"
-#include "ui_MembraneTypesDialog.h"
 
-MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QDialog(parent)
-    , ui(new Ui::MembraneTypesDialog)
-    , membraneTypesTableModel_(new MembraneTypesTableModel(this, abstractSimulationBuilder))
-    , permeabilityDialog_(new PermeabilityDialog(this, abstractSimulationBuilder))
+MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : Base(parent, simulationConfigUpdater, new MembraneTypesTableModel(this, simulationConfigUpdater))
+    , permeabilityDialog_(new PermeabilityDialog(this, simulationConfigUpdater))
 {
-    ui->setupUi(this);
-
-    connect(ui->okPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  membraneTypesTableModel_->commitChanges();
-                                  accept();
-                              }));
-
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
-    connect(ui->addMembranePushButton, &QPushButton::clicked, membraneTypesTableModel_,
-            &MembraneTypesTableModel::addEmptyRow);
-    connect(ui->clearMembranesPushButton, &QPushButton::clicked, membraneTypesTableModel_,
-            &MembraneTypesTableModel::clearRows);
-
-    auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(ui->membraneTypesTableView);
-    auto* colorComboBoxDelegate = new ComboBoxDelegate(ui->membraneTypesTableView);
-    auto* editPermeabilityPushButtonDelegate = new ButtonDelegate(ui->membraneTypesTableView, "Edit");
+    auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(ui->tableView);
+    auto* colorComboBoxDelegate = new ComboBoxDelegate(ui->tableView);
+    auto* editPermeabilityPushButtonDelegate = new ButtonDelegate(ui->tableView, "Edit");
 
     connect(radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated,
             [](QWidget* spinBox)
@@ -46,24 +27,13 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, AbstractSimulationBuil
             [&](int row)
             {
                 selectedRowForPermeabilityEditing_ = row;
-                auto& permeabilityMap = membraneTypesTableModel_->getRow(row).permeabilityMap;
+                auto permeabilityMap = model_->getRows()[row].permeabilityMap;
                 permeabilityDialog_->setPermeabilityMap(permeabilityMap);
                 permeabilityDialog_->show();
             });
 
-    ui->membraneTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
-    ui->membraneTypesTableView->setItemDelegateForColumn(2, colorComboBoxDelegate);
-    ui->membraneTypesTableView->setItemDelegateForColumn(3, editPermeabilityPushButtonDelegate);
-    insertDeleteButtonIntoView(membraneTypesTableModel_, ui->membraneTypesTableView, 4);
-
-    ui->membraneTypesTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
-                                                QAbstractItemView::EditTrigger::SelectedClicked);
-    ui->membraneTypesTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    ui->membraneTypesTableView->setModel(membraneTypesTableModel_);
-}
-
-void MembraneTypesDialog::showEvent(QShowEvent* event)
-{
-    membraneTypesTableModel_->reload();
+    ui->tableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
+    ui->tableView->setItemDelegateForColumn(2, colorComboBoxDelegate);
+    ui->tableView->setItemDelegateForColumn(3, editPermeabilityPushButtonDelegate);
+    insertDeleteButtonIntoView(model_, ui->tableView, 4);
 }

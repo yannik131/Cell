@@ -34,17 +34,16 @@ void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
-DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent,
-                                                   AbstractSimulationBuilder* abstractSimulationBuilder)
+DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : ComboBoxDelegate(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
 
 QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(getDiscTypeNames(abstractSimulationBuilder_->getSimulationConfig().discTypes));
+    editor->addItems(getDiscTypeNames(simulationConfigUpdater_->getSimulationConfig().discTypes));
     emit editorCreated(editor);
 
     return editor;
@@ -62,9 +61,9 @@ QVector<QString> DiscTypeComboBoxDelegate::getDiscTypeNames(const std::vector<ce
 }
 
 MembraneTypeComboBoxDelegate::MembraneTypeComboBoxDelegate(QObject* parent,
-                                                           AbstractSimulationBuilder* abstractSimulationBuilder)
+                                                           SimulationConfigUpdater* simulationConfigUpdater)
     : ComboBoxDelegate(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
 
@@ -72,7 +71,7 @@ QWidget* MembraneTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyl
                                                     const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(getMembraneTypeNames(abstractSimulationBuilder_->getSimulationConfig().membraneTypes));
+    editor->addItems(getMembraneTypeNames(simulationConfigUpdater_->getSimulationConfig().membraneTypes));
     emit editorCreated(editor);
 
     return editor;

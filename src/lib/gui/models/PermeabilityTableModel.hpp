@@ -1,10 +1,10 @@
 #ifndef D7A2ACDF_B39A_4AA7_9906_03973244209E_HPP
 #define D7A2ACDF_B39A_4AA7_9906_03973244209E_HPP
 
-#include "models/AbstractSimulationConfigPartTableModel.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
 class PermeabilityTableModel
-    : public AbstractSimulationConfigPartTableModel<std::pair<std::string, cell::MembraneType::Permeability>>
+    : public AbstractSimulationConfigTableModel<std::pair<std::string, cell::MembraneType::Permeability>>
 {
     Q_OBJECT
 public:

@@ -1,6 +1,6 @@
 #include "dialogs/PlotDataSelectionDialog.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 #include "core/PlotCategories.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
 #include "ui_PlotDataSelectionDialog.h"
@@ -9,11 +9,11 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder,
+PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater,
                                                  PlotModel* plotModel)
     : QDialog(parent)
     , ui(new Ui::PlotDataSelectionDialog)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+    , simulationConfigUpdater_(simulationConfigUpdater)
     , plotModel_(plotModel)
 {
     ui->setupUi(this);
@@ -37,7 +37,7 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent, AbstractSimula
 
 void PlotDataSelectionDialog::showEvent(QShowEvent*)
 {
-    const auto& discTypes = abstractSimulationBuilder_->getSimulationConfig().discTypes;
+    const auto& discTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
     ui->selectedDiscTypesListWidget->clear();
 
     for (const auto& discType : discTypes)

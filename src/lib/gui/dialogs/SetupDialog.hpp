@@ -10,7 +10,7 @@ namespace Ui
 class SetupDialog;
 }
 
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 class DiscTypeDistributionTableModel;
 class DiscTableModel;
 
@@ -18,7 +18,7 @@ class SetupDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    explicit SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void showEvent(QShowEvent*) override;
 

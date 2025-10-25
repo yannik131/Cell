@@ -1,7 +1,7 @@
 #ifndef ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
 #define ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
 
-#include "core/AbstractSimulationBuilder.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 #include <QAbstractItemView>
 #include <QComboBox>
@@ -43,7 +43,7 @@ class DiscTypeComboBoxDelegate : public ComboBoxDelegate
 {
     Q_OBJECT
 public:
-    DiscTypeComboBoxDelegate(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    DiscTypeComboBoxDelegate(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     /**
      * @brief Creates a `QComboBox` and fills it with the currently available disc type names
@@ -54,7 +54,7 @@ private:
     QVector<QString> getDiscTypeNames(const std::vector<cell::config::DiscType>& discTypes) const;
 
 private:
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
+    SimulationConfigUpdater* simulationConfigUpdater_;
 };
 
 // TODO Fix DRY violation here once everything is running
@@ -62,7 +62,7 @@ class MembraneTypeComboBoxDelegate : public ComboBoxDelegate
 {
     Q_OBJECT
 public:
-    MembraneTypeComboBoxDelegate(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    MembraneTypeComboBoxDelegate(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override;
 
@@ -70,23 +70,23 @@ private:
     QVector<QString> getMembraneTypeNames(const std::vector<cell::config::MembraneType>& membraneTypes) const;
 
 private:
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
+    SimulationConfigUpdater* simulationConfigUpdater_;
 };
 
 template <std::integral... Columns>
-void insertDiscTypeComboboxIntoView(QAbstractItemView* view, AbstractSimulationBuilder* abstractSimulationBuilder,
+void insertDiscTypeComboboxIntoView(QAbstractItemView* view, SimulationConfigUpdater* simulationConfigUpdater,
                                     Columns... columns)
 {
-    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(view, abstractSimulationBuilder);
+    auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(view, simulationConfigUpdater);
     (view->setItemDelegateForColumn(columns, discTypeComboBoxDelegate), ...);
     view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                           QAbstractItemView::EditTrigger::SelectedClicked);
 }
 
 inline void insertMembraneTypeComboBoxIntoView(QAbstractItemView* view,
-                                               AbstractSimulationBuilder* abstractSimulationBuilder, int column)
+                                               SimulationConfigUpdater* simulationConfigUpdater, int column)
 {
-    auto* membraneTypeComboBoxDelegate = new MembraneTypeComboBoxDelegate(view, abstractSimulationBuilder);
+    auto* membraneTypeComboBoxDelegate = new MembraneTypeComboBoxDelegate(view, simulationConfigUpdater);
     view->setItemDelegateForColumn(column, membraneTypeComboBoxDelegate);
     view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                           QAbstractItemView::EditTrigger::SelectedClicked);

@@ -9,14 +9,14 @@ class PermeabilityDialog;
 };
 
 class PermeabilityTableModel;
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 
 class PermeabilityDialog : public QDialog
 {
     Q_OBJECT
 public:
-    PermeabilityDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
-    void setPermeabilityMap(std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap);
+    PermeabilityDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
+    void setPermeabilityMap(const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap);
 
 private:
     void showEvent(QShowEvent* event) override;

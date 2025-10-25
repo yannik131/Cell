@@ -9,12 +9,12 @@
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "ui_SetupDialog.h"
 
-SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
+SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::SetupDialog)
-    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this, abstractSimulationBuilder))
-    , discTableModel_(new DiscTableModel(this, abstractSimulationBuilder))
-    , setupModel_(new SetupModel(this, discTypeDistributionTableModel_, discTableModel_, abstractSimulationBuilder))
+    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this, simulationConfigUpdater))
+    , discTableModel_(new DiscTableModel(this, simulationConfigUpdater))
+    , setupModel_(new SetupModel(this, discTypeDistributionTableModel_, discTableModel_, simulationConfigUpdater))
 {
     ui->setupUi(this);
 
@@ -59,7 +59,7 @@ SetupDialog::SetupDialog(QWidget* parent, AbstractSimulationBuilder* abstractSim
 
     ui->discsTableView->setModel(discTableModel_);
 
-    insertDiscTypeComboboxIntoView(ui->discsTableView, abstractSimulationBuilder, 0);
+    insertDiscTypeComboboxIntoView(ui->discsTableView, simulationConfigUpdater, 0);
     insertDeleteButtonIntoView(discTableModel_, ui->discsTableView, 5);
 
     ui->discsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

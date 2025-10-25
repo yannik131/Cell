@@ -10,6 +10,9 @@ class SimulationConfigUpdater;
 template <typename T> class AbstractTableModel : public QAbstractTableModel
 {
 public:
+    using RowType = T;
+
+public:
     AbstractTableModel(QObject* parent, const QStringList& headers, SimulationConfigUpdater* simulationConfigUpdater);
 
     // Necessary methods from QAbstractTableModel with default implementations
@@ -30,6 +33,7 @@ public:
     virtual void addRow() = 0;
 
     void setRows(std::vector<T> rows);
+    const std::vector<T>& getRows() const;
 
 protected:
     virtual QVariant getField(const T& row, int column) const = 0;        // for data(...)
@@ -124,6 +128,11 @@ template <typename T> inline void AbstractTableModel<T>::setRows(std::vector<T> 
     beginResetModel();
     rows_ = std::move(rows);
     endResetModel();
+}
+
+template <typename T> inline const std::vector<T>& AbstractTableModel<T>::getRows() const
+{
+    return rows_;
 }
 
 #endif /* B8F34530_1D0A_4E64_A6E6_CEEE9B21BBD5_HPP */

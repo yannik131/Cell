@@ -9,7 +9,7 @@ class ReactionsDialog;
 };
 
 class ReactionsTableModel;
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 
 /**
  * @brief Dialog where the user can create/delete reactions
@@ -21,7 +21,7 @@ public:
     /**
      * @brief Creates the delegates for displaying the reactions and connects callbacks
      */
-    explicit ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    explicit ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void showEvent(QShowEvent* event) override;
 

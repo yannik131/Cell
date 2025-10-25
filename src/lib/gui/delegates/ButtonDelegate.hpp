@@ -39,12 +39,7 @@ private:
 template <typename T> void insertDeleteButtonIntoView(T* model, QAbstractItemView* view, int column)
 {
     auto* deleteButtonDelegate = new ButtonDelegate(view, "Delete");
-    QObject::connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked,
-                     [model](int row)
-                     {
-                         model->removeRow(row);
-                         qDebug() << row;
-                     });
+    QObject::connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, [model](int row) { model->removeRow(row); });
     view->setItemDelegateForColumn(column, deleteButtonDelegate);
 }
 

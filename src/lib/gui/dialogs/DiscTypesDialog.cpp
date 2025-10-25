@@ -1,35 +1,14 @@
 #include "dialogs/DiscTypesDialog.hpp"
-#include "cell/Settings.hpp"
 #include "core/ColorMapping.hpp"
 #include "core/SafeCast.hpp"
-#include "core/Utility.hpp"
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
 #include "models/DiscTypesTableModel.hpp"
-#include "ui_DiscTypesDialog.h"
 
-#include <QCloseEvent>
-#include <QMessageBox>
-
-DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QDialog(parent)
-    , ui(new Ui::DiscTypesDialog)
-    , discTypesTableModel_(new DiscTypesTableModel(this, abstractSimulationBuilder))
+DiscTypesDialog::DiscTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : Base(parent, simulationConfigUpdater, new DiscTypesTableModel(this, simulationConfigUpdater))
 {
-    ui->setupUi(this);
-
-    connect(ui->okPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  discTypesTableModel_->commitChanges();
-                                  accept();
-                              }));
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
-    connect(ui->addTypePushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::addEmptyRow);
-    connect(ui->clearTypesPushButton, &QPushButton::clicked, discTypesTableModel_, &DiscTypesTableModel::clearRows);
-
     auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
     auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
     auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
@@ -49,19 +28,8 @@ DiscTypesDialog::DiscTypesDialog(QWidget* parent, AbstractSimulationBuilder* abs
                                                              cell::DiscTypeLimits::MaxMass);
             });
 
-    ui->discTypesTableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
-    ui->discTypesTableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
-    ui->discTypesTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
-    insertDeleteButtonIntoView(discTypesTableModel_, ui->discTypesTableView, 4);
-
-    ui->discTypesTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
-                                            QAbstractItemView::EditTrigger::SelectedClicked);
-    ui->discTypesTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    ui->discTypesTableView->setModel(discTypesTableModel_);
-}
-
-void DiscTypesDialog::showEvent(QShowEvent*)
-{
-    discTypesTableModel_->reload();
+    ui->tableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
+    ui->tableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
+    ui->tableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
+    insertDeleteButtonIntoView(model_, ui->tableView, 4);
 }

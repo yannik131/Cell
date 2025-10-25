@@ -17,6 +17,8 @@ namespace cell
 namespace config
 {
 
+inline const std::string cellMembraneTypeName = "Cell membrane";
+
 struct DiscType
 {
     std::string name;
@@ -57,15 +59,13 @@ struct Reaction
 
 } // namespace config
 
-inline const std::string cellMembraneTypeName = "Cell membrane";
-
 struct SimulationConfig
 {
     std::vector<config::DiscType> discTypes;
     std::vector<config::MembraneType> membraneTypes;
     std::vector<config::Reaction> reactions;
 
-    config::MembraneType cellMembraneType{.name = cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
+    config::MembraneType cellMembraneType{.name = config::cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -106,12 +106,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Membrane, membraneTypeName, x, y)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellMembraneType, simulationTimeStep, simulationTimeScale, maxVelocity,
-                                   useDistribution, discCounts, distributions, discs, membranes)
 
 } // namespace config
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, setup)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
+                                   simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution, discCounts,
+                                   distributions, discs, membranes)
 
 } // namespace cell
 

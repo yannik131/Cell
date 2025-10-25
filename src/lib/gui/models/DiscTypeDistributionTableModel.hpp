@@ -1,9 +1,9 @@
 #ifndef C5A7F999_3DE1_4DFF_8512_AD7C6C768848_HPP
 #define C5A7F999_3DE1_4DFF_8512_AD7C6C768848_HPP
 
-#include "models/AbstractSimulationConfigPartTableModel.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
-class DiscTypeDistributionTableModel : public AbstractSimulationConfigPartTableModel<std::pair<std::string, double>>
+class DiscTypeDistributionTableModel : public AbstractSimulationConfigTableModel<std::pair<std::string, double>>
 {
     Q_OBJECT
 public:

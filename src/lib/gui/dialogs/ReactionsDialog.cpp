@@ -11,10 +11,10 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
+ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::ReactionsDialog)
-    , reactionsTableModel_(new ReactionsTableModel(this, abstractSimulationBuilder))
+    , reactionsTableModel_(new ReactionsTableModel(this, simulationConfigUpdater))
 {
     ui->setupUi(this);
 
@@ -39,7 +39,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abs
     connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
 
     insertDeleteButtonIntoView(reactionsTableModel_, ui->reactionsTableView, 8);
-    insertDiscTypeComboboxIntoView(ui->reactionsTableView, abstractSimulationBuilder, 0, 2, 4, 6);
+    insertDiscTypeComboboxIntoView(ui->reactionsTableView, simulationConfigUpdater, 0, 2, 4, 6);
     insertProbabilitySpinBoxIntoView(ui->reactionsTableView, 7);
 
     ui->reactionsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

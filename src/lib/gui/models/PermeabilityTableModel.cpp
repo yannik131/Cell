@@ -8,7 +8,7 @@
 // TODO DRY violation with DiscTypeDistributionTableModel
 
 PermeabilityTableModel::PermeabilityTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : AbstractSimulationConfigPartTableModel<std::pair<std::string, cell::MembraneType::Permeability>>(
+    : AbstractSimulationConfigTableModel<std::pair<std::string, cell::MembraneType::Permeability>>(
           parent, {{"Disc type", "Permeability", "Delete"}}, simulationConfigUpdater)
 {
 }

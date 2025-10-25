@@ -1,30 +1,23 @@
 #ifndef C8FA243B_5843_4BD9_9E3A_0C6297CED23C_HPP
 #define C8FA243B_5843_4BD9_9E3A_0C6297CED23C_HPP
 
-#include <QDialog>
-
-namespace Ui
-{
-class MembraneTypesDialog;
-}
+#include "dialogs/TableViewDialog.hpp"
+#include "models/MembraneTypesTableModel.hpp"
 
 class MembraneTypesTableModel;
-class AbstractSimulationBuilder;
 class PermeabilityDialog;
 
-class MembraneTypesDialog : public QDialog
+class MembraneTypesDialog : public TableViewDialog<MembraneTypesTableModel::RowType>
 {
     Q_OBJECT
+    using Base = TableViewDialog<MembraneTypesTableModel::RowType>;
+
 public:
-    MembraneTypesDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    MembraneTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
 private:
-    void showEvent(QShowEvent* event) override;
-
-private:
-    Ui::MembraneTypesDialog* ui;
-    MembraneTypesTableModel* membraneTypesTableModel_;
     PermeabilityDialog* permeabilityDialog_;
+    int selectedRowForPermeabilityEditing_;
 };
 
 #endif /* C8FA243B_5843_4BD9_9E3A_0C6297CED23C_HPP */
