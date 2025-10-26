@@ -8,8 +8,8 @@
 // TODO DRY violation with DiscTypeDistributionTableModel
 
 PermeabilityTableModel::PermeabilityTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : AbstractSimulationConfigTableModel<std::pair<std::string, cell::MembraneType::Permeability>>(
-          parent, {{"Disc type", "Permeability", "Delete"}}, simulationConfigUpdater)
+    : AbstractSimulationConfigTableModel<PermeabilityMapEntry>(parent, {{"Disc type", "Permeability", "Delete"}},
+                                                               simulationConfigUpdater)
 {
 }
 
@@ -32,8 +32,7 @@ void PermeabilityTableModel::addRow()
     endInsertRows();
 }
 
-QVariant PermeabilityTableModel::getField(const std::pair<std::string, cell::MembraneType::Permeability>& row,
-                                          int column) const
+QVariant PermeabilityTableModel::getField(const PermeabilityMapEntry& row, int column) const
 {
     switch (column)
     {
@@ -44,12 +43,14 @@ QVariant PermeabilityTableModel::getField(const std::pair<std::string, cell::Mem
     }
 }
 
-bool PermeabilityTableModel::setField(std::pair<std::string, cell::MembraneType::Permeability>& row, int column,
-                                      const QVariant& value)
+bool PermeabilityTableModel::setField(PermeabilityMapEntry& row, int column, const QVariant& value)
 {
     switch (column)
     {
-    case 0: row.first = value.toString().toStdString(); break;
+    case 0:
+        auto tmp = row.second;
+        row.first = value.toString().toStdString();
+        break;
     case 1: row.second = getNamePermeabilityMapping()[value.toString()]; break;
     default: return false;
     }

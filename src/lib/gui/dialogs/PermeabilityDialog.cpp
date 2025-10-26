@@ -1,47 +1,35 @@
+#include "dialogs/PermeabilityDialog.hpp"
 #include "core/SafeCast.hpp"
 #include "core/Utility.hpp"
+#include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
-#include "dialogs/DiscTypesDialog.hpp"
 #include "models/PermeabilityTableModel.hpp"
 
-#include "PermeabilityDialog.hpp"
 #include <QCloseEvent>
 #include <QMessageBox>
 
 PermeabilityDialog::PermeabilityDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : QDialog(parent)
-    , ui(new Ui::PermeabilityDialog)
-    , permeabilityTableModel_(new PermeabilityTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new PermeabilityTableModel(this, simulationConfigUpdater))
 {
-    ui->setupUi(this);
-
-    connect(ui->okPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  permeabilityTableModel_->commitChanges();
-                                  accept();
-                              }));
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
-
-    ui->permeabilityTableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
-
     auto* permeabilityComboBoxDelegate = new ComboBoxDelegate(this);
 
     connect(permeabilityComboBoxDelegate, &ComboBoxDelegate::editorCreated,
             [](QComboBox* comboBox) { comboBox->addItems({"None", "Inward", "Outward", "Bidirectional"}); });
 
-    ui->permeabilityTableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
-                                               QAbstractItemView::EditTrigger::SelectedClicked);
-    ui->permeabilityTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    ui->permeabilityTableView->setModel(permeabilityTableModel_);
+    ui->tableView->setItemDelegateForColumn(1, permeabilityComboBoxDelegate);
+    insertDeleteButtonIntoView(model_, ui->tableView, 2);
 }
 
-void PermeabilityDialog::setPermeabilityMap(
-    const std::unordered_map<std::string, cell::MembraneType::Permeability>& permeabilityMap)
+void PermeabilityDialog::setPermeabilityMap(const PermeabilityMap& permeabilityMap)
 {
-    std::vector<std::pair<std::string, cell::MembraneType::Permeability>> rows(permeabilityMap.begin(),
-                                                                               permeabilityMap.end());
-    permeabilityTableModel_->setRows(std::move(rows));
+    std::vector<PermeabilityMapEntry> rows(permeabilityMap.begin(), permeabilityMap.end());
+    model_->setRows(std::move(rows));
+}
+
+PermeabilityMap PermeabilityDialog::getPermeabilityMap() const
+{
+    const auto& rows = model_->getRows();
+    PermeabilityMap permeabilityMap(rows.begin(), rows.end());
+
+    return permeabilityMap;
 }

@@ -3,8 +3,7 @@
 
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class PermeabilityTableModel
-    : public AbstractSimulationConfigTableModel<std::pair<std::string, cell::MembraneType::Permeability>>
+class PermeabilityTableModel : public AbstractSimulationConfigTableModel<PermeabilityMapEntry>
 {
     Q_OBJECT
 public:
@@ -13,9 +12,8 @@ public:
     void addRow() override;
 
 private:
-    QVariant getField(const std::pair<std::string, cell::MembraneType::Permeability>& row, int column) const override;
-    bool setField(std::pair<std::string, cell::MembraneType::Permeability>& row, int column,
-                  const QVariant& value) override;
+    QVariant getField(const PermeabilityMapEntry& row, int column) const override;
+    bool setField(PermeabilityMapEntry& row, int column, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

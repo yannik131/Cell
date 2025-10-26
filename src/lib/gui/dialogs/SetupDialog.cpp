@@ -6,14 +6,15 @@
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
 #include "models/DiscTableModel.hpp"
-#include "models/DiscTypeDistributionTableModel.hpp"
+#include "models/MembranesTableModel.hpp"
+#include "models/SetupModel.hpp"
 #include "ui_SetupDialog.h"
 
 SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::SetupDialog)
-    , discTypeDistributionTableModel_(new DiscTypeDistributionTableModel(this, simulationConfigUpdater))
     , discTableModel_(new DiscTableModel(this, simulationConfigUpdater))
+    , membranesTableModel_(new MembranesTableModel(this, simulationConfigUpdater))
     , setupModel_(new SetupModel(this, discTypeDistributionTableModel_, discTableModel_, simulationConfigUpdater))
 {
     ui->setupUi(this);

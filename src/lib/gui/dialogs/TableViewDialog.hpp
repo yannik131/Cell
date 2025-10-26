@@ -3,7 +3,6 @@
 
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
-#include "models/AbstractSimulationConfigTableModel.hpp"
 #include "ui_TableViewDialog.h"
 
 #include <QDialog>
@@ -18,7 +17,8 @@ class SimulationConfigUpdater;
 template <typename T> class TableViewDialog : public QDialog
 {
 public:
-    TableViewDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater, AbstractTableModel<T>* model);
+    TableViewDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater,
+                    AbstractSimulationConfigTableModel<T>* model);
 
     ~TableViewDialog();
 
@@ -28,12 +28,12 @@ protected:
 protected:
     Ui::TableViewDialog* ui;
     SimulationConfigUpdater* simulationConfigUpdater_;
-    AbstractTableModel<T>* model_;
+    AbstractSimulationConfigTableModel<T>* model_;
 };
 
 template <typename T>
 inline TableViewDialog<T>::TableViewDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater,
-                                           AbstractTableModel<T>* model)
+                                           AbstractSimulationConfigTableModel<T>* model)
     : QDialog(parent)
     , ui(new Ui::TableViewDialog)
     , simulationConfigUpdater_(simulationConfigUpdater)
@@ -66,7 +66,7 @@ template <typename T> inline TableViewDialog<T>::~TableViewDialog()
 
 template <typename T> inline void TableViewDialog<T>::showEvent(QShowEvent* showEvent)
 {
-    if (auto model = dynamic_cast<AbstractSimulationConfigTableModel<T>*>(model_))
+    if (auto model = dynamic_cast<AbstractConfigChanger*>(model_))
         model->loadFromConfig();
 }
 

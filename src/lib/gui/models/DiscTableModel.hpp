@@ -3,7 +3,7 @@
 
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class DiscTableModel : public AbstractSimulationConfigTableModel<cell::config::Disc>
+class DiscTableModel : public AbstractSimulationConfigTableModel<cell::config::Disc>, public AbstractConfigChanger
 {
     Q_OBJECT
 public:

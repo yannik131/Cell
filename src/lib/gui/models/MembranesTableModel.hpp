@@ -4,7 +4,8 @@
 #include "cell/SimulationConfig.hpp"
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class MembranesTableModel : public AbstractSimulationConfigTableModel<cell::config::Membrane>
+class MembranesTableModel : public AbstractSimulationConfigTableModel<cell::config::Membrane>,
+                            public AbstractConfigChanger
 {
     Q_OBJECT
 public:

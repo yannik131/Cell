@@ -41,6 +41,7 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
                 auto permeabilityMap = permeabilityDialog_->getPermeabilityMap();
                 auto rows = model_->getRows();
                 rows[selectedRowForPermeabilityEditing_].permeabilityMap = std::move(permeabilityMap);
+                model_->setRows(std::move(rows));
             });
 
     auto* editDistributionPushButtonDelegate = new ButtonDelegate(ui->tableView, "Edit");
@@ -48,7 +49,17 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
             [this](int row)
             {
                 selectedRowForDistributionEditing_ = row;
-                auto distributions = simulation
+                auto distribution = model_->getRows()[row].discTypeDistribution;
+                discTypeDistributionDialog_->setDiscTypeDistribution(distribution);
+                discTypeDistributionDialog_->show();
+            });
+    connect(discTypeDistributionDialog_, &QDialog::accepted,
+            [this]()
+            {
+                auto distribution = discTypeDistributionDialog_->getDiscTypeDistribution();
+                auto rows = model_->getRows();
+                rows[selectedRowForDistributionEditing_].discTypeDistribution = std::move(distribution);
+                model_->setRows(std::move(rows));
             });
 
     ui->tableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);

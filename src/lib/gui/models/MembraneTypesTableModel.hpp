@@ -10,7 +10,8 @@
 
 class AbstractSimulationBuilder;
 
-class MembraneTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::MembraneType>
+class MembraneTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::MembraneType>,
+                                public AbstractConfigChanger
 {
     Q_OBJECT
     using Base = AbstractSimulationConfigTableModel<cell::config::MembraneType>;

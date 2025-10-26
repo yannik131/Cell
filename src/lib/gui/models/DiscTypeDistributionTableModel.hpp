@@ -3,7 +3,7 @@
 
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class DiscTypeDistributionTableModel : public AbstractSimulationConfigTableModel<std::pair<std::string, double>>
+class DiscTypeDistributionTableModel : public AbstractSimulationConfigTableModel<DiscTypeDistributionEntry>
 {
     Q_OBJECT
 public:
@@ -12,8 +12,8 @@ public:
     void addRow() override;
 
 private:
-    QVariant getField(const std::pair<std::string, double>& row, int column) const override;
-    bool setField(std::pair<std::string, double>& row, int column, const QVariant& value) override;
+    QVariant getField(const DiscTypeDistributionEntry& row, int column) const override;
+    bool setField(DiscTypeDistributionEntry& row, int column, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

@@ -1,4 +1,5 @@
 #include "dialogs/DiscTypeDistributionDialog.hpp"
+#include "DiscTypeDistributionDialog.hpp"
 #include "core/Utility.hpp"
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
@@ -12,4 +13,18 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
     insertProbabilitySpinBoxIntoView(ui->tableView, 1);
 
     insertDeleteButtonIntoView(model_, ui->tableView, 2);
+}
+
+void DiscTypeDistributionDialog::setDiscTypeDistribution(const DiscTypeDistribution& discTypeDistribution)
+{
+    std::vector<DiscTypeDistributionEntry> rows(discTypeDistribution.begin(), discTypeDistribution.end());
+    model_->setRows(std::move(rows));
+}
+
+DiscTypeDistribution DiscTypeDistributionDialog::getDiscTypeDistribution() const
+{
+    const auto& rows = model_->getRows();
+    DiscTypeDistribution distribution(rows.begin(), rows.end());
+
+    return distribution;
 }

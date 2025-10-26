@@ -6,8 +6,8 @@
 
 DiscTypeDistributionTableModel::DiscTypeDistributionTableModel(QObject* parent,
                                                                SimulationConfigUpdater* simulationConfigUpdater)
-    : AbstractSimulationConfigTableModel<std::pair<std::string, double>>(parent, {{"Disc type", "Frequency", "Delete"}},
-                                                                         simulationConfigUpdater)
+    : AbstractSimulationConfigTableModel<DiscTypeDistributionEntry>(parent, {{"Disc type", "Frequency", "Delete"}},
+                                                                    simulationConfigUpdater)
 {
 }
 
@@ -30,7 +30,7 @@ void DiscTypeDistributionTableModel::addRow()
     endInsertRows();
 }
 
-QVariant DiscTypeDistributionTableModel::getField(const std::pair<std::string, double>& row, int column) const
+QVariant DiscTypeDistributionTableModel::getField(const DiscTypeDistributionEntry& row, int column) const
 {
     switch (column)
     {
@@ -41,7 +41,7 @@ QVariant DiscTypeDistributionTableModel::getField(const std::pair<std::string, d
     }
 }
 
-bool DiscTypeDistributionTableModel::setField(std::pair<std::string, double>& row, int column, const QVariant& value)
+bool DiscTypeDistributionTableModel::setField(DiscTypeDistributionEntry& row, int column, const QVariant& value)
 {
     switch (column)
     {

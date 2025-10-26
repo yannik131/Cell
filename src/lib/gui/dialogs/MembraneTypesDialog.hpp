@@ -20,6 +20,7 @@ private:
     PermeabilityDialog* permeabilityDialog_;
     DiscTypeDistributionDialog* discTypeDistributionDialog_;
     int selectedRowForPermeabilityEditing_;
+    int selectedRowForDistributionEditing_;
 };
 
 #endif /* C8FA243B_5843_4BD9_9E3A_0C6297CED23C_HPP */

@@ -7,7 +7,8 @@
 // TODO DRY violation with DiscTypesTableModel
 
 MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, {{"Name", "Radius", "Color", "Permeabilities", "Distribution", "Delete"}}, simulationConfigUpdater)
+    : Base(parent, {{"Name", "Radius", "Color", "Permeabilities", "Distribution", "Disc count", "Delete"}},
+           simulationConfigUpdater)
 {
 }
 
@@ -36,8 +37,8 @@ void MembraneTypesTableModel::addRow()
 {
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
 
-    rows_.push_back(
-        cell::config::MembraneType{.name = "Type" + std::to_string(rows_.size()), .radius = 1, .permeabilityMap = {}});
+    rows_.push_back(cell::config::MembraneType{
+        .name = "Type" + std::to_string(rows_.size()), .radius = 1, .permeabilityMap = {}, .discCount = 0});
     membraneTypeColorMap_[rows_.back().name] = sf::Color::Blue;
 
     endInsertRows();
@@ -69,7 +70,8 @@ QVariant MembraneTypesTableModel::getField(const cell::config::MembraneType& row
     case 2: return getColorNameMapping()[membraneTypeColorMap_.at(row.name)];
     case 3:
     case 4: return "Edit";
-    case 5: return "Delete";
+    case 5: return row.discCount;
+    case 6: return "Delete";
     default: return {};
     }
 }
@@ -81,6 +83,7 @@ bool MembraneTypesTableModel::setField(cell::config::MembraneType& row, int colu
     case 0: updateMembraneTypeName(row, value.toString().toStdString()); break;
     case 1: row.radius = value.toDouble(); break;
     case 2: membraneTypeColorMap_[row.name] = getNameColorMapping()[value.toString()]; break;
+    case 5: row.discCount = value.toInt(); break;
     default: return false;
     }
 
@@ -89,7 +92,7 @@ bool MembraneTypesTableModel::setField(cell::config::MembraneType& row, int colu
 
 bool MembraneTypesTableModel::isEditable(const QModelIndex& index) const
 {
-    return index.column() != 5;
+    return index.column() != 6;
 }
 
 void MembraneTypesTableModel::updateMembraneTypeName(cell::config::MembraneType& membraneType,

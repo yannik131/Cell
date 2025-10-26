@@ -5,7 +5,8 @@
 #include "cell/SimulationConfig.hpp"
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class ReactionsTableModel : public AbstractSimulationConfigTableModel<cell::config::Reaction>
+class ReactionsTableModel : public AbstractSimulationConfigTableModel<cell::config::Reaction>,
+                            public AbstractConfigChanger
 {
     Q_OBJECT
 public:
@@ -13,11 +14,14 @@ public:
 
     void addRow() override
     {
-        throw ExceptionWithLocation("Use the other addRow pls");
+        emit newRowRequested();
     };
     void addRow(cell::Reaction::Type type);
     void loadFromConfig() override;
     void saveToConfig() override;
+
+signals:
+    void newRowRequested();
 
 private:
     QVariant getField(const cell::config::Reaction& row, int column) const override;

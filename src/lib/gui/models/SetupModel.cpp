@@ -1,15 +1,13 @@
 #include "models/SetupModel.hpp"
 #include "SetupModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTableModel.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
 
-SetupModel::SetupModel(QObject* parent, DiscTypeDistributionTableModel* discTypeDistributionTableModel,
-                       DiscTableModel* discTableModel, AbstractSimulationBuilder* abstractSimulationBuilder)
+SetupModel::SetupModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QObject(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
-    , discTypeDistributionTableModel_(discTypeDistributionTableModel)
-    , discTableModel_(discTableModel)
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
 
@@ -47,6 +45,13 @@ void SetupModel::setCellHeight(int cellHeight)
 void SetupModel::setMaxVelocity(int maxVelocity)
 {
     setup_.maxVelocity = static_cast<double>(maxVelocity);
+}
+
+void SetupModel::updateConfig(std::function<void(cell::SimulationConfig& simulationConfig)> updater)
+{
+    auto config = simulationConfigUpdater_->getSimulationConfig();
+    updater(config);
+    simulationConfigUpdater_->setSimulationConfig(config);
 }
 
 void SetupModel::commitChanges()

@@ -8,7 +8,8 @@
 
 #include <unordered_set>
 
-class DiscTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::DiscType>
+class DiscTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::DiscType>,
+                            public AbstractConfigChanger
 {
     Q_OBJECT
     using Base = AbstractSimulationConfigTableModel<cell::config::DiscType>;

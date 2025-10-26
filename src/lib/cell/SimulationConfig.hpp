@@ -19,6 +19,9 @@ namespace config
 
 inline const std::string cellMembraneTypeName = "Cell membrane";
 
+using PermeabilityMap = std::unordered_map<std::string, cell::MembraneType::Permeability>;
+using DiscTypeDistribution = std::unordered_map<std::string, double>;
+
 struct DiscType
 {
     std::string name;
@@ -39,11 +42,11 @@ struct MembraneType
 {
     std::string name;
     double radius = 0;
-    std::unordered_map<std::string, cell::MembraneType::Permeability> permeabilityMap;
+    PermeabilityMap permeabilityMap;
 
     // Only used if distributions are enabled, not part of the actual membrane type:
     int discCount;
-    std::unordered_map<std::string, double> discTypeDistribution;
+    DiscTypeDistribution discTypeDistribution;
 
     bool operator==(const MembraneType&) const = default;
 };
