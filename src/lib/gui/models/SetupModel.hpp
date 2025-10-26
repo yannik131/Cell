@@ -23,11 +23,8 @@ public:
     void loadFromConfig();
 
 private:
-    void updateConfig(std::function<void(cell::SimulationConfig& simulationConfig)> updater);
-
-private:
     SimulationConfigUpdater* simulationConfigUpdater_;
-    cell::SimulationConfig config;
+    cell::SimulationConfig simulationConfig_;
 };
 
 #endif /* CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP */

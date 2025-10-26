@@ -9,10 +9,10 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
                                                        SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, simulationConfigUpdater, new DiscTypeDistributionTableModel(this, simulationConfigUpdater))
 {
-    insertDiscTypeComboboxIntoView(ui->tableView, simulationConfigUpdater, 0);
-    insertProbabilitySpinBoxIntoView(ui->tableView, 1);
+    insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
+    insertProbabilitySpinBoxIntoView(ui->tableView, Column{1});
 
-    insertDeleteButtonIntoView(model_, ui->tableView, 2);
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{2});
 }
 
 void DiscTypeDistributionDialog::setDiscTypeDistribution(const DiscTypeDistribution& discTypeDistribution)

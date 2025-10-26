@@ -2,6 +2,7 @@
 #define B08BC3D3_C04D_4F93_BB91_8575673B2CBF_HPP
 
 #include "core/SafeCast.hpp"
+#include "core/Types.hpp"
 
 #include <QDoubleSpinBox>
 #include <QSpinBox>
@@ -71,6 +72,23 @@ public:
     }
 };
 
-void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, int column);
+struct DoubleSpinBoxParams
+{
+    int column;
+    double min, max;
+    double step;
+    int decimals;
+};
+
+struct IntegerSpinBoxParams
+{
+    int column;
+    int min, max;
+    int step;
+};
+
+void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxParams& params);
+void insertIntegerSpinBoxIntoView(QAbstractItemView* view, const IntegerSpinBoxParams& params);
+void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, Column column);
 
 #endif /* B08BC3D3_C04D_4F93_BB91_8575673B2CBF_HPP */

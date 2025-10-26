@@ -3,11 +3,11 @@
 
 #include "models/AbstractSimulationConfigTableModel.hpp"
 
-class DiscTableModel : public AbstractSimulationConfigTableModel<cell::config::Disc>, public AbstractConfigChanger
+class DiscsTableModel : public AbstractSimulationConfigTableModel<cell::config::Disc>, public AbstractConfigChanger
 {
     Q_OBJECT
 public:
-    DiscTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
+    DiscsTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void addRow() override;
     void loadFromConfig() override;

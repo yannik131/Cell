@@ -9,27 +9,15 @@
 DiscTypesDialog::DiscTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, simulationConfigUpdater, new DiscTypesTableModel(this, simulationConfigUpdater))
 {
-    auto* colorComboBoxDelegate = new ComboBoxDelegate(this);
-    auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
-    auto* massSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(this);
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1,
+                                                                   .min = cell::DiscTypeLimits::MinRadius,
+                                                                   .max = cell::DiscTypeLimits::MaxRadius,
+                                                                   .step = 1});
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 2,
+                                                                   .min = cell::DiscTypeLimits::MinMass,
+                                                                   .max = cell::DiscTypeLimits::MaxMass,
+                                                                   .step = 1});
+    insertColorComboBoxIntoView(ui->tableView, Column{3});
 
-    connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
-            [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
-    connect(radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated,
-            [](QWidget* spinBox)
-            {
-                safeCast<QDoubleSpinBox*>(spinBox)->setRange(cell::DiscTypeLimits::MinRadius,
-                                                             cell::DiscTypeLimits::MaxRadius);
-            });
-    connect(massSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated,
-            [](QWidget* spinBox)
-            {
-                safeCast<QDoubleSpinBox*>(spinBox)->setRange(cell::DiscTypeLimits::MinMass,
-                                                             cell::DiscTypeLimits::MaxMass);
-            });
-
-    ui->tableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
-    ui->tableView->setItemDelegateForColumn(2, massSpinBoxDelegate);
-    ui->tableView->setItemDelegateForColumn(3, colorComboBoxDelegate);
-    insertDeleteButtonIntoView(model_, ui->tableView, 4);
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{4});
 }

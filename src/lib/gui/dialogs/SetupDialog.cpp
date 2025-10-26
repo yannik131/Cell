@@ -1,21 +1,14 @@
 #include "dialogs/SetupDialog.hpp"
-#include "SetupDialog.hpp"
 #include "cell/Settings.hpp"
 #include "core/Utility.hpp"
-#include "delegates/ButtonDelegate.hpp"
-#include "delegates/ComboBoxDelegate.hpp"
-#include "delegates/SpinBoxDelegate.hpp"
-#include "models/DiscTableModel.hpp"
-#include "models/MembranesTableModel.hpp"
 #include "models/SetupModel.hpp"
 #include "ui_SetupDialog.h"
 
 SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::SetupDialog)
-    , discTableModel_(new DiscTableModel(this, simulationConfigUpdater))
-    , membranesTableModel_(new MembranesTableModel(this, simulationConfigUpdater))
-    , setupModel_(new SetupModel(this, discTypeDistributionTableModel_, discTableModel_, simulationConfigUpdater))
+    , setupModel_(new SetupModel(this, simulationConfigUpdater))
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
     ui->setupUi(this);
 
@@ -23,65 +16,41 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
             utility::safeSlot(this,
                               [this]()
                               {
-                                  setupModel_->commitChanges();
+                                  setupModel_->saveToConfig();
                                   accept();
                               }));
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
 
-    connect(ui->useDistributionRadioButton, &QRadioButton::toggled, this,
-            [&](bool on)
-            {
-                ui->discsGroupBox->setEnabled(!on);
-                setupModel_->setUseDistribution(on);
-            });
-    updateWidgets(ui->useDistributionRadioButton->isChecked());
-
-    connect(ui->addDiscPushButton, &QPushButton::clicked, discTableModel_,
-            utility::safeSlot(this, [this]() { discTableModel_->addRow(); }));
-    connect(ui->clearDiscsPushButton, &QPushButton::clicked, discTableModel_, &DiscTableModel::clearRows);
-
+    connect(ui->useDistributionRadioButton, &QRadioButton::toggled, setupModel_, &SetupModel::setUseDistribution);
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
-    connect(ui->cellWidthSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellWidth);
-    connect(ui->cellHeightSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellHeight);
+    connect(ui->cellRadiusSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setCellRadius);
     connect(ui->maxVelocitySpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMaxVelocity);
 
-    ui->numberOfDiscsSpinBox->setRange(cell::SettingsLimits::MinNumberOfDiscs, cell::SettingsLimits::MaxNumberOfDiscs);
     ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
                                   static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
                                          cell::SettingsLimits::MaxSimulationTimeScale);
-    ui->cellWidthSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinCellWidth),
-                                   static_cast<int>(cell::SettingsLimits::MaxCellWidth));
-    ui->cellHeightSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinCellHeight),
-                                    static_cast<int>(cell::SettingsLimits::MaxCellHeight));
+    ui->cellRadiusSpinBox->setRange(static_cast<int>(cell::MembraneTypeLimits::MinRadius),
+                                    static_cast<int>(cell::MembraneTypeLimits::MaxRadius));
     ui->maxVelocitySpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMaxVelocity),
                                      static_cast<int>(cell::SettingsLimits::MaxMaxVelocity));
 
-    ui->discsTableView->setModel(discTableModel_);
-
-    insertDiscTypeComboboxIntoView(ui->discsTableView, simulationConfigUpdater, 0);
-    insertDeleteButtonIntoView(discTableModel_, ui->discsTableView, 5);
-
-    ui->discsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    displayCurrentSetup();
+    displayCurrentConfig();
 }
 
 void SetupDialog::showEvent(QShowEvent*)
 {
-    setupModel_->reload();
-    displayCurrentSetup();
+    setupModel_->loadFromConfig();
+    displayCurrentConfig();
 }
 
-void SetupDialog::displayCurrentSetup()
+void SetupDialog::displayCurrentConfig()
 {
-    const auto& setup = setupModel_->getSetup();
-    ui->useDistributionRadioButton->setChecked(setup.useDistribution);
-    ui->numberOfDiscsSpinBox->setValue(setup.discCount);
-    ui->timeStepSpinBox->setValue(static_cast<int>(std::round(setup.simulationTimeStep * 1e6)));
-    ui->timeScaleDoubleSpinBox->setValue(setup.simulationTimeScale);
-    ui->cellWidthSpinBox->setValue(static_cast<int>(std::round(setup.cellWidth)));
-    ui->cellHeightSpinBox->setValue(static_cast<int>(std::round(setup.cellHeight)));
-    ui->maxVelocitySpinBox->setValue(static_cast<int>(std::round(setup.maxVelocity)));
+    const auto& config = simulationConfigUpdater_->getSimulationConfig();
+    ui->useDistributionRadioButton->setChecked(config.useDistribution);
+    ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep * 1e6)));
+    ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);
+    ui->cellRadiusSpinBox->setValue(static_cast<int>(std::round(config.cellMembraneType.radius)));
+    ui->maxVelocitySpinBox->setValue(static_cast<int>(std::round(config.maxVelocity)));
 }

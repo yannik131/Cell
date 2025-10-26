@@ -27,7 +27,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simul
                 menu.exec(QCursor::pos());
             });
 
-    insertDiscTypeComboboxIntoView(ui->tableView, simulationConfigUpdater, 0, 2, 4, 6);
-    insertProbabilitySpinBoxIntoView(ui->tableView, 7);
-    insertDeleteButtonIntoView(model_, ui->tableView, 8);
+    insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0, 2, 4, 6);
+    insertProbabilitySpinBoxIntoView(ui->tableView, Column{7});
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{8});
 }

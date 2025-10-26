@@ -11,13 +11,8 @@
 PermeabilityDialog::PermeabilityDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, simulationConfigUpdater, new PermeabilityTableModel(this, simulationConfigUpdater))
 {
-    auto* permeabilityComboBoxDelegate = new ComboBoxDelegate(this);
-
-    connect(permeabilityComboBoxDelegate, &ComboBoxDelegate::editorCreated,
-            [](QComboBox* comboBox) { comboBox->addItems({"None", "Inward", "Outward", "Bidirectional"}); });
-
-    ui->tableView->setItemDelegateForColumn(1, permeabilityComboBoxDelegate);
-    insertDeleteButtonIntoView(model_, ui->tableView, 2);
+    insertComboBoxIntoView(ui->tableView, Column{1}, {"None", "Inward", "Outward", "Bidirectional"});
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{2});
 }
 
 void PermeabilityDialog::setPermeabilityMap(const PermeabilityMap& permeabilityMap)

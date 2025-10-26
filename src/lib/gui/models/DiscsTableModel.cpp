@@ -1,16 +1,15 @@
-#include "models/DiscTableModel.hpp"
-#include "DiscTableModel.hpp"
+#include "DiscsTableModel.hpp"
 #include "core/AbstractSimulationBuilder.hpp"
 #include "core/SimulationConfigUpdater.hpp"
-#include "models/DiscTableModel.hpp"
+#include "models/DiscsTableModel.hpp"
 
-DiscTableModel::DiscTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
+DiscsTableModel::DiscsTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : AbstractSimulationConfigTableModel<cell::config::Disc>(parent, {{"Type", "x", "y", "vx", "vy", "Delete"}},
                                                              simulationConfigUpdater)
 {
 }
 
-void DiscTableModel::addRow()
+void DiscsTableModel::addRow()
 {
     const auto& discTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
     if (discTypes.empty())
@@ -21,19 +20,19 @@ void DiscTableModel::addRow()
     endInsertRows();
 }
 
-void DiscTableModel::loadFromConfig()
+void DiscsTableModel::loadFromConfig()
 {
     setRows(simulationConfigUpdater_->getSimulationConfig().discs);
 }
 
-void DiscTableModel::saveToConfig()
+void DiscsTableModel::saveToConfig()
 {
     auto currentConfig = simulationConfigUpdater_->getSimulationConfig();
     currentConfig.discs = rows_;
     simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
-QVariant DiscTableModel::getField(const cell::config::Disc& row, int column) const
+QVariant DiscsTableModel::getField(const cell::config::Disc& row, int column) const
 {
     switch (column)
     {
@@ -47,7 +46,7 @@ QVariant DiscTableModel::getField(const cell::config::Disc& row, int column) con
     }
 }
 
-bool DiscTableModel::setField(cell::config::Disc& row, int column, const QVariant& value)
+bool DiscsTableModel::setField(cell::config::Disc& row, int column, const QVariant& value)
 {
     switch (column)
     {
@@ -62,7 +61,7 @@ bool DiscTableModel::setField(cell::config::Disc& row, int column, const QVarian
     return true;
 }
 
-bool DiscTableModel::isEditable(const QModelIndex& index) const
+bool DiscsTableModel::isEditable(const QModelIndex& index) const
 {
     return index.column() != 5;
 }

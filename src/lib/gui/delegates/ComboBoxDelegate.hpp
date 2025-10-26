@@ -1,7 +1,9 @@
 #ifndef ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
 #define ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP
 
+#include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
+#include "core/Types.hpp"
 
 #include <QAbstractItemView>
 #include <QComboBox>
@@ -74,7 +76,7 @@ private:
 };
 
 template <std::integral... Columns>
-void insertDiscTypeComboboxIntoView(QAbstractItemView* view, SimulationConfigUpdater* simulationConfigUpdater,
+void insertDiscTypeComboBoxIntoView(QAbstractItemView* view, SimulationConfigUpdater* simulationConfigUpdater,
                                     Columns... columns)
 {
     auto* discTypeComboBoxDelegate = new DiscTypeComboBoxDelegate(view, simulationConfigUpdater);
@@ -84,12 +86,25 @@ void insertDiscTypeComboboxIntoView(QAbstractItemView* view, SimulationConfigUpd
 }
 
 inline void insertMembraneTypeComboBoxIntoView(QAbstractItemView* view,
-                                               SimulationConfigUpdater* simulationConfigUpdater, int column)
+                                               SimulationConfigUpdater* simulationConfigUpdater, Column column)
 {
     auto* membraneTypeComboBoxDelegate = new MembraneTypeComboBoxDelegate(view, simulationConfigUpdater);
-    view->setItemDelegateForColumn(column, membraneTypeComboBoxDelegate);
+    view->setItemDelegateForColumn(column.value, membraneTypeComboBoxDelegate);
     view->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
                           QAbstractItemView::EditTrigger::SelectedClicked);
+}
+
+inline void insertComboBoxIntoView(QAbstractItemView* view, Column column, const QStringList& items)
+{
+    auto* colorComboBoxDelegate = new ComboBoxDelegate(view);
+    QObject::connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
+                     [&](QComboBox* comboBox) { comboBox->addItems(items); });
+    view->setItemDelegateForColumn(column.value, colorComboBoxDelegate);
+}
+
+inline void insertColorComboBoxIntoView(QAbstractItemView* view, Column column)
+{
+    insertComboBoxIntoView(view, column, getSupportedDiscColorNames());
 }
 
 #endif /* ED290BD4_AB33_43F0_99DD_D27EBFF8712A_HPP */

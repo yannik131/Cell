@@ -1,6 +1,8 @@
 #ifndef AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP
 #define AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP
 
+#include "core/Types.hpp"
+
 #include <QAbstractItemView>
 #include <QDebug>
 #include <QStyledItemDelegate>
@@ -36,11 +38,11 @@ private:
     QString text_;
 };
 
-template <typename T> void insertDeleteButtonIntoView(T* model, QAbstractItemView* view, int column)
+template <typename T> void insertDeleteButtonIntoView(T* model, QAbstractItemView* view, Column column)
 {
     auto* deleteButtonDelegate = new ButtonDelegate(view, "Delete");
     QObject::connect(deleteButtonDelegate, &ButtonDelegate::buttonClicked, [model](int row) { model->removeRow(row); });
-    view->setItemDelegateForColumn(column, deleteButtonDelegate);
+    view->setItemDelegateForColumn(column.value, deleteButtonDelegate);
 }
 
 #endif /* AF2062F1_CA55_4ADB_BEC5_853F4C739FAF_HPP */

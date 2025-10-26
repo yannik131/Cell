@@ -9,120 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>845</width>
-    <height>725</height>
+    <width>517</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>State setup</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
-   <item>
-    <widget class="QWidget" name="widget_7" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>300</height>
-      </size>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
-      <item>
-       <widget class="QGroupBox" name="membranesGroupBox">
-        <property name="title">
-         <string>Membranes</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QTableView" name="membranesTableView"/>
-         </item>
-         <item>
-          <widget class="QWidget" name="widget_13" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
-            <item>
-             <widget class="QPushButton" name="addMembranePushButton">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>75</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Add</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="clearMembranesPushButton">
-              <property name="maximumSize">
-               <size>
-                <width>75</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Clear</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="discsGroupBox">
-        <property name="title">
-         <string>Discs</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QTableView" name="discsTableView"/>
-         </item>
-         <item>
-          <widget class="QWidget" name="widget_14" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
-            <item>
-             <widget class="QPushButton" name="addDiscPushButton">
-              <property name="maximumSize">
-               <size>
-                <width>75</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Add</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="clearDiscsPushButton">
-              <property name="maximumSize">
-               <size>
-                <width>75</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Clear</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item>
     <widget class="QWidget" name="widget_11" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -258,13 +152,25 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="cellHeightSpinBox"/>
+          <widget class="QSpinBox" name="cellRadiusSpinBox"/>
          </item>
         </layout>
        </widget>
       </item>
       <item>
        <widget class="QWidget" name="widget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <item>
           <widget class="QLabel" name="label_7">

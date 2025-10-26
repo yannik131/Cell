@@ -9,8 +9,6 @@ class SetupDialog;
 }
 
 class SimulationConfigUpdater;
-class DiscTableModel;
-class MembranesTableModel;
 class SetupModel;
 
 class SetupDialog : public QDialog
@@ -21,12 +19,12 @@ public:
 
     void showEvent(QShowEvent*) override;
 
+    void displayCurrentConfig();
+
 private:
     Ui::SetupDialog* ui;
-
-    DiscTableModel* discTableModel_;
-    MembranesTableModel* membranesTableModel_;
     SetupModel* setupModel_;
+    SimulationConfigUpdater* simulationConfigUpdater_;
 };
 
 #endif /* C4E43CD6_7DB6_4EBF_8134_6C676407AECA_HPP */

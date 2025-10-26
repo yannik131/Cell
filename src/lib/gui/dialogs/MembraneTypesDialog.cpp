@@ -13,17 +13,11 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
     , permeabilityDialog_(new PermeabilityDialog(this, simulationConfigUpdater))
     , discTypeDistributionDialog_(new DiscTypeDistributionDialog(this, simulationConfigUpdater))
 {
-    auto* radiusSpinBoxDelegate = new SpinBoxDelegate<QDoubleSpinBox>(ui->tableView);
-    connect(radiusSpinBoxDelegate, &SpinBoxDelegate<QDoubleSpinBox>::editorCreated,
-            [](QWidget* spinBox)
-            {
-                safeCast<QDoubleSpinBox*>(spinBox)->setRange(cell::MembraneTypeLimits::MinRadius,
-                                                             cell::MembraneTypeLimits::MaxRadius);
-            });
-
-    auto* colorComboBoxDelegate = new ComboBoxDelegate(ui->tableView);
-    connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
-            [](QComboBox* comboBox) { comboBox->addItems(getSupportedDiscColorNames()); });
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1,
+                                                                   .min = cell::MembraneTypeLimits::MinRadius,
+                                                                   .max = cell::MembraneTypeLimits::MaxRadius,
+                                                                   .step = 1});
+    insertColorComboBoxIntoView(ui->tableView, Column{2});
 
     auto* editPermeabilityPushButtonDelegate = new ButtonDelegate(ui->tableView, "Edit");
 
@@ -43,8 +37,10 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
                 rows[selectedRowForPermeabilityEditing_].permeabilityMap = std::move(permeabilityMap);
                 model_->setRows(std::move(rows));
             });
+    ui->tableView->setItemDelegateForColumn(3, editPermeabilityPushButtonDelegate);
 
     auto* editDistributionPushButtonDelegate = new ButtonDelegate(ui->tableView, "Edit");
+
     connect(editDistributionPushButtonDelegate, &ButtonDelegate::buttonClicked,
             [this](int row)
             {
@@ -62,9 +58,7 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
                 model_->setRows(std::move(rows));
             });
 
-    ui->tableView->setItemDelegateForColumn(1, radiusSpinBoxDelegate);
-    ui->tableView->setItemDelegateForColumn(2, colorComboBoxDelegate);
-    ui->tableView->setItemDelegateForColumn(3, editPermeabilityPushButtonDelegate);
     ui->tableView->setItemDelegateForColumn(4, editDistributionPushButtonDelegate);
-    insertDeleteButtonIntoView(model_, ui->tableView, 5);
+
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{5});
 }

@@ -4,7 +4,6 @@
 #include "dialogs/TableViewDialog.hpp"
 #include "models/MembraneTypesTableModel.hpp"
 
-class MembraneTypesTableModel;
 class PermeabilityDialog;
 class DiscTypeDistributionDialog;
 
