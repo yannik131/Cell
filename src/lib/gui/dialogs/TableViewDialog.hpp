@@ -56,8 +56,7 @@ inline TableViewDialog<T>::TableViewDialog(QWidget* parent, SimulationConfigUpda
 
     ui->tableView->setModel(model_);
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableView->setEditTriggers(QAbstractItemView::EditTrigger::CurrentChanged |
-                                   QAbstractItemView::EditTrigger::SelectedClicked);
+    ui->tableView->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
 template <typename T> inline TableViewDialog<T>::~TableViewDialog()

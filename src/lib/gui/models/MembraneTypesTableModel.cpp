@@ -13,8 +13,9 @@ MembraneTypesTableModel::MembraneTypesTableModel(QObject* parent, SimulationConf
 
 void MembraneTypesTableModel::removeRow(int row)
 {
+    const auto name = rows_[row].name;
     Base::removeRow(row);
-    membraneTypeColorMap_.erase(rows_[row].name);
+    membraneTypeColorMap_.erase(name);
 
     const auto& originalMembraneTypes = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
     const auto originalIndex = row + removedMembraneTypes_.size();

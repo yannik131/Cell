@@ -14,7 +14,7 @@ void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxPar
     auto* spinBox = new SpinBoxDelegate(view);
 
     QObject::connect(spinBox, &SpinBoxDelegate::editorCreated,
-                     [&](QWidget* spinBox)
+                     [params](QWidget* spinBox)
                      {
                          safeCast<QDoubleSpinBox*>(spinBox)->setRange(params.min, params.max);
                          safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(params.step);
@@ -30,7 +30,7 @@ void insertIntegerSpinBoxIntoView(QAbstractItemView* view, const IntegerSpinBoxP
     auto* spinBox = new SpinBoxDelegate(view);
 
     QObject::connect(spinBox, &SpinBoxDelegate::editorCreated,
-                     [&](QWidget* spinBox)
+                     [params](QWidget* spinBox)
                      {
                          safeCast<QSpinBox*>(spinBox)->setRange(params.min, params.max);
                          safeCast<QSpinBox*>(spinBox)->setSingleStep(params.step);

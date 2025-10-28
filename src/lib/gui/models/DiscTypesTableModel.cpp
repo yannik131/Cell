@@ -12,8 +12,9 @@ DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdate
 
 void DiscTypesTableModel::removeRow(int row)
 {
+    const auto name = rows_[row].name;
     Base::removeRow(row);
-    discTypeColorMap_.erase(rows_[row].name);
+    discTypeColorMap_.erase(name);
 
     const auto& originalDiscTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
     const auto originalIndex = row + removedDiscTypes_.size();
