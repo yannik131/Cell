@@ -8,7 +8,7 @@
 #include <QMenu>
 
 ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new ReactionsTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new ReactionsTableModel(nullptr, simulationConfigUpdater))
 {
     connect(static_cast<ReactionsTableModel*>(model_), &ReactionsTableModel::newRowRequested,
             [this]()

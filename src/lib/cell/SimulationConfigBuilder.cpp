@@ -17,14 +17,14 @@ void SimulationConfigBuilder::useDistribution(bool useDistribution)
 
 void SimulationConfigBuilder::setDiscCount(std::string membraneTypeName, int count)
 {
-    auto membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
+    auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
     membraneType.discCount = count;
 }
 
 void SimulationConfigBuilder::setDistribution(std::string membraneTypeName,
                                               const std::unordered_map<std::string, double>& distribution)
 {
-    auto membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
+    auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
     membraneType.discTypeDistribution = distribution;
 }
 

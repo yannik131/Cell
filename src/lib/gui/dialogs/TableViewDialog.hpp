@@ -3,6 +3,7 @@
 
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 #include "ui_TableViewDialog.h"
 
 #include <QDialog>
@@ -45,12 +46,12 @@ inline TableViewDialog<T>::TableViewDialog(QWidget* parent, SimulationConfigUpda
             utility::safeSlot(this,
                               [this]()
                               {
-                                  if (auto model = dynamic_cast<AbstractSimulationConfigTableModel<T>*>(model_))
+                                  if (auto* model = dynamic_cast<AbstractConfigChanger*>(model_))
                                       model->saveToConfig();
                                   accept();
                               }));
     connect(ui->cancelPushButton, &QPushButton::clicked, [this]() { reject(); });
-    connect(ui->addPushButton, &QPushButton::clicked, [this]() { model_->addRow(); });
+    connect(ui->addPushButton, &QPushButton::clicked, utility::safeSlot(this, [this]() { model_->addRow(); }));
     connect(ui->clearPushButton, &QPushButton::clicked, [this]() { model_->clearRows(); });
 
     ui->tableView->setModel(model_);
@@ -66,8 +67,10 @@ template <typename T> inline TableViewDialog<T>::~TableViewDialog()
 
 template <typename T> inline void TableViewDialog<T>::showEvent(QShowEvent* showEvent)
 {
-    if (auto model = dynamic_cast<AbstractConfigChanger*>(model_))
+    if (auto* model = dynamic_cast<AbstractConfigChanger*>(model_))
         model->loadFromConfig();
+
+    QDialog::showEvent(showEvent);
 }
 
 #endif /* C0A1FDE3_4705_4395_96E3_33DE1B8D03BA_HPP */

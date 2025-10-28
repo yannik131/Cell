@@ -2,6 +2,9 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 #include "dialogs/DiscTypesDialog.hpp"
+#include "dialogs/DiscsDialog.hpp"
+#include "dialogs/MembraneTypesDialog.hpp"
+#include "dialogs/MembranesDialog.hpp"
 #include "dialogs/PlotDataSelectionDialog.hpp"
 #include "dialogs/ReactionsDialog.hpp"
 #include "dialogs/SetupDialog.hpp"
@@ -16,11 +19,15 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , simulation_(new Simulation())
+    , simulationConfigUpdater_(&simulation_->getSimulationConfigUpdater())
     , plotModel_(new PlotModel(this, simulation_.get()))
-    , discTypesDialog_(new DiscTypesDialog(this, simulation_.get()))
-    , reactionsDialog_(new ReactionsDialog(this, simulation_.get()))
-    , setupDialog_(new SetupDialog(this, simulation_.get()))
-    , plotDataSelectionDialog_(new PlotDataSelectionDialog(this, simulation_.get(), plotModel_))
+    , discTypesDialog_(new DiscTypesDialog(this, simulationConfigUpdater_))
+    , discsDialog_(new DiscsDialog(this, simulationConfigUpdater_))
+    , membraneTypesDialog_(new MembraneTypesDialog(this, simulationConfigUpdater_))
+    , membranesDialog_(new MembranesDialog(this, simulationConfigUpdater_))
+    , reactionsDialog_(new ReactionsDialog(this, simulationConfigUpdater_))
+    , setupDialog_(new SetupDialog(this, simulationConfigUpdater_))
+    , plotDataSelectionDialog_(new PlotDataSelectionDialog(this, simulationConfigUpdater_, plotModel_))
 {
     ui->setupUi(this);
 
@@ -34,6 +41,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscTypesClicked, discTypesDialog_,
             &QDialog::show);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editDiscsClicked, discsDialog_, &QDialog::show);
+
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editMembraneTypesClicked, membraneTypesDialog_,
+            &QDialog::show);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::editMembranesClicked, membranesDialog_,
+            &QDialog::show);
+
     connect(ui->simulationControlWidget, &SimulationControlWidget::editReactionsClicked, reactionsDialog_,
             &QDialog::show);
     connect(ui->simulationControlWidget, &SimulationControlWidget::editSetupClicked, setupDialog_, &QDialog::show);
@@ -60,9 +74,9 @@ MainWindow::MainWindow(QWidget* parent)
                 }
 
                 const auto& widgetSize = ui->simulationWidget->size();
-                auto config = simulation_->getSimulationConfig();
-                config.cellMembraneType.radius = std::min(widgetSize.height(), widgetSize.width());
-                simulation_->setSimulationConfig(config);
+                auto config = simulationConfigUpdater_->getSimulationConfig();
+                config.cellMembraneType.radius = std::min(widgetSize.height() / 2, widgetSize.width() / 2);
+                simulationConfigUpdater_->setSimulationConfig(config);
 
                 ui->simulationWidget->resetView();
             });
@@ -71,9 +85,9 @@ MainWindow::MainWindow(QWidget* parent)
             [&](const FrameDTO& frame)
             {
                 ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry(),
-                                             simulation_->getDiscTypeColorMap());
+                                             simulationConfigUpdater_->getDiscTypeColorMap());
             });
-    ui->simulationWidget->injectAbstractSimulationBuilder(simulation_.get());
+    ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
     connect(ui->simulationWidget, &SimulationWidget::renderRequired,
             [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
@@ -110,7 +124,7 @@ void MainWindow::saveSettingsAsJson()
 
     try
     {
-        simulation_->saveConfigToFile(fs::path{fileName.toStdString()});
+        simulationConfigUpdater_->saveConfigToFile(fs::path{fileName.toStdString()});
     }
     catch (const ExceptionWithLocation& e)
     {
@@ -127,7 +141,7 @@ void MainWindow::loadSettingsFromJson()
 
     try
     {
-        simulation_->loadConfigFromFile(fs::path{fileName.toStdString()});
+        simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
     }
     catch (const std::exception& e)
     {

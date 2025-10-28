@@ -1,7 +1,6 @@
 #include "models/PlotModel.hpp"
-#include "PlotModel.hpp"
 #include "cell/MathUtils.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
+#include "core/Simulation.hpp"
 
 #include <cmath>
 #include <unordered_set>
@@ -23,22 +22,22 @@ void averageDataPoint(DataPoint& dataPoint, int length)
 
 } // namespace
 
-PlotModel::PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
+PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     : QObject(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+    , simulation_(simulation)
 {
     // With a simulation time step of 1ms, we get 1000 data points each second
     // With an averaging time of 100ms, we save 10 datapoints for 1 second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*10
     dataPoints_.reserve(3000);
 
-    abstractSimulationBuilder_->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>& colorMap)
-        {
-            reset();
-            updateActivePlotDiscTypes(config.discTypes);
-            emitGraphs();
-        });
+    connect(&simulation_->getSimulationConfigUpdater(), &SimulationConfigUpdater::configChanged,
+            [this]()
+            {
+                reset();
+                updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
+                emitGraphs();
+            });
 }
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
@@ -107,7 +106,7 @@ void PlotModel::emitPlot()
     std::vector<std::unordered_map<std::string, double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
-    double timeStep = abstractSimulationBuilder_->getSimulationConfig().simulationTimeStep;
+    double timeStep = simulation_->getSimulationConfigUpdater().getSimulationConfig().simulationTimeStep;
     const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
 
     for (const auto& dataPoint : dataPoints_)
@@ -141,19 +140,19 @@ void PlotModel::emitPlot()
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
-    const auto& registry = abstractSimulationBuilder_->getDiscTypeRegistry();
+    const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[registry.getByID(discType).getName()] = static_cast<double>(collisionCount);
+        dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
 
     dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000;
 
     for (const auto& disc : frameDTO.discs_)
     {
-        std::string discTypeName = registry.getByID(disc.getTypeID()).getName();
+        std::string discTypeName = discTypeRegistry.getByID(disc.getTypeID()).getName();
         ++dataPoint.discTypeCountMap_[discTypeName];
-        dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(registry);
-        dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(registry);
+        dataPoint.totalKineticEnergyMap_[discTypeName] += disc.getKineticEnergy(discTypeRegistry);
+        dataPoint.totalMomentumMap_[discTypeName] += disc.getAbsoluteMomentum(discTypeRegistry);
     }
 
     return dataPoint;
@@ -223,8 +222,8 @@ void PlotModel::emitGraphs()
     labels_.clear();
     colors_.clear();
 
-    const auto& config = abstractSimulationBuilder_->getSimulationConfig();
-    const auto& colorMap = abstractSimulationBuilder_->getDiscTypeColorMap();
+    const auto& config = simulation_->getSimulationConfigUpdater().getSimulationConfig();
+    const auto& colorMap = simulation_->getSimulationConfigUpdater().getDiscTypeColorMap();
 
     if (plotSum_)
     {

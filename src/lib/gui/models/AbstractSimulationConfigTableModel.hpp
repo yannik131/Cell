@@ -63,12 +63,12 @@ inline AbstractSimulationConfigTableModel<T>::AbstractSimulationConfigTableModel
 {
 }
 
-template <typename T> inline int AbstractSimulationConfigTableModel<T>::rowCount(const QModelIndex& parent) const
+template <typename T> inline int AbstractSimulationConfigTableModel<T>::rowCount(const QModelIndex&) const
 {
     return static_cast<int>(rows_.size());
 }
 
-template <typename T> inline int AbstractSimulationConfigTableModel<T>::columnCount(const QModelIndex& parent) const
+template <typename T> inline int AbstractSimulationConfigTableModel<T>::columnCount(const QModelIndex&) const
 {
     return static_cast<int>(headers_.size());
 }

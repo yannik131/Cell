@@ -7,7 +7,7 @@
 
 DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
                                                        SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new DiscTypeDistributionTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new DiscTypeDistributionTableModel(nullptr, simulationConfigUpdater))
 {
     insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
     insertProbabilitySpinBoxIntoView(ui->tableView, Column{1});

@@ -1,6 +1,5 @@
 #include "models/SetupModel.hpp"
 #include "SetupModel.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "models/DiscsTableModel.hpp"

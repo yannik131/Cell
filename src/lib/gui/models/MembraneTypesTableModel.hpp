@@ -8,8 +8,6 @@
 
 #include <unordered_set>
 
-class AbstractSimulationBuilder;
-
 class MembraneTypesTableModel : public AbstractSimulationConfigTableModel<cell::config::MembraneType>,
                                 public AbstractConfigChanger
 {

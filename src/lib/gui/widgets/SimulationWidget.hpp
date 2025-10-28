@@ -6,11 +6,10 @@
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Clock.hpp>
 
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 
 /**
  * @brief Widget displaying the simulation state by drawing a bunch of circles in different colors each frame based on
@@ -22,7 +21,7 @@ class SimulationWidget : public QSFMLWidget
 public:
     SimulationWidget(QWidget* parent);
 
-    void injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder);
+    void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
@@ -40,8 +39,8 @@ public slots:
 private:
     std::vector<sf::CircleShape> circles_;
     sf::Clock clock_;
-    sf::RectangleShape boundingRect_;
-    AbstractSimulationBuilder* abstractSimulationBuilder_ = nullptr;
+    sf::CircleShape circularBounds_;
+    SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

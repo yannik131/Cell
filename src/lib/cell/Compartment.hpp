@@ -36,8 +36,6 @@ private:
      */
     void removeDestroyedDiscs();
 
-    void handleOuterMembraneCollision(Disc& disc);
-
 private:
     Compartment* parent_;
     Membrane membrane_;

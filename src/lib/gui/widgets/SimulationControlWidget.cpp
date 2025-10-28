@@ -9,9 +9,12 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->editDiscTypesPushButton, &QPushButton::clicked, [&]() { emit editDiscTypesClicked(); });
-    connect(ui->editReactionsPushButton, &QPushButton::clicked, [&]() { emit editReactionsClicked(); });
-    connect(ui->editSetupPushButton, &QPushButton::clicked, [&]() { emit editSetupClicked(); });
+    connect(ui->discTypesPushButton, &QPushButton::clicked, [&]() { emit editDiscTypesClicked(); });
+    connect(ui->discsPushButton, &QPushButton::clicked, [&]() { emit editDiscsClicked(); });
+    connect(ui->membraneTypesPushButton, &QPushButton::clicked, [&]() { emit editMembraneTypesClicked(); });
+    connect(ui->membranesPushButton, &QPushButton::clicked, [&]() { emit editMembranesClicked(); });
+    connect(ui->reactionsPushButton, &QPushButton::clicked, [&]() { emit editReactionsClicked(); });
+    connect(ui->setupPushButton, &QPushButton::clicked, [&]() { emit editSetupClicked(); });
     connect(ui->startStopButton, &QPushButton::clicked, this, &SimulationControlWidget::toggleStartStopButtonState);
     connect(ui->fitIntoViewButton, &QPushButton::clicked, [&]() { emit fitIntoViewRequested(); });
     connect(ui->reinitializeButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
@@ -28,10 +31,7 @@ void SimulationControlWidget::updateWidgets(SimulationRunning simulationRunning)
 
 void SimulationControlWidget::setWidgetsEnabled(bool value)
 {
-    ui->editDiscTypesPushButton->setEnabled(value);
-    ui->editReactionsPushButton->setEnabled(value);
-    ui->editSetupPushButton->setEnabled(value);
-    ui->fitIntoViewButton->setEnabled(value);
+    ui->settingsWidget->setEnabled(value);
 }
 
 void SimulationControlWidget::toggleStartStopButtonState()

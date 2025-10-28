@@ -9,9 +9,9 @@
 #include "models/MembraneTypesTableModel.hpp"
 
 MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new MembraneTypesTableModel(this, simulationConfigUpdater))
-    , permeabilityDialog_(new PermeabilityDialog(this, simulationConfigUpdater))
-    , discTypeDistributionDialog_(new DiscTypeDistributionDialog(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new MembraneTypesTableModel(nullptr, simulationConfigUpdater))
+    , permeabilityDialog_(new PermeabilityDialog(nullptr, simulationConfigUpdater))
+    , discTypeDistributionDialog_(new DiscTypeDistributionDialog(nullptr, simulationConfigUpdater))
 {
     insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1,
                                                                    .min = cell::MembraneTypeLimits::MinRadius,
@@ -60,5 +60,5 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
 
     ui->tableView->setItemDelegateForColumn(4, editDistributionPushButtonDelegate);
 
-    insertDeleteButtonIntoView(model_, ui->tableView, Column{5});
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{6});
 }

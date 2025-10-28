@@ -1,5 +1,4 @@
 #include "models/DiscTypeDistributionTableModel.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
 #include <unordered_set>

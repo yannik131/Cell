@@ -2,6 +2,7 @@
 #define CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
 #include <QObject>
 

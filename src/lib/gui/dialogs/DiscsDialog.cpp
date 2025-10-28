@@ -3,7 +3,7 @@
 #include "delegates/SpinBoxDelegate.hpp"
 
 DiscsDialog::DiscsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new DiscsTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new DiscsTableModel(nullptr, simulationConfigUpdater))
 {
     insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
     const auto cellRadius = simulationConfigUpdater->getSimulationConfig().cellMembraneType.radius;

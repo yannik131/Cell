@@ -3,6 +3,7 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
+#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 #include <SFML/System/Clock.hpp>
@@ -50,14 +51,14 @@ void Simulation::rebuildContext()
     emitFrame(RedrawOnly{true});
 }
 
-const cell::SimulationConfig& Simulation::getSimulationConfig() const
-{
-    return simulationConfigUpdater_.getSimulationConfig();
-}
-
 const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
 {
     return simulationFactory_.getSimulationContext().discTypeRegistry;
+}
+
+SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
+{
+    return simulationConfigUpdater_;
 }
 
 bool Simulation::cellIsBuilt() const
@@ -71,7 +72,26 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
         return;
 
     FrameDTO frameDTO;
-    frameDTO.discs_ = simulationFactory_.getCell().getDiscs();
+    const auto& cell = simulationFactory_.getCell();
+
+    const auto gatherData = [&](const cell::Compartment& compartment)
+    {
+        frameDTO.discs_.insert(frameDTO.discs_.end(), compartment.getDiscs().begin(), compartment.getDiscs().end());
+        frameDTO.membranes_.push_back(circleShapeFromCompartment(compartment));
+    };
+
+    std::vector<const cell::Compartment*> compartments({&cell});
+
+    while (!compartments.empty())
+    {
+        const cell::Compartment* compartment = compartments.back();
+        compartments.pop_back();
+
+        gatherData(*compartment);
+
+        for (const auto& subCompartment : compartment->getCompartments())
+            compartments.push_back(subCompartment.get());
+    }
 
     if (redrawOnly.value)
     {
@@ -84,4 +104,21 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
     frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);
+}
+
+sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
+{
+    sf::CircleShape shape;
+    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
+    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
+
+    shape.setRadius(membraneType.getRadius());
+    shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
+    shape.setFillColor(sf::Color::Transparent);
+    if (membraneType.getName() == cell::config::cellMembraneTypeName)
+        shape.setOutlineColor(sf::Color::Yellow);
+    else
+        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
+
+    return shape;
 }

@@ -1,5 +1,4 @@
 #include "models/DiscTypesTableModel.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 #include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 

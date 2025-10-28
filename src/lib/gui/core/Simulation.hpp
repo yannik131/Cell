@@ -3,12 +3,12 @@
 
 #include "cell/SimulationConfig.hpp"
 #include "cell/SimulationFactory.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
 #include "core/FrameDTO.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Types.hpp"
 
 #include <QObject>
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Time.hpp>
 
 #include <vector>
@@ -16,7 +16,7 @@
 /**
  * @brief Contains and runs the cell for the simulation
  */
-class Simulation : public QObject, public AbstractSimulationBuilder
+class Simulation : public QObject
 {
     Q_OBJECT
 public:
@@ -31,13 +31,16 @@ public:
     void buildContext(const cell::SimulationConfig& = {});
     void rebuildContext();
 
-    const cell::SimulationConfig& getSimulationConfig() const override;
+    const cell::DiscTypeRegistry& getDiscTypeRegistry();
 
-    const cell::DiscTypeRegistry& getDiscTypeRegistry() override;
+    SimulationConfigUpdater& getSimulationConfigUpdater();
 
     bool cellIsBuilt() const;
 
     void emitFrame(RedrawOnly redrawOnly);
+
+private:
+    sf::CircleShape circleShapeFromCompartment(const cell::Compartment& compartment);
 
 signals:
     void frame(const FrameDTO& frame);

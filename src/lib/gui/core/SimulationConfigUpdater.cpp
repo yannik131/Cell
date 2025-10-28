@@ -16,8 +16,20 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
 
 void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
+    const bool discTypesDidChange = simulationConfig_.discTypes != simulationConfig.discTypes;
+    const bool cellRadiusDidChange =
+        simulationConfig_.cellMembraneType.radius != simulationConfig.cellMembraneType.radius;
+
     testConfig(simulationConfig);
     simulationConfig_ = simulationConfig;
+
+    if (discTypesDidChange)
+        emit discTypesChanged();
+
+    if (cellRadiusDidChange)
+        emit cellRadiusChanged();
+
+    emit configChanged();
 }
 
 const std::map<std::string, sf::Color>& SimulationConfigUpdater::getDiscTypeColorMap() const
@@ -68,8 +80,9 @@ void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,
                                           }),
                            config.reactions.end());
 
-    for (auto& [membraneTypeName, distribution] : config.distributions)
+    for (auto& membraneType : config.membraneTypes)
     {
+        auto& distribution = membraneType.discTypeDistribution;
         for (auto iter = distribution.begin(); iter != distribution.end();)
         {
             if (removedDiscTypes.contains(iter->first))
@@ -113,14 +126,14 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
         reaction.product2 = changeMap.at(reaction.product2);
     }
 
-    for (auto& [membraneTypeName, distribution] : config.distributions)
+    for (auto& membraneType : config.membraneTypes)
     {
-        std::map<std::string, double> newDistribution;
+        cell::config::DiscTypeDistribution newDistribution;
 
-        for (const auto& [discType, frequency] : distribution)
+        for (const auto& [discType, frequency] : membraneType.discTypeDistribution)
             newDistribution[changeMap.at(discType)] = frequency;
 
-        distribution = std::move(newDistribution);
+        membraneType.discTypeDistribution = std::move(newDistribution);
     }
 
     for (auto& disc : config.discs)

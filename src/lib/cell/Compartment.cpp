@@ -142,8 +142,4 @@ void Compartment::removeDestroyedDiscs()
     }
 }
 
-void Compartment::handleOuterMembraneCollision(Disc& disc)
-{
-}
-
 } // namespace cell

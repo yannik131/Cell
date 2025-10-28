@@ -5,7 +5,7 @@
 #include "delegates/SpinBoxDelegate.hpp"
 
 MembranesDialog::MembranesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new MembranesTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new MembranesTableModel(nullptr, simulationConfigUpdater))
 {
     insertMembraneTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, Column{0});
 

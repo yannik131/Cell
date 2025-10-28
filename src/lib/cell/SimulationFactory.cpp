@@ -244,6 +244,7 @@ void SimulationFactory::createCompartments(Cell& cell, std::vector<Membrane> mem
             auto compartment = (*iter)->createSubCompartment(std::move(membrane));
             compartments.push_back(compartment);
             parentFound = true;
+            break;
         }
 
         if (!parentFound)
@@ -277,6 +278,9 @@ void SimulationFactory::throwIfCompartmentsIntersect(const std::vector<Compartme
 
 void SimulationFactory::throwIfDiscsCanBeLargerThanMembranes(const SimulationConfig& config) const
 {
+    if (config.discTypes.empty())
+        return;
+
     const auto maxDiscRadius = std::max_element(config.discTypes.begin(), config.discTypes.end(),
                                                 [](const auto& t1, const auto& t2) { return t1.radius < t2.radius; })
                                    ->radius;

@@ -31,6 +31,9 @@ void CellPopulator::populateCell()
 void CellPopulator::populateWithDistributions()
 {
     const auto& discTypes = simulationConfig_.discTypes;
+    if (discTypes.empty())
+        return;
+
     double maxRadius = std::max_element(discTypes.begin(), discTypes.end(),
                                         [](const config::DiscType& lhs, const config::DiscType& rhs)
                                         { return lhs.radius < rhs.radius; })

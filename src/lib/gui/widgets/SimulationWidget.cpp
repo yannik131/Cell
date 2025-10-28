@@ -1,5 +1,5 @@
 #include "widgets/SimulationWidget.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 #include <QCloseEvent>
 #include <QLayout>
@@ -12,20 +12,16 @@
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
-    boundingRect_.setOutlineColor(sf::Color::Yellow);
-    boundingRect_.setOutlineThickness(1);
-    boundingRect_.setFillColor(sf::Color::Transparent);
+    circularBounds_.setOutlineColor(sf::Color::Yellow);
+    circularBounds_.setOutlineThickness(1);
+    circularBounds_.setFillColor(sf::Color::Transparent);
 }
 
-void SimulationWidget::injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder)
+void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
-    abstractSimulationBuilder_ = abstractSimulationBuilder;
-    abstractSimulationBuilder->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
-        {
-            boundingRect_.setSize(
-                sf::Vector2f{static_cast<float>(config.cellWidth), static_cast<float>(config.cellHeight)});
-        });
+    simulationConfigUpdater_ = simulationConfigUpdater;
+    connect(simulationConfigUpdater, &SimulationConfigUpdater::cellRadiusChanged, [this]()
+            { circularBounds_.setRadius(simulationConfigUpdater_->getSimulationConfig().cellMembraneType.radius); });
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -111,8 +107,11 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
         sf::RenderWindow::draw(circleShape);
     }
 
-    boundingRect_.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+    for (const auto& membrane : frame.membranes_)
+        sf::RenderWindow::draw(membrane);
 
-    sf::RenderWindow::draw(boundingRect_);
+    circularBounds_.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+
+    sf::RenderWindow::draw(circularBounds_);
     sf::RenderWindow::display();
 }

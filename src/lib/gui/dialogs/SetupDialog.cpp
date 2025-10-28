@@ -7,7 +7,7 @@
 SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::SetupDialog)
-    , setupModel_(new SetupModel(this, simulationConfigUpdater))
+    , setupModel_(new SetupModel(nullptr, simulationConfigUpdater))
     , simulationConfigUpdater_(simulationConfigUpdater)
 {
     ui->setupUi(this);

@@ -28,7 +28,7 @@ void PermeabilityTableModel::addRow()
         throw ExceptionWithLocation("There are no remaining disc types available.");
 
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
-    rows_.emplace_back(*availableNames.begin(), 0);
+    rows_.emplace_back(*availableNames.begin(), cell::MembraneType::Permeability::None);
     endInsertRows();
 }
 
@@ -47,10 +47,7 @@ bool PermeabilityTableModel::setField(PermeabilityMapEntry& row, int column, con
 {
     switch (column)
     {
-    case 0:
-        auto tmp = row.second;
-        row.first = value.toString().toStdString();
-        break;
+    case 0: row.first = value.toString().toStdString(); break;
     case 1: row.second = getNamePermeabilityMapping()[value.toString()]; break;
     default: return false;
     }

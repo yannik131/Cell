@@ -31,6 +31,9 @@ signals:
     void simulationStopClicked();
     void simulationResetTriggered();
     void editDiscTypesClicked();
+    void editDiscsClicked();
+    void editMembraneTypesClicked();
+    void editMembranesClicked();
     void editReactionsClicked();
     void editSetupClicked();
     void fitIntoViewRequested();

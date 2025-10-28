@@ -7,7 +7,7 @@
 #include "models/DiscTypesTableModel.hpp"
 
 DiscTypesDialog::DiscTypesDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
-    : Base(parent, simulationConfigUpdater, new DiscTypesTableModel(this, simulationConfigUpdater))
+    : Base(parent, simulationConfigUpdater, new DiscTypesTableModel(nullptr, simulationConfigUpdater))
 {
     insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1,
                                                                    .min = cell::DiscTypeLimits::MinRadius,

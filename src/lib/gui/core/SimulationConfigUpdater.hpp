@@ -27,6 +27,8 @@ public:
 
 signals:
     void discTypesChanged();
+    void cellRadiusChanged();
+    void configChanged();
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;
@@ -41,7 +43,7 @@ private:
 
     template <typename T>
     std::unordered_map<std::string, std::string>
-    createChangeMap(const std::vector<T>& newDiscTypes, const std::vector<T>& oldDiscTypes,
+    createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldTypes,
                     const std::unordered_set<std::string>& removedTypes) const;
 
 private:
@@ -62,13 +64,17 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         removeDiscTypes(simulationConfigCopy, removedTypes);
         auto changeMap = createChangeMap(newTypes, simulationConfig_.discTypes, removedTypes);
         updateDiscTypes(simulationConfigCopy, changeMap);
+        simulationConfigCopy.discTypes = newTypes;
+        discTypeColorMap_ = colorMap;
         emit discTypesChanged();
     }
     else if constexpr (std::is_same_v<T, cell::config::MembraneType>)
     {
-        removeMembraneTypes(simulationConfigCopy, updatedTypes.removedTypes);
+        removeMembraneTypes(simulationConfigCopy, removedTypes);
         auto changeMap = createChangeMap(newTypes, simulationConfig_.membraneTypes, removedTypes);
-        updateDiscTypes(simulationConfigCopy, changeMap);
+        updateMembraneTypes(simulationConfigCopy, changeMap);
+        simulationConfigCopy.membraneTypes = newTypes;
+        membraneTypeColorMap_ = colorMap;
     }
 
     setSimulationConfig(simulationConfigCopy);
@@ -76,7 +82,7 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
 
 template <typename T>
 inline std::unordered_map<std::string, std::string>
-SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldDiscTypes,
+SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const std::vector<T>& oldTypes,
                                          const std::unordered_set<std::string>& removedTypes) const
 {
     static_assert(std::is_same_v<T, cell::config::DiscType> || std::is_same_v<T, cell::config::MembraneType>,
