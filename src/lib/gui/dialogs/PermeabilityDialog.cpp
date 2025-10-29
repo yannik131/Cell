@@ -11,6 +11,7 @@
 PermeabilityDialog::PermeabilityDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, simulationConfigUpdater, new PermeabilityTableModel(nullptr, simulationConfigUpdater))
 {
+    insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
     insertComboBoxIntoView(ui->tableView, Column{1}, {"None", "Inward", "Outward", "Bidirectional"});
     insertDeleteButtonIntoView(model_, ui->tableView, Column{2});
 }

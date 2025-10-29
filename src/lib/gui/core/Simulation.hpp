@@ -48,6 +48,7 @@ signals:
 private:
     cell::SimulationFactory simulationFactory_;
     SimulationConfigUpdater simulationConfigUpdater_;
+    std::vector<sf::CircleShape> membranes_;
 };
 
 #endif /* C79C95D4_043A_4803_8C77_D97B81275A0C_HPP */

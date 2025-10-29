@@ -27,7 +27,6 @@ public:
 
 signals:
     void discTypesChanged();
-    void cellRadiusChanged();
     void configChanged();
 
 private:

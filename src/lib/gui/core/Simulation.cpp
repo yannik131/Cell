@@ -94,15 +94,6 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
             compartments.push_back(subCompartment.get());
     }
 
-    std::cout << "Disc positions:\n";
-    for (const auto& disc : frameDTO.discs_)
-        std::cout << disc.getPosition() << " ";
-
-    std::cout << "\nMembrane positions:\n";
-    for (const auto& membrane : frameDTO.membranes_)
-        std::cout << static_cast<sf::Vector2d>(membrane.getPosition());
-    std::cout << std::endl;
-
     if (redrawOnly.value)
     {
         emit frame(frameDTO);
@@ -122,10 +113,13 @@ sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& 
     const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
     const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
 
+    shape.setPointCount(100);
     shape.setRadius(membraneType.getRadius());
     shape.setOrigin(membraneType.getRadius(), membraneType.getRadius());
     shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
     shape.setFillColor(sf::Color::Transparent);
+    shape.setOutlineThickness(1);
+
     if (membraneType.getName() == cell::config::cellMembraneTypeName)
         shape.setOutlineColor(sf::Color::Yellow);
     else

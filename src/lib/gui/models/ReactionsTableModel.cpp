@@ -103,6 +103,7 @@ bool ReactionsTableModel::isEditable(const QModelIndex& index) const
     case cell::Reaction::Type::Combination: return combinationFlags[column];
     case cell::Reaction::Type::Decomposition: return decompositionFlags[column];
     case cell::Reaction::Type::Exchange: return exchangeFlags[column];
-    case cell::Reaction::Type::None: throw ExceptionWithLocation("Invalid reaction type");
+    case cell::Reaction::Type::None:
+    default: throw ExceptionWithLocation("Invalid reaction type");
     }
 }

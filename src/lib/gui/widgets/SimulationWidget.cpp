@@ -12,16 +12,11 @@
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
-    circularBounds_.setOutlineColor(sf::Color::Yellow);
-    circularBounds_.setOutlineThickness(1);
-    circularBounds_.setFillColor(sf::Color::Transparent);
 }
 
 void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
-    connect(simulationConfigUpdater, &SimulationConfigUpdater::cellRadiusChanged, [this]()
-            { circularBounds_.setRadius(simulationConfigUpdater_->getSimulationConfig().cellMembraneType.radius); });
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -108,10 +103,11 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     }
 
     for (const auto& membrane : frame.membranes_)
-        sf::RenderWindow::draw(membrane);
+    {
+        auto copy = membrane;
+        copy.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+        sf::RenderWindow::draw(copy);
+    }
 
-    circularBounds_.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
-
-    sf::RenderWindow::draw(circularBounds_);
     sf::RenderWindow::display();
 }

@@ -11,7 +11,6 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
 {
     insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
     insertProbabilitySpinBoxIntoView(ui->tableView, Column{1});
-
     insertDeleteButtonIntoView(model_, ui->tableView, Column{2});
 }
 

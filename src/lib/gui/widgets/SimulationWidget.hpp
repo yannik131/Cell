@@ -39,7 +39,6 @@ public slots:
 private:
     std::vector<sf::CircleShape> circles_;
     sf::Clock clock_;
-    sf::CircleShape circularBounds_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
 };
 

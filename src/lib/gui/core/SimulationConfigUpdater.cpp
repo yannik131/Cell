@@ -17,17 +17,12 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
 void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
     const bool discTypesDidChange = simulationConfig_.discTypes != simulationConfig.discTypes;
-    const bool cellRadiusDidChange =
-        simulationConfig_.cellMembraneType.radius != simulationConfig.cellMembraneType.radius;
 
     testConfig(simulationConfig);
     simulationConfig_ = simulationConfig;
 
     if (discTypesDidChange)
         emit discTypesChanged();
-
-    if (cellRadiusDidChange)
-        emit cellRadiusChanged();
 
     emit configChanged();
 }

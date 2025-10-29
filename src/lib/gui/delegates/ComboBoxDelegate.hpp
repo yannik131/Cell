@@ -96,10 +96,10 @@ inline void insertMembraneTypeComboBoxIntoView(QAbstractItemView* view,
 
 inline void insertComboBoxIntoView(QAbstractItemView* view, Column column, const QStringList& items)
 {
-    auto* colorComboBoxDelegate = new ComboBoxDelegate(view);
-    QObject::connect(colorComboBoxDelegate, &ComboBoxDelegate::editorCreated,
-                     [&](QComboBox* comboBox) { comboBox->addItems(items); });
-    view->setItemDelegateForColumn(column.value, colorComboBoxDelegate);
+    auto* comboBoxDelegate = new ComboBoxDelegate(view);
+    QObject::connect(comboBoxDelegate, &ComboBoxDelegate::editorCreated,
+                     [items](QComboBox* comboBox) { comboBox->addItems(items); });
+    view->setItemDelegateForColumn(column.value, comboBoxDelegate);
 }
 
 inline void insertColorComboBoxIntoView(QAbstractItemView* view, Column column)
