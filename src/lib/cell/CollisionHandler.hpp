@@ -18,7 +18,7 @@ public:
                               const MembraneTypeRegistry& membraneTypeRegistry);
 
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
-    void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Disc*, Membrane*>> discMembraneCollisions) const;
+    void calculateMembraneDiscCollisionResponse(std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const;
 
     void calculateRectangularBoundsCollisionResponse(Disc& disc,
                                                      CollisionDetector::RectangleCollision& rectangleCollision) const;

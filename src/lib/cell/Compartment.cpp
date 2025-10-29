@@ -74,7 +74,43 @@ void Compartment::update(double dt)
             newDiscs.push_back(std::move(*newDisc));
 
         disc.move(disc.getVelocity() * dt);
+    }
 
+    if (!newDiscs.empty())
+        discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+
+    // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
+    simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
+    auto collisions = simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
+
+    // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
+
+    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.discMembraneCollisions);
+
+    for (auto& [disc, membrane] : collisions.discMembraneCollisions)
+    {
+        const auto& discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
+        const auto& membraneRadius = simulationContext_.membraneTypeRegistry.getByID(membrane->getTypeID()).getRadius();
+        if (mathutils::circleIsFullyContainedByCircle(disc->getPosition(), discRadius, membrane->getPosition(),
+                                                      membraneRadius))
+        {
+            membrane->getCompartment()->addDisc(*disc);
+            disc->markDestroyed();
+        }
+        else
+            membrane->getCompartment()->addIntrudingDisc(*disc);
+    }
+
+    // marks consumed discs as destroyed
+    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
+
+    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
+
+    removeDestroyedDiscs();
+
+    for (std::size_t i = 0; i < discs_.size(); ++i)
+    {
+        auto& disc = discs_[i];
         if (!simulationContext_.collisionDetector.detectCircularBoundsCollision(disc, M, R))
             continue;
 
@@ -97,23 +133,6 @@ void Compartment::update(double dt)
         else
             parent_->addIntrudingDisc(disc);
     }
-
-    discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
-
-    // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
-    simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    auto collisions = simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
-
-    // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
-
-    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.discMembraneCollisions);
-
-    // marks consumed discs as destroyed
-    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
-
-    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
-
-    removeDestroyedDiscs();
 
     for (auto& compartment : compartments_)
         compartment->update(dt);

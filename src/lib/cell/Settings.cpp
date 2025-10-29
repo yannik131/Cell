@@ -36,7 +36,7 @@ const double MaxMass = 10000.0;
 namespace MembraneTypeLimits
 {
 const double MinRadius = 1.0;
-const double MaxRadius = 1000.0;
+const double MaxRadius = 100000.0;
 } // namespace MembraneTypeLimits
 
 } // namespace cell

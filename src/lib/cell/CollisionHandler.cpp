@@ -20,10 +20,11 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
 }
 
 void CollisionHandler::calculateMembraneDiscCollisionResponse(
-    std::vector<std::pair<Disc*, Membrane*>> discMembraneCollisions) const
+    std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const
 {
-    for (const auto& [disc, membrane] : discMembraneCollisions)
+    for (std::size_t i = 0; i < discMembraneCollisions.size(); ++i)
     {
+        const auto& [disc, membrane] = discMembraneCollisions[i];
         const auto& membraneType = membraneTypeRegistry_.getByID(membrane->getTypeID());
         const auto& permeability = membraneType.getPermeabilityFor(disc->getTypeID());
 
@@ -34,6 +35,13 @@ void CollisionHandler::calculateMembraneDiscCollisionResponse(
             continue;
 
         updateVelocitiesDiscMembraneCollision(*disc, *membrane);
+
+        // The disc-membrane collisions are used later to check if a disc is intruding or moving into another membrane
+        // If there was a collision response, the collision must be removed from the vector to avoid that unnecessary
+        // check
+        std::swap(discMembraneCollisions[i], discMembraneCollisions.back());
+        discMembraneCollisions.pop_back();
+        --i;
     }
 }
 

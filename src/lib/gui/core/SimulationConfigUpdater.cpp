@@ -54,9 +54,10 @@ void SimulationConfigUpdater::loadConfigFromFile(const fs::path& path)
     std::ifstream file(path);
     file >> j;
 
-    setSimulationConfig(j["config"].get<cell::SimulationConfig>());
     discTypeColorMap_ = j["discTypeColorMap"].get<std::map<std::string, sf::Color>>();
     membraneTypeColorMap_ = j["membraneTypeColorMap"].get<std::map<std::string, sf::Color>>();
+
+    setSimulationConfig(j["config"].get<cell::SimulationConfig>());
 }
 
 void SimulationConfigUpdater::removeDiscTypes(cell::SimulationConfig& config,

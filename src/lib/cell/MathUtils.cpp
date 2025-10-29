@@ -66,7 +66,7 @@ bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf:
 
 bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
 {
-    const auto& diff = M1 - M2;
+    const auto diff = M1 - M2;
 
     return diff.x * diff.x + diff.y * diff.y <= (R1 + R2) * (R1 + R2);
 }
@@ -74,15 +74,15 @@ bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, d
 bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
 {
     // equivalent to: return circlesOverlap(...) && !circleIsFullyContainedByCircle(...)
-    const auto& diff = M1 - M2;
-    const auto& distanceSquared = diff.x * diff.x + diff.y * diff.y;
+    const auto diff = M1 - M2;
+    const auto distanceSquared = diff.x * diff.x + diff.y * diff.y;
 
     return (distanceSquared <= (R1 + R2) * (R1 + R2)) && distanceSquared >= (R2 - R1) * (R2 - R1);
 }
 
 bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, const sf::Vector2d& point)
 {
-    const auto& diff = point - pos1;
+    const auto diff = point - pos1;
 
     return velocity * diff > 0;
 }

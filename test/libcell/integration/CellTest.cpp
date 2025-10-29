@@ -49,6 +49,11 @@ protected:
     {
         return simulationFactory.getSimulationContext().discTypeRegistry;
     }
+
+    DiscTypeID getIDFor(const std::string& name)
+    {
+        return getDiscTypeRegistry().getIDFor(name);
+    };
 };
 
 TEST_F(ACell, SimulatesASingleDisc)
@@ -108,7 +113,6 @@ TEST_F(ACell, SimulatesBimolecularReactions)
     ASSERT_THAT(discTypeCounts["C"], Eq(2));
 
     auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
-    auto getIDFor = [&](const std::string& name) { return getDiscTypeRegistry().getIDFor(name); };
 
     ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(2));
     ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
@@ -134,14 +138,16 @@ TEST_F(ACell, SimulatesASingleMembrane)
     // TODO tests for Inside -> outside
 
     auto& cell = createAndUpdateCell();
-    const auto& discs = cell.getDiscs();
+    auto discs = cell.getDiscs();
+    auto innerDiscs = cell.getCompartments().front()->getDiscs();
+    discs.insert(discs.end(), innerDiscs.begin(), innerDiscs.end());
 
     const auto& getDisc = [&](const std::string& typeName)
     {
         auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
                                  { return getDiscTypeRegistry().getByID(d.getTypeID()).getName() == typeName; });
         if (iter == discs.end())
-            throw std::logic_error("Couldn't find type " + typeName + " in discs");
+            throw ExceptionWithLocation("Couldn't find type " + typeName + " in discs");
 
         return *iter;
     };
@@ -150,4 +156,23 @@ TEST_F(ACell, SimulatesASingleMembrane)
     expectNear(getDisc("B").getPosition(), {500, 390});
     expectNear(getDisc("C").getPosition(), {600, 500});
     expectNear(getDisc("D").getPosition(), {500, 610}); // Undefined permeability, should collide
+}
+
+TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
+{
+    builder.addMembraneType(
+        "M", Radius{100}, {{"A", MembraneType::Permeability::Bidirectional}, {"B", MembraneType::Permeability::None}});
+
+    builder.addMembrane("M", Position{.x = 0, .y = 0});
+
+    // A outside of M, B is inside
+    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -5, .y = 0});
+    builder.addDisc("B", Position{.x = 94, .y = 0}, Velocity{.x = 5, .y = 0});
+
+    createAndUpdateCell();
+    const auto& collisionCounts = simulationFactory.getAndResetCollisionCounts();
+
+    ASSERT_EQ(collisionCounts.size(), 2);
+    EXPECT_TRUE(collisionCounts.contains(getIDFor("A")) && collisionCounts.at(getIDFor("A")) == 1);
+    EXPECT_TRUE(collisionCounts.contains(getIDFor("B")) && collisionCounts.at(getIDFor("B")) == 1);
 }
