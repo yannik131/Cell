@@ -3,10 +3,11 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 #include <SFML/System/Clock.hpp>
+
+#include <iostream>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
@@ -16,7 +17,7 @@ Simulation::Simulation(QObject* parent)
 void Simulation::run()
 {
     sf::Clock clock;
-    double timeSinceLastUpdate;
+    double timeSinceLastUpdate = 0;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
     const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
@@ -93,6 +94,15 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
             compartments.push_back(subCompartment.get());
     }
 
+    std::cout << "Disc positions:\n";
+    for (const auto& disc : frameDTO.discs_)
+        std::cout << disc.getPosition() << " ";
+
+    std::cout << "\nMembrane positions:\n";
+    for (const auto& membrane : frameDTO.membranes_)
+        std::cout << static_cast<sf::Vector2d>(membrane.getPosition());
+    std::cout << std::endl;
+
     if (redrawOnly.value)
     {
         emit frame(frameDTO);
@@ -113,6 +123,7 @@ sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& 
     const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
 
     shape.setRadius(membraneType.getRadius());
+    shape.setOrigin(membraneType.getRadius(), membraneType.getRadius());
     shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
     shape.setFillColor(sf::Color::Transparent);
     if (membraneType.getName() == cell::config::cellMembraneTypeName)

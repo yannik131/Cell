@@ -127,9 +127,12 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
 
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, discCount);
 
-    if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
-        throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
-                                    " doesn't add up to 100%, it adds up to " + std::to_string(sum));
+    if (!distribution.empty())
+    {
+        if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
+            throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
+                                        " doesn't add up to 100%, it adds up to " + std::to_string(sum));
+    }
 
     for (const auto& [discTypeName, frequency] : distribution)
     {

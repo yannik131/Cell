@@ -136,28 +136,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="widget_9" native="true">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>50</height>
-         </size>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Cell radius</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="cellRadiusSpinBox"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
        <widget class="QWidget" name="widget" native="true">
         <property name="minimumSize">
          <size>

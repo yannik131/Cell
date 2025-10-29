@@ -27,6 +27,7 @@ private:
     QVariant getField(const cell::config::MembraneType& row, int column) const override;
     bool setField(cell::config::MembraneType& row, int column, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
+    bool isEnabled(const QModelIndex& index) const override;
     void updateMembraneTypeName(cell::config::MembraneType& membraneType, const std::string& newName);
 
 private:

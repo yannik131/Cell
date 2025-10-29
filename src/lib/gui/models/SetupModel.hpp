@@ -17,7 +17,6 @@ public:
     void setUseDistribution(bool useDistribution);
     void setTimeStepUs(int timeStepUs);
     void setTimeScale(double timeScale);
-    void setCellRadius(int radius);
     void setMaxVelocity(int maxVelocity);
 
     void saveToConfig();

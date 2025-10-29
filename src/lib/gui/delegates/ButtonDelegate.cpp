@@ -23,6 +23,9 @@ void ButtonDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 bool ButtonDelegate::editorEvent(QEvent* event, QAbstractItemModel*, const QStyleOptionViewItem& option,
                                  const QModelIndex& index)
 {
+    if (!(index.flags() & Qt::ItemIsEnabled))
+        return false; // Ignore clicks for cells that aren't enabled
+
     auto* mouseEvent = dynamic_cast<QMouseEvent*>(event);
 
     if (event->type() == QEvent::MouseButtonRelease && mouseEvent->button() == Qt::LeftButton &&

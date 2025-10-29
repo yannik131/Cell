@@ -18,7 +18,7 @@ void MembraneTypesTableModel::removeRow(int row)
     membraneTypeColorMap_.erase(name);
 
     const auto& originalMembraneTypes = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
-    const auto originalIndex = row + removedMembraneTypes_.size();
+    const auto originalIndex = row - 1 + removedMembraneTypes_.size(); // - 1 because the first row is the cell membrane
 
     if (originalIndex < originalMembraneTypes.size())
         removedMembraneTypes_.insert(originalMembraneTypes[originalIndex].name);
@@ -31,6 +31,11 @@ void MembraneTypesTableModel::clearRows()
 
     for (const auto& membraneType : simulationConfigUpdater_->getSimulationConfig().membraneTypes)
         removedMembraneTypes_.insert(membraneType.name);
+
+    beginInsertRows(QModelIndex(), 0, 0);
+    rows_.push_back(simulationConfigUpdater_->getSimulationConfig().cellMembraneType);
+    membraneTypeColorMap_[cell::config::cellMembraneTypeName] = sf::Color::Yellow;
+    endInsertRows();
 }
 
 void MembraneTypesTableModel::addRow()
@@ -48,15 +53,27 @@ void MembraneTypesTableModel::loadFromConfig()
 {
     removedMembraneTypes_.clear();
 
+    const auto& config = simulationConfigUpdater_->getSimulationConfig();
+
     beginResetModel();
-    rows_ = simulationConfigUpdater_->getSimulationConfig().membraneTypes;
+    rows_ = {config.cellMembraneType};
+    rows_.insert(rows_.end(), config.membraneTypes.begin(), config.membraneTypes.end());
     membraneTypeColorMap_ = simulationConfigUpdater_->getMembraneTypeColorMap();
+    membraneTypeColorMap_[cell::config::cellMembraneTypeName] = sf::Color::Yellow;
     endResetModel();
 }
 
 void MembraneTypesTableModel::saveToConfig()
 {
-    simulationConfigUpdater_->setTypes(rows_, removedMembraneTypes_, membraneTypeColorMap_);
+    // Set cell membrane separately
+    auto config = simulationConfigUpdater_->getSimulationConfig();
+    config.cellMembraneType = rows_[0];
+    simulationConfigUpdater_->setSimulationConfig(config);
+
+    // Remove cell membrane from list
+    auto rows = rows_;
+    rows.erase(rows.begin());
+    simulationConfigUpdater_->setTypes(rows, removedMembraneTypes_, membraneTypeColorMap_);
 
     removedMembraneTypes_.clear();
 }
@@ -93,6 +110,14 @@ bool MembraneTypesTableModel::setField(cell::config::MembraneType& row, int colu
 bool MembraneTypesTableModel::isEditable(const QModelIndex& index) const
 {
     return index.column() != 6;
+}
+
+bool MembraneTypesTableModel::isEnabled(const QModelIndex& index) const
+{
+    if (index.row() == 0)
+        return index.column() != 0 && index.column() != 3 && index.column() != 6;
+
+    return true;
 }
 
 void MembraneTypesTableModel::updateMembraneTypeName(cell::config::MembraneType& membraneType,

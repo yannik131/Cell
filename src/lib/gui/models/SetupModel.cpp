@@ -25,11 +25,6 @@ void SetupModel::setTimeScale(double timeScale)
     simulationConfig_.simulationTimeScale = timeScale;
 }
 
-void SetupModel::setCellRadius(int radius)
-{
-    simulationConfig_.cellMembraneType.radius = radius;
-}
-
 void SetupModel::setMaxVelocity(int maxVelocity)
 {
     simulationConfig_.maxVelocity = static_cast<double>(maxVelocity);

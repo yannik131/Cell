@@ -47,6 +47,7 @@ protected:
     virtual QVariant getField(const T& row, int column) const = 0;        // for data(...)
     virtual bool setField(T& row, int column, const QVariant& value) = 0; // for setData(...)
     virtual bool isEditable(const QModelIndex& index) const = 0;          // for flags(...)
+    virtual bool isEnabled(const QModelIndex& index) const;
 
 protected:
     std::vector<T> rows_;
@@ -109,9 +110,12 @@ inline bool AbstractSimulationConfigTableModel<T>::setData(const QModelIndex& in
 
 template <typename T> inline Qt::ItemFlags AbstractSimulationConfigTableModel<T>::flags(const QModelIndex& index) const
 {
-    auto flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    auto flags = Qt::ItemFlags(Qt::ItemIsSelectable);
+
     if (isEditable(index))
         flags |= Qt::ItemIsEditable;
+    if (isEnabled(index))
+        flags |= Qt::ItemIsEnabled;
 
     return flags;
 }
@@ -143,6 +147,11 @@ template <typename T> inline void AbstractSimulationConfigTableModel<T>::setRows
 template <typename T> inline const std::vector<T>& AbstractSimulationConfigTableModel<T>::getRows() const
 {
     return rows_;
+}
+
+template <typename T> inline bool AbstractSimulationConfigTableModel<T>::isEnabled(const QModelIndex&) const
+{
+    return true;
 }
 
 #endif /* B8F34530_1D0A_4E64_A6E6_CEEE9B21BBD5_HPP */
