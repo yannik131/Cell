@@ -19,7 +19,7 @@ void CollisionHandler::calculateDiscDiscCollisionResponse(
         updateVelocitiesDiscDiscCollision(*p1, *p2);
 }
 
-void CollisionHandler::calculateMembraneDiscCollisionResponse(
+void CollisionHandler::calculateDiscMembraneCollisionResponse(
     std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const
 {
     for (std::size_t i = 0; i < discMembraneCollisions.size(); ++i)
@@ -37,8 +37,7 @@ void CollisionHandler::calculateMembraneDiscCollisionResponse(
         updateVelocitiesDiscMembraneCollision(*disc, *membrane);
 
         // The disc-membrane collisions are used later to check if a disc is intruding or moving into another membrane
-        // If there was a collision response, the collision must be removed from the vector to avoid that unnecessary
-        // check
+        // If there was a collision response, the disc can't move into the membrane and the collision has to be removed
         std::swap(discMembraneCollisions[i], discMembraneCollisions.back());
         discMembraneCollisions.pop_back();
         --i;

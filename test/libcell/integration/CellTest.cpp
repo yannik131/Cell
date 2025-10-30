@@ -54,6 +54,25 @@ protected:
     {
         return getDiscTypeRegistry().getIDFor(name);
     };
+
+    std::vector<Disc> getAllDiscs(const Compartment& compartment)
+    {
+        std::vector<Disc> discs;
+        std::vector<const Compartment*> compartments({&compartment});
+
+        while (!compartments.empty())
+        {
+            const auto* compartment = compartments.back();
+            compartments.pop_back();
+
+            discs.insert(discs.end(), compartment->getDiscs().begin(), compartment->getDiscs().end());
+
+            for (const auto& subCompartment : compartment->getCompartments())
+                compartments.push_back(subCompartment.get());
+        }
+
+        return discs;
+    }
 };
 
 TEST_F(ACell, SimulatesASingleDisc)
@@ -138,9 +157,7 @@ TEST_F(ACell, SimulatesASingleMembrane)
     // TODO tests for Inside -> outside
 
     auto& cell = createAndUpdateCell();
-    auto discs = cell.getDiscs();
-    auto innerDiscs = cell.getCompartments().front()->getDiscs();
-    discs.insert(discs.end(), innerDiscs.begin(), innerDiscs.end());
+    auto discs = getAllDiscs(cell);
 
     const auto& getDisc = [&](const std::string& typeName)
     {
@@ -175,4 +192,24 @@ TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
     ASSERT_EQ(collisionCounts.size(), 2);
     EXPECT_TRUE(collisionCounts.contains(getIDFor("A")) && collisionCounts.at(getIDFor("A")) == 1);
     EXPECT_TRUE(collisionCounts.contains(getIDFor("B")) && collisionCounts.at(getIDFor("B")) == 1);
+}
+
+TEST_F(ACell, SimulationReactionsOfDiscsInDifferentCompartments)
+{
+    builder.addMembraneType(
+        "M", Radius{100}, {{"A", MembraneType::Permeability::Bidirectional}, {"B", MembraneType::Permeability::None}});
+
+    builder.addMembrane("M", Position{.x = 0, .y = 0});
+
+    // A outside of M, B is inside
+    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -10, .y = 0});
+    builder.addDisc("B", Position{.x = 94, .y = 0}, Velocity{.x = 0, .y = 0});
+
+    builder.addReaction("A", "B", "C", "", Probability{1});
+
+    auto& cell = createAndUpdateCell();
+    auto discs = getAllDiscs(cell);
+
+    ASSERT_EQ(discs.size(), 1);
+    EXPECT_EQ(getDiscTypeRegistry().getByID(discs.front().getTypeID()).getName(), "C");
 }

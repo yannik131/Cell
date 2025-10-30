@@ -30,6 +30,12 @@ public:
     Compartment* createSubCompartment(Membrane membrane);
 
 private:
+    void moveDiscsAndApplyUnimolecularReactions(double dt);
+    auto detectCollisions();
+    void moveDiscsIntoChildCompartments(auto& discMembraneCollisions);
+    void moveDiscsIntoParentCompartment();
+    void updateChildCompartments(double dt);
+
     /**
      * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
      * calculates the current kinetic energy based on the discs that are still in the cell

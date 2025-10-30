@@ -24,11 +24,8 @@ void Simulation::run()
     const auto simulationTimeScale = simulationConfig.simulationTimeScale;
     const auto simulationTimeStep = simulationConfig.simulationTimeStep;
 
-    while (!simulationFactory_.getCell().getDiscs().empty())
+    while (!QThread::currentThread()->isInterruptionRequested())
     {
-        if (QThread::currentThread()->isInterruptionRequested())
-            break;
-
         timeSinceLastUpdate += clock.restart().asSeconds();
 
         while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)

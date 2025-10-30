@@ -60,33 +60,57 @@ const Compartment* Compartment::getParent() const
 
 void Compartment::update(double dt)
 {
-    const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID());
-    const auto M = membrane_.getPosition();
-    const auto R = membraneType.getRadius();
+    moveDiscsAndApplyUnimolecularReactions(dt);
+
+    auto collisions = detectCollisions();
+    simulationContext_.collisionHandler.calculateDiscMembraneCollisionResponse(collisions.discMembraneCollisions);
+    moveDiscsIntoChildCompartments(collisions.discMembraneCollisions);
+    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
+    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
+
+    removeDestroyedDiscs();
+
+    moveDiscsIntoParentCompartment();
+    updateChildCompartments(dt);
+}
+
+Compartment* Compartment::createSubCompartment(Membrane membrane)
+{
+    auto compartment = std::make_unique<Compartment>(this, std::move(membrane), simulationContext_);
+    membranes_.push_back(compartment->getMembrane());
+    compartments_.push_back(std::move(compartment));
+
+    return compartments_.back().get();
+}
+
+void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
+{
     std::vector<Disc> newDiscs;
 
-    for (std::size_t i = 0; i < discs_.size(); ++i)
+    for (auto& disc : discs_)
     {
-        auto& disc = discs_[i];
-
         // A -> B returns nothing, A -> B + C returns 1 new disc
         if (auto newDisc = simulationContext_.reactionEngine.applyUnimolecularReactions(disc, dt))
+        {
+            newDisc->move(newDisc->getVelocity() * dt);
             newDiscs.push_back(std::move(*newDisc));
+        }
 
         disc.move(disc.getVelocity() * dt);
     }
 
     if (!newDiscs.empty())
         discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+}
 
-    // Handle collisions with intruding discs after moving the discs in this compartment to avoid overlap after moving
+auto Compartment::detectCollisions()
+{
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    auto collisions = simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
+    return simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
+}
 
-    // TODO when inserting into child compartment, directly insert into newDiscs to avoid double update
-
-    simulationContext_.collisionHandler.calculateMembraneDiscCollisionResponse(collisions.discMembraneCollisions);
-
+void Compartment::moveDiscsIntoChildCompartments(auto& discMembraneCollisions)
+{
     for (auto& [disc, membrane] : collisions.discMembraneCollisions)
     {
         const auto& discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
@@ -100,13 +124,13 @@ void Compartment::update(double dt)
         else
             membrane->getCompartment()->addIntrudingDisc(*disc);
     }
+}
 
-    // marks consumed discs as destroyed
-    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
-
-    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
-
-    removeDestroyedDiscs();
+void Compartment::moveDiscsIntoParentCompartment()
+{
+    const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID());
+    const auto M = membrane_.getPosition();
+    const auto R = membraneType.getRadius();
 
     for (std::size_t i = 0; i < discs_.size(); ++i)
     {
@@ -133,18 +157,12 @@ void Compartment::update(double dt)
         else
             parent_->addIntrudingDisc(disc);
     }
-
-    for (auto& compartment : compartments_)
-        compartment->update(dt);
 }
 
-Compartment* Compartment::createSubCompartment(Membrane membrane)
+void Compartment::updateChildCompartments(double dt)
 {
-    auto compartment = std::make_unique<Compartment>(this, std::move(membrane), simulationContext_);
-    membranes_.push_back(compartment->getMembrane());
-    compartments_.push_back(std::move(compartment));
-
-    return compartments_.back().get();
+    for (auto& compartment : compartments_)
+        compartment->update(dt);
 }
 
 void Compartment::removeDestroyedDiscs()
