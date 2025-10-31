@@ -30,6 +30,11 @@ void SetupModel::setMaxVelocity(int maxVelocity)
     simulationConfig_.maxVelocity = static_cast<double>(maxVelocity);
 }
 
+void SetupModel::setFPS(int FPS)
+{
+    simulationConfigUpdater_->setFPS(FPS);
+}
+
 void SetupModel::saveToConfig()
 {
     simulationConfigUpdater_->setSimulationConfig(simulationConfig_);

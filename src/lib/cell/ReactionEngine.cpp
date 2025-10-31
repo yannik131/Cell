@@ -116,7 +116,7 @@ void ReactionEngine::applyBimolecularReactions(std::vector<std::pair<Disc*, Disc
         if (combinationReaction(d1, d2))
         {
             // One of the discs was destroyed - no collision anymore
-            std::swap(collidingDiscs[i], collidingDiscs.back());
+            collidingDiscs[i] = std::move(collidingDiscs.back());
             collidingDiscs.pop_back();
             --i;
         }

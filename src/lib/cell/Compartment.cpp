@@ -58,6 +58,12 @@ const Compartment* Compartment::getParent() const
     return parent_;
 }
 
+auto Compartment::detectCollisions()
+{
+    simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
+    return simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
+}
+
 void Compartment::update(double dt)
 {
     moveDiscsAndApplyUnimolecularReactions(dt);
@@ -68,10 +74,12 @@ void Compartment::update(double dt)
     simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
     simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
 
-    removeDestroyedDiscs();
-
+    // TODO: Calculate both TOIs for simultaneous bounds/discs collisions and only handle the earlier one
     moveDiscsIntoParentCompartment();
     updateChildCompartments(dt);
+
+    removeDestroyedDiscs();
+    intrudingDiscs_.clear();
 }
 
 Compartment* Compartment::createSubCompartment(Membrane membrane)
@@ -103,15 +111,9 @@ void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
         discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
 }
 
-auto Compartment::detectCollisions()
-{
-    simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    return simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
-}
-
 void Compartment::moveDiscsIntoChildCompartments(auto& discMembraneCollisions)
 {
-    for (auto& [disc, membrane] : collisions.discMembraneCollisions)
+    for (auto& [disc, membrane] : discMembraneCollisions)
     {
         const auto& discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
         const auto& membraneRadius = simulationContext_.membraneTypeRegistry.getByID(membrane->getTypeID()).getRadius();

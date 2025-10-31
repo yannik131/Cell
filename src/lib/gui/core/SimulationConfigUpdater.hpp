@@ -22,6 +22,9 @@ public:
     const std::map<std::string, sf::Color>& getDiscTypeColorMap() const;
     const std::map<std::string, sf::Color>& getMembraneTypeColorMap() const;
 
+    void setFPS(int FPS);
+    int getFPS() const;
+
     void saveConfigToFile(const fs::path& path) const;
     void loadConfigFromFile(const fs::path& path);
 
@@ -49,6 +52,7 @@ private:
     cell::SimulationConfig simulationConfig_;
     std::map<std::string, sf::Color> discTypeColorMap_;
     std::map<std::string, sf::Color> membraneTypeColorMap_;
+    int FPS_ = 60;
 };
 
 template <typename T>

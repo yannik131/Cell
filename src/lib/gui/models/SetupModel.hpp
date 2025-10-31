@@ -18,6 +18,7 @@ public:
     void setTimeStepUs(int timeStepUs);
     void setTimeScale(double timeScale);
     void setMaxVelocity(int maxVelocity);
+    void setFPS(int FPS);
 
     void saveToConfig();
     void loadFromConfig();

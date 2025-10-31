@@ -37,6 +37,19 @@ const std::map<std::string, sf::Color>& SimulationConfigUpdater::getMembraneType
     return membraneTypeColorMap_;
 }
 
+void SimulationConfigUpdater::setFPS(int FPS)
+{
+    if (FPS <= 0)
+        throw ExceptionWithLocation("FPS must be positive");
+
+    FPS_ = FPS;
+}
+
+int SimulationConfigUpdater::getFPS() const
+{
+    return FPS_;
+}
+
 void SimulationConfigUpdater::saveConfigToFile(const fs::path& path) const
 {
     json j;
