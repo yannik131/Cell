@@ -20,18 +20,7 @@ public:
     void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
     void calculateDiscMembraneCollisionResponse(std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const;
 
-    void calculateRectangularBoundsCollisionResponse(Disc& disc,
-                                                     CollisionDetector::RectangleCollision& rectangleCollision) const;
     void calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const;
-
-    /**
-     * Combination reactions are treated as inelastic collisions, so they don't conserve total kinetic energy. To
-     * simulate constant kinetic energy, we give particles a little bump when they collide with the wall if the total
-     * kinetic of the system is currently lower than it was at the start of the simulation (kineticEnergyDeficiency =
-     * initialKineticEnergy - currentKineticEnergy)
-     */
-    double keepKineticEnergyConstant(Disc& disc, const CollisionDetector::RectangleCollision& collision,
-                                     double deficiency) const;
 
 private:
     void updateVelocitiesDiscDiscCollision(Disc& d1, Disc& d2) const;

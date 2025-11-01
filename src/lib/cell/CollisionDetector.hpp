@@ -16,33 +16,19 @@ namespace cell
 class CollisionDetector
 {
 public:
-    struct RectangleCollision
-    {
-        enum class Wall
-        {
-            Left,
-            Top,
-            Right,
-            Bottom,
-            None
-        };
-
-        // A disc can either collide with 1 wall at a time or with both top/left, top/right, bottom/left and
-        // bottom/right
-        // We track the penetration into each wall in px
-        std::optional<std::pair<Wall, double>> xCollision_;
-        std::optional<std::pair<Wall, double>> yCollision_;
-
-        bool isCollision() const
-        {
-            return xCollision_.has_value() || yCollision_.has_value();
-        }
-    };
-
     struct Collisions
     {
         std::vector<std::pair<Disc*, Disc*>> discDiscCollisions;
-        std::vector<std::pair<Disc*, Membrane*>> discMembraneCollisions;
+        std::vector<Disc*> discContainingMembraneCollisions;
+        std::vector<std::pair<Disc*, Membrane*>> discChildMembraneCollisions;
+    };
+
+    struct Params
+    {
+        std::vector<Disc>* discs;
+        std::vector<Membrane>* membranes;
+        std::vector<Disc*>* intrudingDiscs;
+        Membrane* containingMembrane;
     };
 
 private:
@@ -51,6 +37,14 @@ private:
         Disc = 1 << 0,
         Membrane = 1 << 1,
         IntrudingDisc = 1 << 2
+    };
+
+    enum class CollisionType
+    {
+        DiscDisc,
+        DiscContainingMembrane,
+        DiscChildMembrane,
+        None
     };
 
     struct Entry
@@ -65,23 +59,21 @@ private:
 public:
     CollisionDetector(const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry);
 
-    RectangleCollision detectRectangularBoundsCollision(const Disc& disc, const sf::Vector2d& topLeft,
-                                                        const sf::Vector2d& bottomRight) const;
-    bool detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const;
     void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
                       const std::vector<Disc*>& intrudingDiscs);
-    Collisions detectCollisions(std::vector<Disc>* discs, std::vector<Membrane>* membranes,
-                                std::vector<Disc*>* intrudingDiscs);
+    Collisions detectCollisions(const Params& params);
 
-    /**
-     * @returns the collision counts for all disc types in the simulation and sets them to 0
-     */
     DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
     template <typename ElementType, typename RegistryType>
     Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index,
                       EntryType entryType) const;
+
+    bool discIsContainedByMembrane(const Entry& entry);
+    double calculateTimeOfImpactWithContainingMembrane(const Entry& entry, const Membrane& containingMembrane) const;
+    double calculateTimeOfImpactWithChildMembrane(const Entry& entry1, const Entry& entry2) const;
+    double calculateTimeOfImpactBetweenDiscs(const Entry& entry1, const Entry& entry2) const;
 
 private:
     DiscTypeMap<int> collisionCounts_;
@@ -90,6 +82,7 @@ private:
     const MembraneTypeRegistry& membraneTypeRegistry_;
 
     std::vector<Entry> entries_;
+    Params params_;
 };
 
 template <typename ElementType, typename RegistryType>

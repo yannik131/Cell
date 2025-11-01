@@ -13,38 +13,6 @@ CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry,
 {
 }
 
-CollisionDetector::RectangleCollision
-CollisionDetector::detectRectangularBoundsCollision(const Disc& disc, const sf::Vector2d& topLeft,
-                                                    const sf::Vector2d& bottomRight) const
-{
-    using Wall = RectangleCollision::Wall;
-
-    const double& R = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
-    const sf::Vector2d& r = disc.getPosition();
-    RectangleCollision rectangleCollision;
-    double l = NAN;
-
-    if (l = R + topLeft.x - r.x; l > 0)
-        rectangleCollision.xCollision_ = {Wall::Left, l};
-    else if (l = R - bottomRight.x + r.x; l > 0)
-        rectangleCollision.xCollision_ = {Wall::Right, l};
-
-    if (l = R + topLeft.y - r.y; l > 0)
-        rectangleCollision.yCollision_ = {Wall::Top, l};
-    else if (l = R - bottomRight.y + r.y; l > 0)
-        rectangleCollision.yCollision_ = {Wall::Bottom, l};
-
-    return rectangleCollision;
-}
-
-bool CollisionDetector::detectCircularBoundsCollision(const Disc& disc, const sf::Vector2d& M, double Rm) const
-{
-    const auto& r = disc.getPosition();
-    const auto& Rc = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
-
-    return (M - r) * (M - r) >= (Rm - Rc) * (Rm - Rc);
-}
-
 void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
                                      const std::vector<Disc*>& intrudingDiscs)
 {
@@ -63,15 +31,22 @@ void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::
     std::sort(entries_.begin(), entries_.end(), [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
 }
 
-CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Disc>* discs,
-                                                                  std::vector<Membrane>* membranes,
-                                                                  std::vector<Disc*>* intrudingDiscs)
+CollisionDetector::Collisions CollisionDetector::detectCollisions(const Params& params)
 {
+    params_ = params;
     Collisions collisions;
-    collisions.discDiscCollisions.reserve(discs->size() / 2);
+    collisions.discDiscCollisions.reserve(params_.discs->size() / 2);
 
-    std::vector<char> discsInCollisions(discs->size(), 0);
-    std::vector<char> intrudingDiscsInCollisions(intrudingDiscs ? intrudingDiscs->size() : 0, 0);
+    std::vector<char> discsInCollisions(params_.discs->size(), 0);
+    std::vector<char> intrudingDiscsInCollisions(params_.intrudingDiscs ? params_.intrudingDiscs->size() : 0, 0);
+
+    const auto markAsColliding = [&](const Entry& entry)
+    {
+        if (entry.type == EntryType::IntrudingDisc)
+            intrudingDiscsInCollisions[entry.index] = 1;
+        else
+            discsInCollisions[entry.index] = 1;
+    };
 
     const auto isInCollision = [&](const Entry& entry)
     {
@@ -79,11 +54,39 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Di
                (entry.type == EntryType::IntrudingDisc && intrudingDiscsInCollisions[entry.index]);
     };
 
+    const auto getDiscPointer = [&](const Entry& entry)
+    {
+        if (entry.type == EntryType::IntrudingDisc)
+            return (*params_.intrudingDiscs)[entry.index];
+
+        return &(*params_.discs)[entry.index];
+    };
+
+    double timeOfImpact = std::numeric_limits<double>::max();
+    const Entry* firstEntry = nullptr;
+    const Entry* otherEntry = nullptr;
+
+    const auto updateTimeOfImpact = [&](double newTimeOfImpact, const Entry* entry1, const Entry* entry2)
+    {
+        if (newTimeOfImpact < timeOfImpact)
+        {
+            timeOfImpact = newTimeOfImpact;
+            firstEntry = entry1;
+            otherEntry = entry2;
+        }
+    };
+
     for (std::size_t i = 0; i < entries_.size(); ++i)
     {
         const auto& entry1 = entries_[i];
         if (isInCollision(entry1))
             continue;
+
+        if (entry1.type == EntryType::Disc && !discIsContainedByMembrane(entry1))
+        {
+            double newTimeOfImpact = calculateTimeOfImpactWithContainingMembrane(entry1, *params.containingMembrane);
+            updateTimeOfImpact(newTimeOfImpact, &entry1, nullptr);
+        }
 
         for (std::size_t j = i + 1; j < entries_.size(); ++j)
         {
@@ -103,39 +106,33 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(std::vector<Di
 
             if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)
             {
-                const bool firstIsMembrane = (entry1.type == EntryType::Membrane);
-                auto disc = firstIsMembrane ? &(*discs)[entry2.index] : &(*discs)[entry1.index];
-                auto membrane = firstIsMembrane ? &(*membranes)[entry1.index] : &(*membranes)[entry2.index];
-
-                collisions.discMembraneCollisions.emplace_back(disc, membrane);
-                continue;
+                double newTimeOfImpact = calculateTimeOfImpactWithChildMembrane(entry1, entry2);
+                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2);
             }
             else
             {
-                const bool firstIsIntruder = (entry1.type == EntryType::IntrudingDisc);
-                const bool secondIsIntruder = (entry2.type == EntryType::IntrudingDisc);
-
-                auto d1 = firstIsIntruder ? (*intrudingDiscs)[entry1.index] : &(*discs)[entry1.index];
-                auto d2 = secondIsIntruder ? (*intrudingDiscs)[entry2.index] : &(*discs)[entry2.index];
-
-                collisions.discDiscCollisions.emplace_back(d1, d2);
-                ++collisionCounts_[d1->getTypeID()];
-                ++collisionCounts_[d2->getTypeID()];
-
-                if (firstIsIntruder)
-                    intrudingDiscsInCollisions[entry1.index] = 1;
-                else
-                    discsInCollisions[entry1.index] = 1;
-
-                if (secondIsIntruder)
-                    intrudingDiscsInCollisions[entry2.index] = 1;
-                else
-                    discsInCollisions[entry2.index] = 1;
-
-                // Multiple collisions for discs aren't supported, so stop searching further
-                break;
+                double newTimeOfImpact = calculateTimeOfImpactBetweenDiscs(entry1, entry2);
+                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2);
             }
         }
+
+        if (otherEntry)
+        {
+            markAsColliding(*otherEntry);
+
+            if (otherEntry->type == EntryType::Disc)
+                collisions.discDiscCollisions.emplace_back(&(*params_.discs)[entry1.index],
+                                                           getDiscPointer(*otherEntry));
+            else
+                collisions.discChildMembraneCollisions.emplace_back(&(*params_.discs)[entry1.index],
+                                                                    &(*params_.membranes)[otherEntry->index]);
+        }
+        else if (firstEntry)
+            collisions.discContainingMembraneCollisions.push_back(&(*params_.discs)[entry1.index]);
+
+        firstEntry = nullptr;
+        otherEntry = nullptr;
+        timeOfImpact = std::numeric_limits<double>::max();
     }
 
     return collisions;
@@ -147,6 +144,68 @@ DiscTypeMap<int> CollisionDetector::getAndResetCollisionCounts()
     collisionCounts_.clear();
 
     return tmp;
+}
+
+bool CollisionDetector::discIsContainedByMembrane(const Entry& entry)
+{
+    auto disc = (*params_.discs)[entry.index];
+
+    return mathutils::circleIsFullyContainedByCircle(
+        disc.getPosition(), discTypeRegistry_.getByID(disc.getTypeID()).getRadius(),
+        params_.containingMembrane->getPosition(),
+        membraneTypeRegistry_.getByID(params_.containingMembrane->getTypeID()).getRadius());
+}
+
+double CollisionDetector::calculateTimeOfImpactWithContainingMembrane(const Entry& entry,
+                                                                      const Membrane& containingMembrane) const
+{
+    const auto& disc = (*params_.discs)[entry.index];
+    const auto& r = disc.getPosition();
+    const auto& v = disc.getVelocity();
+    const auto Rd = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
+    const auto Rm = membraneTypeRegistry_.getByID(containingMembrane.getTypeID()).getRadius();
+    const auto M = containingMembrane.getPosition();
+
+    const double p = -2.0 * (M - r) * v / (v * v);
+    const double q = ((M - r) * (M - r) - (Rm - Rd) * (Rm - Rd)) / (v * v);
+
+    const double dt = 0.5 * (-p + std::sqrt(p * p - 4 * q));
+
+    return dt;
+}
+
+double CollisionDetector::calculateTimeOfImpactWithChildMembrane(const Entry& entry1, const Entry& entry2) const
+{
+    const bool firstIsMembrane = (entry1.type == EntryType::Membrane);
+    const auto& disc = firstIsMembrane ? (*params_.discs)[entry2.index] : (*params_.discs)[entry1.index];
+    const auto& membrane = firstIsMembrane ? (*params_.membranes)[entry1.index] : (*params_.membranes)[entry2.index];
+
+    const auto r = disc.getPosition() - membrane.getPosition();
+    const auto v = disc.getVelocity();
+
+    const double dt =
+        mathutils::calculateTimeBeforeCollision(r, v, membraneTypeRegistry_.getByID(membrane.getTypeID()).getRadius(),
+                                                discTypeRegistry_.getByID(disc.getTypeID()).getRadius());
+
+    return dt;
+}
+
+double CollisionDetector::calculateTimeOfImpactBetweenDiscs(const Entry& entry1, const Entry& entry2) const
+{
+    const bool firstIsIntruder = (entry1.type == EntryType::IntrudingDisc);
+    const bool secondIsIntruder = (entry2.type == EntryType::IntrudingDisc);
+
+    const auto& d1 = firstIsIntruder ? *(*params_.intrudingDiscs)[entry1.index] : (*params_.discs)[entry1.index];
+    const auto& d2 = secondIsIntruder ? *(*params_.intrudingDiscs)[entry2.index] : (*params_.discs)[entry2.index];
+
+    const auto r = d2.getPosition() - d1.getPosition();
+    const auto v = d2.getVelocity() - d1.getVelocity();
+
+    const double dt =
+        mathutils::calculateTimeBeforeCollision(r, v, discTypeRegistry_.getByID(d1.getTypeID()).getRadius(),
+                                                discTypeRegistry_.getByID(d2.getTypeID()).getRadius());
+
+    return dt;
 }
 
 } // namespace cell

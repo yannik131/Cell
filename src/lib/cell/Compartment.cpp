@@ -61,7 +61,11 @@ const Compartment* Compartment::getParent() const
 auto Compartment::detectCollisions()
 {
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    return simulationContext_.collisionDetector.detectCollisions(&discs_, &membranes_, &intrudingDiscs_);
+    return simulationContext_.collisionDetector.detectCollisions(
+        CollisionDetector::Params{.discs = &discs_,
+                                  .membranes = &membranes_,
+                                  .intrudingDiscs = &intrudingDiscs_,
+                                  .containingMembrane = &membrane_});
 }
 
 void Compartment::update(double dt)
@@ -69,8 +73,8 @@ void Compartment::update(double dt)
     moveDiscsAndApplyUnimolecularReactions(dt);
 
     auto collisions = detectCollisions();
-    simulationContext_.collisionHandler.calculateDiscMembraneCollisionResponse(collisions.discMembraneCollisions);
-    moveDiscsIntoChildCompartments(collisions.discMembraneCollisions);
+    simulationContext_.collisionHandler.calculateDiscMembraneCollisionResponse(collisions.discChildMembraneCollisions);
+    moveDiscsIntoChildCompartments(collisions.discContainingMembraneCollisions);
     simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
     simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
 

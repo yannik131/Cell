@@ -44,39 +44,6 @@ void CollisionHandler::calculateDiscMembraneCollisionResponse(
     }
 }
 
-void CollisionHandler::calculateRectangularBoundsCollisionResponse(
-    Disc& disc, CollisionDetector::RectangleCollision& rectangleCollision) const
-{
-    if (!rectangleCollision.isCollision())
-        return;
-
-    using Wall = CollisionDetector::RectangleCollision::Wall;
-
-    sf::Vector2d dr;
-
-    if (rectangleCollision.xCollision_.has_value())
-    {
-        if (rectangleCollision.xCollision_->first == Wall::Left)
-            dr.x = 2 * rectangleCollision.xCollision_->second;
-        else
-            dr.x = -2 * rectangleCollision.xCollision_->second;
-
-        disc.negateXVelocity();
-    }
-
-    if (rectangleCollision.yCollision_.has_value())
-    {
-        if (rectangleCollision.yCollision_->first == Wall::Top)
-            dr.y = 2 * rectangleCollision.yCollision_->second;
-        else
-            dr.y = -2 * rectangleCollision.yCollision_->second;
-
-        disc.negateYVelocity();
-    }
-
-    disc.move(dr);
-}
-
 void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
 {
     const auto& r = disc.getPosition();
@@ -100,21 +67,6 @@ void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, cons
     disc.move(dt * v);
     disc.setVelocity(mathutils::reflectVector(disc.getVelocity(), disc.getPosition() - M, Rm - Rd));
     disc.move(-dt * disc.getVelocity());
-}
-
-double CollisionHandler::keepKineticEnergyConstant(Disc& disc, const CollisionDetector::RectangleCollision& collision,
-                                                   double deficiency) const
-{
-    if (!collision.isCollision() || deficiency <= 0)
-        return 0.0;
-
-    // The constant has to be selected so that enough energy gets transferred to the disc to even out the deficiency but
-    // not too much to make it look stupid
-    auto randomNumber = mathutils::getRandomNumber<double>(0, 0.15);
-    double kineticEnergyBefore = disc.getKineticEnergy(discTypeRegistry_);
-    disc.scaleVelocity(1.0 + randomNumber);
-
-    return disc.getKineticEnergy(discTypeRegistry_) - kineticEnergyBefore;
 }
 
 void CollisionHandler::updateVelocitiesDiscDiscCollision(Disc& d1, Disc& d2) const
