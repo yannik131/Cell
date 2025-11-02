@@ -62,22 +62,28 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(const Params& 
         return &(*params_.discs)[entry.index];
     };
 
-    double timeOfImpact = std::numeric_limits<double>::max();
-    const Entry* firstEntry = nullptr;
-    const Entry* otherEntry = nullptr;
-
-    const auto updateTimeOfImpact = [&](double newTimeOfImpact, const Entry* entry1, const Entry* entry2)
-    {
-        if (newTimeOfImpact < timeOfImpact)
-        {
-            timeOfImpact = newTimeOfImpact;
-            firstEntry = entry1;
-            otherEntry = entry2;
-        }
-    };
-
+    // TODO For all discs (not intruding discs) gather all collisions and entries with other discs, intruding discs, and
+    // child/containing membranes. Then select the earliest one and keep only that one. This loop doesn't maintain an
+    // order, so these things have to be stored in a map or other structure
     for (std::size_t i = 0; i < entries_.size(); ++i)
     {
+        double timeOfImpact = std::numeric_limits<double>::max();
+        const Entry* firstEntry = nullptr;
+        const Entry* otherEntry = nullptr;
+        CollisionType collisionType = CollisionType::None;
+
+        const auto updateTimeOfImpact =
+            [&](double newTimeOfImpact, const Entry* entry1, const Entry* entry2, CollisionType newCollisionType)
+        {
+            if (newTimeOfImpact < timeOfImpact)
+            {
+                timeOfImpact = newTimeOfImpact;
+                firstEntry = entry1;
+                otherEntry = entry2;
+                collisionType = newCollisionType;
+            }
+        };
+
         const auto& entry1 = entries_[i];
         if (isInCollision(entry1))
             continue;
@@ -85,7 +91,7 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(const Params& 
         if (entry1.type == EntryType::Disc && !discIsContainedByMembrane(entry1))
         {
             double newTimeOfImpact = calculateTimeOfImpactWithContainingMembrane(entry1, *params.containingMembrane);
-            updateTimeOfImpact(newTimeOfImpact, &entry1, nullptr);
+            updateTimeOfImpact(newTimeOfImpact, &entry1, nullptr, CollisionType::DiscContainingMembrane);
         }
 
         for (std::size_t j = i + 1; j < entries_.size(); ++j)
@@ -107,32 +113,50 @@ CollisionDetector::Collisions CollisionDetector::detectCollisions(const Params& 
             if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)
             {
                 double newTimeOfImpact = calculateTimeOfImpactWithChildMembrane(entry1, entry2);
-                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2);
+                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2, CollisionType::DiscChildMembrane);
             }
             else
             {
                 double newTimeOfImpact = calculateTimeOfImpactBetweenDiscs(entry1, entry2);
-                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2);
+                updateTimeOfImpact(newTimeOfImpact, &entry1, &entry2, CollisionType::DiscDisc);
             }
         }
 
-        if (otherEntry)
+        switch (collisionType)
         {
+        case CollisionType::DiscDisc:
+        {
+            auto disc1 = getDiscPointer(*firstEntry);
+            auto disc2 = getDiscPointer(*otherEntry);
+            collisions.discDiscCollisions.push_back(
+                DiscDiscCollision{.disc1 = disc1, .disc2 = disc2, .toi = timeOfImpact});
+
+            ++collisionCounts_[disc1->getTypeID()];
+            ++collisionCounts_[disc2->getTypeID()];
+            markAsColliding(*firstEntry);
             markAsColliding(*otherEntry);
-
-            if (otherEntry->type == EntryType::Disc)
-                collisions.discDiscCollisions.emplace_back(&(*params_.discs)[entry1.index],
-                                                           getDiscPointer(*otherEntry));
-            else
-                collisions.discChildMembraneCollisions.emplace_back(&(*params_.discs)[entry1.index],
-                                                                    &(*params_.membranes)[otherEntry->index]);
         }
-        else if (firstEntry)
-            collisions.discContainingMembraneCollisions.push_back(&(*params_.discs)[entry1.index]);
+        break;
+        case CollisionType::DiscChildMembrane:
+            if (firstEntry->type == EntryType::Membrane)
+                std::swap(firstEntry, otherEntry);
 
-        firstEntry = nullptr;
-        otherEntry = nullptr;
-        timeOfImpact = std::numeric_limits<double>::max();
+            collisions.discChildMembraneCollisions.push_back(
+                DiscChildMembraneCollision{.disc = getDiscPointer(*firstEntry),
+                                           .membrane = &(*params_.membranes)[otherEntry->index],
+                                           .toi = timeOfImpact});
+            markAsColliding(*firstEntry);
+            break;
+        case CollisionType::DiscContainingMembrane:
+            collisions.discContainingMembraneCollisions.push_back(
+                DiscContainingMembraneCollision{.disc = &(*params_.discs)[firstEntry->index],
+                                                .membrane = params_.containingMembrane,
+                                                .toi = timeOfImpact});
+            markAsColliding(*firstEntry);
+            break;
+        case CollisionType::None:
+        default: continue;
+        }
     }
 
     return collisions;

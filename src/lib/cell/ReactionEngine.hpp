@@ -2,6 +2,7 @@
 #define REACTIONENGINE_HPP
 
 #include "AbstractReactionTable.hpp"
+#include "CollisionDetector.hpp"
 #include "MathUtils.hpp"
 
 #include <functional>
@@ -19,7 +20,6 @@ using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
 
 class ReactionEngine
 {
-public:
 public:
     ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const AbstractReactionTable& reactionTable);
 
@@ -57,7 +57,7 @@ public:
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc, double dt) const;
 
-    void applyBimolecularReactions(std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const;
+    void applyBimolecularReactions(std::vector<CollisionDetector::DiscDiscCollision>& collidingDiscs) const;
 
 private:
     template <typename MapType, typename KeyType, typename Condition>

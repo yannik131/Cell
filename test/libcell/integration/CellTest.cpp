@@ -169,10 +169,10 @@ TEST_F(ACell, SimulatesASingleMembrane)
         return *iter;
     };
 
-    expectNear(getDisc("A").getPosition(), {400, 500});
-    expectNear(getDisc("B").getPosition(), {500, 390});
-    expectNear(getDisc("C").getPosition(), {600, 500});
-    expectNear(getDisc("D").getPosition(), {500, 610}); // Undefined permeability, should collide
+    expectNear(getDisc("A").getPosition(), {400, 500}); // Inward: Should go through
+    expectNear(getDisc("B").getPosition(), {500, 390}); // Outward: Should collide
+    expectNear(getDisc("C").getPosition(), {600, 500}); // Bidirectional: Should go through
+    expectNear(getDisc("D").getPosition(), {500, 610}); // Undefined permeability: should collide
 }
 
 TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)

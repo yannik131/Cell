@@ -32,8 +32,8 @@ public:
 private:
     void moveDiscsAndApplyUnimolecularReactions(double dt);
     auto detectCollisions();
-    void moveDiscsIntoChildCompartments(auto& discMembraneCollisions);
-    void moveDiscsIntoParentCompartment();
+    void moveDiscsIntoChildCompartments(auto& discChildMembraneCollisions);
+    void moveDiscsIntoParentCompartment(auto& discContainingMembraneCollisions);
     void updateChildCompartments(double dt);
 
     /**

@@ -13,20 +13,20 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 }
 
 void CollisionHandler::calculateDiscDiscCollisionResponse(
-    std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const
+    std::vector<CollisionDetector::DiscDiscCollision>& discDiscCollisions) const
 {
-    for (const auto& [p1, p2] : discDiscCollisions)
-        updateVelocitiesDiscDiscCollision(*p1, *p2);
+    for (auto& collision : discDiscCollisions)
+        updateVelocitiesDiscDiscCollision(collision);
 }
 
-void CollisionHandler::calculateDiscMembraneCollisionResponse(
-    std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const
+void CollisionHandler::calculateDiscChildMembraneCollisionResponse(
+    std::vector<CollisionDetector::DiscChildMembraneCollision>& discChildMembraneCollisions) const
 {
-    for (std::size_t i = 0; i < discMembraneCollisions.size(); ++i)
+    for (std::size_t i = 0; i < discChildMembraneCollisions.size(); ++i)
     {
-        const auto& [disc, membrane] = discMembraneCollisions[i];
-        const auto& membraneType = membraneTypeRegistry_.getByID(membrane->getTypeID());
-        const auto& permeability = membraneType.getPermeabilityFor(disc->getTypeID());
+        auto& collision = discChildMembraneCollisions[i];
+        const auto& membraneType = membraneTypeRegistry_.getByID(collision.membrane->getTypeID());
+        const auto& permeability = membraneType.getPermeabilityFor(collision.disc->getTypeID());
 
         // TODO If angle < X degree, always collide
 
@@ -34,84 +34,93 @@ void CollisionHandler::calculateDiscMembraneCollisionResponse(
             permeability == MembraneType::Permeability::Inward)
             continue;
 
-        updateVelocitiesDiscMembraneCollision(*disc, *membrane);
+        updateVelocitiesDiscChildMembraneCollision(collision);
 
         // The disc-membrane collisions are used later to check if a disc is intruding or moving into another membrane
         // If there was a collision response, the disc can't move into the membrane and the collision has to be removed
-        std::swap(discMembraneCollisions[i], discMembraneCollisions.back());
-        discMembraneCollisions.pop_back();
+        std::swap(discChildMembraneCollisions[i], discChildMembraneCollisions.back());
+        discChildMembraneCollisions.pop_back();
         --i;
     }
 }
 
-void CollisionHandler::calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const
+void CollisionHandler::calculateDiscContainingMembraneCollisionResponse(
+    std::vector<CollisionDetector::DiscContainingMembraneCollision>& discContainingMembraneCollisions) const
 {
-    const auto& r = disc.getPosition();
-    const auto& v = disc.getVelocity();
-    const auto Rd = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
+    for (std::size_t i = 0; i < discContainingMembraneCollisions.size(); ++i)
+    {
+        auto& collision = discContainingMembraneCollisions[i];
+        const auto& membraneType = membraneTypeRegistry_.getByID(collision.membrane->getTypeID());
+        const auto& permeability = membraneType.getPermeabilityFor(collision.disc->getTypeID());
 
-    const double p = -2.0 * (M - r) * v / (v * v);
-    const double q = ((M - r) * (M - r) - (Rm - Rd) * (Rm - Rd)) / (v * v);
+        // TODO If angle < X degree, always collide
 
-    const double dt = 0.5 * (-p + std::sqrt(p * p - 4 * q));
+        if (permeability == MembraneType::Permeability::Bidirectional ||
+            permeability == MembraneType::Permeability::Outward)
+            continue;
 
-#ifdef DEBUG
-    if (std::isnan(dt))
-        throw ExceptionWithLocation("dt is nan: sqrt(x) with x < 0, probably no collision or math error");
-#endif
+        updateVelocitiesDiscContainingMembraneCollision(collision);
 
-    if (std::abs(dt) < 1e-8)
-        return;
-
-    // dt is < 0: Move the disc back in time to first point of contact
-    disc.move(dt * v);
-    disc.setVelocity(mathutils::reflectVector(disc.getVelocity(), disc.getPosition() - M, Rm - Rd));
-    disc.move(-dt * disc.getVelocity());
+        // The disc-membrane collisions are used later to check if a disc is intruding or moving into another membrane
+        // If there was a collision response, the disc can't move into the membrane and the collision has to be removed
+        std::swap(discContainingMembraneCollisions[i], discContainingMembraneCollisions.back());
+        discContainingMembraneCollisions.pop_back();
+        --i;
+    }
 }
 
-void CollisionHandler::updateVelocitiesDiscDiscCollision(Disc& d1, Disc& d2) const
+void CollisionHandler::updateVelocitiesDiscDiscCollision(CollisionDetector::DiscDiscCollision& collision) const
 {
-    const auto r = d2.getPosition() - d1.getPosition();
-    const auto v = d2.getVelocity() - d1.getVelocity();
-    const auto R1 = discTypeRegistry_.getByID(d1.getTypeID()).getRadius();
-    const auto R2 = discTypeRegistry_.getByID(d2.getTypeID()).getRadius();
+    Disc* d1 = collision.disc1;
+    Disc* d2 = collision.disc2;
 
-    double dt = mathutils::calculateTimeBeforeCollision(r, v, R1, R2);
+    const auto R1 = discTypeRegistry_.getByID(d1->getTypeID()).getRadius();
+    const auto R2 = discTypeRegistry_.getByID(d2->getTypeID()).getRadius();
 
     // dt is < 0: Move the disc back in time to first point of contact
-    d1.move(dt * d1.getVelocity());
-    d2.move(dt * d2.getVelocity());
+    collision.disc1->move(collision.toi * collision.disc1->getVelocity());
+    collision.disc2->move(collision.toi * collision.disc2->getVelocity());
 
     static const double e = 1.;
 
-    const sf::Vector2d n = (d2.getPosition() - d1.getPosition()) / (R1 + R2);
-    const double vrN = -v * n; // formula has v1 - v2
+    const sf::Vector2d n = (d2->getPosition() - d1->getPosition()) / (R1 + R2);
+    const double vrN = (d1->getVelocity() - d2->getVelocity()) * n;
 
-    const auto& m1 = discTypeRegistry_.getByID(d1.getTypeID()).getMass();
-    const auto& m2 = discTypeRegistry_.getByID(d2.getTypeID()).getMass();
+    const auto m1 = discTypeRegistry_.getByID(d1->getTypeID()).getMass();
+    const auto m2 = discTypeRegistry_.getByID(d2->getTypeID()).getMass();
 
     const double impulse = -vrN * (e + 1) / (1. / m1 + 1. / m2);
 
-    d1.accelerate(impulse / m1 * n);
-    d2.accelerate(-impulse / m2 * n);
+    d1->accelerate(impulse / m1 * n);
+    d2->accelerate(-impulse / m2 * n);
 
-    d1.move(-dt * d1.getVelocity());
-    d2.move(-dt * d2.getVelocity());
+    collision.disc1->move(-collision.toi * collision.disc1->getVelocity());
+    collision.disc2->move(-collision.toi * collision.disc2->getVelocity());
 }
 
-void CollisionHandler::updateVelocitiesDiscMembraneCollision(Disc& disc, const Membrane& membrane) const
+void CollisionHandler::updateVelocitiesDiscChildMembraneCollision(
+    CollisionDetector::DiscChildMembraneCollision& collision) const
 {
-    const auto r = disc.getPosition() - membrane.getPosition();
-    const auto v = disc.getVelocity();
-    const auto R1 = membraneTypeRegistry_.getByID(membrane.getTypeID()).getRadius();
-    const auto R2 = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
+    const auto Rm = membraneTypeRegistry_.getByID(collision.membrane->getTypeID()).getRadius();
+    const auto Rd = discTypeRegistry_.getByID(collision.disc->getTypeID()).getRadius();
 
-    double dt = mathutils::calculateTimeBeforeCollision(r, v, R1, R2);
+    collision.disc->move(collision.toi * collision.disc->getVelocity());
+    collision.disc->setVelocity(mathutils::reflectVector(
+        collision.disc->getVelocity(), collision.disc->getPosition() - collision.membrane->getPosition(), Rm + Rd));
+    collision.disc->move(-collision.toi * collision.disc->getVelocity());
+}
 
-    disc.move(dt * disc.getVelocity());
-    disc.setVelocity(
-        mathutils::reflectVector(disc.getVelocity(), disc.getPosition() - membrane.getPosition(), R1 + R2));
-    disc.move(-dt * disc.getVelocity());
+void CollisionHandler::updateVelocitiesDiscContainingMembraneCollision(
+    CollisionDetector::DiscContainingMembraneCollision& collision) const
+{
+    const auto Rd = discTypeRegistry_.getByID(collision.disc->getTypeID()).getRadius();
+    const auto Rm = membraneTypeRegistry_.getByID(collision.membrane->getTypeID()).getRadius();
+
+    // dt is < 0: Move the disc back in time to first point of contact
+    collision.disc->move(collision.toi * collision.disc->getVelocity());
+    collision.disc->setVelocity(mathutils::reflectVector(
+        collision.disc->getVelocity(), collision.disc->getPosition() - collision.membrane->getPosition(), Rm - Rd));
+    collision.disc->move(-collision.toi * collision.disc->getVelocity());
 }
 
 } // namespace cell

@@ -73,13 +73,13 @@ void Compartment::update(double dt)
     moveDiscsAndApplyUnimolecularReactions(dt);
 
     auto collisions = detectCollisions();
-    simulationContext_.collisionHandler.calculateDiscMembraneCollisionResponse(collisions.discChildMembraneCollisions);
-    moveDiscsIntoChildCompartments(collisions.discContainingMembraneCollisions);
+    simulationContext_.collisionHandler.calculateDiscChildMembraneCollisionResponse(
+        collisions.discChildMembraneCollisions);
+    moveDiscsIntoChildCompartments(collisions.discChildMembraneCollisions);
     simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
     simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
 
-    // TODO: Calculate both TOIs for simultaneous bounds/discs collisions and only handle the earlier one
-    moveDiscsIntoParentCompartment();
+    moveDiscsIntoParentCompartment(collisions.discContainingMembraneCollisions);
     updateChildCompartments(dt);
 
     removeDestroyedDiscs();
@@ -115,53 +115,41 @@ void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
         discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
 }
 
-void Compartment::moveDiscsIntoChildCompartments(auto& discMembraneCollisions)
+void Compartment::moveDiscsIntoChildCompartments(auto& discChildMembraneCollisions)
 {
-    for (auto& [disc, membrane] : discMembraneCollisions)
+    for (auto& collision : discChildMembraneCollisions)
     {
-        const auto& discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
-        const auto& membraneRadius = simulationContext_.membraneTypeRegistry.getByID(membrane->getTypeID()).getRadius();
-        if (mathutils::circleIsFullyContainedByCircle(disc->getPosition(), discRadius, membrane->getPosition(),
-                                                      membraneRadius))
+        const auto& discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
+        const auto& membraneRadius =
+            simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID()).getRadius();
+        if (mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius,
+                                                      collision.membrane->getPosition(), membraneRadius))
         {
-            membrane->getCompartment()->addDisc(*disc);
-            disc->markDestroyed();
+            collision.membrane->getCompartment()->addDisc(*collision.disc);
+            collision.disc->markDestroyed();
         }
         else
-            membrane->getCompartment()->addIntrudingDisc(*disc);
+            collision.membrane->getCompartment()->addIntrudingDisc(*collision.disc);
     }
 }
 
-void Compartment::moveDiscsIntoParentCompartment()
+void Compartment::moveDiscsIntoParentCompartment(auto& discContainingMembraneCollisions)
 {
     const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID());
     const auto M = membrane_.getPosition();
     const auto R = membraneType.getRadius();
 
-    for (std::size_t i = 0; i < discs_.size(); ++i)
+    for (auto& collision : discContainingMembraneCollisions)
     {
-        auto& disc = discs_[i];
-        if (!simulationContext_.collisionDetector.detectCircularBoundsCollision(disc, M, R))
-            continue;
-
-        if (static_cast<int>(membraneType.getPermeabilityFor(disc.getTypeID())) &
-            (static_cast<int>(MembraneType::Permeability::None) | static_cast<int>(MembraneType::Permeability::Inward)))
-        {
-            simulationContext_.collisionHandler.calculateCircularBoundsCollisionResponse(disc, M, R);
-            continue;
-        }
-
         // Note: parent is nullptr for the containing cell, so it should never have outward permeability
-        const auto& discRadius = simulationContext_.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
-        if (!mathutils::circlesOverlap(disc.getPosition(), discRadius, M, R))
+        const auto discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
+        if (!mathutils::circlesOverlap(collision.disc->getPosition(), discRadius, M, R))
         {
-            std::swap(discs_[i], discs_.back());
-            parent_->addDisc(std::move(disc));
-            discs_.pop_back();
-            --i;
+            parent_->addDisc(*collision.disc);
+            collision.disc->markDestroyed();
         }
         else
-            parent_->addIntrudingDisc(disc);
+            parent_->addIntrudingDisc(*collision.disc);
     }
 }
 
@@ -173,16 +161,9 @@ void Compartment::updateChildCompartments(double dt)
 
 void Compartment::removeDestroyedDiscs()
 {
-    for (std::size_t i = 0; i < discs_.size();)
-    {
-        if (discs_[i].isMarkedDestroyed())
-        {
-            discs_[i] = std::move(discs_.back());
-            discs_.pop_back();
-        }
-        else
-            ++i;
-    }
+    discs_.erase(
+        std::remove_if(discs_.begin(), discs_.end(), [](const Disc& disc) { return disc.isMarkedDestroyed(); }),
+        discs_.end());
 }
 
 } // namespace cell

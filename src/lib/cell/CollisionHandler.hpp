@@ -17,14 +17,18 @@ public:
     explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
                               const MembraneTypeRegistry& membraneTypeRegistry);
 
-    void calculateDiscDiscCollisionResponse(std::vector<std::pair<Disc*, Disc*>>& discDiscCollisions) const;
-    void calculateDiscMembraneCollisionResponse(std::vector<std::pair<Disc*, Membrane*>>& discMembraneCollisions) const;
-
-    void calculateCircularBoundsCollisionResponse(Disc& disc, const sf::Vector2d& M, double Rm) const;
+    void
+    calculateDiscDiscCollisionResponse(std::vector<CollisionDetector::DiscDiscCollision>& discDiscCollisions) const;
+    void calculateDiscChildMembraneCollisionResponse(
+        std::vector<CollisionDetector::DiscChildMembraneCollision>& discChildMembraneCollisions) const;
+    void calculateDiscContainingMembraneCollisionResponse(
+        std::vector<CollisionDetector::DiscContainingMembraneCollision>& discContainingMembraneCollisions) const;
 
 private:
-    void updateVelocitiesDiscDiscCollision(Disc& d1, Disc& d2) const;
-    void updateVelocitiesDiscMembraneCollision(Disc& disc, const Membrane& membrane) const;
+    void updateVelocitiesDiscDiscCollision(CollisionDetector::DiscDiscCollision& collision) const;
+    void updateVelocitiesDiscChildMembraneCollision(CollisionDetector::DiscChildMembraneCollision& collision) const;
+    void updateVelocitiesDiscContainingMembraneCollision(
+        CollisionDetector::DiscContainingMembraneCollision& collision) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;

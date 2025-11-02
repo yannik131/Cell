@@ -16,11 +16,32 @@ namespace cell
 class CollisionDetector
 {
 public:
+    struct DiscContainingMembraneCollision
+    {
+        Disc* disc;
+        Membrane* membrane;
+        double toi;
+    };
+
+    struct DiscDiscCollision
+    {
+        Disc* disc1;
+        Disc* disc2;
+        double toi;
+    };
+
+    struct DiscChildMembraneCollision
+    {
+        Disc* disc;
+        Membrane* membrane;
+        double toi;
+    };
+
     struct Collisions
     {
-        std::vector<std::pair<Disc*, Disc*>> discDiscCollisions;
-        std::vector<Disc*> discContainingMembraneCollisions;
-        std::vector<std::pair<Disc*, Membrane*>> discChildMembraneCollisions;
+        std::vector<DiscDiscCollision> discDiscCollisions;
+        std::vector<DiscContainingMembraneCollision> discContainingMembraneCollisions;
+        std::vector<DiscChildMembraneCollision> discChildMembraneCollisions;
     };
 
     struct Params
