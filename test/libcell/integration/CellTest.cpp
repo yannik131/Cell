@@ -183,7 +183,8 @@ TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
     builder.addMembrane("M", Position{.x = 0, .y = 0});
 
     // A outside of M, B is inside
-    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -5, .y = 0});
+    // A has to move faster so that the collision between discs happens before the disc-membrane collision
+    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -10, .y = 0});
     builder.addDisc("B", Position{.x = 94, .y = 0}, Velocity{.x = 5, .y = 0});
 
     createAndUpdateCell();

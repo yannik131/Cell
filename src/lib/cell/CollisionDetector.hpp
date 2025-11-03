@@ -77,6 +77,14 @@ private:
         EntryType type;
     };
 
+    struct Collision
+    {
+        const Entry* discEntry;
+        const Entry* otherEntry;
+        double toi;
+        CollisionType type;
+    };
+
 public:
     CollisionDetector(const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry);
 
@@ -90,6 +98,7 @@ private:
     template <typename ElementType, typename RegistryType>
     Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index,
                       EntryType entryType) const;
+    std::vector<std::vector<Collision>> getCollisionsPerDisc();
 
     bool discIsContainedByMembrane(const Entry& entry);
     double calculateTimeOfImpactWithContainingMembrane(const Entry& entry, const Membrane& containingMembrane) const;

@@ -29,6 +29,7 @@ void CollisionHandler::calculateDiscChildMembraneCollisionResponse(
         const auto& permeability = membraneType.getPermeabilityFor(collision.disc->getTypeID());
 
         // TODO If angle < X degree, always collide
+        // TODO DRY violation with below func
 
         if (permeability == MembraneType::Permeability::Bidirectional ||
             permeability == MembraneType::Permeability::Inward)
