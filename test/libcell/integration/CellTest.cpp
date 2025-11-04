@@ -73,6 +73,16 @@ protected:
 
         return discs;
     }
+
+    const Disc& getDisc(const std::vector<Disc>& discs, const std::string& typeName)
+    {
+        auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
+                                 { return getDiscTypeRegistry().getByID(d.getTypeID()).getName() == typeName; });
+        if (iter == discs.end())
+            throw ExceptionWithLocation("Couldn't find type " + typeName + " in discs");
+
+        return *iter;
+    };
 };
 
 TEST_F(ACell, SimulatesASingleDisc)
@@ -159,20 +169,10 @@ TEST_F(ACell, SimulatesASingleMembrane)
     auto& cell = createAndUpdateCell();
     auto discs = getAllDiscs(cell);
 
-    const auto& getDisc = [&](const std::string& typeName)
-    {
-        auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
-                                 { return getDiscTypeRegistry().getByID(d.getTypeID()).getName() == typeName; });
-        if (iter == discs.end())
-            throw ExceptionWithLocation("Couldn't find type " + typeName + " in discs");
-
-        return *iter;
-    };
-
-    expectNear(getDisc("A").getPosition(), {400, 500}); // Inward: Should go through
-    expectNear(getDisc("B").getPosition(), {500, 390}); // Outward: Should collide
-    expectNear(getDisc("C").getPosition(), {600, 500}); // Bidirectional: Should go through
-    expectNear(getDisc("D").getPosition(), {500, 610}); // Undefined permeability: should collide
+    expectNear(getDisc(discs, "A").getPosition(), {400, 500}); // Inward: Should go through
+    expectNear(getDisc(discs, "B").getPosition(), {500, 390}); // Outward: Should collide
+    expectNear(getDisc(discs, "C").getPosition(), {600, 500}); // Bidirectional: Should go through
+    expectNear(getDisc(discs, "D").getPosition(), {500, 610}); // Undefined permeability: should collide
 }
 
 TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
@@ -213,4 +213,29 @@ TEST_F(ACell, SimulationReactionsOfDiscsInDifferentCompartments)
 
     ASSERT_EQ(discs.size(), 1);
     EXPECT_EQ(getDiscTypeRegistry().getByID(discs.front().getTypeID()).getName(), "C");
+}
+
+TEST_F(ACell, SimulatesNewDiscsCorrectly)
+{
+    builder.addDisc("A", Position{.x = 100, .y = 0}, Velocity{.x = -10, .y = 0});
+    builder.addDisc("B", Position{.x = 90, .y = 0}, Velocity{.x = 0, .y = 0});
+    builder.addDisc("D", Position{.x = 80, .y = 0}, Velocity{.x = 0, .y = 0});
+
+    builder.addReaction("A", "B", "C", "", Probability{1});
+
+    auto& cell = createAndUpdateCell();
+    auto discs = getAllDiscs(cell);
+    simulationFactory.getAndResetCollisionCounts(); // Discard the collision between A and B
+
+    ASSERT_EQ(discs.size(), 2);
+    auto discC = getDisc(discs, "C");
+    expectNear(discC.getPosition(), {90, 0});
+
+    cell.update(timeStep);
+    discs = getAllDiscs(cell);
+
+    auto collisions = simulationFactory.getAndResetCollisionCounts();
+    ASSERT_EQ(collisions.size(), 2);
+    ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("C")));
+    ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("D")));
 }
