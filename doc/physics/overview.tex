@@ -144,8 +144,106 @@ for sol in simplified:
 	print(sol)
 	\end{lstlisting}
 
+    \subsection{Iterative collision handling}
+    We consider two circles (2D) and want to apply the methods described in "Iterative Dynamics with Temporal Coherence" for collision handling. We'll use matrix notation: The scalar (dot) product of 2 vectors $r_1$ and $r_2$ is $r^T_1 r_2$.
+
+    First, the paper states:
+    For a system of $n$ bodies, the linear and angular velocities are stacked in a 6n-by-1 column vector 
+
+    \begin{align*}
+        V = \begin{pmatrix}
+            v_1\\
+            \omega_1\\
+            \ldots\\
+            v_n\\
+            \omega_n
+        \end{pmatrix}
+    \end{align*}
+
+    For my circles, I have no angular velocity, so $V$ is a 2n-by-1 column vector 
+    
+    \begin{align*}
+        V = \begin{pmatrix}
+            v_1\\
+            \ldots\\
+            v_n
+        \end{pmatrix}
+    \end{align*}
+
+    For two circles this would just be 
+
+    \begin{align*}
+        V = \begin{pmatrix}
+            v_{1,x}\\
+            v_{1,y}\\
+            v_{2,x}\\
+            v_{2,y}
+        \end{pmatrix}
+    \end{align*}
+
+    Next, pairwise constraints $C_k(x_i, q_i, x_j, q_j) = 0$ (with quaternions $q$ which I again don't need) are defined as abstract scalar functions. If $s$ is the number of constraints, this is an s-by-1 column vector $C$. 
+
+    For two circles with positions $p_i$ and radii $r_i$, the constraint function would be 
+    
+    \begin{align*}
+        C &= ||p_1 - p_2|| - (r_1 + r_2)\\
+    \end{align*}
+    
+    $C = 0$ for just touching, $C > 0$ for separated and $C < 0$ for penetration. We want to enforce $C \ge 0$. 
+
+    The time derivative of $C$ gives the velocity contraint vector if the s-by-2n Jacobian $J$ is defined such as 
+
+    \begin{align*}
+        \dot{C} = JV = 0
+    \end{align*}
+
+    For two circles we have 
+
+    \begin{align*}
+        \dot{C} &= \frac{(p_1 - p_2)^T}{||p_1 - p_2||}(\dot{p}_1 - \dot{p}_2)\\
+        &= n^T(v_1 - v_2) \quad \text{with\ } n =  \frac{(p_1 - p_2)^T}{||p_1 - p_2||}.
+    \end{align*}
+
+    This gives an equation we can solve for $J$:
+
+    \begin{align*}
+        JV &= n^T(v_1 - v_2)\\
+        \Leftrightarrow(J_1, J_2)\begin{pmatrix}v_1\\v_2\end{pmatrix} &= n^T(v_1 - v_2)\\
+        \Leftrightarrow J_1 v_1 + J_2 v_2 &= n^T(v_1 - v_2)\\
+        \Rightarrow J &= (n^T, -n^T).
+    \end{align*}
+
+    The paper defines constraint forces $F_C$ for the constraints with reaction forces $f_c$ and reaction torques $\tau_c$ (which we don't need):
+
+    \begin{align*}
+        F_C = \begin{pmatrix}f_{c_1}\\ \ldots\\ f_{c_n}\end{pmatrix}
+    \end{align*}
+
+    Then, the formula 
+
+    \begin{align*}
+        F_C = J^T\lambda
+    \end{align*}
+
+    falls from the sky: $\lambda$ are $s$ undetermined multipliers. What is $\lambda$ in the case of my two circles?
+
+    Now the paper goes on to define an algorithm to compute $\dot{C} = JV$:
+
+    \begin{lstlisting}
+        for i = 1 to s do 
+            b_1 = J_{map}(i, 1)
+            b_2 = J_{map}(i, 2)
+            sum = 0
+            if b_1 > 0 then 
+                sum = sum + J_{sp}(i, 1)V(b_1)
+            end if 
+            sum = sum + J_{sp}(i, 2)V(b2)
+            \dot{C}(i) = sum 
+        end for
+    \end{lstlisting}
+
 	\subsection{Collision handling}
-		
+
 	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
 	
 	\begin{align*}

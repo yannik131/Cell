@@ -1,0 +1,43 @@
+I want to use the algorithms from the paper "Iterative Dynamics with Temporal Coherence" to resolve collisions between discs in my 2D physics simulation in C++. Collisions are represented as 
+std::pair<Disc*, Disc*> collisions;
+struct Disc { sf::Vector2d position, velocity; double radius; double mass; };
+The paper contains these algorithms:
+- Compute \overset{\cdot}{C} = JV
+- Compute F_C = J^T\lambda
+- Approximately solve Ax = b given x^0
+- Approximately solve JB\lambda = \eta given \lambda^0
+- Contact caching and queries
+
+Which algorithms do I need? What do they do? How do I apply them to my situation?
+Which physical quantities (F_C, J, \lambda, V, B, \eta) do I need? What are they for? How do I calculate them?
+
+Let's start simple: Suppose there are only 2 discs and a single collision between them in this form std::pair<Disc*, Disc*> collisions; struct Disc { sf::Vector2d position, velocity; double radius; double mass; }; Give me a step-by-step recipe I can follow to solve this. What do I define, what do I solve, how to I resolve the collision?
+
+We consider 2 circles (2D) and want to apply the methods described in "Iterative Dynamics with Temporal Coherence" for collision handling.
+
+First, the paper states:
+For a system of n bodies, the linear and angular velocities are stacked in a 6n-by-1 column vector 
+V = (v1, omega1, ..., vn, omegan)^T
+For my circles, I have no angular velocity, so omega = 0, and V is a 2n-by-1 column vector V = (v1, ..., vn).
+
+Next, pairwise constraints Ck(xi, qi, xj, qj) = 0 are defined as abstract scalar functions. If s is the number of constraints, this is an s-by-1 column vector C. 
+The time derivative of C gives the velocity contraint vector with 
+dC/dt = J*V = 0
+where J is the s-by-3n Jacobian.
+
+For 2 circles, the constraint function would be C = ||p1 - p2| - (r1 + r2):
+C >= 0 for just touching or separated
+C < 0 for penetration
+
+We want to enforce C >= 0.
+
+dC/dt = (p1 - p2)/||p1 - p2|| * (p1' - p2')
+
+
+This is where he lost me. Is the goal for C to be = 0? For 2 circles, I could define 
+C = min(||p1 - p2|| - (r1 + r2), 0)
+this would be 0 if the distance between the 2 circles is equal to or larger than the sum of their radii, and < 0 otherwise. Is this what was meant?
+Next, I don't understand dC/dt = J*V = 0. What does this even mean?
+
+Each contraint has an internal reaction force fc (and reaction torque, which is 0 for me). Again, we get 
+Fc = (fc1, ..., fcn)^T 

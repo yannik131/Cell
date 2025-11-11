@@ -108,10 +108,7 @@ void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
     {
         // A -> B returns nothing, A -> B + C returns 1 new disc
         if (auto newDisc = simulationContext_.reactionEngine.applyUnimolecularReactions(disc, dt))
-        {
-            newDisc->move(newDisc->getVelocity() * dt);
             newDiscs.push_back(std::move(*newDisc));
-        }
 
         disc.move(disc.getVelocity() * dt);
     }

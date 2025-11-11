@@ -239,3 +239,14 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("C")));
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("D")));
 }
+
+TEST_F(ACell, FindsDiscsCollidingWithOuterMembrane)
+{
+    builder.addDiscType("X", Radius{15}, Mass{5});
+    builder.addDisc("X", Position{.x = 60.187431523810069, .y = 122.16987032736733},
+                    Velocity{.x = 730.50388463697072, .y = -259.62602644440216});
+    builder.setCellMembraneType(Radius{150}, {});
+    builder.setTimeStep(0.005);
+
+    auto& cell = createAndUpdateCell();
+}
