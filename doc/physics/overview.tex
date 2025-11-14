@@ -225,7 +225,46 @@ for sol in simplified:
         F_C = J^T\lambda
     \end{align*}
 
-    falls from the sky: $\lambda$ are $s$ undetermined multipliers. What is $\lambda$ in the case of my two circles?
+    falls from the sky: $\lambda$ are $s$ undetermined multipliers. $\lambda$ is the impulse change required to make the relative velocities along the collision normal zero. The new velocities $\vec{v_i}'$ after the collision are:
+
+    \begin{align*}
+        \vec{v_1}' = \vec{v_1} + \frac{\lambda}{m_1}\vec{n}. \quad \vec{v_2}' = \vec{v_2} - \frac{\lambda}{m_2}\vec{n}.
+    \end{align*}
+
+    With the collision normal 
+
+    \begin{align*}
+        \vec{n} = \frac{\vec{r_1} - \vec{r_2}}{|\vec{r_1} - \vec{r_2}|}.
+    \end{align*}
+
+    Projecting the relative velocity after the collision $\vec{v_r} = \vec{v_1}' - \vec{v_2}'$ onto the normal gives the relative normal velocity
+
+    \begin{align*}
+        \vec{v_{r_n}} = \frac{(\vec{v_1}' - \vec{v_2}')\cdot \vec{n}}{\vec{n} \cdot \vec{n}}\cdot \vec{n}
+    \end{align*}
+
+    with the magnitude 
+
+    \begin{align*}
+        v_{r_n} = (\vec{v_1}' - \vec{v_2}')\cdot \vec{n}
+    \end{align*}
+
+    If 
+
+    \begin{itemize}
+        \item $v_{r_n} < 0$: Bodies are approaching each other 
+        \item $v_{r_n} > 0$: Bodies are separating from each other 
+        \item $v_{r_n} = 0$: Bodies are neither approaching nor separating
+    \end{itemize}
+
+    We want to go from $v_{r_n} < 0$ to $v_{r_n} = 0$.\footnote{Generally, $(\vec{v_1}' - \vec{v_2}')\cdot \vec{n} = -e(\vec{v_1} - \vec{v_2})\cdot \vec{n}$ with restitution $e$}. This gives an equation for $\lambda$:
+
+    \begin{align*}
+        &(\vec{v_1}' - \vec{v_2}')\cdot \vec{n} = 0\\
+        &\Leftrightarrow \left(\vec{v_1} + \frac{\lambda}{m_1}\vec{n} - \vec{v_2} - \frac{\lambda}{m_2}\vec{n}\right)\cdot \vec{n} = 0\\
+        &\Leftrightarrow \lambda\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = \vec{v_2} - \vec{v_1}\\
+        &\Rightarrow \lambda = \frac{\vec{v_2} - \vec{v_1}}{\frac{1}{m_1} + \frac{1}{m_2}}
+    \end{align*}
 
     Now the paper goes on to define an algorithm to compute $\dot{C} = JV$:
 
