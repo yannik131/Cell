@@ -4,6 +4,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{cleveref}
+\usepackage{amsfonts}
 
 \lstset{
 	language=Python,
@@ -145,44 +146,27 @@ for sol in simplified:
 	\end{lstlisting}
 
     \subsection{Iterative collision handling}
-    We consider two circles (2D) and want to apply the methods described in "Iterative Dynamics with Temporal Coherence" for collision handling. We'll use matrix notation: The scalar (dot) product of 2 vectors $r_1$ and $r_2$ is $r^T_1 r_2$.
+    We consider $n$ circles and found $L$ overlaps between various circles (a circle might overlap with several others) with a total of $N$ distinct circles partaking in collisions. The following is a recipe to solve overlap iteratively:
 
-    First, the paper states:
-    For a system of $n$ bodies, the linear and angular velocities are stacked in a 6n-by-1 column vector 
+    \begin{enumerate}
+        \item Construct $M \in \mathbb{R}^{2N \times 2N}$: \\
+        $M = 
+        \begin{pmatrix}
+        m_1 I_2 & \cdots & 0_{2\times 2}\\
+        \vdots & \ddots & \vdots\\
+        0_{2 \times 2} & \cdots & m_N I_2
+        \end{pmatrix} = \text{diag}(m_1I_2, \ldots, m_NI_2)$ with the $2\times 2$ identity matrix $I_2$. The paper included moments of inertia. We have no rotation, so we ignore that.
+        \item Calculate $M^{-1} \in \mathbb{R}^{2N \times 2N} = \text{diag}(m_1^{-1}I_2, \ldots, m_N^{-1}I_2)$
+        \item Construct $V^1 \in \mathbb{R}^{2N \times 1}$: Stack velocities of each disc $V^1 = \begin{pmatrix}
+            \vec{v}_1\\ \ldots\\ \vec{v}_N
+        \end{pmatrix}$
+        \item Construct $J \in \mathbb{R}^{L \times 2N}$: For each collision pair with indices $(i, j)$ relative to the discs array of length $N$, calculate the collision normal $\vec{n}_{i, j} = (\vec{r}_j - \vec{r}_i)/|\vec{r}_j - \vec{r}_i|$ and add a row of $2N$ zeros. With 0-indexing, set columns $2i$ and $2i + 1$ to $\vec{n}_{i, j}$ and columns $2j$ and $2j + 1$ to $-\vec{n}_{i, j}$
+        \item Construct $C \in \mathbb{R}^{L \times 1}$: For each collision pair, add a row containing the value $|\vec{r}_i - \vec{r}_j| - (R_i + R_j)$
+        \item Solve the linear system $\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV^1$ for $\lambda$ using Gauss-Seidel with some $\beta \in (0, \frac{1}{\Delta t}]$
+        \item Calculate $V^2 = V^1 + \Delta t M^{-1}J^{T}\lambda$
+    \end{enumerate}
 
-    \begin{align*}
-        V = \begin{pmatrix}
-            v_1\\
-            \omega_1\\
-            \ldots\\
-            v_n\\
-            \omega_n
-        \end{pmatrix}
-    \end{align*}
-
-    For my circles, I have no angular velocity, so $V$ is a 2n-by-1 column vector 
-    
-    \begin{align*}
-        V = \begin{pmatrix}
-            v_1\\
-            \ldots\\
-            v_n
-        \end{pmatrix}
-    \end{align*}
-
-    For two circles this would just be 
-
-    \begin{align*}
-        V = \begin{pmatrix}
-            v_{1,x}\\
-            v_{1,y}\\
-            v_{2,x}\\
-            v_{2,y}
-        \end{pmatrix}
-    \end{align*}
-
-    Next, pairwise constraints $C_k(x_i, q_i, x_j, q_j) = 0$ (with quaternions $q$ which I again don't need) are defined as abstract scalar functions. If $s$ is the number of constraints, this is an s-by-1 column vector $C$. 
-
+    More details for two circles:
     For two circles with positions $p_i$ and radii $r_i$, the constraint function would be 
     
     \begin{align*}
@@ -265,21 +249,6 @@ for sol in simplified:
         &\Leftrightarrow \lambda\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = \vec{v_2} - \vec{v_1}\\
         &\Rightarrow \lambda = \frac{\vec{v_2} - \vec{v_1}}{\frac{1}{m_1} + \frac{1}{m_2}}
     \end{align*}
-
-    Now the paper goes on to define an algorithm to compute $\dot{C} = JV$:
-
-    \begin{lstlisting}
-        for i = 1 to s do 
-            b_1 = J_{map}(i, 1)
-            b_2 = J_{map}(i, 2)
-            sum = 0
-            if b_1 > 0 then 
-                sum = sum + J_{sp}(i, 1)V(b_1)
-            end if 
-            sum = sum + J_{sp}(i, 2)V(b2)
-            \dot{C}(i) = sum 
-        end for
-    \end{lstlisting}
 
 	\subsection{Collision handling}
 

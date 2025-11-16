@@ -41,3 +41,16 @@ Next, I don't understand dC/dt = J*V = 0. What does this even mean?
 
 Each contraint has an internal reaction force fc (and reaction torque, which is 0 for me). Again, we get 
 Fc = (fc1, ..., fcn)^T 
+
+
+So let's say I'm processing a frame. I found all overlaps between N circles in some sort of array/set std::set<std::pair<Disc*, Disc*>> collisions; of size M
+Now I have to:
+- Construct M: The diagonal entries for row i are m_i I_2, where I_2 is the 2x2 identity matrix, everything else is 0: diag(m_1 I_2, ..., m_N I_2)
+- Construct M^{-1}: diag(m_1^{-1} I_2, ..., m_N^{-1} I_2)
+- Construct V: Stacking velocities of all discs in collisions on top of each other (v_1, v_2, ..., v_N) 
+- Construct J: For each collision pair of discs (i, j), append a row of  2N zeros, set columns 2i and 2i+1 to n^T and columns 2j and 2j+1 to -n^T with the normal vector n from i to j 
+- Construct C: For each collision pair, append the row |r_1 - r_2| - (R_1 + R_2) 
+- Solve the linear system \Delta t J M^{-1} J^T \lambda = -\beta C - JV^1 for \lambda (using PGS) 
+- Calculate V^2 = V^1 + \Delta t M^{-1}J^{T}\lambda. 
+
+I'll try to implement this now. Overall it was pretty difficult to understand the paper. How hard would you rate this to understand and implement in C++ on a scale of 1-10?
