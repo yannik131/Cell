@@ -146,7 +146,7 @@ for sol in simplified:
 	\end{lstlisting}
 
     \subsection{Iterative collision handling}
-    We consider $n$ circles and found $L$ overlaps between various circles (a circle might overlap with several others) with a total of $N$ distinct circles partaking in collisions. The following is a recipe to solve overlap iteratively:
+    We consider $n$ circles and found $L$ overlaps between various circles (a circle might overlap with several others) and circular bounds with a total of $N$ distinct circles partaking in collisions. The following is a recipe to solve overlap iteratively:
 
     \begin{enumerate}
         \item Construct $M \in \mathbb{R}^{2N \times 2N}$: \\
@@ -155,23 +155,26 @@ for sol in simplified:
         m_1 I_2 & \cdots & 0_{2\times 2}\\
         \vdots & \ddots & \vdots\\
         0_{2 \times 2} & \cdots & m_N I_2
-        \end{pmatrix} = \text{diag}(m_1I_2, \ldots, m_NI_2)$ with the $2\times 2$ identity matrix $I_2$. The paper included moments of inertia. We have no rotation, so we ignore that.
+        \end{pmatrix} = \text{diag}(m_1I_2, \ldots, m_NI_2)$ with the $2\times 2$ identity matrix $I_2$. The paper included moments of inertia. We have no rotation, so we ignore that. If the collision is between circle and bounds, set the "mass" of the bounds to $\infty$, making the entry in $M^{-1}$ for it $0$.
         \item Calculate $M^{-1} \in \mathbb{R}^{2N \times 2N} = \text{diag}(m_1^{-1}I_2, \ldots, m_N^{-1}I_2)$
-        \item Construct $V^1 \in \mathbb{R}^{2N \times 1}$: Stack velocities of each disc $V^1 = \begin{pmatrix}
+        \item Construct $V \in \mathbb{R}^{2N \times 1}$: Stack velocities of each body $V = \begin{pmatrix}
             \vec{v}_1\\ \ldots\\ \vec{v}_N
-        \end{pmatrix}$
-        \item Construct $J \in \mathbb{R}^{L \times 2N}$: For each collision pair with indices $(i, j)$ relative to the discs array of length $N$, calculate the collision normal $\vec{n}_{i, j} = (\vec{r}_j - \vec{r}_i)/|\vec{r}_j - \vec{r}_i|$ and add a row of $2N$ zeros. With 0-indexing, set columns $2i$ and $2i + 1$ to $\vec{n}_{i, j}$ and columns $2j$ and $2j + 1$ to $-\vec{n}_{i, j}$
+        \end{pmatrix}$. Velocities for bounds are $0$.
+        \item Construct $J \in \mathbb{R}^{L \times 2N}$: For each collision pair with indices $(i, j)$ relative to the discs array of length $N$, calculate the collision normal $\vec{n}_{i, j} = (\vec{r}_j - \vec{r}_i)/|\vec{r}_j - \vec{r}_i|$ and add a row of $2N$ zeros. With 0-indexing, set columns $2i$ and $2i + 1$ to $\vec{n}_{i, j}$ and columns $2j$ and $2j + 1$ to $-\vec{n}_{i, j}$.  If the collision pair is between disc and bounds, flip the signs.
         \item Construct $C \in \mathbb{R}^{L \times 1}$: For each collision pair, add a row containing the value $|\vec{r}_i - \vec{r}_j| - (R_i + R_j)$
-        \item Solve the linear system $\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV^1$ for $\lambda$ using Gauss-Seidel with some $\beta \in (0, \frac{1}{\Delta t}]$
-        \item Calculate $V^2 = V^1 + \Delta t M^{-1}J^{T}\lambda$
+        \item Solve the linear system $\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV$ for $\lambda$ using Gauss-Seidel with some $\beta \in (0, \frac{1}{\Delta t}]$
+        \item Calculate $V' = V + \Delta t M^{-1}J^{T}\lambda$
     \end{enumerate}
 
-    More details for two circles:
-    For two circles with positions $p_i$ and radii $r_i$, the constraint function would be 
+    \subsubsection{$J$ for circle-circle collisions}
+
+    For two circles with positions $\vec{r}_i$ and radii $R_i$, the constraint function would be 
     
     \begin{align*}
-        C &= ||p_1 - p_2|| - (r_1 + r_2)\\
+        C &= |\vec{r}_2 - \vec{r}_1| - (R_1 + R_2)\\
     \end{align*}
+
+    The normal always points from body $1$ to body $2$.
     
     $C = 0$ for just touching, $C > 0$ for separated and $C < 0$ for penetration. We want to enforce $C \ge 0$. 
 
@@ -184,71 +187,94 @@ for sol in simplified:
     For two circles we have 
 
     \begin{align*}
-        \dot{C} &= \frac{(p_1 - p_2)^T}{||p_1 - p_2||}(\dot{p}_1 - \dot{p}_2)\\
-        &= n^T(v_1 - v_2) \quad \text{with\ } n =  \frac{(p_1 - p_2)^T}{||p_1 - p_2||}.
+        \dot{C} &= \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}(\dot{\vec{r}}_2 - \dot{\vec{r}}_1)\\
+        &= \vec{n}(\vec{v}_2 - \vec{v}_1) \quad \text{with\ } \vec{n} =  \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}.
     \end{align*}
 
     This gives an equation we can solve for $J$:
 
     \begin{align*}
-        JV &= n^T(v_1 - v_2)\\
-        \Leftrightarrow(J_1, J_2)\begin{pmatrix}v_1\\v_2\end{pmatrix} &= n^T(v_1 - v_2)\\
-        \Leftrightarrow J_1 v_1 + J_2 v_2 &= n^T(v_1 - v_2)\\
-        \Rightarrow J &= (n^T, -n^T).
+        JV &= \vec{n}(\vec{v}_2 - \vec{v}_1)\\
+        \Leftrightarrow(J_1, J_2)\begin{pmatrix}\vec{v}_1\\\vec{v}_2\end{pmatrix} &= \vec{n}(\vec{v}_2 - \vec{v}_1)\\
+        \Leftrightarrow J_1 \vec{v}_1 + J_2 \vec{v}_2 &= \vec{n}\vec{v}_2 - \vec{n}\vec{v}_1\\
+        \Rightarrow J &= \begin{pmatrix} -\vec{n}^T & \vec{n}^T \end{pmatrix}
     \end{align*}
 
-    The paper defines constraint forces $F_C$ for the constraints with reaction forces $f_c$ and reaction torques $\tau_c$ (which we don't need):
+    \subsubsection{$J$ for circle-bounds collision}
+    Let the bounds be body 1 and the circle body 2. Using the same approach, we get
 
     \begin{align*}
-        F_C = \begin{pmatrix}f_{c_1}\\ \ldots\\ f_{c_n}\end{pmatrix}
+        &C = R_1 - R_2 - |\vec{r}_2 - \vec{r}_1|.\\
+        &\Rightarrow \dot{C} = -\frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}(\vec{v}_2 - \vec{v}_1) = -\vec{n}(\vec{v}_2 - \vec{v}_1).\\
+        &\Rightarrow JV = -\vec{n}(\vec{v}_2 - \vec{v}_1)\\
+        &\Rightarrow J = \begin{pmatrix} \vec{n}^T & -\vec{n}^T \end{pmatrix}
     \end{align*}
 
-    Then, the formula 
+    \subsubsection{Solving the system iteratively}
+
+    So we have 
 
     \begin{align*}
-        F_C = J^T\lambda
+        &\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV\\
+        &\Leftrightarrow A\lambda = b.
     \end{align*}
 
-    falls from the sky: $\lambda$ are $s$ undetermined multipliers. $\lambda$ is the impulse change required to make the relative velocities along the collision normal zero. The new velocities $\vec{v_i}'$ after the collision are:
+    Gauß-Seidel (GS) solves iteratively using this formula 
 
     \begin{align*}
-        \vec{v_1}' = \vec{v_1} + \frac{\lambda}{m_1}\vec{n}. \quad \vec{v_2}' = \vec{v_2} - \frac{\lambda}{m_2}\vec{n}.
+        \lambda_k^{\mathrm{new}} = \frac{b_k - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}
     \end{align*}
 
-    With the collision normal 
+    Generally, entries $A_{kj}$ of $A$ and $b_k$ of $b$ are given by 
 
     \begin{align*}
-        \vec{n} = \frac{\vec{r_1} - \vec{r_2}}{|\vec{r_1} - \vec{r_2}|}.
+        A_{kj} = \Delta t(J_kM^{-1}J_j^T)\\
+        b_{k} = -\beta C_k - J_kV
     \end{align*}
 
-    Projecting the relative velocity after the collision $\vec{v_r} = \vec{v_1}' - \vec{v_2}'$ onto the normal gives the relative normal velocity
+    We'll define an effective mass with 
 
     \begin{align*}
-        \vec{v_{r_n}} = \frac{(\vec{v_1}' - \vec{v_2}')\cdot \vec{n}}{\vec{n} \cdot \vec{n}}\cdot \vec{n}
+        m_{\mathrm{eff},k} = \frac{1}{A_{kk}}
     \end{align*}
 
-    with the magnitude 
+    Plugging this into the GS formula we get 
 
     \begin{align*}
-        v_{r_n} = (\vec{v_1}' - \vec{v_2}')\cdot \vec{n}
+        \lambda_k^{\mathrm{new}} = \frac{-\beta C_k - J_kV - \sum_{j<k}\Delta t(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{new}} - \sum_{j>k}\Delta t(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{old}}}{A_{kk}}
     \end{align*}
 
-    If 
-
-    \begin{itemize}
-        \item $v_{r_n} < 0$: Bodies are approaching each other 
-        \item $v_{r_n} > 0$: Bodies are separating from each other 
-        \item $v_{r_n} = 0$: Bodies are neither approaching nor separating
-    \end{itemize}
-
-    We want to go from $v_{r_n} < 0$ to $v_{r_n} = 0$.\footnote{Generally, $(\vec{v_1}' - \vec{v_2}')\cdot \vec{n} = -e(\vec{v_1} - \vec{v_2})\cdot \vec{n}$ with restitution $e$}. This gives an equation for $\lambda$:
+    Very ugly. To simplify, look at the velocity update formula: 
 
     \begin{align*}
-        &(\vec{v_1}' - \vec{v_2}')\cdot \vec{n} = 0\\
-        &\Leftrightarrow \left(\vec{v_1} + \frac{\lambda}{m_1}\vec{n} - \vec{v_2} - \frac{\lambda}{m_2}\vec{n}\right)\cdot \vec{n} = 0\\
-        &\Leftrightarrow \lambda\left(\frac{1}{m_1} + \frac{1}{m_2}\right) = \vec{v_2} - \vec{v_1}\\
-        &\Rightarrow \lambda = \frac{\vec{v_2} - \vec{v_1}}{\frac{1}{m_1} + \frac{1}{m_2}}
+        V' &= V + \Delta t M^{-1}J^T\lambda\\
+        &= V + \Delta t \sum_j M^{-1}J_j^T \lambda_j.\\
+        &\Leftrightarrow J_kV' = J_kV + \Delta t \sum_j (J_kM^{-1}J_j^T)\lambda_j\\
+        &\Leftrightarrow J_kV' = J_kV + \sum_j A_{kj}\lambda_j\\
+        &\Leftrightarrow J_kV' = J_kV + \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}\\
+        &\Leftrightarrow \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}} = J_kV' - J_kV
     \end{align*}
+
+    Note that $V'$ here is referring to the original velocity $V$ still being updated. Using this, we can give an algorithm to update the velocities of the two bodies taking part in collision $k$ where objects $i$ and $j$ are colliding. Initially, we set all entries of $\lambda$ to $0$. Each step of the GS iteration immediately uses the previously updated velocities. This is where collisions are coupled. This also means that $\lambda_k^\mathrm{new}$ is now just a $\Delta \lambda_k$ instead of the new, updated value and it can be calculated with this formula:
+
+    \begin{align*}
+        \Delta \lambda_k &= \frac{-\beta C_k - J_kV - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}\\
+        &= \frac{-\beta C_k - J_kV - J_kV' + J_kV}{A_{kk}}\\
+        &= \frac{-\beta C_k - J_kV'}{A_{kk}}
+    \end{align*}
+
+    \begin{enumerate}
+        \item Calculate $\beta C_k$ depending on the constraint for collision $k$
+        \item Calculate $J_k V$, using the correct $J$ for the constraint: $\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-circle, $-\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-bounds, etc.
+        \item Calculate $A_{kk} = \Delta t J_kM^{-1}J_k^T$.\\
+        Circle-circle: $\Delta t \begin{pmatrix} -\vec{n}^Tm_i^{-1} & \vec{n}^T m_j^{-1}\end{pmatrix}J_k^T = \Delta t(m_i^{-1} + m_j^{-1})$\\
+        Bounds-circle: Entry for bounds is $0$ in $M^{-1}$, so for circle $j$ we have $\Delta t m_j^{-1}$
+        \item Now calculate $\Delta \lambda_k^\mathrm{raw} = m_{\mathrm{eff},k}(-\beta C_k - J_k V')$ for collision $k$, add it to the old $\lambda$ with $\lambda_k^\mathrm{tmp} = \lambda_k^\mathrm{old} + \Delta \lambda_k^\mathrm{raw}$, set the new $\lambda$ with $\lambda_k^\mathrm{new} = \max\{0, \lambda_k^\mathrm{tmp}\}$ and calculate the actual delta with $\Delta \lambda_k = \lambda_k^\mathrm{new} - \lambda_k^\mathrm{old}$. We clamp at zero because the objects might already be moving away from each other, in which case $\lambda_k^\mathrm{new} < 0$ to satisfy the $C = 0$ constraint, which would effectively be an attractive force, which we don't want.
+        \item Update the velocities for both bodies in collision $k$ immediately: $V = V + \Delta t M^{-1}J_k^T \Delta \lambda_k = V + \Delta V$ where $\Delta V$ is\\
+        Circle-circle: $\Delta V = \Delta t \begin{pmatrix}-\vec{n}m_i^{-1}\\ \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
+        Bounds-circle: $\Delta V = \Delta t \begin{pmatrix}0\\ - \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
+        Note that the notation is a little off here, obviously not the whole $V$ is being updated, just the two velocities in the collision pair $\vec{v}_i$ and $\vec{v}_j$
+    \end{enumerate}
 
 	\subsection{Collision handling}
 
