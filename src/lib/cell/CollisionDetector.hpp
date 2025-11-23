@@ -16,34 +16,6 @@ namespace cell
 class CollisionDetector
 {
 public:
-    struct DiscContainingMembraneCollision
-    {
-        Disc* disc;
-        Membrane* membrane;
-        double toi;
-    };
-
-    struct DiscDiscCollision
-    {
-        Disc* disc1;
-        Disc* disc2;
-        double toi;
-    };
-
-    struct DiscChildMembraneCollision
-    {
-        Disc* disc;
-        Membrane* membrane;
-        double toi;
-    };
-
-    struct Collisions
-    {
-        std::vector<DiscDiscCollision> discDiscCollisions;
-        std::vector<DiscContainingMembraneCollision> discContainingMembraneCollisions;
-        std::vector<DiscChildMembraneCollision> discChildMembraneCollisions;
-    };
-
     struct Params
     {
         std::vector<Disc>* discs;
@@ -79,9 +51,8 @@ private:
 
     struct Collision
     {
-        const Entry* discEntry;
-        const Entry* otherEntry;
-        double toi;
+        int i;
+        int j;
         CollisionType type;
     };
 
@@ -90,7 +61,7 @@ public:
 
     void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
                       const std::vector<Disc*>& intrudingDiscs);
-    Collisions detectCollisions(const Params& params);
+    std::vector<Collision> detectCollisions(const Params& params);
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 
@@ -98,12 +69,8 @@ private:
     template <typename ElementType, typename RegistryType>
     Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index,
                       EntryType entryType) const;
-    std::vector<std::vector<Collision>> getCollisionsPerDisc();
 
     bool discIsContainedByMembrane(const Entry& entry);
-    double calculateTimeOfImpactWithContainingMembrane(const Entry& entry, const Membrane& containingMembrane) const;
-    double calculateTimeOfImpactWithChildMembrane(const Entry& entry1, const Entry& entry2) const;
-    double calculateTimeOfImpactBetweenDiscs(const Entry& entry1, const Entry& entry2) const;
 
 private:
     DiscTypeMap<int> collisionCounts_;
