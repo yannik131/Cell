@@ -276,6 +276,17 @@ for sol in simplified:
         Note that the notation is a little off here, obviously not the whole $V$ is being updated, just the two velocities in the collision pair $\vec{v}_i$ and $\vec{v}_j$
     \end{enumerate}
 
+    The actual implementation will follow this scheme:
+
+        \begin{enumerate}
+        \item Insert all simulation objects into a \texttt{std::vector<Entry> entries}.
+        \item The detection step simply creates a \texttt{std::vector<std::pair<std::size\_t, std::size\_t>>}, where each pair represents a collision and contains the indices of the corresponding entries.
+        \item Compute all collision normals and store them in a \texttt{std::vector<sf::Vector2d> normals}; the indices correspond to the collision pairs.
+        \item Compute $\beta C$ for each collision pair.
+        \item Now the collisions are iterated $n$ times (maybe 5 or so), and steps 2--5 of the list are applied.
+    \end{enumerate}
+
+
 	\subsection{Collision handling}
 
 	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
