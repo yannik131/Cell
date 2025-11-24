@@ -24,7 +24,6 @@ public:
         Membrane* containingMembrane;
     };
 
-private:
     enum class EntryType
     {
         Disc = 1 << 0,

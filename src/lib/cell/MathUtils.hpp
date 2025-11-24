@@ -73,6 +73,8 @@ namespace cell::mathutils
  */
 double abs(const sf::Vector2d& vec);
 
+sf::Vector2d calculateNormal(const sf::Vector2d& v1, const sf::Vector2d& v2);
+
 /**
  * @brief Returns a number in the given range
  */

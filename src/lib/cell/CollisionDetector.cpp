@@ -45,11 +45,22 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
         return &(*params_.discs)[entry.index];
     };
 
+    const auto getPermeabilityFor = [&](const Membrane& membrane, const Entry& discEntry)
+    {
+        return membraneTypeRegistry_.getByID(membrane.getTypeID())
+            .getPermeabilityFor((*params_.discs)[discEntry.index].getTypeID());
+    };
+
     for (int i = 0; i < static_cast<int>(entries_.size()); ++i)
     {
         const auto& entry1 = entries_[i];
         if (entry1.type == EntryType::Disc && !discIsContainedByMembrane(entry1))
-            collisions.push_back(Collision{.i = i, .j = -1, .type = CollisionType::DiscContainingMembrane});
+        {
+            const auto permeability = getPermeabilityFor(*params_.containingMembrane, entry1);
+
+            if (permeability == MembraneType::Permeability::Inward || permeability == MembraneType::Permeability::None)
+                collisions.push_back(Collision{.i = i, .j = -1, .type = CollisionType::DiscContainingMembrane});
+        }
 
         for (int j = i + 1; j < static_cast<int>(entries_.size()); ++j)
         {
@@ -68,7 +79,19 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
                 continue;
 
             if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)
-                collisions.push_back(Collision{.i = i, .j = j, .type = CollisionType::DiscChildMembrane});
+            {
+                const bool firstIsMembrane = entry1.type == EntryType::Membrane;
+
+                const auto& membrane =
+                    firstIsMembrane ? (*params_.membranes)[entry1.index] : (*params_.membranes)[entry2.index];
+                const auto permeability = getPermeabilityFor(membrane, firstIsMembrane ? entry2 : entry1);
+
+                if (permeability == MembraneType::Permeability::Outward ||
+                    permeability == MembraneType::Permeability::None)
+                    collisions.push_back(Collision{.i = firstIsMembrane ? j : i,
+                                                   .j = firstIsMembrane ? i : j,
+                                                   .type = CollisionType::DiscChildMembrane});
+            }
             else
             {
                 collisions.push_back(Collision{.i = i, .j = j, .type = CollisionType::DiscDisc});
