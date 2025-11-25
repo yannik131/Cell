@@ -28,40 +28,43 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
         Disc* obj1 = &(*params.discs)[collision.i];
         const double R1 = discTypeRegistry_.getByID(obj1->getTypeID()).getRadius();
 
-        if (collision.type == CollisionType::DiscContainingMembrane)
+        auto getObj2AndR = [&](const auto& c) -> std::pair<PhysicalObject*, double>
         {
-            const auto& disc = (*params.discs)[collision.i];
-            const auto& membrane = *params.containingMembrane;
+            switch (c.type)
+            {
+            case CollisionType::DiscContainingMembrane:
+            {
+                auto* m = params.containingMembrane;
+                return {m, membraneTypeRegistry_.getByID(m->getTypeID()).getRadius()};
+            }
+            case CollisionType::DiscChildMembrane:
+            {
+                auto* m = &(*params.membranes)[c.j];
+                return {m, membraneTypeRegistry_.getByID(m->getTypeID()).getRadius()};
+            }
+            case CollisionType::DiscIntrudingDisc:
+            {
+                auto* d = (*params.intrudingDiscs)[c.j];
+                return {d, discTypeRegistry_.getByID(d->getTypeID()).getRadius()};
+            }
+            case CollisionType::DiscDisc:
+            default:
+            {
+                auto* d = &(*params.discs)[c.j];
+                return {d, discTypeRegistry_.getByID(d->getTypeID()).getRadius()};
+            }
+            }
+        };
 
-            sf::Vector2d diff = disc.getPosition() - membrane.getPosition();
-            const auto distance = mathutils::abs(diff);
-            normals.push_back(diff / distance);
+        auto [obj2, R2] = getObj2AndR(collision);
 
-            const auto R1 = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
-            const auto R2 = membraneTypeRegistry_.getByID(membrane.getTypeID()).getRadius();
+        sf::Vector2d diff = obj2->getPosition() - obj1->getPosition();
+        const auto distance = mathutils::abs(diff);
+        normals.push_back(diff / distance);
 
-            betaC.push_back(beta * (R1 - R2 - distance));
-        }
-        else
-        {
-            bool isMembraneCollision = collision.type == CollisionType::DiscChildMembrane;
-            const auto r1 = (*params.discs)[collision.i].getPosition();
-            const auto r2 = isMembraneCollision ? (*params.membranes)[collision.j].getPosition()
-                                                : (*params.discs)[collision.j].getPosition();
+        const double sign = (collision.type == CollisionType::DiscContainingMembrane) ? -1.0 : +1.0;
 
-            const auto R1 = discTypeRegistry_.getByID((*params.discs)[collision.i].getTypeID()).getRadius();
-            double R2;
-            if (isMembraneCollision)
-                R2 = membraneTypeRegistry_.getByID((*params.membranes)[collision.j].getTypeID()).getRadius();
-            else
-                R2 = discTypeRegistry_.getByID((*params.discs)[collision.j].getTypeID()).getRadius();
-
-            const sf::Vector2d diff = r2 - r1;
-            const auto distance = mathutils::abs(diff);
-            normals.push_back(diff / distance);
-
-            betaC.push_back(beta * (distance - (R1 + R2)));
-        }
+        betaC.push_back(beta * (sign * distance - R1 - sign * R2));
     }
 }
 

@@ -96,8 +96,19 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
             }
             else
             {
-                // Handle intruding discs
-                collisions.push_back(Collision{.i = i, .j = j, .type = CollisionType::DiscDisc});
+                if (entry1.type == EntryType::IntrudingDisc)
+                    collisions.push_back(Collision{.i = static_cast<int>(entry1.index),
+                                                   .j = static_cast<int>(entry2.index),
+                                                   .type = CollisionType::DiscIntrudingDisc});
+                else if (entry2.type == EntryType::IntrudingDisc)
+                    collisions.push_back(Collision{.i = static_cast<int>(entry2.index),
+                                                   .j = static_cast<int>(entry1.index),
+                                                   .type = CollisionType::DiscIntrudingDisc});
+                else
+                    collisions.push_back(Collision{.i = static_cast<int>(entry1.index),
+                                                   .j = static_cast<int>(entry2.index),
+                                                   .type = CollisionType::DiscDisc});
+
                 ++collisionCounts_[getDiscPointer(entry1)->getTypeID()];
                 ++collisionCounts_[getDiscPointer(entry2)->getTypeID()];
             }

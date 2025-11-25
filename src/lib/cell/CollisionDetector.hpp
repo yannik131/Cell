@@ -34,6 +34,7 @@ public:
     enum class CollisionType
     {
         DiscDisc,
+        DiscIntrudingDisc,
         DiscContainingMembrane,
         DiscChildMembrane,
         None
