@@ -25,6 +25,9 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
 
     for (const auto& collision : collisions)
     {
+        Disc* obj1 = &(*params.discs)[collision.i];
+        const double R1 = discTypeRegistry_.getByID(obj1->getTypeID()).getRadius();
+
         if (collision.type == CollisionType::DiscContainingMembrane)
         {
             const auto& disc = (*params.discs)[collision.i];
