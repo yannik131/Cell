@@ -31,7 +31,6 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     std::vector<std::pair<Entry, Entry>> collisionObjects;
     collisionObjects.reserve(collisions.size());
 
-    std::vector<double> lambdas(collisions.size(), 0);
     const double e = 1.0;
 
     for (const auto& collision : collisions)
@@ -72,52 +71,50 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
 
         sf::Vector2d diff = entry2.obj->getPosition() - obj1->getPosition();
         const auto distance = mathutils::abs(diff);
-        normals.push_back(diff / distance);
+
+        if (collision.type == CollisionType::DiscChildMembrane)
+            normals.push_back(-diff / distance);
+        else
+            normals.push_back(diff / distance);
     }
 
-    for (int iterationCount = 0; iterationCount < 5; ++iterationCount)
+    for (std::size_t i = 0; i < collisions.size(); ++i)
     {
-        for (std::size_t i = 0; i < collisions.size(); ++i)
+        double JV;
+        double effMass;
+        const auto& collision = collisions[i];
+        const auto& [entry1, entry2] = collisionObjects[i];
+
+        if (collision.type == CollisionType::DiscContainingMembrane)
         {
-            double JV;
-            double effMass;
-            const auto& collision = collisions[i];
-            const auto& [entry1, entry2] = collisionObjects[i];
+            JV = normals[i] * entry1.obj->getVelocity();
+            effMass = 1.0 / entry1.invMass;
+        }
+        else if (collision.type == CollisionType::DiscChildMembrane)
+        {
+            JV = normals[i] * entry1.obj->getVelocity();
+            effMass = 1.0 / entry1.invMass;
+        }
+        else
+        {
+            JV = normals[i] * (entry2.obj->getVelocity() - entry1.obj->getVelocity());
+            effMass = 1.0 / (entry1.invMass + entry2.invMass);
+        }
 
-            if (collision.type == CollisionType::DiscContainingMembrane)
-            {
-                JV = normals[i] * entry1.obj->getVelocity();
-                effMass = 1.0 / entry1.invMass;
-            }
-            else if (collision.type == CollisionType::DiscChildMembrane)
-            {
-                JV = normals[i] * entry1.obj->getVelocity();
-                effMass = 1.0 / entry1.invMass;
-            }
-            else
-            {
-                JV = normals[i] * (entry2.obj->getVelocity() - entry1.obj->getVelocity());
-                effMass = 1.0 / (entry1.invMass + entry2.invMass);
-            }
+        double lambdaRaw = -effMass * (1 + e) * JV;
+        double dLambda = std::max(lambdaRaw, 0.0);
 
-            double lambdaRaw = -effMass * (1 + e) * JV;
-            double lambdaTmp = lambdas[i] + lambdaRaw;
-            double lambdaNew = std::max(0.0, lambdaTmp);
-            double dLambda = lambdaNew - lambdas[i];
-            lambdas[i] = lambdaNew;
-
-            switch (collision.type)
-            {
-            case CollisionType::DiscContainingMembrane:
-                entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass);
-                break;
-            case CollisionType::DiscChildMembrane: entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass); break;
-            case CollisionType::DiscIntrudingDisc:
-            case CollisionType::DiscDisc:
-            default:
-                entry1.obj->accelerate(-dLambda * normals[i] * entry1.invMass);
-                entry2.obj->accelerate(dLambda * normals[i] * entry2.invMass);
-            }
+        switch (collision.type)
+        {
+        case CollisionType::DiscContainingMembrane:
+            entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass);
+            break;
+        case CollisionType::DiscChildMembrane: entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass); break;
+        case CollisionType::DiscIntrudingDisc:
+        case CollisionType::DiscDisc:
+        default:
+            entry1.obj->accelerate(-dLambda * normals[i] * entry1.invMass);
+            entry2.obj->accelerate(dLambda * normals[i] * entry2.invMass);
         }
     }
 }

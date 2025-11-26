@@ -109,7 +109,7 @@ bool pointIsInCircle(const sf::Vector2d& point, const sf::Vector2d& M, double R)
  */
 bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
 
-bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2, double minOverlap = 0.1);
 
 bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
 
