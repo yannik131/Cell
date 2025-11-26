@@ -13,58 +13,112 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 }
 
 void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions,
-                                         CollisionDetector::Params params, double dt)
+                                         CollisionDetector::Params params, double dt) const
 {
+    if (collisions.empty())
+        return;
+
     using CollisionType = CollisionDetector::CollisionType;
     std::vector<sf::Vector2d> normals;
-    std::vector<double> betaC;
-    const double beta = 1 / dt * 0.1;
 
     normals.reserve(collisions.size());
-    betaC.reserve(collisions.size());
+
+    struct Entry
+    {
+        PhysicalObject* obj;
+        double invMass;
+    };
+    std::vector<std::pair<Entry, Entry>> collisionObjects;
+    collisionObjects.reserve(collisions.size());
+
+    std::vector<double> lambdas(collisions.size(), 0);
+    const double e = 1.0;
 
     for (const auto& collision : collisions)
     {
         Disc* obj1 = &(*params.discs)[collision.i];
-        const double R1 = discTypeRegistry_.getByID(obj1->getTypeID()).getRadius();
+        const double invMass1 = 1.0 / discTypeRegistry_.getByID(obj1->getTypeID()).getMass();
 
-        auto getObj2AndR = [&](const auto& c) -> std::pair<PhysicalObject*, double>
+        auto getObj2Properties = [&](const auto& c) -> Entry
         {
             switch (c.type)
             {
             case CollisionType::DiscContainingMembrane:
             {
                 auto* m = params.containingMembrane;
-                return {m, membraneTypeRegistry_.getByID(m->getTypeID()).getRadius()};
+                return Entry{.obj = m, .invMass = 0};
             }
             case CollisionType::DiscChildMembrane:
             {
                 auto* m = &(*params.membranes)[c.j];
-                return {m, membraneTypeRegistry_.getByID(m->getTypeID()).getRadius()};
+                return Entry{.obj = m, .invMass = 0};
             }
             case CollisionType::DiscIntrudingDisc:
             {
                 auto* d = (*params.intrudingDiscs)[c.j];
-                return {d, discTypeRegistry_.getByID(d->getTypeID()).getRadius()};
+                return Entry{.obj = d, .invMass = 1.0 / discTypeRegistry_.getByID(d->getTypeID()).getMass()};
             }
             case CollisionType::DiscDisc:
             default:
             {
                 auto* d = &(*params.discs)[c.j];
-                return {d, discTypeRegistry_.getByID(d->getTypeID()).getRadius()};
+                return Entry{.obj = d, .invMass = 1.0 / discTypeRegistry_.getByID(d->getTypeID()).getMass()};
             }
             }
         };
 
-        auto [obj2, R2] = getObj2AndR(collision);
+        auto entry2 = getObj2Properties(collision);
+        collisionObjects.push_back({Entry{.obj = obj1, .invMass = invMass1}, entry2});
 
-        sf::Vector2d diff = obj2->getPosition() - obj1->getPosition();
+        sf::Vector2d diff = entry2.obj->getPosition() - obj1->getPosition();
         const auto distance = mathutils::abs(diff);
         normals.push_back(diff / distance);
+    }
 
-        const double sign = (collision.type == CollisionType::DiscContainingMembrane) ? -1.0 : +1.0;
+    for (int iterationCount = 0; iterationCount < 5; ++iterationCount)
+    {
+        for (std::size_t i = 0; i < collisions.size(); ++i)
+        {
+            double JV;
+            double effMass;
+            const auto& collision = collisions[i];
+            const auto& [entry1, entry2] = collisionObjects[i];
 
-        betaC.push_back(beta * (sign * distance - R1 - sign * R2));
+            if (collision.type == CollisionType::DiscContainingMembrane)
+            {
+                JV = normals[i] * entry1.obj->getVelocity();
+                effMass = 1.0 / entry1.invMass;
+            }
+            else if (collision.type == CollisionType::DiscChildMembrane)
+            {
+                JV = normals[i] * entry1.obj->getVelocity();
+                effMass = 1.0 / entry1.invMass;
+            }
+            else
+            {
+                JV = normals[i] * (entry2.obj->getVelocity() - entry1.obj->getVelocity());
+                effMass = 1.0 / (entry1.invMass + entry2.invMass);
+            }
+
+            double lambdaRaw = -effMass * (1 + e) * JV;
+            double lambdaTmp = lambdas[i] + lambdaRaw;
+            double lambdaNew = std::max(0.0, lambdaTmp);
+            double dLambda = lambdaNew - lambdas[i];
+            lambdas[i] = lambdaNew;
+
+            switch (collision.type)
+            {
+            case CollisionType::DiscContainingMembrane:
+                entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass);
+                break;
+            case CollisionType::DiscChildMembrane: entry1.obj->accelerate(dLambda * normals[i] * entry1.invMass); break;
+            case CollisionType::DiscIntrudingDisc:
+            case CollisionType::DiscDisc:
+            default:
+                entry1.obj->accelerate(-dLambda * normals[i] * entry1.invMass);
+                entry2.obj->accelerate(dLambda * normals[i] * entry2.invMass);
+            }
+        }
     }
 }
 

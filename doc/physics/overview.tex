@@ -162,8 +162,8 @@ for sol in simplified:
         \end{pmatrix}$. Velocities for bounds are $0$.
         \item Construct $J \in \mathbb{R}^{L \times 2N}$: For each collision pair with indices $(i, j)$ relative to the discs array of length $N$, calculate the collision normal $\vec{n}_{i, j} = (\vec{r}_j - \vec{r}_i)/|\vec{r}_j - \vec{r}_i|$ and add a row of $2N$ zeros. With 0-indexing, set columns $2i$ and $2i + 1$ to $\vec{n}_{i, j}$ and columns $2j$ and $2j + 1$ to $-\vec{n}_{i, j}$.  If the collision pair is between disc and bounds, flip the signs.
         \item Construct $C \in \mathbb{R}^{L \times 1}$: For each collision pair, add a row containing the value $|\vec{r}_i - \vec{r}_j| - (R_i + R_j)$
-        \item Solve the linear system $\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV$ for $\lambda$ using Gauss-Seidel with some $\beta \in (0, \frac{1}{\Delta t}]$
-        \item Calculate $V' = V + \Delta t M^{-1}J^{T}\lambda$
+        \item Solve the linear system $(J M^{-1} J^T) \lambda = -(1 + e)JV$ for $e = 1$ (elastic collision)
+        \item Calculate $V' = V + M^{-1}J^{T}\lambda$
     \end{enumerate}
 
     \subsubsection{$J$ for circle-circle collisions}
@@ -215,7 +215,7 @@ for sol in simplified:
     So we have 
 
     \begin{align*}
-        &\Delta t (J M^{-1} J^T) \lambda = -\beta C - JV\\
+        &(J M^{-1} J^T) \lambda = -(1 + e)JV\\
         &\Leftrightarrow A\lambda = b.
     \end{align*}
 
@@ -228,8 +228,8 @@ for sol in simplified:
     Generally, entries $A_{kj}$ of $A$ and $b_k$ of $b$ are given by 
 
     \begin{align*}
-        A_{kj} = \Delta t(J_kM^{-1}J_j^T)\\
-        b_{k} = -\beta C_k - J_kV
+        A_{kj} = J_kM^{-1}J_j^T\\
+        b_{k} = -(1 + e)JV
     \end{align*}
 
     We'll define an effective mass with 
@@ -241,15 +241,15 @@ for sol in simplified:
     Plugging this into the GS formula we get 
 
     \begin{align*}
-        \lambda_k^{\mathrm{new}} = \frac{-\beta C_k - J_kV - \sum_{j<k}\Delta t(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{new}} - \sum_{j>k}\Delta t(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{old}}}{A_{kk}}
+        \lambda_k^{\mathrm{new}} = \frac{-(1+e)JV - \sum_{j<k}(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{new}} - \sum_{j>k}(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{old}}}{A_{kk}}
     \end{align*}
 
     Very ugly. To simplify, look at the velocity update formula: 
 
     \begin{align*}
-        V' &= V + \Delta t M^{-1}J^T\lambda\\
-        &= V + \Delta t \sum_j M^{-1}J_j^T \lambda_j.\\
-        &\Leftrightarrow J_kV' = J_kV + \Delta t \sum_j (J_kM^{-1}J_j^T)\lambda_j\\
+        V' &= V + M^{-1}J^T\lambda\\
+        &= V + \sum_j M^{-1}J_j^T \lambda_j.\\
+        &\Leftrightarrow J_kV' = J_kV + \sum_j (J_kM^{-1}J_j^T)\lambda_j\\
         &\Leftrightarrow J_kV' = J_kV + \sum_j A_{kj}\lambda_j\\
         &\Leftrightarrow J_kV' = J_kV + \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}\\
         &\Leftrightarrow \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}} = J_kV' - J_kV
@@ -258,21 +258,20 @@ for sol in simplified:
     Note that $V'$ here is referring to the original velocity $V$ still being updated. Using this, we can give an algorithm to update the velocities of the two bodies taking part in collision $k$ where objects $i$ and $j$ are colliding. Initially, we set all entries of $\lambda$ to $0$. Each step of the GS iteration immediately uses the previously updated velocities. This is where collisions are coupled. This also means that $\lambda_k^\mathrm{new}$ is now just a $\Delta \lambda_k$ instead of the new, updated value and it can be calculated with this formula:
 
     \begin{align*}
-        \Delta \lambda_k &= \frac{-\beta C_k - J_kV - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}\\
-        &= \frac{-\beta C_k - J_kV - J_kV' + J_kV}{A_{kk}}\\
-        &= \frac{-\beta C_k - J_kV'}{A_{kk}}
+        \Delta \lambda_k &= \frac{-(1 + e)JV - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}\\
+        &= \frac{-(1 + e)JV - J_kV' + J_kV}{A_{kk}}\\
+        &= \frac{-(1 + e)JV'}{A_{kk}}
     \end{align*}
 
     \begin{enumerate}
-        \item Calculate $\beta C_k$ depending on the constraint for collision $k$
         \item Calculate $J_k V$, using the correct $J$ for the constraint: $\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-circle, $-\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-bounds, etc.
-        \item Calculate $A_{kk} = \Delta t J_kM^{-1}J_k^T$.\\
-        Circle-circle: $\Delta t \begin{pmatrix} -\vec{n}^Tm_i^{-1} & \vec{n}^T m_j^{-1}\end{pmatrix}J_k^T = \Delta t(m_i^{-1} + m_j^{-1})$\\
-        Bounds-circle: Entry for bounds is $0$ in $M^{-1}$, so for circle $j$ we have $\Delta t m_j^{-1}$
-        \item Now calculate $\Delta \lambda_k^\mathrm{raw} = m_{\mathrm{eff},k}(-\beta C_k - J_k V')$ for collision $k$, add it to the old $\lambda$ with $\lambda_k^\mathrm{tmp} = \lambda_k^\mathrm{old} + \Delta \lambda_k^\mathrm{raw}$, set the new $\lambda$ with $\lambda_k^\mathrm{new} = \max\{0, \lambda_k^\mathrm{tmp}\}$ and calculate the actual delta with $\Delta \lambda_k = \lambda_k^\mathrm{new} - \lambda_k^\mathrm{old}$. We clamp at zero because the objects might already be moving away from each other, in which case $\lambda_k^\mathrm{new} < 0$ to satisfy the $C = 0$ constraint, which would effectively be an attractive force, which we don't want.
-        \item Update the velocities for both bodies in collision $k$ immediately: $V = V + \Delta t M^{-1}J_k^T \Delta \lambda_k = V + \Delta V$ where $\Delta V$ is\\
-        Circle-circle: $\Delta V = \Delta t \begin{pmatrix}-\vec{n}m_i^{-1}\\ \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
-        Bounds-circle: $\Delta V = \Delta t \begin{pmatrix}0\\ - \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
+        \item Calculate $A_{kk} = J_kM^{-1}J_k^T$.\\
+        Circle-circle: $\begin{pmatrix} -\vec{n}^Tm_i^{-1} & \vec{n}^T m_j^{-1}\end{pmatrix}J_k^T = m_i^{-1} + m_j^{-1}$\\
+        Bounds-circle: Entry for bounds is $0$ in $M^{-1}$, so for circle $j$ we have $m_j^{-1}$
+        \item Now calculate $\Delta \lambda_k^\mathrm{raw} = -m_{\mathrm{eff},k}(1+e)JV$ for collision $k$, add it to the old $\lambda$ with $\lambda_k^\mathrm{tmp} = \lambda_k^\mathrm{old} + \Delta \lambda_k^\mathrm{raw}$, set the new $\lambda$ with $\lambda_k^\mathrm{new} = \max\{0, \lambda_k^\mathrm{tmp}\}$ and calculate the actual delta with $\Delta \lambda_k = \lambda_k^\mathrm{new} - \lambda_k^\mathrm{old}$. We clamp at zero because the objects might already be moving away from each other, in which case $\lambda_k^\mathrm{new} < 0$ to satisfy the $C = 0$ constraint, which would effectively be an attractive force, which we don't want.
+        \item Update the velocities for both bodies in collision $k$ immediately: $V = V + M^{-1}J_k^T \Delta \lambda_k = V + \Delta V$ where $\Delta V$ is\\
+        Circle-circle: $\Delta V = \begin{pmatrix}-\vec{n}m_i^{-1}\\ \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
+        Bounds-circle: $\Delta V = \begin{pmatrix}0\\ - \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
         Note that the notation is a little off here, obviously not the whole $V$ is being updated, just the two velocities in the collision pair $\vec{v}_i$ and $\vec{v}_j$
     \end{enumerate}
 

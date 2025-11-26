@@ -73,17 +73,12 @@ void Compartment::update(double dt)
     moveDiscsAndApplyUnimolecularReactions(dt);
 
     auto collisions = detectCollisions();
-
-    simulationContext_.collisionHandler.calculateDiscChildMembraneCollisionResponse(
-        collisions.discChildMembraneCollisions);
-    moveDiscsIntoChildCompartments(collisions.discChildMembraneCollisions);
-
-    simulationContext_.reactionEngine.applyBimolecularReactions(collisions.discDiscCollisions);
-    simulationContext_.collisionHandler.calculateDiscDiscCollisionResponse(collisions.discDiscCollisions);
-
-    simulationContext_.collisionHandler.calculateDiscContainingMembraneCollisionResponse(
-        collisions.discContainingMembraneCollisions);
-    moveDiscsIntoParentCompartment(collisions.discContainingMembraneCollisions);
+    simulationContext_.collisionHandler.resolveCollisions(collisions,
+                                                          CollisionDetector::Params{.discs = &discs_,
+                                                                                    .membranes = &membranes_,
+                                                                                    .intrudingDiscs = &intrudingDiscs_,
+                                                                                    .containingMembrane = &membrane_},
+                                                          dt);
 
     updateChildCompartments(dt);
 

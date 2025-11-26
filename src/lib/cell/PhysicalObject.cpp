@@ -1,4 +1,5 @@
 #include "PhysicalObject.hpp"
+#include "ExceptionWithLocation.hpp"
 
 #include <functional>
 
