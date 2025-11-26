@@ -187,8 +187,11 @@ Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
     };
 
     if (!isFullyContainedIn(cell_))
-        throw ExceptionWithLocation("Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) +
-                                    ") is not contained by the cell");
+    {
+        LOG(WARNING) << "Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) +
+                            ") is not contained by the cell";
+        return cell_;
+    }
 
     Compartment* compartment = &cell_;
     bool continueSearch = true;
