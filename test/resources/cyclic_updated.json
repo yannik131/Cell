@@ -1,0 +1,172 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 2000,
+            "discTypeDistribution": {
+                "Predator": 0.33,
+                "Prey": 0.34,
+                "Resource": 0.33
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 1500.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Predator",
+                "radius": 20.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Prey",
+                "radius": 15.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Resource",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Police",
+                "radius": 5.0
+            },
+            {
+                "mass": 2.0,
+                "name": "Killed",
+                "radius": 10.0
+            }
+        ],
+        "discs": [],
+        "maxVelocity": 600.0,
+        "membraneTypes": [
+            {
+                "discCount": 200,
+                "discTypeDistribution": {
+                    "Police": 1.0
+                },
+                "name": "Refuge",
+                "permeabilityMap": {
+                    "Prey": 4,
+                    "Resource": 4
+                },
+                "radius": 500.0
+            }
+        ],
+        "membranes": [
+            {
+                "membraneTypeName": "Refuge",
+                "x": 0.0,
+                "y": 0.0
+            }
+        ],
+        "reactions": [
+            {
+                "educt1": "Resource",
+                "educt2": "Prey",
+                "probability": 0.2,
+                "product1": "Prey",
+                "product2": "Prey"
+            },
+            {
+                "educt1": "Predator",
+                "educt2": "Prey",
+                "probability": 0.5,
+                "product1": "Predator",
+                "product2": "Predator"
+            },
+            {
+                "educt1": "Prey",
+                "educt2": "",
+                "probability": 0.1,
+                "product1": "Resource",
+                "product2": ""
+            },
+            {
+                "educt1": "Predator",
+                "educt2": "",
+                "probability": 0.5,
+                "product1": "Resource",
+                "product2": ""
+            },
+            {
+                "educt1": "Resource",
+                "educt2": "",
+                "probability": 0.01,
+                "product1": "Predator",
+                "product2": ""
+            },
+            {
+                "educt1": "Resource",
+                "educt2": "",
+                "probability": 0.01,
+                "product1": "Prey",
+                "product2": ""
+            },
+            {
+                "educt1": "Predator",
+                "educt2": "Police",
+                "probability": 0.5,
+                "product1": "Killed",
+                "product2": ""
+            },
+            {
+                "educt1": "Killed",
+                "educt2": "",
+                "probability": 0.1,
+                "product1": "Police",
+                "product2": "Resource"
+            }
+        ],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.0010000000474974513,
+        "useDistribution": true
+    },
+    "discTypeColorMap": {
+        "Killed": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Police": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Predator": [
+            255,
+            0,
+            0,
+            255
+        ],
+        "Prey": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Resource": [
+            0,
+            0,
+            255,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Refuge": [
+            0,
+            255,
+            255,
+            255
+        ]
+    }
+}

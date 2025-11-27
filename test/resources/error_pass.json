@@ -1,0 +1,85 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 0,
+            "discTypeDistribution": {},
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 100.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Type0",
+                "radius": 10.0
+            }
+        ],
+        "discs": [
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": 0.0,
+                "x": -80.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": 0.0,
+                "x": -60.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": 0.0,
+                "x": -40.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": 0.0,
+                "x": -20.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 89.0,
+                "y": 0.0
+            }
+        ],
+        "maxVelocity": 600.0,
+        "membraneTypes": [],
+        "membranes": [],
+        "reactions": [],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.0010000000474974513,
+        "useDistribution": false
+    },
+    "discTypeColorMap": {
+        "Type0": [
+            0,
+            0,
+            255,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ]
+    }
+}

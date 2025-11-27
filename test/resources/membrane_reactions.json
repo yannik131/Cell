@@ -1,0 +1,130 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 100,
+            "discTypeDistribution": {
+                "Type0": 0.0,
+                "Type1": 0.0,
+                "Type2": 1.0
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 200.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Type0",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Type1",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Type2",
+                "radius": 5.0
+            },
+            {
+                "mass": 2.0,
+                "name": "Type3",
+                "radius": 5.0
+            }
+        ],
+        "discs": [
+            {
+                "discTypeName": "Type0",
+                "vx": 50.0,
+                "vy": -50.0,
+                "x": -80.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 89.0,
+                "y": 0.0
+            }
+        ],
+        "maxVelocity": 100.0,
+        "membraneTypes": [
+            {
+                "discCount": 100,
+                "discTypeDistribution": {
+                    "Type0": 1.0,
+                    "Type1": 0.0,
+                    "Type2": 0.0
+                },
+                "name": "Type1",
+                "permeabilityMap": {
+                    "Type0": 1,
+                    "Type1": 2,
+                    "Type2": 4
+                },
+                "radius": 100.0
+            }
+        ],
+        "membranes": [
+            {
+                "membraneTypeName": "Type1",
+                "x": 0.0,
+                "y": 0.0
+            }
+        ],
+        "reactions": [
+            {
+                "educt1": "Type0",
+                "educt2": "Type2",
+                "probability": 1.0,
+                "product1": "Type3",
+                "product2": ""
+            }
+        ],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.01,
+        "useDistribution": true
+    },
+    "discTypeColorMap": {
+        "Type0": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "Type1": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Type2": [
+            0,
+            255,
+            255,
+            255
+        ],
+        "Type3": [
+            255,
+            0,
+            0,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Type1": [
+            0,
+            255,
+            0,
+            255
+        ]
+    }
+}
