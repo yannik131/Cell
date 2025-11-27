@@ -12,9 +12,10 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 {
 }
 
-void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions,
-                                         CollisionDetector::Params params, double dt) const
+void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions,
+                                         double dt) const
 {
+    const auto& collisions = detectedCollisions.collisions;
     if (collisions.empty())
         return;
 
@@ -32,10 +33,19 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     std::vector<CollisionEntry> collisionEntries;
     collisionEntries.reserve(collisions.size());
 
+    const auto getPermeabilityFor = [&](Membrane* membrane, Disc* disc)
+    { return membraneTypeRegistry_.getByID(membrane->getTypeID()).getPermeabilityFor(disc->getTypeID()); };
+
     for (const auto& collision : collisions)
     {
+        if (collision.isInvalidatedByDestroyedDisc())
+        {
+            collisionEntries.push_back({});
+            continue;
+        }
+
         CollisionEntry entry;
-        entry.obj1 = &(*params.discs)[collision.i];
+        entry.obj1 = collision.disc;
         const double m1 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj1)->getTypeID()).getMass();
         entry.invMass1 = 1.0 / m1;
         const double R1 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj1)->getTypeID()).getRadius();
@@ -44,21 +54,14 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
         switch (collision.type)
         {
         case CollisionType::DiscContainingMembrane:
-            entry.obj2 = params.containingMembrane;
-            R2 = membraneTypeRegistry_.getByID(static_cast<Membrane*>(entry.obj2)->getTypeID()).getRadius();
-            break;
         case CollisionType::DiscChildMembrane:
-            entry.obj2 = &(*params.membranes)[collision.j];
+            entry.obj2 = collision.membrane;
             R2 = membraneTypeRegistry_.getByID(static_cast<Membrane*>(entry.obj2)->getTypeID()).getRadius();
             break;
         case CollisionType::DiscIntrudingDisc:
-            entry.obj2 = (*params.intrudingDiscs)[collision.j];
-            entry.invMass2 = 1.0 / discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getMass();
-            R2 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getRadius();
-            break;
         case CollisionType::DiscDisc:
         default:
-            entry.obj2 = &(*params.discs)[collision.j];
+            entry.obj2 = collision.otherDisc;
             entry.invMass2 = 1.0 / discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getMass();
             R2 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getRadius();
         }
@@ -85,14 +88,27 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
 
     for (std::size_t i = 0; i < collisions.size(); ++i)
     {
-        double JV;
         const auto& collision = collisions[i];
+        if (collision.isInvalidatedByDestroyedDisc())
+            continue;
+
+        double JV;
         auto& entry = collisionEntries[i];
         const double e = 1.0;
 
         if (collision.type == CollisionType::DiscContainingMembrane ||
             collision.type == CollisionType::DiscChildMembrane)
+        {
+            const auto permeability = getPermeabilityFor(collision.membrane, collision.disc);
+            if (permeability == MembraneType::Permeability::Bidirectional ||
+                (collision.type == CollisionType::DiscChildMembrane &&
+                 permeability == MembraneType::Permeability::Inward) ||
+                (collision.type == CollisionType::DiscContainingMembrane &&
+                 permeability == MembraneType::Permeability::Outward))
+                continue;
+
             JV = entry.normal * entry.obj1->getVelocity();
+        }
         else
             JV = entry.normal * (entry.obj2->getVelocity() - entry.obj1->getVelocity());
 
@@ -101,7 +117,8 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
 
         if (dLambda == 0)
         {
-            double beta = dt * std::max(entry.penetration, 10.0);
+            // Separation will always happen within 2 time steps
+            double beta = entry.penetration / 2;
 
             switch (collision.type)
             {

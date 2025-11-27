@@ -1,6 +1,7 @@
 #ifndef C4819342_4F4C_446A_9CDF_CA4AA5E00883_HPP
 #define C4819342_4F4C_446A_9CDF_CA4AA5E00883_HPP
 
+#include "CollisionDetector.hpp"
 #include "Membrane.hpp"
 #include "SimulationContext.hpp"
 
@@ -32,8 +33,8 @@ public:
 private:
     void moveDiscsAndApplyUnimolecularReactions(double dt);
     auto detectCollisions();
-    void moveDiscsIntoChildCompartments(auto& discChildMembraneCollisions);
-    void moveDiscsIntoParentCompartment(auto& discContainingMembraneCollisions);
+    void moveDiscsIntoChildCompartments(const CollisionDetector::DetectedCollisions& detectedCollisions);
+    void moveDiscsIntoParentCompartment(const CollisionDetector::DetectedCollisions& detectedCollisions);
     void updateChildCompartments(double dt);
 
     /**

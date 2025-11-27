@@ -16,8 +16,7 @@ class CollisionHandler
 public:
     explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
                               const MembraneTypeRegistry& membraneTypeRegistry);
-    void resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions,
-                           CollisionDetector::Params params, double dt) const;
+    void resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions, double dt) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;

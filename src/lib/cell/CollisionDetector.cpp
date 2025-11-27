@@ -31,10 +31,11 @@ void CollisionDetector::buildEntries(const std::vector<Disc>& discs, const std::
     std::sort(entries_.begin(), entries_.end(), [&](const Entry& e1, const Entry& e2) { return e1.minX < e2.minX; });
 }
 
-std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(const Params& params)
+CollisionDetector::DetectedCollisions CollisionDetector::detectCollisions(const Params& params)
 {
     params_ = params;
-    std::vector<Collision> collisions;
+    DetectedCollisions result;
+    auto& collisions = result.collisions;
     collisions.reserve(50);
 
     const auto getDiscPointer = [&](const Entry& entry)
@@ -45,22 +46,15 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
         return &(*params_.discs)[entry.index];
     };
 
-    const auto getPermeabilityFor = [&](const Membrane& membrane, const Entry& discEntry)
-    {
-        return membraneTypeRegistry_.getByID(membrane.getTypeID())
-            .getPermeabilityFor((*params_.discs)[discEntry.index].getTypeID());
-    };
-
     for (std::size_t i = 0; i < entries_.size(); ++i)
     {
         const auto& entry1 = entries_[i];
         if (entry1.type == EntryType::Disc && !discIsContainedByMembrane(entry1))
         {
-            const auto permeability = getPermeabilityFor(*params_.containingMembrane, entry1);
-
-            if (permeability == MembraneType::Permeability::Inward || permeability == MembraneType::Permeability::None)
-                collisions.push_back(Collision{
-                    .i = static_cast<int>(entry1.index), .j = -1, .type = CollisionType::DiscContainingMembrane});
+            result.indexes[CollisionType::DiscContainingMembrane].push_back(collisions.size());
+            collisions.push_back(Collision{.disc = &(*params_.discs)[entry1.index],
+                                           .membrane = params_.containingMembrane,
+                                           .type = CollisionType::DiscContainingMembrane});
         }
 
         for (std::size_t j = i + 1; j < entries_.size(); ++j)
@@ -83,31 +77,38 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
             {
                 const bool firstIsMembrane = entry1.type == EntryType::Membrane;
 
-                const auto& membrane =
-                    firstIsMembrane ? (*params_.membranes)[entry1.index] : (*params_.membranes)[entry2.index];
-                const auto permeability = getPermeabilityFor(membrane, firstIsMembrane ? entry2 : entry1);
+                Membrane* membrane =
+                    firstIsMembrane ? &(*params_.membranes)[entry1.index] : &(*params_.membranes)[entry2.index];
 
-                if (permeability == MembraneType::Permeability::Outward ||
-                    permeability == MembraneType::Permeability::None)
-                    collisions.push_back(Collision{
-                        .i = firstIsMembrane ? static_cast<int>(entry2.index) : static_cast<int>(entry1.index),
-                        .j = firstIsMembrane ? static_cast<int>(entry1.index) : static_cast<int>(entry2.index),
-                        .type = CollisionType::DiscChildMembrane});
+                result.indexes[CollisionType::DiscChildMembrane].push_back(collisions.size());
+                Disc* disc = firstIsMembrane ? &(*params_.discs)[entry2.index] : &(*params_.discs)[entry1.index];
+
+                collisions.push_back(
+                    Collision{.disc = disc, .membrane = membrane, .type = CollisionType::DiscChildMembrane});
             }
             else
             {
                 if (entry1.type == EntryType::IntrudingDisc)
-                    collisions.push_back(Collision{.i = static_cast<int>(entry1.index),
-                                                   .j = static_cast<int>(entry2.index),
+                {
+                    result.indexes[CollisionType::DiscIntrudingDisc].push_back(collisions.size());
+                    collisions.push_back(Collision{.disc = &(*params_.discs)[entry2.index],
+                                                   .otherDisc = (*params_.intrudingDiscs)[entry1.index],
                                                    .type = CollisionType::DiscIntrudingDisc});
+                }
                 else if (entry2.type == EntryType::IntrudingDisc)
-                    collisions.push_back(Collision{.i = static_cast<int>(entry2.index),
-                                                   .j = static_cast<int>(entry1.index),
+                {
+                    result.indexes[CollisionType::DiscIntrudingDisc].push_back(collisions.size());
+                    collisions.push_back(Collision{.disc = &(*params_.discs)[entry1.index],
+                                                   .otherDisc = (*params_.intrudingDiscs)[entry2.index],
                                                    .type = CollisionType::DiscIntrudingDisc});
+                }
                 else
-                    collisions.push_back(Collision{.i = static_cast<int>(entry1.index),
-                                                   .j = static_cast<int>(entry2.index),
+                {
+                    result.indexes[CollisionType::DiscDisc].push_back(collisions.size());
+                    collisions.push_back(Collision{.disc = &(*params_.discs)[entry1.index],
+                                                   .otherDisc = &(*params_.discs)[entry2.index],
                                                    .type = CollisionType::DiscDisc});
+                }
 
                 ++collisionCounts_[getDiscPointer(entry1)->getTypeID()];
                 ++collisionCounts_[getDiscPointer(entry2)->getTypeID()];
@@ -115,7 +116,7 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectCollisions(co
         }
     }
 
-    return collisions;
+    return result;
 }
 
 DiscTypeMap<int> CollisionDetector::getAndResetCollisionCounts()

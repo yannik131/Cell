@@ -107,19 +107,24 @@ std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc, doubl
     return decompositionReaction(&disc, dt);
 }
 
-void ReactionEngine::applyBimolecularReactions(std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const
+void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const
 {
-    for (std::size_t i = 0; i < collidingDiscs.size(); ++i)
+    for (auto collisionType :
+         {CollisionDetector::CollisionType::DiscDisc, CollisionDetector::CollisionType::DiscIntrudingDisc})
     {
-        if (combinationReaction(collidingDiscs[i].first, collidingDiscs[i].second))
+        auto indexes = detectedCollisions.indexes.find(collisionType);
+        if (indexes == detectedCollisions.indexes.end())
+            continue;
+
+        for (std::size_t index : indexes->second)
         {
-            // One of the discs was destroyed - no collision anymore
-            collidingDiscs[i] = std::move(collidingDiscs.back());
-            collidingDiscs.pop_back();
-            --i;
+            if (combinationReaction(detectedCollisions.collisions[index].disc,
+                                    detectedCollisions.collisions[index].otherDisc))
+                continue;
+            else
+                exchangeReaction(detectedCollisions.collisions[index].disc,
+                                 detectedCollisions.collisions[index].otherDisc);
         }
-        else
-            exchangeReaction(collidingDiscs[i].first, collidingDiscs[i].second);
     }
 }
 

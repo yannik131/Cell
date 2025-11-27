@@ -72,6 +72,8 @@ void PlotModel::reset()
     dataPointForStorage_ = {};
     dataPointForPlotting_ = {};
     averagingCount_ = 0;
+
+    emitPlot();
 }
 
 void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames)

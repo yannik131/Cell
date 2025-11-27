@@ -51,9 +51,21 @@ public:
 
     struct Collision
     {
-        int i;
-        int j;
+        Disc* disc;
+        Disc* otherDisc = nullptr;
+        Membrane* membrane = nullptr;
         CollisionType type;
+
+        bool isInvalidatedByDestroyedDisc() const
+        {
+            return disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
+        }
+    };
+
+    struct DetectedCollisions
+    {
+        std::vector<Collision> collisions;
+        std::unordered_map<CollisionType, std::vector<std::size_t>> indexes;
     };
 
 public:
@@ -61,7 +73,7 @@ public:
 
     void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
                       const std::vector<Disc*>& intrudingDiscs);
-    std::vector<Collision> detectCollisions(const Params& params);
+    DetectedCollisions detectCollisions(const Params& params);
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 
