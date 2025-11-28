@@ -150,25 +150,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="fitIntoViewButton">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Fit into view</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="reinitializeButton">
         <property name="minimumSize">
          <size>
@@ -195,7 +176,7 @@
      <property name="minimumSize">
       <size>
        <width>140</width>
-       <height>37</height>
+       <height>75</height>
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -218,6 +199,25 @@
         </property>
         <property name="text">
          <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fitIntoViewButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Fit into view</string>
         </property>
        </widget>
       </item>

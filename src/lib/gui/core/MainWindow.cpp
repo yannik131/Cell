@@ -207,9 +207,17 @@ void MainWindow::startSimulation()
     simulation_->moveToThread(simulationThread_);
 
     connect(simulationThread_, &QThread::started, ui->simulationControlWidget,
-            [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{true}); });
+            [&]()
+            {
+                ui->menubar->setEnabled(false);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
+            });
     connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
-            [&]() { ui->simulationControlWidget->updateWidgets(SimulationRunning{false}); });
+            [&]()
+            {
+                ui->menubar->setEnabled(true);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
+            });
 
     connect(simulationThread_, &QThread::started,
             [&]()

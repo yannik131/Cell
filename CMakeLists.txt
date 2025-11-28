@@ -79,6 +79,11 @@ target_link_libraries(libcellgui PUBLIC
 )
 
 add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
+
+if(WIN32)
+    target_sources(cell-gui PRIVATE src/apps/cell-gui/cell-gui.rc)
+endif()
+
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
