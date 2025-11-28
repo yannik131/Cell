@@ -5,9 +5,6 @@
 #include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
-#include <glog/logging.h>
-
-#include <map>
 
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
@@ -77,8 +74,24 @@ void SimulationWidget::toggleFullscreen()
     }
 }
 
-void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                              const std::map<std::string, sf::Color>& colorMap)
+void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry)
+{
+    typeShapes_.resize(discTypeRegistry.getValues().size());
+
+    for (const auto& type : discTypeRegistry.getValues())
+    {
+        const auto ID = discTypeRegistry.getIDFor(type.getName());
+
+        sf::CircleShape circleShape;
+        circleShape.setRadius(static_cast<float>(type.getRadius()));
+        circleShape.setFillColor(simulationConfigUpdater_->getDiscTypeColorMap().at(type.getName()));
+        circleShape.setOrigin(sf::Vector2f{static_cast<float>(type.getRadius()), static_cast<float>(type.getRadius())});
+
+        typeShapes_[ID] = circleShape;
+    }
+}
+
+void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
 {
     if (frame.elapsedSimulationTimeUs > 0 &&
         clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(simulationConfigUpdater_->getFPS())))
@@ -87,19 +100,12 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     clock_.restart();
 
     sf::RenderWindow::clear(sf::Color::Black);
-    sf::CircleShape circleShape;
+    rebuildTypeShapes(discTypeRegistry); // TODO Only update cache when needed, same for compartments/membranes
 
     for (const auto& disc : frame.discs_)
     {
-        const auto& discType = discTypeRegistry.getByID(disc.getTypeID());
-
-        circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
-        circleShape.setRadius(static_cast<float>(discType.getRadius()));
-        circleShape.setFillColor(colorMap.at(discType.getName()));
-        circleShape.setOrigin(
-            sf::Vector2f{static_cast<float>(discType.getRadius()), static_cast<float>(discType.getRadius())});
-
-        sf::RenderWindow::draw(circleShape);
+        typeShapes_[disc.getTypeID()].setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
+        sf::RenderWindow::draw(typeShapes_[disc.getTypeID()]);
     }
 
     for (const auto& membrane : frame.membranes_)

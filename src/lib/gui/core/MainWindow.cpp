@@ -67,11 +67,7 @@ MainWindow::MainWindow(QWidget* parent)
             &MainWindow::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
-            [&](const FrameDTO& frame)
-            {
-                ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry(),
-                                             simulationConfigUpdater_->getDiscTypeColorMap());
-            });
+            [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
     connect(ui->simulationWidget, &SimulationWidget::renderRequired,
             [this]() { simulation_->emitFrame(RedrawOnly{true}); });
