@@ -140,6 +140,8 @@ double calculateTimeBeforeCollision(const sf::Vector2d& r, const sf::Vector2d& v
  */
 sf::Vector2d reflectVector(const sf::Vector2d& v, sf::Vector2d n, double l);
 
+double getAngleBetween(const sf::Vector2d& a, const sf::Vector2d& b);
+
 } // namespace cell::mathutils
 
 #endif /* F49356D0_94E7_4146_8837_E2FA0C87BEBB_HPP */

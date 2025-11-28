@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 #include <numeric>
 #include <ostream>
 #include <random>
@@ -115,6 +116,22 @@ sf::Vector2d reflectVector(const sf::Vector2d& v, sf::Vector2d n, double l)
     n /= l;
 
     return v - 2 * (v * n) * n;
+}
+
+double getAngleBetween(const sf::Vector2d& a, const sf::Vector2d& b)
+{
+    const double lenA = abs(a);
+    const double lenB = abs(b);
+
+    if (lenA == 0.0 || lenB == 0.0)
+        return 0.0; // arbitrary, no direction
+
+    double dot = a * b / (lenA * lenB);
+
+    // Clamp to valid range for acos
+    dot = std::clamp(dot, -1.0, 1.0);
+
+    return std::acos(dot) * 180.0 / std::numbers::pi;
 }
 
 } // namespace cell::mathutils

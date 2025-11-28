@@ -2,6 +2,8 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 
+#include <numbers>
+
 namespace cell
 {
 
@@ -12,121 +14,32 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 {
 }
 
-void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions,
-                                         double dt) const
+void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions) const
 {
     const auto& collisions = detectedCollisions.collisions;
     if (collisions.empty())
         return;
 
     using CollisionType = CollisionDetector::CollisionType;
-    struct CollisionEntry
-    {
-        PhysicalObject* obj1 = nullptr;
-        PhysicalObject* obj2 = nullptr;
-        sf::Vector2d normal;
-        double penetration = 0;
-        double effMass = 0;
-        double invMass1 = 0;
-        double invMass2 = 0;
-    };
-    std::vector<CollisionEntry> collisionEntries;
-    collisionEntries.reserve(collisions.size());
-
-    const auto getPermeabilityFor = [&](Membrane* membrane, Disc* disc)
-    { return membraneTypeRegistry_.getByID(membrane->getTypeID()).getPermeabilityFor(disc->getTypeID()); };
 
     for (const auto& collision : collisions)
     {
-        if (collision.isInvalidatedByDestroyedDisc())
-        {
-            collisionEntries.push_back({});
-            continue;
-        }
-
-        CollisionEntry entry;
-        entry.obj1 = collision.disc;
-        const double m1 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj1)->getTypeID()).getMass();
-        entry.invMass1 = 1.0 / m1;
-        const double R1 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj1)->getTypeID()).getRadius();
-        double R2;
-
-        switch (collision.type)
-        {
-        case CollisionType::DiscContainingMembrane:
-        case CollisionType::DiscChildMembrane:
-            entry.obj2 = collision.membrane;
-            R2 = membraneTypeRegistry_.getByID(static_cast<Membrane*>(entry.obj2)->getTypeID()).getRadius();
-            break;
-        case CollisionType::DiscIntrudingDisc:
-        case CollisionType::DiscDisc:
-        default:
-            entry.obj2 = collision.otherDisc;
-            entry.invMass2 = 1.0 / discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getMass();
-            R2 = discTypeRegistry_.getByID(static_cast<Disc*>(entry.obj2)->getTypeID()).getRadius();
-        }
-
-        entry.effMass = 1.0 / (entry.invMass1 + entry.invMass2);
-
-        sf::Vector2d diff = entry.obj2->getPosition() - entry.obj1->getPosition();
-        const double distance = mathutils::abs(diff);
-
-        if (collision.type == CollisionType::DiscContainingMembrane)
-            entry.penetration = std::abs(R2 - R1 - distance);
-        else
-            entry.penetration = std::abs(R1 + R2 - distance);
-
-        if (std::abs(distance) < 1e-3)
-            entry.normal = sf::Vector2d{1, 0};
-        else if (collision.type == CollisionType::DiscChildMembrane)
-            entry.normal = -diff / distance;
-        else
-            entry.normal = diff / distance;
-
-        collisionEntries.push_back(std::move(entry));
-    }
-
-    for (std::size_t i = 0; i < collisions.size(); ++i)
-    {
-        const auto& collision = collisions[i];
-        if (collision.isInvalidatedByDestroyedDisc())
+        const auto context = calculateCollisionContext(collision);
+        if (context.skipCollision)
             continue;
 
-        double JV;
-        auto& entry = collisionEntries[i];
-        const double e = 1.0;
-
-        if (collision.type == CollisionType::DiscContainingMembrane ||
-            collision.type == CollisionType::DiscChildMembrane)
-        {
-            const auto permeability = getPermeabilityFor(collision.membrane, collision.disc);
-            if (permeability == MembraneType::Permeability::Bidirectional ||
-                (collision.type == CollisionType::DiscChildMembrane &&
-                 permeability == MembraneType::Permeability::Inward) ||
-                (collision.type == CollisionType::DiscContainingMembrane &&
-                 permeability == MembraneType::Permeability::Outward))
-                continue;
-
-            JV = entry.normal * entry.obj1->getVelocity();
-        }
-        else
-            JV = entry.normal * (entry.obj2->getVelocity() - entry.obj1->getVelocity());
-
-        double lambdaRaw = -entry.effMass * (1 + e) * JV;
-        double dLambda = std::max(lambdaRaw, 0.0);
-
-        if (dLambda == 0)
+        if (context.impulseChange < 0)
         {
             // Separation will always happen within 2 time steps
-            double beta = entry.penetration / 2;
+            double beta = context.penetration / 2;
 
             switch (collision.type)
             {
-            case CollisionType::DiscContainingMembrane: entry.obj1->move(beta * entry.normal); break;
-            case CollisionType::DiscChildMembrane: entry.obj1->move(beta * entry.normal); break;
+            case CollisionType::DiscContainingMembrane:
+            case CollisionType::DiscChildMembrane: context.disc->move(beta * context.normal); break;
             default:
-                entry.obj1->move(-beta * entry.invMass1 * entry.effMass * entry.normal);
-                entry.obj2->move(beta * entry.invMass2 * entry.effMass * entry.normal);
+                context.disc->move(-beta * context.invMass1 * context.effMass * context.normal);
+                context.obj2->move(beta * context.invMass2 * context.effMass * context.normal);
             }
         }
         else
@@ -134,19 +47,102 @@ void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollis
             switch (collision.type)
             {
             case CollisionType::DiscContainingMembrane:
-                entry.obj1->accelerate(dLambda * entry.normal * entry.invMass1);
-                break;
             case CollisionType::DiscChildMembrane:
-                entry.obj1->accelerate(dLambda * entry.normal * entry.invMass1);
+                context.disc->accelerate(context.impulseChange * context.normal * context.invMass1);
                 break;
             case CollisionType::DiscIntrudingDisc:
             case CollisionType::DiscDisc:
             default:
-                entry.obj1->accelerate(-dLambda * entry.normal * entry.invMass1);
-                entry.obj2->accelerate(dLambda * entry.normal * entry.invMass2);
+                context.disc->accelerate(-context.impulseChange * context.normal * context.invMass1);
+                context.obj2->accelerate(context.impulseChange * context.normal * context.invMass2);
             }
         }
     }
+}
+
+CollisionHandler::CollisionContext
+CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& collision) const
+{
+    CollisionContext context;
+    using CollisionType = CollisionDetector::CollisionType;
+
+    const bool isMembraneCollision =
+        collision.type == CollisionType::DiscContainingMembrane || collision.type == CollisionType::DiscChildMembrane;
+
+    if (collision.isInvalidatedByDestroyedDisc() ||
+        (isMembraneCollision && canGoThrough(collision.disc, collision.membrane, collision.type)))
+    {
+        context.skipCollision = true;
+        return context;
+    }
+
+    context.disc = collision.disc;
+    context.invMass1 = 1.0 / discTypeRegistry_.getByID(context.disc->getTypeID()).getMass();
+    const double R1 = discTypeRegistry_.getByID(context.disc->getTypeID()).getRadius();
+
+    double R2;
+    if (isMembraneCollision)
+    {
+        context.obj2 = collision.membrane;
+        R2 = membraneTypeRegistry_.getByID(collision.membrane->getTypeID()).getRadius();
+        context.invMass2 = 0;
+    }
+    else
+    {
+        context.obj2 = collision.otherDisc;
+        context.invMass2 = 1.0 / discTypeRegistry_.getByID(collision.otherDisc->getTypeID()).getMass();
+        R2 = discTypeRegistry_.getByID(collision.otherDisc->getTypeID()).getRadius();
+    }
+
+    context.effMass = 1.0 / (context.invMass1 + context.invMass2);
+
+    const sf::Vector2d diff = context.obj2->getPosition() - context.disc->getPosition();
+    const double distance = mathutils::abs(diff);
+
+    if (collision.type == CollisionType::DiscContainingMembrane)
+        context.penetration = std::abs(R2 - R1 - distance);
+    else
+        context.penetration = std::abs(R1 + R2 - distance);
+
+    // The normal points in the direction of the impulse change
+    if (std::abs(distance) < 1e-3)
+        context.normal = sf::Vector2d{1, 0};
+    else if (collision.type == CollisionType::DiscChildMembrane)
+        context.normal = -diff / distance;
+    else
+        context.normal = diff / distance;
+
+    double relativeNormalSpeed;
+    const double e = 1.0;
+
+    if (isMembraneCollision)
+        relativeNormalSpeed = context.normal * collision.disc->getVelocity();
+    else
+        relativeNormalSpeed = context.normal * (context.obj2->getVelocity() - collision.disc->getVelocity());
+
+    context.impulseChange = -context.effMass * (1 + e) * relativeNormalSpeed;
+
+    return context;
+}
+
+bool CollisionHandler::canGoThrough(Disc* disc, Membrane* membrane,
+                                    CollisionDetector::CollisionType collisionType) const
+{
+    using CollisionType = CollisionDetector::CollisionType;
+
+    const auto permeability =
+        membraneTypeRegistry_.getByID(membrane->getTypeID()).getPermeabilityFor(disc->getTypeID());
+
+    if (permeability == MembraneType::Permeability::Bidirectional ||
+        (collisionType == CollisionType::DiscChildMembrane && permeability == MembraneType::Permeability::Inward) ||
+        (collisionType == CollisionType::DiscContainingMembrane && permeability == MembraneType::Permeability::Outward))
+    {
+        double angle = mathutils::getAngleBetween(disc->getVelocity(), membrane->getPosition() - disc->getPosition());
+        if (std::abs(90.0 - angle) > 30)
+            return true;
+    }
+
+    return false;
 }
 
 } // namespace cell

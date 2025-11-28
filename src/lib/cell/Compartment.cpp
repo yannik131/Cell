@@ -74,7 +74,7 @@ void Compartment::update(double dt)
 
     auto detectedCollisions = detectCollisions();
     simulationContext_.reactionEngine.applyBimolecularReactions(detectedCollisions);
-    simulationContext_.collisionHandler.resolveCollisions(detectedCollisions, dt);
+    simulationContext_.collisionHandler.resolveCollisions(detectedCollisions);
     moveDiscsIntoChildCompartments(detectedCollisions);
     moveDiscsIntoParentCompartment(detectedCollisions);
 
