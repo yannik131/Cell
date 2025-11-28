@@ -11,11 +11,11 @@ std::string toString(Reaction::Type type)
 {
     switch (type)
     {
-    case Reaction::Decomposition: return "Decomposition";
-    case Reaction::Transformation: return "Transformation";
-    case Reaction::Combination: return "Combination";
-    case Reaction::Exchange: return "Exchange";
-    case Reaction::None: return "None";
+    case Reaction::Type::Decomposition: return "Decomposition";
+    case Reaction::Type::Transformation: return "Transformation";
+    case Reaction::Type::Combination: return "Combination";
+    case Reaction::Type::Exchange: return "Exchange";
+    case Reaction::Type::None: return "None";
     default: throw ExceptionWithLocation("Invalid reaction type");
     }
 }
@@ -105,7 +105,7 @@ DiscTypeID Reaction::getEduct2() const
 
 bool Reaction::hasEduct2() const
 {
-    return type_ & (Combination | Exchange);
+    return type_ == Type::Combination || type_ == Type::Exchange;
 }
 
 void Reaction::setEduct2(DiscTypeID educt2)
@@ -135,7 +135,7 @@ DiscTypeID Reaction::getProduct2() const
 
 bool Reaction::hasProduct2() const
 {
-    return type_ & (Decomposition | Exchange);
+    return type_ == Type::Decomposition || type_ == Type::Exchange;
 }
 
 void Reaction::setProduct2(DiscTypeID product2)
@@ -175,7 +175,7 @@ void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) +
                                     ": Product- and educt masses need to be identical");
 
-    if (type_ == Transformation && educt1_ == product1_)
+    if (type_ == Type::Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
 }
 

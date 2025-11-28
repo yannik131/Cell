@@ -69,14 +69,17 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
         return false;
 
     const auto& resultType = discTypeRegistry_.getByID(reaction->getProduct1());
-    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
+    const auto* d1Type = &discTypeRegistry_.getByID(d1->getTypeID());
+    const auto* d2Type = &discTypeRegistry_.getByID(d2->getTypeID());
 
     // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
-    if (std::abs(resultType.getRadius() - d1Type.getRadius()) > std::abs(resultType.getRadius() - d2Type.getRadius()))
+    if (std::abs(resultType.getRadius() - d1Type->getRadius()) > std::abs(resultType.getRadius() - d2Type->getRadius()))
+    {
         std::swap(d1, d2);
+        std::swap(d1Type, d2Type);
+    }
 
-    d1->setVelocity((d1Type.getMass() * d1->getVelocity() + d2Type.getMass() * d2->getVelocity()) /
+    d1->setVelocity((d1Type->getMass() * d1->getVelocity() + d2Type->getMass() * d2->getVelocity()) /
                     resultType.getMass());
     d1->setType(reaction->getProduct1());
 

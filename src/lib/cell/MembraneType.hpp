@@ -12,10 +12,10 @@ class MembraneType
 public:
     enum class Permeability
     {
-        Inward = 1 << 0,
-        Outward = 1 << 1,
-        Bidirectional = 1 << 2,
-        None = 1 << 3
+        Inward,
+        Outward,
+        Bidirectional,
+        None
     };
 
     using PermeabilityMap = std::unordered_map<DiscTypeID, Permeability>;

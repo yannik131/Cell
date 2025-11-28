@@ -128,7 +128,7 @@ void ReactionTable::checkIfIsDuplicateReaction(const Reaction& reaction) const
 
 bool ReactionTable::isUnary(const Reaction& r) const
 {
-    return r.getType() & (Reaction::Transformation | Reaction::Decomposition);
+    return r.getType() == Reaction::Type::Transformation || r.getType() == Reaction::Type::Decomposition;
 }
 
 } // namespace cell

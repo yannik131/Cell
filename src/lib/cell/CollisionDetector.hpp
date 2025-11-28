@@ -26,9 +26,9 @@ public:
 
     enum class EntryType
     {
-        Disc = 1 << 0,
-        Membrane = 1 << 1,
-        IntrudingDisc = 1 << 2
+        Disc,
+        Membrane,
+        IntrudingDisc
     };
 
     enum class CollisionType

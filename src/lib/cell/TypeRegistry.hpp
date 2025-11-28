@@ -41,6 +41,7 @@ template <typename ValueType> inline void TypeRegistry<ValueType>::setValues(std
     if (values.empty())
     {
         values_.clear();
+        nameIDMap_.clear();
         return;
     }
 
@@ -49,9 +50,8 @@ template <typename ValueType> inline void TypeRegistry<ValueType>::setValues(std
         throw ExceptionWithLocation("Too many types: Registry only supports " + std::to_string(MaxCount) + ", but " +
                                     std::to_string(values.size()) + " were given");
 
-    buildNameIDMap(values);
-
     values_ = std::move(values);
+    buildNameIDMap(values_);
 }
 
 template <typename ValueType> inline const std::vector<ValueType>& TypeRegistry<ValueType>::getValues() const

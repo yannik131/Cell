@@ -27,9 +27,9 @@ void ReactionsTableModel::addRow(cell::Reaction::Type type)
         .educt1 = defaultName, .educt2 = defaultName, .product1 = defaultName, .product2 = defaultName};
     switch (type)
     {
-    case cell::Reaction::Transformation: newReaction.educt2 = newReaction.product2 = ""; break;
-    case cell::Reaction::Decomposition: newReaction.educt2 = ""; break;
-    case cell::Reaction::Combination: newReaction.product2 = ""; break;
+    case cell::Reaction::Type::Transformation: newReaction.educt2 = newReaction.product2 = ""; break;
+    case cell::Reaction::Type::Decomposition: newReaction.educt2 = ""; break;
+    case cell::Reaction::Type::Combination: newReaction.product2 = ""; break;
     default:;
     }
     rows_.push_back(newReaction);

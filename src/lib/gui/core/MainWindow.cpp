@@ -64,22 +64,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
-            [this]()
-            {
-                if (simulationThread_)
-                {
-                    QMessageBox::information(this, "Simulation is running",
-                                             "Can't resize right now, simulation is running");
-                    return;
-                }
-
-                const auto& widgetSize = ui->simulationWidget->size();
-                auto config = simulationConfigUpdater_->getSimulationConfig();
-                config.cellMembraneType.radius = std::min(widgetSize.height() / 2, widgetSize.width() / 2);
-                simulationConfigUpdater_->setSimulationConfig(config);
-
-                ui->simulationWidget->resetView();
-            });
+            [this]() { ui->simulationWidget->resetView(); });
 
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame)

@@ -10,7 +10,7 @@
 ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, simulationConfigUpdater, new ReactionsTableModel(nullptr, simulationConfigUpdater))
 {
-    connect(static_cast<ReactionsTableModel*>(model_), &ReactionsTableModel::newRowRequested,
+    connect(safeCast<ReactionsTableModel*>(model_), &ReactionsTableModel::newRowRequested,
             [this]()
             {
                 using Type = cell::Reaction::Type;

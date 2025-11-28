@@ -136,7 +136,7 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
 
     for (const auto& [discTypeName, frequency] : distribution)
     {
-        const auto count = static_cast<int>(std::round(frequency * discCount));
+        const auto count = static_cast<int>(std::round(frequency * static_cast<double>(discCount)));
         const auto discTypeID = simulationContext_.discTypeRegistry.getIDFor(discTypeName);
 
         for (int i = 0; i < count && !gridPoints.empty(); ++i)

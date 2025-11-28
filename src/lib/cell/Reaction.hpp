@@ -30,13 +30,13 @@ namespace cell
 class Reaction
 {
 public:
-    enum Type
+    enum class Type
     {
-        Transformation = 1 << 0,
-        Decomposition = 1 << 1,
-        Combination = 1 << 2,
-        Exchange = 1 << 3,
-        None = 0
+        Transformation,
+        Decomposition,
+        Combination,
+        Exchange,
+        None
     };
 
 public:
@@ -49,7 +49,6 @@ public:
 
     // Boilerplate getters and setters with no additional documentation
 
-    // TODO remove these and other unneeded functions (maybe?)
     DiscTypeID getEduct1() const;
     void setEduct1(DiscTypeID educt1);
 

@@ -68,12 +68,12 @@ private:
 
     template <typename Self> static auto& unaryMap(Self& self, const Reaction& r)
     {
-        return (r.getType() & Reaction::Transformation) ? self.transformations_ : self.decompositions_;
+        return (r.getType() == Reaction::Type::Transformation) ? self.transformations_ : self.decompositions_;
     }
 
     template <typename Self> static auto& binaryMap(Self& self, const Reaction& r)
     {
-        return (r.getType() & Reaction::Combination) ? self.combinations_ : self.exchanges_;
+        return (r.getType() == Reaction::Type::Combination) ? self.combinations_ : self.exchanges_;
     }
 
 private:

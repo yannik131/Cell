@@ -16,7 +16,7 @@ class SetupDialog : public QDialog
     Q_OBJECT
 public:
     SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
-    ~SetupDialog();
+    ~SetupDialog() override;
 
     void showEvent(QShowEvent*) override;
 
