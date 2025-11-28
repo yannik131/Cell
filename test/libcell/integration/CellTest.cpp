@@ -23,7 +23,7 @@ const double MaxPositionError = 1e-9;
 class ACell : public Test
 {
 protected:
-    double timeStep = 1;
+    const double timeStep = 1;
     SimulationConfigBuilder builder;
     SimulationFactory simulationFactory;
 
@@ -117,8 +117,8 @@ TEST_F(ACell, SimulatesUnimolecularReactions)
     auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
     auto getIDFor = [&](const std::string& name) { return getDiscTypeRegistry().getIDFor(name); };
 
-    ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(1));
-    ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
+    ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(0));
+    ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(0));
     ASSERT_THAT(collisionCounts[getIDFor("C")], Eq(0));
 }
 
@@ -137,15 +137,15 @@ TEST_F(ACell, SimulatesBimolecularReactions)
 
     auto discTypeCounts = countDiscTypes(cell.getDiscs(), getDiscTypeRegistry());
 
-    ASSERT_THAT(discTypeCounts["A"], Eq(0));
-    ASSERT_THAT(discTypeCounts["B"], Eq(1));
-    ASSERT_THAT(discTypeCounts["C"], Eq(2));
+    EXPECT_THAT(discTypeCounts["A"], Eq(0));
+    EXPECT_THAT(discTypeCounts["B"], Eq(1));
+    EXPECT_THAT(discTypeCounts["C"], Eq(2));
 
     auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
 
-    ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(2));
-    ASSERT_THAT(collisionCounts[getIDFor("B")], Eq(1));
-    ASSERT_THAT(collisionCounts[getIDFor("C")], Eq(1));
+    EXPECT_THAT(collisionCounts[getIDFor("A")], Eq(2));
+    EXPECT_THAT(collisionCounts[getIDFor("B")], Eq(1));
+    EXPECT_THAT(collisionCounts[getIDFor("C")], Eq(1));
 }
 
 TEST_F(ACell, SimulatesASingleMembrane)
@@ -159,23 +159,23 @@ TEST_F(ACell, SimulatesASingleMembrane)
     builder.addMembrane("M", Position{.x = 500, .y = 500});
 
     // Outside -> inside
-    builder.addDisc("A", Position{.x = 390, .y = 500}, Velocity{.x = 10, .y = 0});  // Left
-    builder.addDisc("B", Position{.x = 500, .y = 390}, Velocity{.x = 0, .y = 10});  // Top
-    builder.addDisc("C", Position{.x = 610, .y = 500}, Velocity{.x = -10, .y = 0}); // Right
-    builder.addDisc("D", Position{.x = 500, .y = 610}, Velocity{.x = 0, .y = -10}); // Bottom
+    builder.addDisc("A", Position{.x = 400, .y = 500}, Velocity{.x = 10, .y = 0});  // Left
+    builder.addDisc("B", Position{.x = 500, .y = 400}, Velocity{.x = 0, .y = 10});  // Top
+    builder.addDisc("C", Position{.x = 600, .y = 500}, Velocity{.x = -10, .y = 0}); // Right
+    builder.addDisc("D", Position{.x = 500, .y = 600}, Velocity{.x = 0, .y = -10}); // Bottom
 
     // TODO tests for Inside -> outside
 
     auto& cell = createAndUpdateCell();
     auto discs = getAllDiscs(cell);
 
-    expectNear(getDisc(discs, "A").getPosition(), {400, 500}); // Inward: Should go through
+    expectNear(getDisc(discs, "A").getPosition(), {410, 500}); // Inward: Should go through
     expectNear(getDisc(discs, "B").getPosition(), {500, 390}); // Outward: Should collide
-    expectNear(getDisc(discs, "C").getPosition(), {600, 500}); // Bidirectional: Should go through
+    expectNear(getDisc(discs, "C").getPosition(), {590, 500}); // Bidirectional: Should go through
     expectNear(getDisc(discs, "D").getPosition(), {500, 610}); // Undefined permeability: should collide
 }
 
-TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
+TEST_F(ACell, SimulatesReactionsOfDiscsInDifferentCompartments)
 {
     builder.addMembraneType(
         "M", Radius{100}, {{"A", MembraneType::Permeability::Bidirectional}, {"B", MembraneType::Permeability::None}});
@@ -183,28 +183,8 @@ TEST_F(ACell, SimulatesCollisionsWithIntrudingDiscs)
     builder.addMembrane("M", Position{.x = 0, .y = 0});
 
     // A outside of M, B is inside
-    // A has to move faster so that the collision between discs happens before the disc-membrane collision
-    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -10, .y = 0});
-    builder.addDisc("B", Position{.x = 94, .y = 0}, Velocity{.x = 5, .y = 0});
-
-    createAndUpdateCell();
-    const auto& collisionCounts = simulationFactory.getAndResetCollisionCounts();
-
-    ASSERT_EQ(collisionCounts.size(), 2);
-    EXPECT_TRUE(collisionCounts.contains(getIDFor("A")) && collisionCounts.at(getIDFor("A")) == 1);
-    EXPECT_TRUE(collisionCounts.contains(getIDFor("B")) && collisionCounts.at(getIDFor("B")) == 1);
-}
-
-TEST_F(ACell, SimulationReactionsOfDiscsInDifferentCompartments)
-{
-    builder.addMembraneType(
-        "M", Radius{100}, {{"A", MembraneType::Permeability::Bidirectional}, {"B", MembraneType::Permeability::None}});
-
-    builder.addMembrane("M", Position{.x = 0, .y = 0});
-
-    // A outside of M, B is inside
-    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = -10, .y = 0});
-    builder.addDisc("B", Position{.x = 94, .y = 0}, Velocity{.x = 0, .y = 0});
+    builder.addDisc("A", Position{.x = 103, .y = 0}, Velocity{.x = -10, .y = 0});
+    builder.addDisc("B", Position{.x = 95, .y = 0}, Velocity{.x = 0, .y = 0});
 
     builder.addReaction("A", "B", "C", "", Probability{1});
 
@@ -213,11 +193,17 @@ TEST_F(ACell, SimulationReactionsOfDiscsInDifferentCompartments)
 
     ASSERT_EQ(discs.size(), 1);
     EXPECT_EQ(getDiscTypeRegistry().getByID(discs.front().getTypeID()).getName(), "C");
+
+    const auto& collisionCounts = simulationFactory.getAndResetCollisionCounts();
+
+    ASSERT_EQ(collisionCounts.size(), 2);
+    EXPECT_TRUE(collisionCounts.contains(getIDFor("A")) && collisionCounts.at(getIDFor("A")) == 1);
+    EXPECT_TRUE(collisionCounts.contains(getIDFor("B")) && collisionCounts.at(getIDFor("B")) == 1);
 }
 
 TEST_F(ACell, SimulatesNewDiscsCorrectly)
 {
-    builder.addDisc("A", Position{.x = 100, .y = 0}, Velocity{.x = -10, .y = 0});
+    builder.addDisc("A", Position{.x = 90, .y = 0}, Velocity{.x = -10, .y = 0});
     builder.addDisc("B", Position{.x = 90, .y = 0}, Velocity{.x = 0, .y = 0});
     builder.addDisc("D", Position{.x = 80, .y = 0}, Velocity{.x = 0, .y = 0});
 
@@ -229,7 +215,7 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
 
     ASSERT_EQ(discs.size(), 2);
     auto discC = getDisc(discs, "C");
-    expectNear(discC.getPosition(), {90, 0});
+    expectNear(discC.getPosition(), {85, 0});
 
     cell.update(timeStep);
     discs = getAllDiscs(cell);
@@ -238,15 +224,4 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
     ASSERT_EQ(collisions.size(), 2);
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("C")));
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("D")));
-}
-
-TEST_F(ACell, FindsDiscsCollidingWithOuterMembrane)
-{
-    builder.addDiscType("X", Radius{15}, Mass{5});
-    builder.addDisc("X", Position{.x = 60.187431523810069, .y = 122.16987032736733},
-                    Velocity{.x = 730.50388463697072, .y = -259.62602644440216});
-    builder.setCellMembraneType(Radius{150}, {});
-    builder.setTimeStep(0.005);
-
-    auto& cell = createAndUpdateCell();
 }

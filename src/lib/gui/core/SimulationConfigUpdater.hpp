@@ -30,7 +30,6 @@ public:
 
 signals:
     void discTypesChanged();
-    void configChanged();
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;

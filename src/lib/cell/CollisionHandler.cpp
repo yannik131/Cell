@@ -28,7 +28,7 @@ void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollis
         if (context.skipCollision)
             continue;
 
-        if (context.impulseChange < 0)
+        if (context.impulseChange <= 0)
         {
             // Separation will always happen within 2 time steps
             double beta = context.penetration / 2;
@@ -50,8 +50,6 @@ void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollis
             case CollisionType::DiscChildMembrane:
                 context.disc->accelerate(context.impulseChange * context.normal * context.invMass1);
                 break;
-            case CollisionType::DiscIntrudingDisc:
-            case CollisionType::DiscDisc:
             default:
                 context.disc->accelerate(-context.impulseChange * context.normal * context.invMass1);
                 context.obj2->accelerate(context.impulseChange * context.normal * context.invMass2);

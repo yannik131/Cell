@@ -31,7 +31,7 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     // We'll reserve enough space for 5 minutes of plotting, 5*60*10
     dataPoints_.reserve(3000);
 
-    connect(&simulation_->getSimulationConfigUpdater(), &SimulationConfigUpdater::configChanged,
+    connect(&simulation_->getSimulationConfigUpdater(), &SimulationConfigUpdater::discTypesChanged,
             [this]()
             {
                 reset();

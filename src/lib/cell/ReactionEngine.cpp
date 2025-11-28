@@ -41,15 +41,22 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) c
         v = mathutils::abs(d1->getVelocity());
     }
 
-    const sf::Vector2d n = d1->getVelocity() / v;
+    const sf::Vector2d eductNormalizedVelocity = d1->getVelocity() / v;
+    const sf::Vector2d n{-eductNormalizedVelocity.y, eductNormalizedVelocity.x};
 
-    // We will let the collision handling in the next time step take care of separation
     d1->setType(reaction->getProduct1());
-    d1->setVelocity(v * sf::Vector2d{-n.y, n.x});
+    d1->setVelocity(v * n);
 
     Disc product2(reaction->getProduct2());
     product2.setPosition(d1->getPosition());
-    product2.setVelocity(v * sf::Vector2d{n.y, -n.x});
+    product2.setVelocity(-v * n);
+
+    const auto R1 = discTypeRegistry_.getByID(d1->getTypeID()).getRadius();
+    const auto R2 = discTypeRegistry_.getByID(product2.getTypeID()).getRadius();
+    const auto overlap = R1 + R2 + 1e-6; // Discs at same position always have maximum overlap R1 + R2
+
+    d1->move(0.5 * overlap * n);
+    product2.move(-0.5 * overlap * n);
 
     return product2;
 }
@@ -118,12 +125,14 @@ void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollis
 
         for (std::size_t index : indexes->second)
         {
-            if (combinationReaction(detectedCollisions.collisions[index].disc,
-                                    detectedCollisions.collisions[index].otherDisc))
+            const auto& collision = detectedCollisions.collisions[index];
+            if (collision.isInvalidatedByDestroyedDisc())
+                continue;
+
+            if (combinationReaction(collision.disc, collision.otherDisc))
                 continue;
             else
-                exchangeReaction(detectedCollisions.collisions[index].disc,
-                                 detectedCollisions.collisions[index].otherDisc);
+                exchangeReaction(collision.disc, collision.otherDisc);
         }
     }
 }

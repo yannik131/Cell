@@ -72,10 +72,15 @@ bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf:
     return diff.x * diff.x + diff.y * diff.y < (R2 - R1) * (R2 - R1);
 }
 
-bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2, double minOverlap)
+bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2)
+{
+    return circlesOverlap(M1, R1, M2, R2, MinOverlap{0.0});
+}
+
+bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2, MinOverlap minOverlap)
 {
     const auto diff = M1 - M2;
-    const double R = R1 + R2 - minOverlap;
+    const double R = R1 + R2 - minOverlap.value;
 
     return diff.x * diff.x + diff.y * diff.y <= R * R;
 }

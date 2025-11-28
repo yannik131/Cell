@@ -70,7 +70,8 @@ CollisionDetector::DetectedCollisions CollisionDetector::detectCollisions(const 
             // Membrane-membrane: Overlapping membranes aren't allowed to occur
 
             if ((entry1.type != EntryType::Disc && entry2.type != EntryType::Disc) ||
-                !mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
+                !mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius,
+                                           MinOverlap{0.1}))
                 continue;
 
             if (entry1.type == EntryType::Membrane || entry2.type == EntryType::Membrane)

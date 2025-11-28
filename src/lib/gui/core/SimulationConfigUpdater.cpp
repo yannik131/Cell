@@ -23,8 +23,6 @@ void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& 
 
     if (discTypesDidChange)
         emit discTypesChanged();
-
-    emit configChanged();
 }
 
 const std::map<std::string, sf::Color>& SimulationConfigUpdater::getDiscTypeColorMap() const

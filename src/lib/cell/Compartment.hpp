@@ -37,12 +37,6 @@ private:
     void moveDiscsIntoParentCompartment(const CollisionDetector::DetectedCollisions& detectedCollisions);
     void updateChildCompartments(double dt);
 
-    /**
-     * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
-     * calculates the current kinetic energy based on the discs that are still in the cell
-     */
-    void removeDestroyedDiscs();
-
 private:
     Compartment* parent_;
     Membrane membrane_;

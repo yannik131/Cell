@@ -82,6 +82,11 @@ struct Probability
     double value;
 };
 
+struct MinOverlap
+{
+    double value;
+};
+
 } // namespace cell
 
 #endif /* TYPES_HPP */

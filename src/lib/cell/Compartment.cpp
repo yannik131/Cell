@@ -70,16 +70,14 @@ auto Compartment::detectCollisions()
 
 void Compartment::update(double dt)
 {
-    moveDiscsAndApplyUnimolecularReactions(dt);
-
     auto detectedCollisions = detectCollisions();
+
     simulationContext_.reactionEngine.applyBimolecularReactions(detectedCollisions);
-    simulationContext_.collisionHandler.resolveCollisions(detectedCollisions);
     moveDiscsIntoChildCompartments(detectedCollisions);
     moveDiscsIntoParentCompartment(detectedCollisions);
-
+    simulationContext_.collisionHandler.resolveCollisions(detectedCollisions);
     updateChildCompartments(dt);
-
+    moveDiscsAndApplyUnimolecularReactions(dt); // Removes destroyed discs
     intrudingDiscs_.clear();
 }
 
@@ -101,19 +99,18 @@ void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
         auto& disc = discs_[i];
         if (disc.isMarkedDestroyed())
         {
-            // This can happen if a child component has a bimolecular reaction with an intruding disc. We need to remove
-            // these immediately. This assumes that this function is called first in update.
+            // This function also removes destroyed discs and thus needs to be called first
             discs_[i] = std::move(discs_.back());
             discs_.pop_back();
             --i;
             continue;
         }
 
+        disc.move(disc.getVelocity() * dt);
+
         // A -> B returns nothing, A -> B + C returns 1 new disc
         if (auto newDisc = simulationContext_.reactionEngine.applyUnimolecularReactions(disc, dt))
             newDiscs.push_back(std::move(*newDisc));
-
-        disc.move(disc.getVelocity() * dt);
     }
 
     if (!newDiscs.empty())
@@ -130,6 +127,11 @@ void Compartment::moveDiscsIntoChildCompartments(const CollisionDetector::Detect
     {
         const auto& collision = detectedCollisions.collisions[index];
         if (collision.isInvalidatedByDestroyedDisc())
+            continue;
+
+        const auto permeability = simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID())
+                                      .getPermeabilityFor(collision.disc->getTypeID());
+        if (permeability == MembraneType::Permeability::None || permeability == MembraneType::Permeability::Outward)
             continue;
 
         const auto& discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
@@ -166,6 +168,11 @@ void Compartment::moveDiscsIntoParentCompartment(const CollisionDetector::Detect
         if (collision.isInvalidatedByDestroyedDisc())
             continue;
 
+        const auto permeability = simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID())
+                                      .getPermeabilityFor(collision.disc->getTypeID());
+        if (permeability == MembraneType::Permeability::None || permeability == MembraneType::Permeability::Inward)
+            continue;
+
         const auto discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
         if (!mathutils::circlesOverlap(collision.disc->getPosition(), discRadius, M, R))
         {
@@ -181,13 +188,6 @@ void Compartment::updateChildCompartments(double dt)
 {
     for (auto& compartment : compartments_)
         compartment->update(dt);
-}
-
-void Compartment::removeDestroyedDiscs()
-{
-    discs_.erase(
-        std::remove_if(discs_.begin(), discs_.end(), [](const Disc& disc) { return disc.isMarkedDestroyed(); }),
-        discs_.end());
 }
 
 } // namespace cell
