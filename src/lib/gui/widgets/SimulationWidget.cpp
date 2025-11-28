@@ -5,10 +5,6 @@
 #include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
-#include <glog/logging.h>
-
-#include "SimulationWidget.hpp"
-#include <map>
 
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
