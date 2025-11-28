@@ -96,9 +96,9 @@ MainWindow::MainWindow(QWidget* parent)
 
 void MainWindow::resetSimulation()
 {
-    if(simulationThread_)
+    if (simulationThread_)
         return;
-        
+
     simulation_->rebuildContext();
     plotModel_->reset();
     fitSimulationIntoView();
