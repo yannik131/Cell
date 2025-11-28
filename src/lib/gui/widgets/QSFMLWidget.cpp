@@ -96,7 +96,7 @@ void QSFMLWidget::resetView(Zoom zoom)
         sf::FloatRect(0, 0, static_cast<float>(QWidget::size().width()), static_cast<float>(QWidget::size().height())));
     view_.setCenter(0.f, 0.f);
     currentZoom_ = zoom.value;
-    view_.zoom(currentZoom_);
+    view_.zoom(static_cast<float>(currentZoom_));
     offset_ = QPoint(0, 0);
 
     RenderWindow::setView(view_);

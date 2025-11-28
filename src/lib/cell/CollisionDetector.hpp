@@ -18,9 +18,9 @@ class CollisionDetector
 public:
     struct Params
     {
-        std::vector<Disc>* discs;
-        std::vector<Membrane>* membranes;
-        std::vector<Disc*>* intrudingDiscs;
+        std::vector<Disc>* discs = nullptr;
+        std::vector<Membrane>* membranes = nullptr;
+        std::vector<Disc*>* intrudingDiscs = nullptr;
         Membrane* containingMembrane = nullptr;
     };
 

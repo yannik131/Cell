@@ -28,7 +28,8 @@ void Simulation::run()
     {
         timeSinceLastUpdate += clock.restart().asSeconds();
 
-        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)
+        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep &&
+               !QThread::currentThread()->isInterruptionRequested())
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
             simulationFactory_.getCell().update(simulationTimeStep);
@@ -46,7 +47,6 @@ void Simulation::buildContext(const cell::SimulationConfig& config)
 void Simulation::rebuildContext()
 {
     buildContext(simulationConfigUpdater_.getSimulationConfig());
-    emitFrame(RedrawOnly{true});
 }
 
 const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
