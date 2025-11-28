@@ -23,6 +23,7 @@ SimulationFactory::~SimulationFactory() = default;
 
 void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simulationConfig)
 {
+    // Building might fail and we don't want anything dangling
     reset();
 
     try

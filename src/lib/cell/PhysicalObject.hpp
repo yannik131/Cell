@@ -25,16 +25,6 @@ public:
     void accelerate(const sf::Vector2d& acceleration);
 
     /**
-     * @brief Negates the x-component of the velocity
-     */
-    void negateXVelocity();
-
-    /**
-     * @brief Negates the y-component of the velocity
-     */
-    void negateYVelocity();
-
-    /**
      * @brief Sets the position with no checks.
      * @note In debug mode, checks for invalid values (nan, inf)
      */

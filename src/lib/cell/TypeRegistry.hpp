@@ -44,7 +44,7 @@ template <typename ValueType> inline void TypeRegistry<ValueType>::setValues(std
         return;
     }
 
-    const auto& MaxCount = std::numeric_limits<KeyType>::max();
+    const auto MaxCount = std::numeric_limits<KeyType>::max();
     if (values.size() > MaxCount)
         throw ExceptionWithLocation("Too many types: Registry only supports " + std::to_string(MaxCount) + ", but " +
                                     std::to_string(values.size()) + " were given");

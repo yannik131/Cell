@@ -122,26 +122,6 @@ bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, con
 
 double calculateOverlap(const sf::Vector2d& r, double R1, double R2);
 
-/**
- * @brief Given 2 circles, returns the earlier of the 2 times where they just started touching
- * @param r Relative position vector
- * @param v Relative velocity vector
- * @param R1 Radius of circle 1
- * @param R2 Radius of circle 2
- */
-double calculateTimeBeforeCollision(const sf::Vector2d& r, const sf::Vector2d& v, double R1, double R2);
-
-/**
- * @brief Reflects `v` on `n` with |n| = `l`.
- * @param v The vector to reflect
- * @param n The vector normal to the vector that `v` should be reflected on.
- * @param l Needs to be equal to |n|. This is just here because calculating abs(n) might be expensive and could be
- * avoided in some scenarios, like when discs are moved to the point just before a collision and distances are known.
- * @note For example, if `v` should be reflected on
- * the x-axis, then n = [1, 0] or [-1, 0], because [1, 0] and [-1, 0] are perpendicular (normal) to the x-axis.
- */
-sf::Vector2d reflectVector(const sf::Vector2d& v, sf::Vector2d n, double l);
-
 double getAngleBetween(const sf::Vector2d& a, const sf::Vector2d& b);
 
 } // namespace cell::mathutils

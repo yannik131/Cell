@@ -25,16 +25,6 @@ void PhysicalObject::accelerate(const sf::Vector2d& acceleration)
     setVelocity(velocity_ + acceleration);
 }
 
-void PhysicalObject::negateXVelocity()
-{
-    velocity_.x = -velocity_.x;
-}
-
-void PhysicalObject::negateYVelocity()
-{
-    velocity_.y = -velocity_.y;
-}
-
 void PhysicalObject::setPosition(const sf::Vector2d& position)
 {
 #ifdef DEBUG

@@ -1,14 +1,4 @@
 #include "Cell.hpp"
-#include "CollisionDetector.hpp"
-#include "CollisionHandler.hpp"
-#include "Compartment.hpp"
-#include "Disc.hpp"
-#include "MathUtils.hpp"
-#include "Membrane.hpp"
-#include "ReactionEngine.hpp"
-#include "Settings.hpp"
-
-#include <algorithm>
 
 namespace cell
 {

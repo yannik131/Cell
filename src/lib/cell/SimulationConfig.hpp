@@ -45,7 +45,7 @@ struct MembraneType
     PermeabilityMap permeabilityMap;
 
     // Only used if distributions are enabled, not part of the actual membrane type:
-    int discCount;
+    int discCount = 0;
     DiscTypeDistribution discTypeDistribution;
 
     bool operator==(const MembraneType&) const = default;

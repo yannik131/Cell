@@ -8,6 +8,7 @@
 class AbstractConfigChanger
 {
 public:
+    virtual ~AbstractConfigChanger() = default;
     virtual void loadFromConfig() = 0;
     virtual void saveToConfig() = 0;
 };
@@ -20,7 +21,7 @@ public:
     using RowType = T;
 
 public:
-    AbstractSimulationConfigTableModel(QObject* parent, const QStringList& headers,
+    AbstractSimulationConfigTableModel(QObject* parent, QStringList headers,
                                        SimulationConfigUpdater* simulationConfigUpdater);
 
     // Necessary methods from QAbstractTableModel with default implementations
@@ -57,9 +58,9 @@ protected:
 
 template <typename T>
 inline AbstractSimulationConfigTableModel<T>::AbstractSimulationConfigTableModel(
-    QObject* parent, const QStringList& headers, SimulationConfigUpdater* simulationConfigUpdater)
+    QObject* parent, QStringList headers, SimulationConfigUpdater* simulationConfigUpdater)
     : QAbstractTableModel(parent)
-    , headers_(headers)
+    , headers_(std::move(headers))
     , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
