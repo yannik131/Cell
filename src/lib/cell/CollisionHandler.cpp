@@ -78,7 +78,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     context.invMass1 = 1.0 / discTypeRegistry_.getByID(context.disc->getTypeID()).getMass();
     const double R1 = discTypeRegistry_.getByID(context.disc->getTypeID()).getRadius();
 
-    double R2;
+    double R2 = NAN;
     if (isMembraneCollision)
     {
         context.obj2 = collision.membrane;
@@ -110,7 +110,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     else
         context.normal = diff / distance;
 
-    double relativeNormalSpeed;
+    double relativeNormalSpeed = NAN;
     const double e = 1.0;
 
     if (isMembraneCollision)

@@ -14,7 +14,7 @@ ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simul
             [this]()
             {
                 using Type = cell::Reaction::Type;
-                auto model = static_cast<ReactionsTableModel*>(model_);
+                auto model = safeCast<ReactionsTableModel*>(model_);
 
                 QMenu menu;
                 menu.addAction("Transformation",

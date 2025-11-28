@@ -8,9 +8,9 @@
 /**
  * @brief Performs a qobject_cast with the given type and throws and exception if it returns `nullptr`
  */
-template <typename T> T safeCast(QWidget* widget)
+template <typename T, typename Target = QWidget> T safeCast(Target* target)
 {
-    T result = qobject_cast<T>(widget);
+    T result = qobject_cast<T>(target);
     if (!result)
         throw ExceptionWithLocation("qobject_cast returned nullptr");
 

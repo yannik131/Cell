@@ -81,7 +81,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
                               const std::map<std::string, sf::Color>& colorMap)
 {
     if (frame.elapsedSimulationTimeUs > 0 &&
-        clock_.getElapsedTime() < sf::seconds(1.f / simulationConfigUpdater_->getFPS()))
+        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(simulationConfigUpdater_->getFPS())))
         return;
 
     clock_.restart();

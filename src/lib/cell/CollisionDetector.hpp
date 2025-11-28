@@ -42,19 +42,19 @@ public:
 
     struct Entry
     {
-        std::size_t index;
-        double radius;
+        std::size_t index = 0;
+        double radius = 0;
         sf::Vector2d position;
-        double minX, maxX;
-        EntryType type;
+        double minX = 0, maxX = 0;
+        EntryType type = EntryType::Disc;
     };
 
     struct Collision
     {
-        Disc* disc;
+        Disc* disc = nullptr;
         Disc* otherDisc = nullptr;
         Membrane* membrane = nullptr;
-        CollisionType type;
+        CollisionType type = CollisionType::None;
 
         bool isInvalidatedByDestroyedDisc() const
         {

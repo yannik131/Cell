@@ -23,7 +23,7 @@ public:
      * @brief Loads the settings and connects the callbacks
      */
     PlotDataSelectionDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater, PlotModel* plotModel);
-    ~PlotDataSelectionDialog();
+    ~PlotDataSelectionDialog() override;
 
     void showEvent(QShowEvent* event) override;
 

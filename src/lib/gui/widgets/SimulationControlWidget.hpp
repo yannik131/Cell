@@ -20,7 +20,7 @@ class SimulationControlWidget : public QWidget
     Q_OBJECT
 public:
     SimulationControlWidget(QWidget* parent = nullptr);
-    ~SimulationControlWidget();
+    ~SimulationControlWidget() override;
 
     void updateWidgets(SimulationRunning simulationRunning);
 

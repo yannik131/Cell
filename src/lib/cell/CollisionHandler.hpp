@@ -16,16 +16,16 @@ class CollisionHandler
 private:
     struct CollisionContext
     {
-        Disc* disc;
-        PhysicalObject* obj2;
+        Disc* disc = nullptr;
+        PhysicalObject* obj2 = nullptr;
 
-        double invMass1, invMass2;
-        double effMass;
+        double invMass1 = 0, invMass2 = 0;
+        double effMass = 0;
 
         sf::Vector2d normal;
-        double penetration;
+        double penetration = 0;
 
-        double impulseChange;
+        double impulseChange = 0;
 
         bool skipCollision = false;
     };

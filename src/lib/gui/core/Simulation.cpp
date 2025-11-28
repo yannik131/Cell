@@ -109,10 +109,11 @@ sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& 
     sf::CircleShape shape;
     const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
     const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
+    const auto R = static_cast<float>(membraneType.getRadius());
 
     shape.setPointCount(100);
-    shape.setRadius(membraneType.getRadius());
-    shape.setOrigin(membraneType.getRadius(), membraneType.getRadius());
+    shape.setRadius(R);
+    shape.setOrigin(R, R);
     shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineThickness(1);

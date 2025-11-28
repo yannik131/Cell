@@ -18,7 +18,7 @@ class PlotControlWidget : public QWidget
     Q_OBJECT
 public:
     PlotControlWidget(QWidget* parent = nullptr);
-    ~PlotControlWidget();
+    ~PlotControlWidget() override;
 
     void setModel(PlotModel* plotModel);
 
