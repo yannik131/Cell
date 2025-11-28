@@ -99,7 +99,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
             ++i;
     }
 
-    if (gridPoints.size() < discCount)
+    if (static_cast<int>(gridPoints.size()) < discCount)
     {
         LOG(WARNING) << std::to_string(discCount)
                      << " discs should be created for membrane of type \"" + membraneType.getName() +

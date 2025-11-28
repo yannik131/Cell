@@ -1,7 +1,7 @@
 #include "PhysicalObject.hpp"
 #include "ExceptionWithLocation.hpp"
 
-#include <functional>
+#include <cmath>
 
 namespace cell
 {
