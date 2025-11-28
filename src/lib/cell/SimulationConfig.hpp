@@ -1,6 +1,7 @@
 #ifndef CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 #define CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 
+#include "MembraneType.hpp"
 #include "Settings.hpp"
 #include "Vector2d.hpp"
 
@@ -15,6 +16,11 @@ namespace cell
 
 namespace config
 {
+
+inline const std::string cellMembraneTypeName = "Cell membrane";
+
+using PermeabilityMap = std::unordered_map<std::string, cell::MembraneType::Permeability>;
+using DiscTypeDistribution = std::unordered_map<std::string, double>;
 
 struct DiscType
 {
@@ -32,6 +38,26 @@ struct Disc
     bool operator==(const Disc&) const = default;
 };
 
+struct MembraneType
+{
+    std::string name;
+    double radius = 0;
+    PermeabilityMap permeabilityMap;
+
+    // Only used if distributions are enabled, not part of the actual membrane type:
+    int discCount = 0;
+    DiscTypeDistribution discTypeDistribution;
+
+    bool operator==(const MembraneType&) const = default;
+};
+
+struct Membrane
+{
+    std::string membraneTypeName;
+    double x = 0, y = 0;
+    bool operator==(const Membrane&) const = default;
+};
+
 struct Reaction
 {
     std::string educt1, educt2, product1, product2;
@@ -39,10 +65,15 @@ struct Reaction
     bool operator==(const Reaction&) const = default;
 };
 
-struct Setup
+} // namespace config
+
+struct SimulationConfig
 {
-    double cellWidth = SettingsLimits::MinCellWidth;
-    double cellHeight = SettingsLimits::MinCellHeight;
+    std::vector<config::DiscType> discTypes;
+    std::vector<config::MembraneType> membraneTypes;
+    std::vector<config::Reaction> reactions;
+
+    config::MembraneType cellMembraneType{.name = config::cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
@@ -62,23 +93,12 @@ struct Setup
 
     bool useDistribution = true;
 
-    // In case of distribution:
-    int discCount = SettingsLimits::MinNumberOfDiscs;
-    std::map<std::string, double> distribution;
-
     // In case not:
     std::vector<config::Disc> discs;
 
-    bool operator==(const Setup&) const = default;
-};
+    // These never use a distribution
+    std::vector<config::Membrane> membranes;
 
-} // namespace config
-
-struct SimulationConfig
-{
-    std::vector<config::DiscType> discTypes;
-    std::vector<config::Reaction> reactions;
-    config::Setup setup;
     bool operator==(const SimulationConfig&) const = default;
 };
 
@@ -87,13 +107,18 @@ namespace config
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DiscType, name, radius, mass)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Disc, discTypeName, x, y, vx, vy)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(MembraneType, name, radius, permeabilityMap, discCount, discTypeDistribution)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Membrane, membraneTypeName, x, y)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2, probability)
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Setup, cellWidth, cellHeight, simulationTimeStep, simulationTimeScale, maxVelocity,
-                                   useDistribution, discCount, distribution, discs)
 
 } // namespace config
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, reactions, setup)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
+                                   simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution, discs,
+                                   membranes)
+
+cell::config::MembraneType& findMembraneTypeByName(cell::SimulationConfig& simulationConfig,
+                                                   std::string membraneTypeName);
 
 } // namespace cell
 

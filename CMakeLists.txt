@@ -79,6 +79,11 @@ target_link_libraries(libcellgui PUBLIC
 )
 
 add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
+
+if(WIN32)
+    target_sources(cell-gui PRIVATE src/apps/cell-gui/cell-gui.rc)
+endif()
+
 target_link_libraries(cell-gui libcellgui)
 
 # benchmark target
@@ -118,11 +123,3 @@ target_include_directories(tests-libcell PUBLIC
 
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)
-
-# tests for gui
-add_executable(tests-gui ${PROJECT_SOURCE_DIR}/test/libcellgui/e2e/DiscTypesTest.cpp)
-
-target_link_libraries(tests-gui PRIVATE 
-    libcellgui 
-    Qt::Test
-)

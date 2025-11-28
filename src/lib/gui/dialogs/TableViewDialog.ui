@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ReactionsDialog</class>
- <widget class="QDialog" name="ReactionsDialog">
+ <class>TableViewDialog</class>
+ <widget class="QDialog" name="TableViewDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -9,80 +9,41 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>967</width>
+    <width>700</width>
     <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Reactions</string>
+   <string/>
   </property>
   <property name="modal">
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableView" name="reactionsTableView"/>
+    <widget class="QTableView" name="tableView"/>
    </item>
    <item>
     <widget class="QWidget" name="widget_3" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QPushButton" name="addTransformationReactionPushButton">
+       <widget class="QPushButton" name="addPushButton">
         <property name="maximumSize">
          <size>
-          <width>150</width>
+          <width>75</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="text">
-         <string>Transformation</string>
+         <string>Add</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="addDecompositionReactionPushButton">
+       <widget class="QPushButton" name="clearPushButton">
         <property name="maximumSize">
          <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Decomposition reaction</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="addCombinationReactionPushButton">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Combination reaction</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="addExchangeReactionPushButton">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Exchange reaction</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="clearReactionsPushButton">
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
+          <width>75</width>
           <height>16777215</height>
          </size>
         </property>
@@ -99,6 +60,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QPushButton" name="okPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>OK</string>
         </property>
@@ -106,6 +73,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="cancelPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Cancel</string>
         </property>

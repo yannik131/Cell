@@ -2,42 +2,30 @@
 #define CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
 
 #include <QObject>
 
-class DiscTypeDistributionTableModel;
-class DiscTableModel;
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 
-class SetupModel : public QObject
+class SetupModel : public QObject, public AbstractConfigChanger
 {
     Q_OBJECT
 public:
-    explicit SetupModel(QObject* parent, DiscTypeDistributionTableModel* discTypeDistributionTableModel,
-                        DiscTableModel* discTableModel, AbstractSimulationBuilder* abstractSimulationBuilder);
+    SetupModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void setUseDistribution(bool useDistribution);
-    void setNumberOfDiscs(int numberOfDiscs);
     void setTimeStepUs(int timeStepUs);
     void setTimeScale(double timeScale);
-    void setCellWidth(int cellWidth);
-    void setCellHeight(int cellHeight);
     void setMaxVelocity(int maxVelocity);
+    void setFPS(int FPS);
 
-    // TODO make an interface out of this, there's 3 dialogs and models doing the same shit
-    void commitChanges();
-    void reload();
-    const cell::config::Setup& getSetup();
-
-private:
-    void loadDiscsAndDistribution();
+    void saveToConfig() override;
+    void loadFromConfig() override;
 
 private:
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
-    DiscTypeDistributionTableModel* discTypeDistributionTableModel_;
-    DiscTableModel* discTableModel_;
-
-    cell::config::Setup setup_;
+    SimulationConfigUpdater* simulationConfigUpdater_;
+    cell::SimulationConfig simulationConfig_;
 };
 
 #endif /* CA3C5220_84D1_4F43_AEE6_80E28349C546_HPP */

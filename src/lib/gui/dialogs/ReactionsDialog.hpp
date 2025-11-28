@@ -1,33 +1,16 @@
 #ifndef FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP
 #define FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP
 
-#include <QDialog>
+#include "dialogs/TableViewDialog.hpp"
+#include "models/ReactionsTableModel.hpp"
 
-namespace Ui
-{
-class ReactionsDialog;
-};
-
-class ReactionsTableModel;
-class AbstractSimulationBuilder;
-
-/**
- * @brief Dialog where the user can create/delete reactions
- */
-class ReactionsDialog : public QDialog
+class ReactionsDialog : public TableViewDialog<ReactionsTableModel::RowType>
 {
     Q_OBJECT
+    using Base = TableViewDialog<ReactionsTableModel::RowType>;
+
 public:
-    /**
-     * @brief Creates the delegates for displaying the reactions and connects callbacks
-     */
-    explicit ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
-
-    void showEvent(QShowEvent* event) override;
-
-private:
-    Ui::ReactionsDialog* ui;
-    ReactionsTableModel* reactionsTableModel_;
+    ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
 };
 
 #endif /* FF484939_FF4B_43EC_AAEA_E6416E44A6F1_HPP */

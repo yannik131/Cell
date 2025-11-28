@@ -1,6 +1,8 @@
 #ifndef FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP
 #define FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP
 
+#include "core/Types.hpp"
+
 #include <QTimer>
 #include <QWidget>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -60,7 +62,7 @@ public:
     /**
      * @brief Creates a new view without zoom and translation and resets zoom and translation offset
      */
-    void resetView();
+    void resetView(Zoom zoom = Zoom{1});
 
     /**
      * @returns the accumulative zoom of the view

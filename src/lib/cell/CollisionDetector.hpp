@@ -1,11 +1,10 @@
 #ifndef F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
 #define F674C74F_4648_4098_89DD_4A99F7F0CB5C_HPP
 
-#include "PositionNanoflannAdapter.hpp"
+#include "Disc.hpp"
+#include "Membrane.hpp"
 #include "Types.hpp"
 #include "Vector2d.hpp"
-
-#include <nanoflann.hpp>
 
 #include <optional>
 #include <set>
@@ -14,57 +13,96 @@
 namespace cell
 {
 
-class Disc;
-
 class CollisionDetector
 {
 public:
-    template <typename T> using AdapterType = nanoflann::L2_Simple_Adaptor<double, PositionNanoflannAdapter<T>>;
-
-    template <typename T>
-    using KDTree = nanoflann::KDTreeSingleIndexAdaptor<AdapterType<T>, PositionNanoflannAdapter<T>, 2>;
-
-    struct RectangleCollision
+    struct Params
     {
-        enum class Wall
-        {
-            Left,
-            Top,
-            Right,
-            Bottom,
-            None
-        };
+        std::vector<Disc>* discs = nullptr;
+        std::vector<Membrane>* membranes = nullptr;
+        std::vector<Disc*>* intrudingDiscs = nullptr;
+        Membrane* containingMembrane = nullptr;
+    };
 
-        // A disc can either collide with 1 wall at a time or with both top/left, top/right, bottom/left and
-        // bottom/right
-        // We track the penetration into each wall in px
-        std::optional<std::pair<Wall, double>> xCollision_;
-        std::optional<std::pair<Wall, double>> yCollision_;
+    enum class EntryType
+    {
+        Disc,
+        Membrane,
+        IntrudingDisc
+    };
 
-        bool isCollision() const
+    enum class CollisionType
+    {
+        DiscDisc,
+        DiscIntrudingDisc,
+        DiscContainingMembrane,
+        DiscChildMembrane,
+        None
+    };
+
+    struct Entry
+    {
+        std::size_t index = 0;
+        double radius = 0;
+        sf::Vector2d position;
+        double minX = 0, maxX = 0;
+        EntryType type = EntryType::Disc;
+    };
+
+    struct Collision
+    {
+        Disc* disc = nullptr;
+        Disc* otherDisc = nullptr;
+        Membrane* membrane = nullptr;
+        CollisionType type = CollisionType::None;
+
+        bool isInvalidatedByDestroyedDisc() const
         {
-            return xCollision_.has_value() || yCollision_.has_value();
+            return disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
         }
     };
 
+    struct DetectedCollisions
+    {
+        std::vector<Collision> collisions;
+        std::unordered_map<CollisionType, std::vector<std::size_t>> indexes;
+    };
+
 public:
-    CollisionDetector(DiscTypeResolver discTypeResolver, MaxRadiusProvider maxRadiusProvider);
+    CollisionDetector(const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry);
 
-    RectangleCollision detectDiscRectangleCollision(const Disc& disc, const sf::Vector2d& topLeft,
-                                                    const sf::Vector2d& bottomRight) const;
+    void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
+                      const std::vector<Disc*>& intrudingDiscs);
+    DetectedCollisions detectCollisions(const Params& params);
 
-    std::vector<std::pair<Disc*, Disc*>> detectDiscDiscCollisions(std::vector<Disc>& discs);
-
-    /**
-     * @returns the collision counts for all disc types in the simulation and sets them to 0
-     */
     DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
+    template <typename ElementType, typename RegistryType>
+    Entry createEntry(const ElementType& element, const RegistryType& registry, std::size_t index,
+                      EntryType entryType) const;
+
+    bool discIsContainedByMembrane(const Entry& entry);
+
+private:
     DiscTypeMap<int> collisionCounts_;
-    DiscTypeResolver discTypeResolver_;
-    MaxRadiusProvider maxRadiusProvider_;
+
+    const DiscTypeRegistry& discTypeRegistry_;
+    const MembraneTypeRegistry& membraneTypeRegistry_;
+
+    std::vector<Entry> entries_;
+    Params params_;
 };
+
+template <typename ElementType, typename RegistryType>
+inline CollisionDetector::Entry CollisionDetector::createEntry(const ElementType& element, const RegistryType& registry,
+                                                               std::size_t index, EntryType entryType) const
+{
+    const double r = registry.getByID(element.getTypeID()).getRadius();
+    const auto& p = element.getPosition();
+
+    return Entry{.index = index, .radius = r, .position = p, .minX = p.x - r, .maxX = p.x + r, .type = entryType};
+}
 
 } // namespace cell
 

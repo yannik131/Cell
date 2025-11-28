@@ -5,6 +5,7 @@
  * @brief The math utilities here are partly explained in the physics part of the documentation
  */
 
+#include "Types.hpp"
 #include "Vector2d.hpp"
 
 #include <SFML/System/Time.hpp>
@@ -73,6 +74,8 @@ namespace cell::mathutils
  */
 double abs(const sf::Vector2d& vec);
 
+sf::Vector2d calculateNormal(const sf::Vector2d& v1, const sf::Vector2d& v2);
+
 /**
  * @brief Returns a number in the given range
  */
@@ -96,6 +99,30 @@ template <typename T> T getRandomNumber(std::type_identity_t<T> low, std::type_i
  * settings.
  */
 std::vector<sf::Vector2d> calculateGrid(double width, double height, double edgeLength);
+
+bool pointIsInCircle(const sf::Vector2d& point, const sf::Vector2d& M, double R);
+
+/**
+ * @param M1 Center point of contained circle
+ * @param R1 Radius of contained circle
+ * @param M2 Center point of containing circle
+ * @param R2 Radius of containing circle
+ */
+bool circleIsFullyContainedByCircle(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+
+bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+bool circlesOverlap(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2, MinOverlap minOverlap);
+
+bool circlesIntersect(const sf::Vector2d& M1, double R1, const sf::Vector2d& M2, double R2);
+
+/**
+ * @return `true` if the moving object at position `pos1` with velocity `velocity` is moving towards the point `point`
+ */
+bool isMovingTowards(const sf::Vector2d& pos1, const sf::Vector2d& velocity, const sf::Vector2d& point);
+
+double calculateOverlap(const sf::Vector2d& r, double R1, double R2);
+
+double getAngleBetween(const sf::Vector2d& a, const sf::Vector2d& b);
 
 } // namespace cell::mathutils
 

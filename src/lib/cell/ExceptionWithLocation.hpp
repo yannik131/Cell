@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <source_location>
-#include <sstream>
 #include <stdexcept>
 
 namespace fs = std::filesystem;

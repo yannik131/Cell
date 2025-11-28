@@ -1,82 +1,24 @@
-#ifndef EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP
-#define EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP
+#ifndef CED957EE_7402_4CC8_9E3D_517440690039_HPP
+#define CED957EE_7402_4CC8_9E3D_517440690039_HPP
 
-#include "Cell.hpp"
-#include "CollisionDetector.hpp"
-#include "CollisionHandler.hpp"
-#include "DiscTypeRegistry.hpp"
-#include "ReactionEngine.hpp"
-#include "ReactionTable.hpp"
-#include "SimulationConfig.hpp"
-
-#include <SFML/System/Time.hpp>
+#include "Types.hpp"
 
 namespace cell
 {
 
-class InvalidDiscTypesException : public std::runtime_error
+class ReactionEngine;
+class CollisionDetector;
+class CollisionHandler;
+
+struct SimulationContext
 {
-    using std::runtime_error::runtime_error;
-};
-
-class InvalidReactionsException : public std::runtime_error
-{
-    using std::runtime_error::runtime_error;
-};
-
-class InvalidSetupException : public std::runtime_error
-{
-    using std::runtime_error::runtime_error;
-};
-
-class SimulationContext
-{
-public:
-    SimulationContext() = default;
-
-    void buildContextFromConfig(const SimulationConfig& simulationConfig);
-
-    const DiscTypeRegistry& getDiscTypeRegistry() const;
-    Cell& getCell();
-    bool isBuilt() const;
-
-    DiscTypeMap<int> getAndResetCollisionCounts();
-
-private:
-    SimulationTimeStepProvider buildSimulationTimeStepProvider(const sf::Time& simulationTimeStep);
-    DiscTypeRegistry buildDiscTypeRegistry(const SimulationConfig& simulationConfig) const;
-    ReactionTable buildReactionTable(const SimulationConfig& simulationConfig, const DiscTypeRegistry& discTypeRegistry,
-                                     DiscTypeResolver discTypeResolver) const;
-    ReactionEngine buildReactionEngine(DiscTypeResolver discTypeResolver,
-                                       SimulationTimeStepProvider simulationTimeStepProvider,
-                                       const ReactionTable& reactionTable) const;
-    CollisionDetector buildCollisionDetector(DiscTypeResolver discTypeResolver,
-                                             MaxRadiusProvider maxRadiusProvider) const;
-    CollisionHandler buildCollisionHandler(DiscTypeResolver discTypeResolver) const;
-    Cell buildCell(const SimulationConfig& simulationConfig, MaxRadiusProvider maxRadiusProvider,
-                   SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver) const;
-
-    std::vector<Disc> getDiscsFromConfig(const SimulationConfig& simulationConfig,
-                                         MaxRadiusProvider maxRadiusProvider) const;
-    std::vector<Disc> createDiscsDirectly(const SimulationConfig& simulationConfig) const;
-    std::vector<Disc> createDiscGridFromDistribution(const SimulationConfig& simulationConfig,
-                                                     MaxRadiusProvider maxRadiusProvider) const;
-
-    double calculateDistributionSum(const std::map<std::string, double>& distribution) const;
-
-    void throwIfNotBuildYet() const;
-
-private:
-    std::unique_ptr<DiscTypeRegistry> discTypeRegistry_;
-    std::unique_ptr<ReactionTable> reactionTable_;
-    std::unique_ptr<ReactionEngine> reactionEngine_;
-    std::unique_ptr<CollisionDetector> collisionDetector_;
-    std::unique_ptr<CollisionHandler> collisionHandler_;
-    std::unique_ptr<Cell> cell_;
-
-    bool built_ = false;
+    const DiscTypeRegistry& discTypeRegistry;
+    const MembraneTypeRegistry& membraneTypeRegistry;
+    const ReactionEngine& reactionEngine;
+    CollisionDetector& collisionDetector;
+    const CollisionHandler& collisionHandler;
 };
 
 } // namespace cell
 
-#endif /* EAA46EC4_DDB5_4CF5_A61A_8BC66872C559_HPP */
+#endif /* CED957EE_7402_4CC8_9E3D_517440690039_HPP */

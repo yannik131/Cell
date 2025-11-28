@@ -8,7 +8,7 @@ namespace Ui
 class PlotDataSelectionDialog;
 }
 
-class AbstractSimulationBuilder;
+class SimulationConfigUpdater;
 class PlotModel;
 
 /**
@@ -22,14 +22,14 @@ public:
     /**
      * @brief Loads the settings and connects the callbacks
      */
-    explicit PlotDataSelectionDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder,
-                                     PlotModel* plotModel);
+    PlotDataSelectionDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater, PlotModel* plotModel);
+    ~PlotDataSelectionDialog() override;
 
     void showEvent(QShowEvent* event) override;
 
 private:
-    Ui::PlotDataSelectionDialog* ui;
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
+    std::unique_ptr<Ui::PlotDataSelectionDialog> ui;
+    SimulationConfigUpdater* simulationConfigUpdater_;
     PlotModel* plotModel_;
 };
 

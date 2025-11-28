@@ -14,6 +14,9 @@ class MainWindow;
 }
 
 class DiscTypesDialog;
+class DiscsDialog;
+class MembraneTypesDialog;
+class MembranesDialog;
 class ReactionsDialog;
 class SetupDialog;
 class PlotDataSelectionDialog;
@@ -75,15 +78,20 @@ private:
      */
     void loadSettingsFromJson();
 
+    void fitSimulationIntoView();
     void toggleSimulationFullscreen();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QThread* simulationThread_ = nullptr;
     std::unique_ptr<Simulation> simulation_;
+    SimulationConfigUpdater* simulationConfigUpdater_;
     PlotModel* plotModel_;
 
     DiscTypesDialog* discTypesDialog_;
+    DiscsDialog* discsDialog_;
+    MembraneTypesDialog* membraneTypesDialog_;
+    MembranesDialog* membranesDialog_;
     ReactionsDialog* reactionsDialog_;
     SetupDialog* setupDialog_;
     PlotDataSelectionDialog* plotDataSelectionDialog_;

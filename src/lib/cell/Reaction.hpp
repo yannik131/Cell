@@ -2,7 +2,6 @@
 #define ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
 
 #include "DiscType.hpp"
-#include "DiscTypeRegistry.hpp"
 
 #include <optional>
 #include <vector>
@@ -31,13 +30,13 @@ namespace cell
 class Reaction
 {
 public:
-    enum Type
+    enum class Type
     {
-        Transformation = 1 << 0,
-        Decomposition = 1 << 1,
-        Combination = 1 << 2,
-        Exchange = 1 << 3,
-        None = 0
+        Transformation,
+        Decomposition,
+        Combination,
+        Exchange,
+        None
     };
 
 public:
@@ -50,7 +49,6 @@ public:
 
     // Boilerplate getters and setters with no additional documentation
 
-    // TODO remove these and other unneeded functions (maybe?)
     DiscTypeID getEduct1() const;
     void setEduct1(DiscTypeID educt1);
 
@@ -77,7 +75,7 @@ public:
      *
      * - educt and product masses are the same
      */
-    void validate(const DiscTypeResolver& discTypeResolver) const;
+    void validate(const DiscTypeRegistry& discTypeRegistry) const;
 
 private:
     DiscTypeID educt1_;
@@ -101,14 +99,14 @@ bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 /**
  * @brief String representation in the form of A + B -> C + D
  */
-std::string toString(const Reaction& reaction, const DiscTypeResolver& discTypeResolver);
+std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
 
 /**
  * @returns `true` if the given disctype is part of the educts or products of the reaction
  */
 bool contains(const Reaction& reaction, DiscTypeID discType);
 
-Reaction::Type inferType(bool educt2, bool product2);
+Reaction::Type inferReactionType(bool educt2, bool product2);
 
 } // namespace cell
 

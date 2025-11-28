@@ -1,5 +1,5 @@
 #include "widgets/SimulationWidget.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 #include <QCloseEvent>
 #include <QLayout>
@@ -12,20 +12,11 @@
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
-    boundingRect_.setOutlineColor(sf::Color::Yellow);
-    boundingRect_.setOutlineThickness(1);
-    boundingRect_.setFillColor(sf::Color::Transparent);
 }
 
-void SimulationWidget::injectAbstractSimulationBuilder(AbstractSimulationBuilder* abstractSimulationBuilder)
+void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
-    abstractSimulationBuilder_ = abstractSimulationBuilder;
-    abstractSimulationBuilder->registerConfigObserver(
-        [&](const cell::SimulationConfig& config, const std::map<std::string, sf::Color>&)
-        {
-            boundingRect_.setSize(
-                sf::Vector2f{static_cast<float>(config.setup.cellWidth), static_cast<float>(config.setup.cellHeight)});
-        });
+    simulationConfigUpdater_ = simulationConfigUpdater;
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -86,11 +77,11 @@ void SimulationWidget::toggleFullscreen()
     }
 }
 
-void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolver& discTypeResolver,
+void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry,
                               const std::map<std::string, sf::Color>& colorMap)
 {
-    const int FPS = 60;
-    if (frame.elapsedSimulationTimeUs > 0 && clock_.getElapsedTime() < sf::seconds(1.f / FPS))
+    if (frame.elapsedSimulationTimeUs > 0 &&
+        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(simulationConfigUpdater_->getFPS())))
         return;
 
     clock_.restart();
@@ -100,7 +91,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolve
 
     for (const auto& disc : frame.discs_)
     {
-        const auto& discType = discTypeResolver(disc.getDiscTypeID());
+        const auto& discType = discTypeRegistry.getByID(disc.getTypeID());
 
         circleShape.setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
         circleShape.setRadius(static_cast<float>(discType.getRadius()));
@@ -111,8 +102,12 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeResolve
         sf::RenderWindow::draw(circleShape);
     }
 
-    boundingRect_.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+    for (const auto& membrane : frame.membranes_)
+    {
+        auto copy = membrane;
+        copy.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+        sf::RenderWindow::draw(copy);
+    }
 
-    sf::RenderWindow::draw(boundingRect_);
     sf::RenderWindow::display();
 }

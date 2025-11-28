@@ -34,17 +34,16 @@ void ComboBoxDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
-DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent,
-                                                   AbstractSimulationBuilder* abstractSimulationBuilder)
+DiscTypeComboBoxDelegate::DiscTypeComboBoxDelegate(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : ComboBoxDelegate(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
 
 QWidget* DiscTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {
     auto* editor = new QComboBox(parent);
-    editor->addItems(getDiscTypeNames(abstractSimulationBuilder_->getSimulationConfig().discTypes));
+    editor->addItems(getDiscTypeNames(simulationConfigUpdater_->getSimulationConfig().discTypes));
     emit editorCreated(editor);
 
     return editor;
@@ -57,6 +56,35 @@ QVector<QString> DiscTypeComboBoxDelegate::getDiscTypeNames(const std::vector<ce
 
     for (const auto& discType : discTypes)
         names.push_back(QString::fromStdString(discType.name));
+
+    return names;
+}
+
+MembraneTypeComboBoxDelegate::MembraneTypeComboBoxDelegate(QObject* parent,
+                                                           SimulationConfigUpdater* simulationConfigUpdater)
+    : ComboBoxDelegate(parent)
+    , simulationConfigUpdater_(simulationConfigUpdater)
+{
+}
+
+QWidget* MembraneTypeComboBoxDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&,
+                                                    const QModelIndex&) const
+{
+    auto* editor = new QComboBox(parent);
+    editor->addItems(getMembraneTypeNames(simulationConfigUpdater_->getSimulationConfig().membraneTypes));
+    emit editorCreated(editor);
+
+    return editor;
+}
+
+QVector<QString>
+MembraneTypeComboBoxDelegate::getMembraneTypeNames(const std::vector<cell::config::MembraneType>& membraneTypes) const
+{
+    QVector<QString> names;
+    names.reserve(static_cast<qsizetype>(membraneTypes.size()));
+
+    for (const auto& membraneType : membraneTypes)
+        names.push_back(QString::fromStdString(membraneType.name));
 
     return names;
 }

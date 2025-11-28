@@ -1,5 +1,4 @@
 #include "cell/ReactionTable.hpp"
-#include "cell/DiscTypeRegistry.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 
 #include <gtest/gtest.h>
@@ -10,7 +9,7 @@ class AReactionTable : public ::testing::Test
 {
 protected:
     DiscTypeRegistry registry;
-    DiscTypeResolver resolver;
+    std::unique_ptr<ReactionTable> table;
     DiscTypeID A{}, B{}, C{};
 
     void SetUp() override
@@ -20,8 +19,9 @@ protected:
         types.emplace_back("B", Radius{5}, Mass{1});
         types.emplace_back("C", Radius{5}, Mass{2});
 
-        registry.setDiscTypes(std::move(types));
-        resolver = registry.getDiscTypeResolver();
+        registry.setValues(std::move(types));
+
+        table = std::make_unique<ReactionTable>(registry);
 
         A = registry.getIDFor("A");
         B = registry.getIDFor("B");
@@ -31,40 +31,36 @@ protected:
 
 TEST_F(AReactionTable, ThrowsOnDuplicateTransformation)
 {
-    ReactionTable table(resolver);
     Reaction r(A, std::nullopt, B, std::nullopt, 1.0);
 
-    table.addReaction(r);
+    table->addReaction(r);
 
-    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+    EXPECT_THROW(table->addReaction(r), ExceptionWithLocation);
 }
 
 TEST_F(AReactionTable, ThrowsOnDuplicateDecomposition)
 {
-    ReactionTable table(resolver);
     Reaction r(C, std::nullopt, A, B, 1.0);
 
-    table.addReaction(r);
+    table->addReaction(r);
 
-    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+    EXPECT_THROW(table->addReaction(r), ExceptionWithLocation);
 }
 
 TEST_F(AReactionTable, ThrowsOnDuplicateCombination)
 {
-    ReactionTable table(resolver);
     Reaction r(A, B, C, std::nullopt, 1.0);
 
-    table.addReaction(r);
+    table->addReaction(r);
 
-    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+    EXPECT_THROW(table->addReaction(r), ExceptionWithLocation);
 }
 
 TEST_F(AReactionTable, ThrowsOnDuplicateExchange)
 {
-    ReactionTable table(resolver);
     Reaction r(C, B, C, A, 1.0);
 
-    table.addReaction(r);
+    table->addReaction(r);
 
-    EXPECT_THROW(table.addReaction(r), ExceptionWithLocation);
+    EXPECT_THROW(table->addReaction(r), ExceptionWithLocation);
 }

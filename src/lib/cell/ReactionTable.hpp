@@ -3,7 +3,6 @@
 
 #include "AbstractReactionTable.hpp"
 #include "DiscType.hpp"
-#include "DiscTypeRegistry.hpp"
 #include "Reaction.hpp"
 
 #include <vector>
@@ -21,7 +20,7 @@ namespace cell
 class ReactionTable : public AbstractReactionTable
 {
 public:
-    ReactionTable(DiscTypeResolver discTypeResolver);
+    ReactionTable(const DiscTypeRegistry& discTypeRegistry);
 
     const DiscTypeMap<std::vector<Reaction>>& getTransformations() const override;
     const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const override;
@@ -69,12 +68,12 @@ private:
 
     template <typename Self> static auto& unaryMap(Self& self, const Reaction& r)
     {
-        return (r.getType() & Reaction::Transformation) ? self.transformations_ : self.decompositions_;
+        return (r.getType() == Reaction::Type::Transformation) ? self.transformations_ : self.decompositions_;
     }
 
     template <typename Self> static auto& binaryMap(Self& self, const Reaction& r)
     {
-        return (r.getType() & Reaction::Combination) ? self.combinations_ : self.exchanges_;
+        return (r.getType() == Reaction::Type::Combination) ? self.combinations_ : self.exchanges_;
     }
 
 private:
@@ -85,7 +84,7 @@ private:
     DiscTypePairMap<std::vector<Reaction>> combinations_;
     DiscTypePairMap<std::vector<Reaction>> exchanges_;
 
-    DiscTypeResolver discTypeResolver_;
+    const DiscTypeRegistry& discTypeRegistry_;
 };
 
 } // namespace cell

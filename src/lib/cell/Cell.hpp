@@ -1,39 +1,18 @@
 #ifndef AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
 #define AE328161_6FB3_4EA0_8D38_CF7D51BEA90A_HPP
 
+#include "Compartment.hpp"
 #include "Types.hpp"
-
-#include <SFML/System/Time.hpp>
-
-#include <map>
-#include <memory>
-#include <unordered_map>
-#include <vector>
 
 namespace cell
 {
 
-class Disc;
-class ReactionEngine;
-class CollisionDetector;
-class CollisionHandler;
+struct SimulationContext;
 
-class Cell
+class Cell : public Compartment
 {
 public:
-    Cell(ReactionEngine& reactionEngine, CollisionDetector& collisionDetector, CollisionHandler& collisionHandler,
-         SimulationTimeStepProvider simulationTimeStepProvider, DiscTypeResolver discTypeResolver,
-         Dimensions dimensions, std::vector<Disc>&& discs);
-
-    /**
-     * @brief Advances the simulation by a single time step
-     */
-    void update();
-
-    /**
-     * @returns all discs currently part of this cell
-     */
-    const std::vector<Disc>& getDiscs() const;
+    Cell(Membrane membrane, SimulationContext simulationContext);
 
     /**
      * @returns The initial kinetic energy of all discs in this cell after `reinitialize()` was called
@@ -46,26 +25,6 @@ public:
     double getCurrentKineticEnergy() const;
 
 private:
-    /**
-     * @brief Removed all discs that were marked as destroyed (i. e. after decomposition or combination reactions) and
-     * calculates the current kinetic energy based on the discs that are still in the cell
-     */
-    void removeDestroyedDiscs();
-
-private:
-    ReactionEngine& reactionEngine_;
-    CollisionDetector& collisionDetector_;
-    CollisionHandler& collisionHandler_;
-
-    SimulationTimeStepProvider simulationTimeStepProvider_;
-    DiscTypeResolver discTypeResolver_;
-
-    double width_;
-    double height_;
-
-    std::vector<Disc> discs_;
-
-    // TODO remove, the simulation doesn't care about this
     double initialKineticEnergy_ = 0;
     double currentKineticEnergy_ = 0;
 };

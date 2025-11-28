@@ -6,10 +6,8 @@
 namespace cell
 {
 
-ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
-                               const AbstractReactionTable& reactionTable)
-    : discTypeResolver_(std::move(discTypeResolver))
-    , simulationTimeStepProvider_(std::move(simulationTimeStepProvider))
+ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const AbstractReactionTable& reactionTable)
+    : discTypeRegistry_(discTypeRegistry)
     , transformations_(&reactionTable.getTransformations())
     , decompositions_(&reactionTable.getDecompositions())
     , combinations_(&reactionTable.getCombinations())
@@ -17,9 +15,9 @@ ReactionEngine::ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTime
 {
 }
 
-bool ReactionEngine::transformationReaction(Disc* disc) const
+bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
 {
-    const Reaction* reaction = selectReaction(*transformations_, disc->getDiscTypeID());
+    const Reaction* reaction = selectUnimolecularReaction(*transformations_, disc->getTypeID(), dt);
     if (!reaction)
         return false;
 
@@ -28,9 +26,9 @@ bool ReactionEngine::transformationReaction(Disc* disc) const
     return true;
 }
 
-std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
+std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) const
 {
-    const Reaction* reaction = selectReaction(*decompositions_, d1->getDiscTypeID());
+    const Reaction* reaction = selectUnimolecularReaction(*decompositions_, d1->getTypeID(), dt);
     if (!reaction)
         return {};
 
@@ -43,34 +41,45 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1) const
         v = mathutils::abs(d1->getVelocity());
     }
 
-    const sf::Vector2d n = d1->getVelocity() / v;
+    const sf::Vector2d eductNormalizedVelocity = d1->getVelocity() / v;
+    const sf::Vector2d n{-eductNormalizedVelocity.y, eductNormalizedVelocity.x};
 
-    // We will let the collision handling in the next time step take care of separation
     d1->setType(reaction->getProduct1());
-    d1->setVelocity(v * sf::Vector2d{-n.y, n.x});
+    d1->setVelocity(v * n);
 
     Disc product2(reaction->getProduct2());
     product2.setPosition(d1->getPosition());
-    product2.setVelocity(v * sf::Vector2d{n.y, -n.x});
+    product2.setVelocity(-v * n);
+
+    const auto R1 = discTypeRegistry_.getByID(d1->getTypeID()).getRadius();
+    const auto R2 = discTypeRegistry_.getByID(product2.getTypeID()).getRadius();
+    const auto overlap = R1 + R2 + 1e-6; // Discs at same position always have maximum overlap R1 + R2
+
+    d1->move(0.5 * overlap * n);
+    product2.move(-0.5 * overlap * n);
 
     return product2;
 }
 
 bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 {
-    const Reaction* reaction = selectReaction(*combinations_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction =
+        selectBimolecularReaction(*combinations_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
         return false;
 
-    const auto& resultType = discTypeResolver_(reaction->getProduct1());
-    const auto& d1Type = discTypeResolver_(d1->getDiscTypeID());
-    const auto& d2Type = discTypeResolver_(d2->getDiscTypeID());
+    const auto& resultType = discTypeRegistry_.getByID(reaction->getProduct1());
+    const auto* d1Type = &discTypeRegistry_.getByID(d1->getTypeID());
+    const auto* d2Type = &discTypeRegistry_.getByID(d2->getTypeID());
 
     // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
-    if (std::abs(resultType.getRadius() - d1Type.getRadius()) > std::abs(resultType.getRadius() - d2Type.getRadius()))
+    if (std::abs(resultType.getRadius() - d1Type->getRadius()) > std::abs(resultType.getRadius() - d2Type->getRadius()))
+    {
         std::swap(d1, d2);
+        std::swap(d1Type, d2Type);
+    }
 
-    d1->setVelocity((d1Type.getMass() * d1->getVelocity() + d2Type.getMass() * d2->getVelocity()) /
+    d1->setVelocity((d1Type->getMass() * d1->getVelocity() + d2Type->getMass() * d2->getVelocity()) /
                     resultType.getMass());
     d1->setType(reaction->getProduct1());
 
@@ -81,14 +90,14 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 
 bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 {
-    const Reaction* reaction = selectReaction(*exchanges_, std::make_pair(d1->getDiscTypeID(), d2->getDiscTypeID()));
+    const Reaction* reaction = selectBimolecularReaction(*exchanges_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
         return false;
 
-    const auto& d1Type = discTypeResolver_(d1->getDiscTypeID());
-    const auto& d2Type = discTypeResolver_(d2->getDiscTypeID());
-    const auto& product1Type = discTypeResolver_(reaction->getProduct1());
-    const auto& product2Type = discTypeResolver_(reaction->getProduct2());
+    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
+    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
+    const auto& product1Type = discTypeRegistry_.getByID(reaction->getProduct1());
+    const auto& product2Type = discTypeRegistry_.getByID(reaction->getProduct2());
 
     d1->scaleVelocity(std::sqrt(d1Type.getMass() / product1Type.getMass()));
     d1->setType(reaction->getProduct1());
@@ -99,23 +108,51 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
     return true;
 }
 
-std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc) const
+std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc, double dt) const
 {
     // TODO random shuffle all reactions
-    if (transformationReaction(&disc))
+    if (transformationReaction(&disc, dt))
         return {};
 
-    return decompositionReaction(&disc);
+    return decompositionReaction(&disc, dt);
 }
 
-void ReactionEngine::applyBimolecularReactions(const std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const
+void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const
 {
-    for (auto& [d1, d2] : collidingDiscs)
+    for (auto collisionType :
+         {CollisionDetector::CollisionType::DiscDisc, CollisionDetector::CollisionType::DiscIntrudingDisc})
     {
-        if (combinationReaction(d1, d2))
+        auto indexes = detectedCollisions.indexes.find(collisionType);
+        if (indexes == detectedCollisions.indexes.end())
             continue;
-        exchangeReaction(d1, d2);
+
+        for (std::size_t index : indexes->second)
+        {
+            const auto& collision = detectedCollisions.collisions[index];
+            if (collision.isInvalidatedByDestroyedDisc())
+                continue;
+
+            if (combinationReaction(collision.disc, collision.otherDisc))
+                continue;
+            else
+                exchangeReaction(collision.disc, collision.otherDisc);
+        }
     }
+}
+
+const Reaction* ReactionEngine::selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key,
+                                                           double dt) const
+{
+    return selectReaction(
+        map, key, [&](const Reaction& reaction)
+        { return mathutils::getRandomNumber<double>(0, 1) <= 1 - std::pow(1 - reaction.getProbability(), dt); });
+}
+
+const Reaction* ReactionEngine::selectBimolecularReaction(const PairLookupMap& map,
+                                                          const std::pair<DiscTypeID, DiscTypeID>& key) const
+{
+    return selectReaction(map, key, [](const Reaction& reaction)
+                          { return mathutils::getRandomNumber<double>(0, 1) <= reaction.getProbability(); });
 }
 
 } // namespace cell

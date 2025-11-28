@@ -1,7 +1,8 @@
-#ifndef CD2404D2_405E_4617_8483_0D8737CD5D63_HPP
-#define CD2404D2_405E_4617_8483_0D8737CD5D63_HPP
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
 #include "Hashing.hpp"
+#include "TypeRegistry.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -12,12 +13,16 @@ namespace cell
 {
 
 class DiscType;
+class MembraneType;
 class Reaction;
+class Disc;
+class Membrane;
 
-using DiscTypeID = std::uint16_t;
-using DiscTypeResolver = std::function<const DiscType&(DiscTypeID)>;
-using MaxRadiusProvider = std::function<double()>;
-using SimulationTimeStepProvider = std::function<double()>;
+using DiscTypeID = TypeRegistry<Disc>::KeyType;
+using MembraneTypeID = TypeRegistry<Membrane>::KeyType;
+
+using DiscTypeRegistry = TypeRegistry<DiscType>;
+using MembraneTypeRegistry = TypeRegistry<MembraneType>;
 
 /**
  * @brief Type to be used for reaction and disc type distribution tables
@@ -77,6 +82,11 @@ struct Probability
     double value;
 };
 
+struct MinOverlap
+{
+    double value;
+};
+
 } // namespace cell
 
-#endif /* CD2404D2_405E_4617_8483_0D8737CD5D63_HPP */
+#endif /* TYPES_HPP */

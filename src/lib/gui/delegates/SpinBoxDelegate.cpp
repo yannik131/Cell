@@ -2,18 +2,39 @@
 
 #include <QAbstractItemView>
 
-void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, int column)
+void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, Column column)
+{
+    insertDoubleSpinBoxIntoView(
+        view, DoubleSpinBoxParams{.column = column.value, .min = 0, .max = 1, .step = 0.001, .decimals = 3});
+}
+
+void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxParams& params)
 {
     using SpinBoxDelegate = SpinBoxDelegate<QDoubleSpinBox>;
-    auto* probabilitySpinBoxDelegate = new SpinBoxDelegate(view);
+    auto* spinBox = new SpinBoxDelegate(view);
 
-    QObject::connect(probabilitySpinBoxDelegate, &SpinBoxDelegate::editorCreated,
-                     [](QWidget* spinBox)
+    QObject::connect(spinBox, &SpinBoxDelegate::editorCreated,
+                     [params](QWidget* spinBox)
                      {
-                         safeCast<QDoubleSpinBox*>(spinBox)->setRange(0.0, 1.0);
-                         safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(0.001);
-                         safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(3);
+                         safeCast<QDoubleSpinBox*>(spinBox)->setRange(params.min, params.max);
+                         safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(params.step);
+                         safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(params.decimals);
                      });
 
-    view->setItemDelegateForColumn(column, probabilitySpinBoxDelegate);
+    view->setItemDelegateForColumn(params.column, spinBox);
+}
+
+void insertIntegerSpinBoxIntoView(QAbstractItemView* view, const IntegerSpinBoxParams& params)
+{
+    using SpinBoxDelegate = SpinBoxDelegate<QSpinBox>;
+    auto* spinBox = new SpinBoxDelegate(view);
+
+    QObject::connect(spinBox, &SpinBoxDelegate::editorCreated,
+                     [params](QWidget* spinBox)
+                     {
+                         safeCast<QSpinBox*>(spinBox)->setRange(params.min, params.max);
+                         safeCast<QSpinBox*>(spinBox)->setSingleStep(params.step);
+                     });
+
+    view->setItemDelegateForColumn(params.column, spinBox);
 }

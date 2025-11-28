@@ -1,9 +1,10 @@
 // configure using cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. and profile with VerySleepy
 
+#include "cell/Cell.hpp"
 #include "cell/Disc.hpp"
 #include "cell/Logging.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
-#include "cell/SimulationContext.hpp"
+#include "cell/SimulationFactory.hpp"
 #include "cell/StringUtils.hpp"
 #include "cell/Types.hpp"
 
@@ -19,34 +20,40 @@ int main(int argc, char** argv)
 
     SimulationConfigBuilder builder;
 
-    builder.setCellDimensions(Width{1000.0}, Height{1000.0});
-    builder.setTimeStep(1e-3);
-    builder.setDiscCount(800);
-    builder.useDistribution(true);
+    builder.addMembraneType(
+        "M", Radius{100},
+        {{"A", MembraneType::Permeability::Inward}, {"B", MembraneType::Permeability::Bidirectional}});
+    builder.addMembrane("M", Position{.x = 500, .y = 500});
 
+    builder.setCellMembraneType(Radius{1000}, {});
     builder.addDiscType("A", Radius{10}, Mass{5});
     builder.addDiscType("B", Radius{10}, Mass{5});
     builder.addDiscType("C", Radius{12}, Mass{10});
 
-    builder.setDistribution({{"A", 1}});
+    builder.setDistribution("", {{"A", 1}});
+    builder.setDistribution("M", {{"A", 1}});
+
+    builder.setDiscCount("", 800);
+    builder.setDiscCount("M", 30);
+    builder.useDistribution(true);
 
     builder.addReaction("A", "", "B", "", Probability{0.1});
     builder.addReaction("A", "B", "C", "", Probability{0.1});
     builder.addReaction("B", "C", "A", "C", Probability{0.2});
     builder.addReaction("C", "", "A", "B", Probability{0.1});
 
-    SimulationContext simulationContext;
-    simulationContext.buildContextFromConfig(builder.getSimulationConfig());
+    SimulationFactory simulationContext;
+    simulationContext.buildSimulationFromConfig(builder.getSimulationConfig());
 
     auto& cell = simulationContext.getCell();
-    auto discTypeResolver = simulationContext.getDiscTypeRegistry().getDiscTypeResolver();
+    const auto& registry = simulationContext.getSimulationContext().discTypeRegistry;
 
     const int N = 100000;
     LOG(INFO) << "Starting benchmark";
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < N; ++i)
-        cell.update();
+        cell.update(1e-3);
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -57,5 +64,5 @@ int main(int argc, char** argv)
     LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
 
     for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
-        LOG(INFO) << discTypeResolver(typeID).getName() << ": " << count << " collisions";
+        LOG(INFO) << registry.getByID(typeID).getName() << ": " << count << " collisions";
 }

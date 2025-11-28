@@ -15,12 +15,19 @@ class SimulationConfigBuilder
 public:
     void addDisc(const std::string& discType, Position position, Velocity velocity);
     void useDistribution(bool useDistribution);
-    void setDiscCount(int count);
-    void setDistribution(const std::map<std::string, double>& distribution);
+
+    // These are separate because if useDistribution is false, they won't be used anyways
+    void setDiscCount(std::string membraneTypeName, int count);
+    void setDistribution(std::string membraneTypeName, const std::unordered_map<std::string, double>& distribution);
+
     void addDiscType(const std::string& name, Radius radius, Mass mass);
+    void addMembraneType(const std::string& name, Radius radius,
+                         const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);
+    void addMembrane(const std::string& membraneTypeName, Position position);
     void addReaction(const std::string& educt1, const std::string& educt2, const std::string& product1,
                      const std::string& product2, Probability probability);
-    void setCellDimensions(Width width, Height height);
+    void setCellMembraneType(Radius radius,
+                             const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);
     void setTimeStep(double simulationTimeStep);
     void setTimeScale(double simulationTimeScale);
     void setMaxVelocity(double maxVelocity);
@@ -28,7 +35,6 @@ public:
     const SimulationConfig& getSimulationConfig() const;
 
 private:
-    int requiredCallsCount_ = 0;
     SimulationConfig simulationConfig_;
 };
 

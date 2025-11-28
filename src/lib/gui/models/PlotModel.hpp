@@ -24,7 +24,7 @@ struct DataPoint
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
 
-class AbstractSimulationBuilder;
+class Simulation;
 
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
@@ -35,7 +35,8 @@ class PlotModel : public QObject
 {
     Q_OBJECT
 public:
-    PlotModel(QObject* parent, AbstractSimulationBuilder* abstractSimulationBuilder);
+    // TODO Don't use simulation here?
+    PlotModel(QObject* parent, Simulation* simulation);
 
     void setPlotCategory(PlotCategory plotCategory);
     void setPlotTimeInterval(int valueMilliseconds);
@@ -97,7 +98,7 @@ private:
     bool plotSum_ = false;
     PlotCategory plotCategory_ = PlotCategory::CollisionCounts;
 
-    AbstractSimulationBuilder* abstractSimulationBuilder_;
+    Simulation* simulation_;
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;

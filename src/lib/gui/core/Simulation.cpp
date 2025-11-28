@@ -1,43 +1,38 @@
 #include "core/Simulation.hpp"
-#include "SFMLJsonSerializers.hpp"
+#include "cell/Cell.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
 #include <QThread>
 #include <QTimer>
 #include <SFML/System/Clock.hpp>
-#include <nlohmann/json.hpp>
 
-#include <fstream>
-
-using json = nlohmann::json;
+#include <iostream>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
-    QTimer::singleShot(0, this, &Simulation::loadDefaultConfig);
 }
 
 void Simulation::run()
 {
     sf::Clock clock;
-    sf::Time timeSinceLastUpdate;
+    double timeSinceLastUpdate = 0;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
-    auto simulationTimeScale = static_cast<float>(simulationConfig_.setup.simulationTimeScale);
-    auto simulationTimeStep = sf::seconds(static_cast<float>(simulationConfig_.setup.simulationTimeStep));
+    const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
+    const auto simulationTimeScale = simulationConfig.simulationTimeScale;
+    const auto simulationTimeStep = simulationConfig.simulationTimeStep;
 
-    while (!simulationContext_.getCell().getDiscs().empty())
+    while (!QThread::currentThread()->isInterruptionRequested())
     {
-        if (QThread::currentThread()->isInterruptionRequested())
-            break;
+        timeSinceLastUpdate += clock.restart().asSeconds();
 
-        timeSinceLastUpdate += clock.restart();
-
-        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep)
+        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep &&
+               !QThread::currentThread()->isInterruptionRequested())
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-            simulationContext_.getCell().update();
+            simulationFactory_.getCell().update(simulationTimeStep);
 
             emitFrame(RedrawOnly{false});
         }
@@ -46,112 +41,55 @@ void Simulation::run()
 
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
-    simulationContext_.buildContextFromConfig(config);
+    simulationFactory_.buildSimulationFromConfig(config);
 }
 
 void Simulation::rebuildContext()
 {
-    buildContext(simulationConfig_);
-    notifyConfigObservers();
-    emitFrame(RedrawOnly{true});
+    buildContext(simulationConfigUpdater_.getSimulationConfig());
 }
 
-const cell::SimulationConfig& Simulation::getSimulationConfig() const
+const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
 {
-    return simulationConfig_;
+    return simulationFactory_.getSimulationContext().discTypeRegistry;
 }
 
-void Simulation::setDiscTypes(const std::vector<cell::config::DiscType>& discTypes,
-                              const std::unordered_set<std::string>& removedDiscTypes,
-                              const std::map<std::string, sf::Color>& discTypeColorMap)
+SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
 {
-    SimulationConfigUpdater updater;
-    auto changeMap = updater.createChangeMap(discTypes, simulationConfig_.discTypes, removedDiscTypes);
-
-    auto newConfig = simulationConfig_;
-    newConfig.discTypes = discTypes;
-    updater.removeDiscTypes(newConfig, removedDiscTypes);
-    updater.updateDiscTypes(newConfig, changeMap);
-
-    buildContext(newConfig);
-
-    // If the above line didn't throw, we're safe to actually change the config now
-
-    simulationConfig_ = std::move(newConfig);
-    discTypeColorMap_ = discTypeColorMap;
-
-    notifyConfigObservers();
+    return simulationConfigUpdater_;
 }
 
-void Simulation::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
+bool Simulation::cellIsBuilt() const
 {
-    buildContext(simulationConfig);
-    simulationConfig_ = simulationConfig;
-    notifyConfigObservers();
-}
-
-const std::map<std::string, sf::Color>& Simulation::getDiscTypeColorMap() const
-{
-    return discTypeColorMap_;
-}
-
-void Simulation::registerConfigObserver(ConfigObserver observer)
-{
-    configObservers_.push_back(std::move(observer));
-}
-
-cell::DiscTypeResolver Simulation::getDiscTypeResolver() const
-{
-    return simulationContext_.getDiscTypeRegistry().getDiscTypeResolver();
-}
-
-bool Simulation::contextIsBuilt() const
-{
-    return simulationContext_.isBuilt();
-}
-
-void Simulation::loadDefaultConfig()
-{
-    simulationConfig_ = {};
-}
-
-void Simulation::saveConfigToFile(const fs::path& path) const
-{
-    json j;
-    j["config"] = simulationConfig_;
-    j["colorMap"] = discTypeColorMap_;
-
-    std::ofstream file(path);
-    file << j.dump(4);
-}
-
-void Simulation::loadConfigFromFile(const fs::path& path)
-{
-    json j;
-    std::ifstream file(path);
-    file >> j;
-
-    simulationConfig_ = j["config"].get<cell::SimulationConfig>();
-    discTypeColorMap_ = j["colorMap"].get<std::map<std::string, sf::Color>>();
-
-    rebuildContext();
-}
-
-void Simulation::notifyConfigObservers()
-{
-    for (const auto& observer : configObservers_)
-        observer(simulationConfig_, discTypeColorMap_);
-
-    emitFrame(RedrawOnly{true});
+    return simulationFactory_.cellIsBuilt();
 }
 
 void Simulation::emitFrame(RedrawOnly redrawOnly)
 {
-    if (!simulationContext_.isBuilt())
+    if (!simulationFactory_.cellIsBuilt())
         return;
 
     FrameDTO frameDTO;
-    frameDTO.discs_ = simulationContext_.getCell().getDiscs();
+    const auto& cell = simulationFactory_.getCell();
+
+    const auto gatherData = [&](const cell::Compartment& compartment)
+    {
+        frameDTO.discs_.insert(frameDTO.discs_.end(), compartment.getDiscs().begin(), compartment.getDiscs().end());
+        frameDTO.membranes_.push_back(circleShapeFromCompartment(compartment));
+    };
+
+    std::vector<const cell::Compartment*> compartments({&cell});
+
+    while (!compartments.empty())
+    {
+        const cell::Compartment* compartment = compartments.back();
+        compartments.pop_back();
+
+        gatherData(*compartment);
+
+        for (const auto& subCompartment : compartment->getCompartments())
+            compartments.push_back(subCompartment.get());
+    }
 
     if (redrawOnly.value)
     {
@@ -159,8 +97,31 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
         return;
     }
 
-    frameDTO.elapsedSimulationTimeUs = static_cast<long long>(simulationConfig_.setup.simulationTimeStep * 1e6);
-    frameDTO.collisionCounts_ = simulationContext_.getAndResetCollisionCounts();
+    frameDTO.elapsedSimulationTimeUs =
+        static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().simulationTimeStep * 1e6);
+    frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
 
     emit frame(frameDTO);
+}
+
+sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
+{
+    sf::CircleShape shape;
+    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
+    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
+    const auto R = static_cast<float>(membraneType.getRadius());
+
+    shape.setPointCount(100);
+    shape.setRadius(R);
+    shape.setOrigin(R, R);
+    shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
+    shape.setFillColor(sf::Color::Transparent);
+    shape.setOutlineThickness(1);
+
+    if (membraneType.getName() == cell::config::cellMembraneTypeName)
+        shape.setOutlineColor(sf::Color::Yellow);
+    else
+        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
+
+    return shape;
 }

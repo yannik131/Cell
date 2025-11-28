@@ -4,50 +4,30 @@
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"
 #include "delegates/SpinBoxDelegate.hpp"
-#include "models/ReactionsTableModel.hpp"
-#include "ui_ReactionsDialog.h"
 
-#include "ReactionsDialog.hpp"
-#include <QCloseEvent>
-#include <QMessageBox>
+#include <QMenu>
 
-ReactionsDialog::ReactionsDialog(QWidget* parent, AbstractSimulationBuilder* abstractSimulationBuilder)
-    : QDialog(parent)
-    , ui(new Ui::ReactionsDialog)
-    , reactionsTableModel_(new ReactionsTableModel(this, abstractSimulationBuilder))
+ReactionsDialog::ReactionsDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
+    : Base(parent, simulationConfigUpdater, new ReactionsTableModel(nullptr, simulationConfigUpdater))
 {
-    ui->setupUi(this);
+    connect(safeCast<ReactionsTableModel*>(model_), &ReactionsTableModel::newRowRequested,
+            [this]()
+            {
+                using Type = cell::Reaction::Type;
+                auto model = safeCast<ReactionsTableModel*>(model_);
 
-    connect(ui->okPushButton, &QPushButton::clicked,
-            utility::safeSlot(this,
-                              [this]()
-                              {
-                                  reactionsTableModel_->commitChanges();
-                                  accept();
-                              }));
-    connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
+                QMenu menu;
+                menu.addAction("Transformation",
+                               utility::safeSlot(this, [model]() { model->addRow(Type::Transformation); }));
+                menu.addAction("Decomposition",
+                               utility::safeSlot(this, [model]() { model->addRow(Type::Decomposition); }));
+                menu.addAction("Combination", utility::safeSlot(this, [model]() { model->addRow(Type::Combination); }));
+                menu.addAction("Exchange", utility::safeSlot(this, [model]() { model->addRow(Type::Exchange); }));
 
-    connect(ui->addCombinationReactionPushButton, &QPushButton::clicked,
-            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Combination); }));
-    connect(ui->addDecompositionReactionPushButton, &QPushButton::clicked,
-            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Decomposition); }));
-    connect(ui->addExchangeReactionPushButton, &QPushButton::clicked,
-            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Exchange); }));
-    connect(ui->addTransformationReactionPushButton, &QPushButton::clicked,
-            utility::safeSlot(this, [this]() { reactionsTableModel_->addRow(cell::Reaction::Type::Transformation); }));
+                menu.exec(QCursor::pos());
+            });
 
-    connect(ui->clearReactionsPushButton, &QPushButton::clicked, reactionsTableModel_, &ReactionsTableModel::clearRows);
-
-    insertDeleteButtonIntoView(reactionsTableModel_, ui->reactionsTableView, 8);
-    insertDiscTypeComboboxIntoView(ui->reactionsTableView, abstractSimulationBuilder, 0, 2, 4, 6);
-    insertProbabilitySpinBoxIntoView(ui->reactionsTableView, 7);
-
-    ui->reactionsTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    ui->reactionsTableView->setModel(reactionsTableModel_);
-}
-
-void ReactionsDialog::showEvent(QShowEvent*)
-{
-    reactionsTableModel_->reload();
+    insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0, 2, 4, 6);
+    insertProbabilitySpinBoxIntoView(ui->tableView, Column{7});
+    insertDeleteButtonIntoView(model_, ui->tableView, Column{8});
 }

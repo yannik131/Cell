@@ -18,6 +18,7 @@ class PlotControlWidget : public QWidget
     Q_OBJECT
 public:
     PlotControlWidget(QWidget* parent = nullptr);
+    ~PlotControlWidget() override;
 
     void setModel(PlotModel* plotModel);
 
@@ -25,7 +26,7 @@ signals:
     void selectDiscTypesClicked();
 
 private:
-    Ui::PlotControlWidget* ui;
+    std::unique_ptr<Ui::PlotControlWidget> ui;
 };
 
 #endif /* BC236487_5829_46C6_81D5_E7309D40F63E_HPP */

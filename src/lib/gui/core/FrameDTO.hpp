@@ -4,6 +4,7 @@
 #include "cell/Disc.hpp"
 
 #include <QtCore/QMetaType>
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <vector>
@@ -14,6 +15,7 @@
 struct FrameDTO
 {
     std::vector<cell::Disc> discs_;
+    std::vector<sf::CircleShape> membranes_;
     cell::DiscTypeMap<int> collisionCounts_;
     long long elapsedSimulationTimeUs = 0;
 };

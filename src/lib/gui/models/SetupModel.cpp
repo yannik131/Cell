@@ -1,81 +1,46 @@
 #include "models/SetupModel.hpp"
 #include "SetupModel.hpp"
-#include "core/AbstractSimulationBuilder.hpp"
-#include "models/DiscTableModel.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
+#include "models/DiscsTableModel.hpp"
 
-SetupModel::SetupModel(QObject* parent, DiscTypeDistributionTableModel* discTypeDistributionTableModel,
-                       DiscTableModel* discTableModel, AbstractSimulationBuilder* abstractSimulationBuilder)
+SetupModel::SetupModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QObject(parent)
-    , abstractSimulationBuilder_(abstractSimulationBuilder)
-    , discTypeDistributionTableModel_(discTypeDistributionTableModel)
-    , discTableModel_(discTableModel)
+    , simulationConfigUpdater_(simulationConfigUpdater)
 {
 }
 
 void SetupModel::setUseDistribution(bool useDistribution)
 {
-    setup_.useDistribution = useDistribution;
-}
-
-void SetupModel::setNumberOfDiscs(int numberOfDiscs)
-{
-    setup_.discCount = numberOfDiscs;
+    simulationConfig_.useDistribution = useDistribution;
 }
 
 void SetupModel::setTimeStepUs(int timeStepUs)
 {
-    setup_.simulationTimeStep = timeStepUs / 1e6;
+    simulationConfig_.simulationTimeStep = timeStepUs / 1e6;
 }
 
 void SetupModel::setTimeScale(double timeScale)
 {
-    setup_.simulationTimeScale = timeScale;
-}
-
-void SetupModel::setCellWidth(int cellWidth)
-{
-
-    setup_.cellWidth = cellWidth;
-}
-
-void SetupModel::setCellHeight(int cellHeight)
-{
-    setup_.cellHeight = cellHeight;
+    simulationConfig_.simulationTimeScale = timeScale;
 }
 
 void SetupModel::setMaxVelocity(int maxVelocity)
 {
-    setup_.maxVelocity = static_cast<double>(maxVelocity);
+    simulationConfig_.maxVelocity = static_cast<double>(maxVelocity);
 }
 
-void SetupModel::commitChanges()
+void SetupModel::setFPS(int FPS)
 {
-    loadDiscsAndDistribution();
-
-    auto config = abstractSimulationBuilder_->getSimulationConfig();
-    config.setup = setup_;
-
-    abstractSimulationBuilder_->setSimulationConfig(config);
+    simulationConfigUpdater_->setFPS(FPS);
 }
 
-void SetupModel::reload()
+void SetupModel::saveToConfig()
 {
-    setup_ = abstractSimulationBuilder_->getSimulationConfig().setup;
-    discTypeDistributionTableModel_->reload();
-    discTableModel_->reload();
+    simulationConfigUpdater_->setSimulationConfig(simulationConfig_);
 }
 
-const cell::config::Setup& SetupModel::getSetup()
+void SetupModel::loadFromConfig()
 {
-    loadDiscsAndDistribution();
-    return setup_;
-}
-
-void SetupModel::loadDiscsAndDistribution()
-{
-    const auto& distributionEntries = discTypeDistributionTableModel_->getRows();
-    setup_.distribution = std::map<std::string, double>(distributionEntries.begin(), distributionEntries.end());
-
-    setup_.discs = discTableModel_->getRows();
+    simulationConfig_ = simulationConfigUpdater_->getSimulationConfig();
 }

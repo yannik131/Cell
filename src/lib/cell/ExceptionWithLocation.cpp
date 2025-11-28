@@ -1,5 +1,7 @@
 #include "ExceptionWithLocation.hpp"
 
+#include <sstream>
+
 ExceptionWithLocation::ExceptionWithLocation(const std::string& description, const std::source_location location)
     : std::runtime_error(buildMessage(description, location))
 {

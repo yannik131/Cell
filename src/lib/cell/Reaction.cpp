@@ -11,18 +11,12 @@ std::string toString(Reaction::Type type)
 {
     switch (type)
     {
-    case Reaction::Decomposition:
-        return "Decomposition";
-    case Reaction::Transformation:
-        return "Transformation";
-    case Reaction::Combination:
-        return "Combination";
-    case Reaction::Exchange:
-        return "Exchange";
-    case Reaction::None:
-        return "None";
-    default:
-        throw ExceptionWithLocation("Invalid reaction type");
+    case Reaction::Type::Decomposition: return "Decomposition";
+    case Reaction::Type::Transformation: return "Transformation";
+    case Reaction::Type::Combination: return "Combination";
+    case Reaction::Type::Exchange: return "Exchange";
+    case Reaction::Type::None: return "None";
+    default: throw ExceptionWithLocation("Invalid reaction type");
     }
 }
 } // namespace
@@ -34,17 +28,17 @@ bool operator==(const Reaction& a, const Reaction& b)
            a.hasProduct2() == b.hasProduct2() && (!a.hasProduct2() || a.getProduct2() == b.getProduct2());
 }
 
-std::string toString(const Reaction& reaction, const DiscTypeResolver& discTypeResolver)
+std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry)
 {
-    std::string result = discTypeResolver(reaction.getEduct1()).getName();
+    std::string result = discTypeRegistry.getByID(reaction.getEduct1()).getName();
 
     if (reaction.hasEduct2())
-        result += " + " + discTypeResolver(reaction.getEduct2()).getName();
+        result += " + " + discTypeRegistry.getByID(reaction.getEduct2()).getName();
 
-    result += " -> " + discTypeResolver(reaction.getProduct1()).getName();
+    result += " -> " + discTypeRegistry.getByID(reaction.getProduct1()).getName();
 
     if (reaction.hasProduct2())
-        result += " + " + discTypeResolver(reaction.getProduct2()).getName();
+        result += " + " + discTypeRegistry.getByID(reaction.getProduct2()).getName();
 
     return result;
 }
@@ -55,7 +49,7 @@ bool contains(const Reaction& reaction, DiscTypeID discType)
            reaction.getProduct2() == discType;
 }
 
-Reaction::Type inferType(bool educt2, bool product2)
+Reaction::Type inferReactionType(bool educt2, bool product2)
 {
     if (!educt2 && !product2)
         return Reaction::Type::Transformation;
@@ -86,7 +80,7 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     , educt2_(educt2)
     , product1_(product1)
     , product2_(product2)
-    , type_(inferType(educt2.has_value(), product2.has_value()))
+    , type_(inferReactionType(educt2.has_value(), product2.has_value()))
 {
     setProbability(probability);
 }
@@ -111,7 +105,7 @@ DiscTypeID Reaction::getEduct2() const
 
 bool Reaction::hasEduct2() const
 {
-    return type_ & (Combination | Exchange);
+    return type_ == Type::Combination || type_ == Type::Exchange;
 }
 
 void Reaction::setEduct2(DiscTypeID educt2)
@@ -141,7 +135,7 @@ DiscTypeID Reaction::getProduct2() const
 
 bool Reaction::hasProduct2() const
 {
-    return type_ & (Decomposition | Exchange);
+    return type_ == Type::Decomposition || type_ == Type::Exchange;
 }
 
 void Reaction::setProduct2(DiscTypeID product2)
@@ -170,19 +164,19 @@ const Reaction::Type& Reaction::getType() const
     return type_;
 }
 
-void Reaction::validate(const DiscTypeResolver& discTypeResolver) const
+void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
 {
-    auto getMass = [&](DiscTypeID discTypeID) { return discTypeResolver(discTypeID).getMass(); };
+    auto getMass = [&](DiscTypeID discTypeID) { return discTypeRegistry.getByID(discTypeID).getMass(); };
 
     const auto eductMassSum = getMass(educt1_) + (educt2_ ? getMass(*educt2_) : 0);
     const auto productMassSum = getMass(product1_) + (product2_ ? getMass(*product2_) : 0);
 
     if (eductMassSum != productMassSum)
-        throw ExceptionWithLocation(toString(*this, discTypeResolver) +
+        throw ExceptionWithLocation(toString(*this, discTypeRegistry) +
                                     ": Product- and educt masses need to be identical");
 
-    if (type_ == Transformation && educt1_ == product1_)
-        throw ExceptionWithLocation(toString(*this, discTypeResolver) + ": Educt 1 and product 1 are identical");
+    if (type_ == Type::Transformation && educt1_ == product1_)
+        throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
 }
 
 } // namespace cell

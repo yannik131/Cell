@@ -1,8 +1,8 @@
-#ifndef DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP
-#define DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP
+#ifndef REACTIONENGINE_HPP
+#define REACTIONENGINE_HPP
 
 #include "AbstractReactionTable.hpp"
-#include "DiscTypeRegistry.hpp"
+#include "CollisionDetector.hpp"
 #include "MathUtils.hpp"
 
 #include <functional>
@@ -15,27 +15,25 @@ namespace cell
 class DiscType;
 class Disc;
 
+using SingleLookupMap = DiscTypeMap<std::vector<Reaction>>;
+using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
+
 class ReactionEngine
 {
 public:
-    using SingleLookupMap = DiscTypeMap<std::vector<Reaction>>;
-    using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
-
-public:
-    ReactionEngine(DiscTypeResolver discTypeResolver, SimulationTimeStepProvider simulationTimeStepProvider,
-                   const AbstractReactionTable& reactionTable);
+    ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const AbstractReactionTable& reactionTable);
 
     /**
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
      * @param d1 The disc to transform
      */
-    bool transformationReaction(Disc* d1) const;
+    bool transformationReaction(Disc* d1, double dt) const;
 
     /**
      * @brief Decomposition reaction A -> B + C.
      * @param d1 The disc to decompose
      */
-    std::optional<Disc> decompositionReaction(Disc* d1) const;
+    std::optional<Disc> decompositionReaction(Disc* d1, double dt) const;
 
     /**
      * @brief Combination reaction A + B -> C. Destroys one of the 2 educt discs and changes the other if a reaction
@@ -57,59 +55,42 @@ public:
      * will occur for each disc.
      * @param discs Discs to transform/decompose
      */
-    std::optional<Disc> applyUnimolecularReactions(Disc& disc) const;
+    std::optional<Disc> applyUnimolecularReactions(Disc& disc, double dt) const;
 
-    void applyBimolecularReactions(const std::vector<std::pair<Disc*, Disc*>>& collidingDiscs) const;
-
-private:
-    /**
-     * @brief Helper function to search the lookup maps for reactions
-     * @param map A reaction lookup map as returned by ReactionTable
-     * @param key Either a single disc type (decomposition, transformation) or a pair of disc types (combination,
-     * exchange)
-     */
-    template <typename MapType, typename KeyType>
-    const Reaction* selectReaction(const MapType& map, const KeyType& key) const;
+    void applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const;
 
 private:
-    DiscTypeResolver discTypeResolver_;
-    SimulationTimeStepProvider simulationTimeStepProvider_;
+    template <typename MapType, typename KeyType, typename Condition>
+    const Reaction* selectReaction(const MapType& map, const KeyType& key, const Condition& condition) const;
+
+    const Reaction* selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key, double dt) const;
+    const Reaction* selectBimolecularReaction(const PairLookupMap& map,
+                                              const std::pair<DiscTypeID, DiscTypeID>& key) const;
+
+private:
+    const DiscTypeRegistry& discTypeRegistry_;
     const SingleLookupMap* transformations_;
     const SingleLookupMap* decompositions_;
     const PairLookupMap* combinations_;
     const PairLookupMap* exchanges_;
 };
 
-template <typename MapType, typename KeyType>
-const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType& key) const
+template <typename MapType, typename KeyType, typename Condition>
+inline const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType& key,
+                                                      const Condition& condition) const
 {
-    const auto& iter = map.find(key);
+    auto iter = map.find(key);
     if (iter == map.end())
         return nullptr;
 
-    const auto& possibleReactions = iter->second;
+    const auto& reactions = iter->second;
+    auto start = mathutils::getRandomNumber<std::size_t>(0, reactions.size() - 1);
 
-    // combination/exchange reactions always act on pairs of discs and don't have time based probabilities
-    if constexpr (std::is_same_v<KeyType, std::pair<DiscTypeID, DiscTypeID>>)
+    for (std::size_t i = 0; i < reactions.size(); ++i)
     {
-        for (const auto& reaction : possibleReactions)
-        {
-            if (mathutils::getRandomNumber<double>(0, 1) > reaction.getProbability())
-                continue;
-
+        const auto& reaction = reactions[(start + i) % reactions.size()];
+        if (condition(reaction))
             return &reaction;
-        }
-    }
-    else
-    {
-        const auto dt = simulationTimeStepProvider_();
-        for (const auto& reaction : possibleReactions)
-        {
-            if (mathutils::getRandomNumber<double>(0, 1) > 1 - std::pow(1 - reaction.getProbability(), dt))
-                continue;
-
-            return &reaction;
-        }
     }
 
     return nullptr;
@@ -117,4 +98,4 @@ const Reaction* ReactionEngine::selectReaction(const MapType& map, const KeyType
 
 } // namespace cell
 
-#endif /* DC7AE7AB_B146_4189_B454_D8D7D7EE32EA_HPP */
+#endif /* REACTIONENGINE_HPP */
