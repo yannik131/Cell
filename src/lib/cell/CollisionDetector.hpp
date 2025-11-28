@@ -21,7 +21,7 @@ public:
         std::vector<Disc>* discs;
         std::vector<Membrane>* membranes;
         std::vector<Disc*>* intrudingDiscs;
-        Membrane* containingMembrane;
+        Membrane* containingMembrane = nullptr;
     };
 
     enum class EntryType

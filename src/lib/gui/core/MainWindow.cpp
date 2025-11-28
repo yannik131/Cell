@@ -63,8 +63,8 @@ MainWindow::MainWindow(QWidget* parent)
     resizeTimer_.setSingleShot(true);
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
-    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested,
-            [this]() { ui->simulationWidget->resetView(); });
+    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, this,
+            &MainWindow::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame)
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent)
             &MainWindow::toggleSimulationFullscreen);
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this, [&]() { simulation_->rebuildContext(); });
+    QTimer::singleShot(0, this, [&]() { resetSimulation(); });
 }
 
 void MainWindow::resetSimulation()
@@ -99,6 +99,7 @@ void MainWindow::resetSimulation()
     stopSimulation();
     simulation_->rebuildContext();
     plotModel_->reset();
+    fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -127,11 +128,22 @@ void MainWindow::loadSettingsFromJson()
     try
     {
         simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
+        resetSimulation();
     }
     catch (const std::exception& e)
     {
         QMessageBox::warning(this, "Couldn't open file", e.what());
     }
+}
+
+void MainWindow::fitSimulationIntoView()
+{
+    const auto& widgetSize = ui->simulationWidget->size();
+    auto config = simulationConfigUpdater_->getSimulationConfig();
+    auto smallestEdge = std::min(widgetSize.height() / 2, widgetSize.width() / 2);
+    auto zoom = config.cellMembraneType.radius / smallestEdge;
+
+    ui->simulationWidget->resetView(Zoom{zoom});
 }
 
 void MainWindow::toggleSimulationFullscreen()
