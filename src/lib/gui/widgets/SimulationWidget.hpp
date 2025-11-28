@@ -33,11 +33,13 @@ public slots:
     /**
      * @brief Clears the render window and displays circles based on the given `FrameDTO`
      */
-    void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                const std::map<std::string, sf::Color>& colorMap);
+    void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
 
 private:
-    std::vector<sf::CircleShape> circles_;
+    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry);
+
+private:
+    std::vector<sf::CircleShape> typeShapes_;
     sf::Clock clock_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
 };
