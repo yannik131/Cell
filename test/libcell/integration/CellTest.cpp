@@ -62,12 +62,12 @@ protected:
 
         while (!compartments.empty())
         {
-            const auto* compartment = compartments.back();
+            const auto* child = compartments.back();
             compartments.pop_back();
 
-            discs.insert(discs.end(), compartment->getDiscs().begin(), compartment->getDiscs().end());
+            discs.insert(discs.end(), child->getDiscs().begin(), child->getDiscs().end());
 
-            for (const auto& subCompartment : compartment->getCompartments())
+            for (const auto& subCompartment : child->getCompartments())
                 compartments.push_back(subCompartment.get());
         }
 

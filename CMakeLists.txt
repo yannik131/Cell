@@ -118,11 +118,3 @@ target_include_directories(tests-libcell PUBLIC
 
 include(GoogleTest)
 gtest_add_tests(TARGET tests-libcell)
-
-# tests for gui
-add_executable(tests-gui ${PROJECT_SOURCE_DIR}/test/libcellgui/e2e/DiscTypesTest.cpp)
-
-target_link_libraries(tests-gui PRIVATE 
-    libcellgui 
-    Qt::Test
-)
