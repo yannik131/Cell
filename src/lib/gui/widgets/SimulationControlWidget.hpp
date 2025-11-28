@@ -20,6 +20,7 @@ class SimulationControlWidget : public QWidget
     Q_OBJECT
 public:
     SimulationControlWidget(QWidget* parent = nullptr);
+    ~SimulationControlWidget();
 
     void updateWidgets(SimulationRunning simulationRunning);
 
@@ -51,7 +52,7 @@ private:
     void reset();
 
 private:
-    Ui::SimulationControlWidget* ui;
+    std::unique_ptr<Ui::SimulationControlWidget> ui;
 };
 
 #endif /* BFD742A1_095D_472C_9947_A6D648D19B4D_HPP */

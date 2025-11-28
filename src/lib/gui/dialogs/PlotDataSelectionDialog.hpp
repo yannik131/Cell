@@ -22,13 +22,13 @@ public:
     /**
      * @brief Loads the settings and connects the callbacks
      */
-    explicit PlotDataSelectionDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater,
-                                     PlotModel* plotModel);
+    PlotDataSelectionDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater, PlotModel* plotModel);
+    ~PlotDataSelectionDialog();
 
     void showEvent(QShowEvent* event) override;
 
 private:
-    Ui::PlotDataSelectionDialog* ui;
+    std::unique_ptr<Ui::PlotDataSelectionDialog> ui;
     SimulationConfigUpdater* simulationConfigUpdater_;
     PlotModel* plotModel_;
 };

@@ -20,6 +20,8 @@ SimulationControlWidget::SimulationControlWidget(QWidget* parent)
     connect(ui->reinitializeButton, &QPushButton::clicked, this, &SimulationControlWidget::reset);
 }
 
+SimulationControlWidget::~SimulationControlWidget() = default;
+
 void SimulationControlWidget::updateWidgets(SimulationRunning simulationRunning)
 {
     setWidgetsEnabled(!simulationRunning.value);

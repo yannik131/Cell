@@ -35,6 +35,8 @@ PlotDataSelectionDialog::PlotDataSelectionDialog(QWidget* parent, SimulationConf
                               }));
 }
 
+PlotDataSelectionDialog::~PlotDataSelectionDialog() = default;
+
 void PlotDataSelectionDialog::showEvent(QShowEvent*)
 {
     const auto& discTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;

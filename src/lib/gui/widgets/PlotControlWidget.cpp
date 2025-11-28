@@ -14,6 +14,8 @@ PlotControlWidget::PlotControlWidget(QWidget* parent)
     connect(ui->selectDiscTypesPushButton, &QPushButton::clicked, this, [&]() { emit selectDiscTypesClicked(); });
 }
 
+PlotControlWidget::~PlotControlWidget() = default;
+
 void PlotControlWidget::setModel(PlotModel* plotModel)
 {
     connect(ui->plotSumCheckBox, &QCheckBox::toggled, plotModel, &PlotModel::setPlotSum);

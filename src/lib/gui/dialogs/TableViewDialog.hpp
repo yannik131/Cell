@@ -21,13 +21,11 @@ public:
     TableViewDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater,
                     AbstractSimulationConfigTableModel<T>* model);
 
-    ~TableViewDialog();
-
 protected:
     void showEvent(QShowEvent* showEvent) override;
 
 protected:
-    Ui::TableViewDialog* ui;
+    std::unique_ptr<Ui::TableViewDialog> ui;
     SimulationConfigUpdater* simulationConfigUpdater_;
     AbstractSimulationConfigTableModel<T>* model_;
 };
@@ -57,11 +55,6 @@ inline TableViewDialog<T>::TableViewDialog(QWidget* parent, SimulationConfigUpda
     ui->tableView->setModel(model_);
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableView->setEditTriggers(QAbstractItemView::AllEditTriggers);
-}
-
-template <typename T> inline TableViewDialog<T>::~TableViewDialog()
-{
-    delete ui;
 }
 
 template <typename T> inline void TableViewDialog<T>::showEvent(QShowEvent* showEvent)

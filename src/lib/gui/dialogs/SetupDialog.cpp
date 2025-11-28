@@ -38,6 +38,8 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     displayCurrentConfig();
 }
 
+SetupDialog::~SetupDialog() = default;
+
 void SetupDialog::showEvent(QShowEvent*)
 {
     setupModel_->loadFromConfig();

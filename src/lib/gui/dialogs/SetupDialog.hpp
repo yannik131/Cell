@@ -15,14 +15,15 @@ class SetupDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
+    SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater);
+    ~SetupDialog();
 
     void showEvent(QShowEvent*) override;
 
     void displayCurrentConfig();
 
 private:
-    Ui::SetupDialog* ui;
+    std::unique_ptr<Ui::SetupDialog> ui;
     SetupModel* setupModel_;
     SimulationConfigUpdater* simulationConfigUpdater_;
 };
