@@ -121,7 +121,7 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     const auto& distribution = membraneType.discTypeDistribution;
 
     if (membraneType.discCount < 0)
-        throw ExceptionWithLocation("Disc count for membrane type " + membraneTypeName + " is negative (" +
+        throw ExceptionWithLocation("Disc count for membrane type \"" + membraneTypeName + "\" is negative (" +
                                     std::to_string(membraneType.discCount) + ")");
 
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, membraneType.discCount);
@@ -130,8 +130,8 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     if (!distribution.empty())
     {
         if (double sum = calculateValueSum(distribution) * 100; std::abs(sum - 100) > 1e-1)
-            throw ExceptionWithLocation("Distribution for membrane type " + membraneTypeName +
-                                        " doesn't add up to 100%, it adds up to " + std::to_string(sum));
+            throw ExceptionWithLocation("Distribution for membrane type \"" + membraneTypeName +
+                                        "\" doesn't add up to 100%, it adds up to " + std::to_string(sum) + "%");
     }
 
     for (const auto& [discTypeName, frequency] : distribution)

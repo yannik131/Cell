@@ -41,6 +41,7 @@ private:
     void updateMembraneTypes(cell::SimulationConfig& config,
                              const std::unordered_map<std::string, std::string>& changeMap) const;
     void testConfig(const cell::SimulationConfig& simulationConfig) const;
+    void setSimulationConfigWithoutSignals(const cell::SimulationConfig& simulationConfig);
 
     template <typename T>
     std::unordered_map<std::string, std::string>
@@ -67,6 +68,7 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         auto changeMap = createChangeMap(newTypes, simulationConfig_.discTypes, removedTypes);
         updateDiscTypes(simulationConfigCopy, changeMap);
         simulationConfigCopy.discTypes = newTypes;
+        setSimulationConfigWithoutSignals(simulationConfigCopy);
         discTypeColorMap_ = colorMap;
         emit discTypesChanged();
     }
@@ -76,10 +78,9 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         auto changeMap = createChangeMap(newTypes, simulationConfig_.membraneTypes, removedTypes);
         updateMembraneTypes(simulationConfigCopy, changeMap);
         simulationConfigCopy.membraneTypes = newTypes;
+        setSimulationConfig(simulationConfigCopy);
         membraneTypeColorMap_ = colorMap;
     }
-
-    setSimulationConfig(simulationConfigCopy);
 }
 
 template <typename T>
@@ -91,20 +92,22 @@ SimulationConfigUpdater::createChangeMap(const std::vector<T>& newTypes, const s
                   "Unsupported type");
 
     // Since new types are always appended to the table in the GUI, iterating both arrays in order gives the changes
-    // We'll map "" to "" to accomodate empty strings like in reactions
-
     std::unordered_map<std::string, std::string> changeMap({{"", ""}});
 
-    for (std::size_t i = 0; i < oldTypes.size() && i < newTypes.size(); ++i)
+    std::size_t i = 0;
+    for (const auto& oldType : oldTypes)
     {
-        if (removedTypes.contains(oldTypes[i].name))
+        if (removedTypes.contains(oldType.name))
             continue;
 
-        changeMap[oldTypes[i].name] = newTypes[i].name;
+        changeMap[oldType.name] = newTypes[i++].name;
     }
 
-    if (changeMap.size() == 1)
-        return {};
+    while (i < newTypes.size())
+    {
+        changeMap[newTypes[i].name] = newTypes[i].name;
+        ++i;
+    }
 
     return changeMap;
 }
