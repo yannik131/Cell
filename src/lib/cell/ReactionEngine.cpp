@@ -94,16 +94,33 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
     if (!reaction)
         return false;
 
-    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
-    const auto& product1Type = discTypeRegistry_.getByID(reaction->getProduct1());
-    const auto& product2Type = discTypeRegistry_.getByID(reaction->getProduct2());
+    auto product1TypeID = reaction->getProduct1();
+    auto product2TypeID = reaction->getProduct2();
 
-    d1->scaleVelocity(std::sqrt(d1Type.getMass() / product1Type.getMass()));
-    d1->setType(reaction->getProduct1());
+    const auto* d1Type = &discTypeRegistry_.getByID(d1->getTypeID());
+    const auto* d2Type = &discTypeRegistry_.getByID(d2->getTypeID());
+    const auto* product1Type = &discTypeRegistry_.getByID(product1TypeID);
+    const auto* product2Type = &discTypeRegistry_.getByID(product2TypeID);
 
-    d2->scaleVelocity(std::sqrt(d2Type.getMass() / product2Type.getMass()));
-    d2->setType(reaction->getProduct2());
+    // Sort both product types and educt discs by radius
+    // Now the smallest/largest disc gets the smallest/largest product type
+
+    if (product1Type->getRadius() > product2Type->getRadius())
+    {
+        std::swap(product1Type, product2Type);
+        std::swap(product1TypeID, product2TypeID);
+    }
+    if (d1Type->getRadius() > d2Type->getRadius())
+    {
+        std::swap(d1, d2);
+        std::swap(d1Type, d2Type);
+    }
+
+    d1->scaleVelocity(std::sqrt(d1Type->getMass() / product1Type->getMass()));
+    d1->setType(product1TypeID);
+
+    d2->scaleVelocity(std::sqrt(d2Type->getMass() / product2Type->getMass()));
+    d2->setType(product2TypeID);
 
     return true;
 }

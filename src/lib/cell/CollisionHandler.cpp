@@ -136,6 +136,7 @@ bool CollisionHandler::canGoThrough(Disc* disc, Membrane* membrane,
         (collisionType == CollisionType::DiscContainingMembrane && permeability == MembraneType::Permeability::Outward))
     {
         double angle = mathutils::getAngleBetween(disc->getVelocity(), membrane->getPosition() - disc->getPosition());
+        // TODO Don't do this if the disc is already in the membrane and then pushed by another..
         if (std::abs(90.0 - angle) > 30)
             return true;
     }

@@ -16,9 +16,11 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
 
 void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
+    const bool discTypesDidChange = simulationConfig_.discTypes != simulationConfig.discTypes;
+
     setSimulationConfigWithoutSignals(simulationConfig);
 
-    if (simulationConfig_.discTypes != simulationConfig.discTypes)
+    if (discTypesDidChange)
         emit discTypesChanged();
 }
 
