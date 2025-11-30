@@ -16,12 +16,9 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
 
 void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
-    const bool discTypesDidChange = simulationConfig_.discTypes != simulationConfig.discTypes;
+    setSimulationConfigWithoutSignals(simulationConfig);
 
-    testConfig(simulationConfig);
-    simulationConfig_ = simulationConfig;
-
-    if (discTypesDidChange)
+    if (simulationConfig_.discTypes != simulationConfig.discTypes)
         emit discTypesChanged();
 }
 
@@ -119,6 +116,12 @@ void SimulationConfigUpdater::testConfig(const cell::SimulationConfig& simulatio
     simulationFactory.buildSimulationFromConfig(simulationConfig);
 }
 
+void SimulationConfigUpdater::setSimulationConfigWithoutSignals(const cell::SimulationConfig& simulationConfig)
+{
+    testConfig(simulationConfig);
+    simulationConfig_ = simulationConfig;
+}
+
 void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
                                               const std::unordered_map<std::string, std::string>& changeMap) const
 {
@@ -133,33 +136,37 @@ void SimulationConfigUpdater::updateDiscTypes(cell::SimulationConfig& config,
         reaction.product2 = changeMap.at(reaction.product2);
     }
 
-    for (auto& membraneType : config.membraneTypes)
+    const auto updateMap = [&](const auto& oldMap)
     {
-        cell::config::DiscTypeDistribution newDistribution;
+        std::decay_t<decltype(oldMap)> newMap;
+        for (const auto& [key, value] : oldMap)
+        {
+            if (!changeMap.contains(key))
+                continue;
+            newMap[changeMap.at(key)] = value;
+        }
 
-        for (const auto& [discType, frequency] : membraneType.discTypeDistribution)
-            newDistribution[changeMap.at(discType)] = frequency;
+        return newMap;
+    };
 
-        membraneType.discTypeDistribution = std::move(newDistribution);
-    }
+    const auto updateMembraneType = [&](auto& membraneType)
+    {
+        membraneType.discTypeDistribution = updateMap(membraneType.discTypeDistribution);
+        membraneType.permeabilityMap = updateMap(membraneType.permeabilityMap);
+    };
+
+    updateMembraneType(config.cellMembraneType);
+
+    for (auto& membraneType : config.membraneTypes)
+        updateMembraneType(membraneType);
 
     for (auto& disc : config.discs)
-    {
-        if (!changeMap.contains(disc.discTypeName))
-            continue;
-
         disc.discTypeName = changeMap.at(disc.discTypeName);
-    }
 }
 
 void SimulationConfigUpdater::updateMembraneTypes(cell::SimulationConfig& config,
                                                   const std::unordered_map<std::string, std::string>& changeMap) const
 {
     for (auto& membrane : config.membranes)
-    {
-        if (!changeMap.contains(membrane.membraneTypeName))
-            continue;
-
         membrane.membraneTypeName = changeMap.at(membrane.membraneTypeName);
-    }
 }

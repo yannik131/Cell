@@ -5,7 +5,7 @@
 void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, Column column)
 {
     insertDoubleSpinBoxIntoView(
-        view, DoubleSpinBoxParams{.column = column.value, .min = 0, .max = 1, .step = 0.001, .decimals = 3});
+        view, DoubleSpinBoxParams{.column = column.value, .min = 0, .max = 1, .step = 1e-6, .decimals = 6});
 }
 
 void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxParams& params)
