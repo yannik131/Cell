@@ -116,6 +116,18 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
         std::swap(d1Type, d2Type);
     }
 
+    // Prefer the assignment that keeps
+    // as many discs as possible with their original type.
+
+    int leaveAsIs = (d1->getTypeID() == product1TypeID) + (d2->getTypeID() == product2TypeID);
+    int swapAgain = (d1->getTypeID() == product2TypeID) + (d2->getTypeID() == product1TypeID);
+
+    if (swapAgain > leaveAsIs)
+    {
+        std::swap(product1Type, product2Type);
+        std::swap(product1TypeID, product2TypeID);
+    }
+
     d1->scaleVelocity(std::sqrt(d1Type->getMass() / product1Type->getMass()));
     d1->setType(product1TypeID);
 

@@ -15,6 +15,15 @@ class Disc;
 
 class Compartment
 {
+private:
+    struct CompartmentEntry
+    {
+        double rightX;
+        const MembraneType* membraneType;
+        const Membrane* membrane;
+        Compartment* compartment;
+    };
+
 public:
     Compartment(Compartment* parent, Membrane membrane, SimulationContext simulationContext);
     ~Compartment();
@@ -33,8 +42,6 @@ public:
 private:
     void moveDiscsAndApplyUnimolecularReactions(double dt);
     auto detectCollisions();
-    void moveDiscsIntoChildCompartments(const CollisionDetector::DetectedCollisions& detectedCollisions);
-    void moveDiscsIntoParentCompartment(const CollisionDetector::DetectedCollisions& detectedCollisions);
     void updateChildCompartments(double dt);
 
 private:
@@ -43,6 +50,7 @@ private:
     std::vector<Disc> discs_;
     std::vector<Disc*> intrudingDiscs_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
+    std::vector<CompartmentEntry> compartmentEntries_;
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
 };

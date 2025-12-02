@@ -1,0 +1,104 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 0,
+            "discTypeDistribution": {},
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 150.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "A",
+                "radius": 5.0
+            },
+            {
+                "mass": 2.0,
+                "name": "C",
+                "radius": 5.0
+            }
+        ],
+        "discs": [
+            {
+                "discTypeName": "A",
+                "vx": 8.0,
+                "vy": 0.0,
+                "x": -106.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "A",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": -94.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "A",
+                "vx": 8.0,
+                "vy": 0.0,
+                "x": 94.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "A",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 106.0,
+                "y": 0.0
+            }
+        ],
+        "maxVelocity": 600.0,
+        "membraneTypes": [
+            {
+                "discCount": 0,
+                "discTypeDistribution": {},
+                "name": "M",
+                "permeabilityMap": {
+                    "A": 2
+                },
+                "radius": 100.0
+            }
+        ],
+        "membranes": [
+            {
+                "membraneTypeName": "M",
+                "x": 0.0,
+                "y": 0.0
+            }
+        ],
+        "reactions": [],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.0010000000474974513,
+        "useDistribution": false
+    },
+    "discTypeColorMap": {
+        "A": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "C": [
+            255,
+            255,
+            0,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "M": [
+            0,
+            0,
+            255,
+            255
+        ]
+    }
+}
