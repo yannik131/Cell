@@ -55,25 +55,32 @@ public:
         Disc* otherDisc = nullptr;
         Membrane* membrane = nullptr;
         CollisionType type = CollisionType::None;
+        bool allowedMembranePass = false;
 
-        bool isInvalidatedByDestroyedDisc() const
+        bool cantBeResolved() const
         {
-            return disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
+            return allowedMembranePass || disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
         }
     };
 
-    struct DetectedCollisions
+private:
+    struct EntryComparator
     {
-        std::vector<Collision> collisions;
-        std::unordered_map<CollisionType, std::vector<std::size_t>> indexes;
-    };
+        bool operator()(const Entry& e1, const Entry& e2) const
+        {
+            return e1.minX < e2.minX;
+        }
+    } entryComparator_;
 
 public:
     CollisionDetector(const DiscTypeRegistry& discTypeRegistry, const MembraneTypeRegistry& membraneTypeRegistry);
+    void setParams(Params params);
+    void buildMembraneIndex();
+    void buildDiscIndex();
+    void addIntrudingDiscsToIndex();
 
-    void buildEntries(const std::vector<Disc>& discs, const std::vector<Membrane>& membranes,
-                      const std::vector<Disc*>& intrudingDiscs);
-    DetectedCollisions detectCollisions(const Params& params);
+    std::vector<Collision> detectDiscMembraneCollisions();
+    std::vector<Collision> detectDiscDiscCollisions();
 
     DiscTypeMap<int> getAndResetCollisionCounts();
 
@@ -83,6 +90,7 @@ private:
                       EntryType entryType) const;
 
     bool discIsContainedByMembrane(const Entry& entry);
+    bool canGoThrough(Disc* disc, Membrane* membrane, CollisionDetector::CollisionType collisionType) const;
 
 private:
     DiscTypeMap<int> collisionCounts_;
@@ -90,7 +98,8 @@ private:
     const DiscTypeRegistry& discTypeRegistry_;
     const MembraneTypeRegistry& membraneTypeRegistry_;
 
-    std::vector<Entry> entries_;
+    std::vector<Entry> membraneEntries_;
+    std::vector<Entry> discEntries_;
     Params params_;
 };
 

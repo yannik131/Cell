@@ -67,7 +67,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     const bool isMembraneCollision =
         collision.type == CollisionType::DiscContainingMembrane || collision.type == CollisionType::DiscChildMembrane;
 
-    if (collision.isInvalidatedByDestroyedDisc() ||
+    if (collision.cantBeResolved() ||
         (isMembraneCollision && canGoThrough(collision.disc, collision.membrane, collision.type)))
     {
         context.skipCollision = true;
@@ -121,22 +121,6 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     context.impulseChange = -context.effMass * (1 + e) * relativeNormalSpeed;
 
     return context;
-}
-
-bool CollisionHandler::canGoThrough(Disc* disc, Membrane* membrane,
-                                    CollisionDetector::CollisionType collisionType) const
-{
-    using CollisionType = CollisionDetector::CollisionType;
-
-    const auto permeability =
-        membraneTypeRegistry_.getByID(membrane->getTypeID()).getPermeabilityFor(disc->getTypeID());
-
-    if (permeability == MembraneType::Permeability::Bidirectional ||
-        (collisionType == CollisionType::DiscChildMembrane && permeability == MembraneType::Permeability::Inward) ||
-        (collisionType == CollisionType::DiscContainingMembrane && permeability == MembraneType::Permeability::Outward))
-        return true;
-
-    return false;
 }
 
 } // namespace cell

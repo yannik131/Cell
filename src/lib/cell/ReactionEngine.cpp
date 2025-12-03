@@ -158,7 +158,7 @@ void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollis
         for (std::size_t index : indexes->second)
         {
             const auto& collision = detectedCollisions.collisions[index];
-            if (collision.isInvalidatedByDestroyedDisc())
+            if (collision.cantBeResolved())
                 continue;
 
             if (combinationReaction(collision.disc, collision.otherDisc))

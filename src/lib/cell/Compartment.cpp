@@ -14,6 +14,10 @@ Compartment::Compartment(Compartment* parent, Membrane membrane, SimulationConte
     , simulationContext_(std::move(simulationContext))
 {
     membrane_.setCompartment(this);
+    simulationContext_.collisionDetector.setParams(CollisionDetector::Params{.discs = &discs_,
+                                                                             .membranes = &membranes_,
+                                                                             .intrudingDiscs = &intrudingDiscs_,
+                                                                             .containingMembrane = &membrane_});
 }
 
 Compartment::~Compartment() = default;
@@ -79,11 +83,7 @@ const Compartment* Compartment::getParent() const
 auto Compartment::detectCollisions()
 {
     simulationContext_.collisionDetector.buildEntries(discs_, membranes_, intrudingDiscs_);
-    auto collisions = simulationContext_.collisionDetector.detectCollisions(
-        CollisionDetector::Params{.discs = &discs_,
-                                  .membranes = &membranes_,
-                                  .intrudingDiscs = &intrudingDiscs_,
-                                  .containingMembrane = &membrane_});
+    auto collisions = simulationContext_.collisionDetector.detectCollisions();
     intrudingDiscs_.clear();
     return collisions;
 }
@@ -94,7 +94,8 @@ void Compartment::update(double dt)
      * 1st iteration:
      *  - Find disc-membrane collisions
      * END
-     * - Add intruders to parent/child or move to parent/child
+     * - Add intruders to parent/child (for child: set flag for recursive overlap search with deeper children) or move
+     * to parent/child
      * - Recurse into child compartments
      * 2nd iteration:
      * - Find disc-disc collisions
@@ -107,13 +108,15 @@ void Compartment::update(double dt)
      * - Move discs
      * END
      */
-    auto detectedCollisions = detectCollisions();
-    simulationContext_.reactionEngine.applyBimolecularReactions(detectedCollisions);
-    simulationContext_.collisionHandler.resolveCollisions(detectedCollisions);
-
+    auto discMembraneCollisions = detectDiscMembraneCollisions();
+    moveDiscsBetweenCompartments(discMembraneCollisions);
     updateChildCompartments(dt);
 
-    moveDiscsAndApplyUnimolecularReactions(dt); // Removes destroyed discs
+    auto discDiscCollisions = detectDiscDiscCollisions();
+    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
+    simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions, discDiscCollisions);
+
+    moveDiscsAndCleanUp(dt);
 }
 
 Compartment* Compartment::createSubCompartment(Membrane membrane)
@@ -122,33 +125,7 @@ Compartment* Compartment::createSubCompartment(Membrane membrane)
     membranes_.push_back(compartment->getMembrane());
     compartments_.push_back(std::move(compartment));
 
-    // Keep compartments sorted by left x to accomodate sweep & prune
-    std::sort(compartments_.begin(), compartments_.end(),
-              [&](const std::unique_ptr<Compartment>& lhs, const std::unique_ptr<Compartment>& rhs)
-              {
-                  const auto& lhsMembrane = lhs->getMembrane();
-                  const auto& rhsMembrane = rhs->getMembrane();
-                  const auto lhsLeftX =
-                      lhsMembrane.getPosition().x -
-                      simulationContext_.membraneTypeRegistry.getByID(lhsMembrane.getTypeID()).getRadius();
-                  const auto rhsLeftX =
-                      rhsMembrane.getPosition().x -
-                      simulationContext_.membraneTypeRegistry.getByID(rhsMembrane.getTypeID()).getRadius();
-
-                  return lhsLeftX < rhsLeftX;
-              });
-
-    compartmentEntries_.clear();
-    for (const auto& compartment : compartments_)
-    {
-        const auto* membraneType =
-            &simulationContext_.membraneTypeRegistry.getByID(compartment->getMembrane().getTypeID());
-        double rightX = compartment->getMembrane().getPosition().x + membraneType->getRadius();
-        compartmentEntries_.push_back(CompartmentEntry{.rightX = rightX,
-                                                       .membraneType = membraneType,
-                                                       .membrane = &compartment->getMembrane(),
-                                                       .compartment = compartment.get()});
-    }
+    simulationContext_.collisionDetector.buildMembraneIndex(membranes_);
 
     return compartments_.back().get();
 }
@@ -188,6 +165,18 @@ void Compartment::moveDiscsAndApplyUnimolecularReactions(double dt)
 
     if (!newDiscs.empty())
         discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+}
+
+auto Compartment::detectDiscMembraneCollisions()
+{
+    simulationContext_.collisionDetector.buildDiscIndex();
+    return simulationContext_.collisionDetector.detectDiscMembraneCollisions();
+}
+
+auto Compartment::detectDiscDiscCollisions()
+{
+    simulationContext_.collisionDetector.addIntrudingDiscsToIndex();
+    return simulationContext_.collisionDetector.detectDiscDiscCollisions();
 }
 
 void Compartment::updateChildCompartments(double dt)

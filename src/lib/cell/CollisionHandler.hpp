@@ -37,7 +37,6 @@ public:
 
 private:
     CollisionContext calculateCollisionContext(const CollisionDetector::Collision& collision) const;
-    bool canGoThrough(Disc* disc, Membrane* membrane, CollisionDetector::CollisionType collisionType) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;
