@@ -32,7 +32,7 @@ public:
     void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc disc);
     const std::vector<Disc>& getDiscs() const;
-    void addIntrudingDisc(Disc& disc);
+    void addIntrudingDisc(Disc& disc, SearchChildren searchChildren);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
@@ -43,6 +43,8 @@ private:
     void moveDiscsAndApplyUnimolecularReactions(double dt);
     auto detectCollisions();
     void updateChildCompartments(double dt);
+    bool moveDiscToParentCompartment(Disc& disc);
+    bool moveDiscToChildCompartment(Disc& disc);
 
 private:
     Compartment* parent_;
