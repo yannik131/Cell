@@ -6,6 +6,9 @@
 
 namespace cell
 {
+
+DiscTypeMap<int> CollisionDetector::collisionCounts_;
+
 CollisionDetector::CollisionDetector(const DiscTypeRegistry& discTypeRegistry,
                                      const MembraneTypeRegistry& membraneTypeRegistry)
     : discTypeRegistry_(discTypeRegistry)
@@ -32,7 +35,7 @@ void CollisionDetector::buildDiscIndex()
 {
     discEntries_.clear();
     const auto& discs = *params_.discs;
-    // We'll guess 100 additional intruding discs
+    // We guess 100 intruding discs
     discEntries_.reserve(discs.size() + 100);
 
     for (std::size_t i = 0; i < discs.size(); ++i)
@@ -44,12 +47,12 @@ void CollisionDetector::buildDiscIndex()
 void CollisionDetector::addIntrudingDiscsToIndex()
 {
     const auto& intrudingDiscs = *params_.intrudingDiscs;
-    discEntries_.reserve(discEntries_.size() + intrudingDiscs.size());
-    auto mid = discEntries_.end();
+    const auto oldSize = discEntries_.size();
 
     for (std::size_t i = 0; i < intrudingDiscs.size(); ++i)
         discEntries_.push_back(createEntry(*intrudingDiscs[i], discTypeRegistry_, i, EntryType::IntrudingDisc));
 
+    auto mid = discEntries_.begin() + static_cast<ptrdiff_t>(oldSize);
     std::sort(mid, discEntries_.end(), entryComparator_);
     std::inplace_merge(discEntries_.begin(), mid, discEntries_.end(), entryComparator_);
 }
@@ -57,24 +60,27 @@ void CollisionDetector::addIntrudingDiscsToIndex()
 std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscMembraneCollisions()
 {
     std::vector<Collision> collisions;
+    collisions.reserve(static_cast<std::size_t>(discEntries_.size() * 0.05));
+
     std::size_t startJ = 0;
 
     for (std::size_t i = 0; i < discEntries_.size(); ++i)
     {
         const auto& entry = discEntries_[i];
+        auto* disc = &(*params_.discs)[discEntries_[i].index];
+
         if (!discIsContainedByMembrane(entry))
-            collisions.push_back(Collision{.disc = &(*params_.discs)[entry.index],
+            collisions.push_back(Collision{.disc = disc,
                                            .membrane = params_.containingMembrane,
                                            .type = CollisionType::DiscContainingMembrane,
-                                           .allowedMembranePass =
-                                               canGoThrough(&(*params_.discs)[entry.index], params_.containingMembrane,
-                                                            CollisionType::DiscContainingMembrane)});
+                                           .allowedToPass = canGoThrough(disc, params_.containingMembrane,
+                                                                         CollisionType::DiscContainingMembrane)});
+
+        if (startJ == membraneEntries_.size())
+            continue;
 
         while (startJ < membraneEntries_.size() && membraneEntries_[startJ].maxX < entry.minX)
             ++startJ;
-
-        if (startJ == membraneEntries_.size())
-            break;
 
         for (std::size_t j = startJ; j < membraneEntries_.size(); ++j)
         {
@@ -83,9 +89,14 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscMembraneC
 
             if (mathutils::circlesOverlap(entry.position, entry.radius, membraneEntries_[j].position,
                                           membraneEntries_[j].radius))
-                collisions.push_back(Collision{.disc = &(*params_.discs)[entry.index],
-                                               .membrane = &(*params_.membranes)[membraneEntries_[j].index],
-                                               .type = CollisionType::DiscChildMembrane});
+            {
+                auto* membrane = &(*params_.membranes)[membraneEntries_[j].index];
+                collisions.push_back(
+                    Collision{.disc = disc,
+                              .membrane = membrane,
+                              .type = CollisionType::DiscChildMembrane,
+                              .allowedToPass = canGoThrough(disc, membrane, CollisionType::DiscChildMembrane)});
+            }
         }
     }
 
@@ -95,6 +106,8 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscMembraneC
 std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscDiscCollisions()
 {
     std::vector<Collision> collisions;
+    collisions.reserve(static_cast<std::size_t>(discEntries_.size() * 0.1));
+
     const auto getDiscPointer = [&](const Entry& entry)
     {
         if (entry.type == EntryType::IntrudingDisc)
@@ -112,7 +125,11 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscDiscColli
             if (entry2.minX > entry1.maxX)
                 break;
 
-            if (!mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius))
+            if (entry2.type == EntryType::IntrudingDisc && entry1.type == EntryType::IntrudingDisc)
+                continue;
+
+            if (!mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius,
+                                           MinOverlap{1e-2}))
                 continue;
 
             if (entry1.type == EntryType::IntrudingDisc)

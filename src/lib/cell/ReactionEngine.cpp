@@ -139,33 +139,38 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 
 std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc, double dt) const
 {
-    // TODO random shuffle all reactions
-    if (transformationReaction(&disc, dt))
-        return {};
+    // TODO random shuffle all reactions. For now we'll keep it simple
+    static bool transformationFirst = true;
+    if (transformationFirst)
+    {
+        transformationFirst = !transformationFirst;
+        if (transformationReaction(&disc, dt))
+            return {};
 
-    return decompositionReaction(&disc, dt);
+        return decompositionReaction(&disc, dt);
+    }
+    else
+    {
+        transformationFirst = !transformationFirst;
+        if (auto newDisc = decompositionReaction(&disc, dt))
+            return newDisc;
+
+        transformationReaction(&disc, dt);
+        return {};
+    }
 }
 
-void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const
+void ReactionEngine::applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions) const
 {
-    for (auto collisionType :
-         {CollisionDetector::CollisionType::DiscDisc, CollisionDetector::CollisionType::DiscIntrudingDisc})
+    for (const auto& collision : collisions)
     {
-        auto indexes = detectedCollisions.indexes.find(collisionType);
-        if (indexes == detectedCollisions.indexes.end())
+        if (collision.invalidatedByDestroyedDisc())
             continue;
 
-        for (std::size_t index : indexes->second)
-        {
-            const auto& collision = detectedCollisions.collisions[index];
-            if (collision.cantBeResolved())
-                continue;
-
-            if (combinationReaction(collision.disc, collision.otherDisc))
-                continue;
-            else
-                exchangeReaction(collision.disc, collision.otherDisc);
-        }
+        if (combinationReaction(collision.disc, collision.otherDisc))
+            continue;
+        else
+            exchangeReaction(collision.disc, collision.otherDisc);
     }
 }
 

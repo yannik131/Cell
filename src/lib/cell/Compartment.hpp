@@ -5,6 +5,7 @@
 #include "Membrane.hpp"
 #include "SimulationContext.hpp"
 
+#include <deque>
 #include <list>
 #include <vector>
 
@@ -15,23 +16,19 @@ class Disc;
 
 class Compartment
 {
-private:
-    struct CompartmentEntry
-    {
-        double rightX;
-        const MembraneType* membraneType;
-        const Membrane* membrane;
-        Compartment* compartment;
-    };
-
 public:
     Compartment(Compartment* parent, Membrane membrane, SimulationContext simulationContext);
     ~Compartment();
 
+    Compartment& operator=(const Compartment&) = delete;
+    Compartment(const Compartment&) = delete;
+    Compartment& operator=(Compartment&&) = delete;
+    Compartment(Compartment&&) = delete;
+
     const Membrane& getMembrane() const;
-    void setDiscs(std::vector<Disc>&& discs);
+    void setDiscs(std::deque<Disc>&& discs);
     void addDisc(Disc disc);
-    const std::vector<Disc>& getDiscs() const;
+    const std::deque<Disc>& getDiscs() const;
     void addIntrudingDisc(Disc& disc, SearchChildren searchChildren);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
@@ -40,22 +37,23 @@ public:
     Compartment* createSubCompartment(Membrane membrane);
 
 private:
-    void moveDiscsAndApplyUnimolecularReactions(double dt);
     auto detectDiscMembraneCollisions();
     auto detectDiscDiscCollisions();
+    void moveDiscsBetweenCompartments(const std::vector<CollisionDetector::Collision>& discMembraneCollisions);
     void updateChildCompartments(double dt);
-    bool moveDiscToParentCompartment(Disc& disc);
-    bool moveDiscToChildCompartment(Disc& disc);
+    void moveDiscsAndCleanUp(double dt);
+    void bimolecularUpdate();
+    void unimolecularUpdate(double dt);
 
 private:
     Compartment* parent_;
     Membrane membrane_;
-    std::vector<Disc> discs_;
+    std::deque<Disc> discs_;
     std::vector<Disc*> intrudingDiscs_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
-    std::vector<CompartmentEntry> compartmentEntries_;
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
+    CollisionDetector collisionDetector_;
 };
 
 } // namespace cell

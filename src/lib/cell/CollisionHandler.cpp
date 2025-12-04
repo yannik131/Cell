@@ -14,9 +14,8 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 {
 }
 
-void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions) const
+void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions) const
 {
-    const auto& collisions = detectedCollisions.collisions;
     if (collisions.empty())
         return;
 
@@ -67,8 +66,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     const bool isMembraneCollision =
         collision.type == CollisionType::DiscContainingMembrane || collision.type == CollisionType::DiscChildMembrane;
 
-    if (collision.cantBeResolved() ||
-        (isMembraneCollision && canGoThrough(collision.disc, collision.membrane, collision.type)))
+    if (collision.invalidatedByDestroyedDisc() || collision.allowedToPass)
     {
         context.skipCollision = true;
         return context;

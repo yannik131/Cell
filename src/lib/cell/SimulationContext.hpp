@@ -15,7 +15,6 @@ struct SimulationContext
     const DiscTypeRegistry& discTypeRegistry;
     const MembraneTypeRegistry& membraneTypeRegistry;
     const ReactionEngine& reactionEngine;
-    CollisionDetector& collisionDetector;
     const CollisionHandler& collisionHandler;
 };
 

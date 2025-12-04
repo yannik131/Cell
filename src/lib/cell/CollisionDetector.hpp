@@ -6,6 +6,7 @@
 #include "Types.hpp"
 #include "Vector2d.hpp"
 
+#include <deque>
 #include <optional>
 #include <set>
 #include <vector>
@@ -18,7 +19,7 @@ class CollisionDetector
 public:
     struct Params
     {
-        std::vector<Disc>* discs = nullptr;
+        std::deque<Disc>* discs = nullptr;
         std::vector<Membrane>* membranes = nullptr;
         std::vector<Disc*>* intrudingDiscs = nullptr;
         Membrane* containingMembrane = nullptr;
@@ -55,11 +56,11 @@ public:
         Disc* otherDisc = nullptr;
         Membrane* membrane = nullptr;
         CollisionType type = CollisionType::None;
-        bool allowedMembranePass = false;
+        bool allowedToPass = false; // Set in case of membrane collisions depending on permeability
 
-        bool cantBeResolved() const
+        bool invalidatedByDestroyedDisc() const
         {
-            return allowedMembranePass || disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
+            return disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
         }
     };
 
@@ -82,7 +83,7 @@ public:
     std::vector<Collision> detectDiscMembraneCollisions();
     std::vector<Collision> detectDiscDiscCollisions();
 
-    DiscTypeMap<int> getAndResetCollisionCounts();
+    static DiscTypeMap<int> getAndResetCollisionCounts();
 
 private:
     template <typename ElementType, typename RegistryType>
@@ -93,7 +94,7 @@ private:
     bool canGoThrough(Disc* disc, Membrane* membrane, CollisionDetector::CollisionType collisionType) const;
 
 private:
-    DiscTypeMap<int> collisionCounts_;
+    static DiscTypeMap<int> collisionCounts_;
 
     const DiscTypeRegistry& discTypeRegistry_;
     const MembraneTypeRegistry& membraneTypeRegistry_;

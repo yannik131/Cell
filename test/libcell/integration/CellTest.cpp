@@ -55,9 +55,9 @@ protected:
         return getDiscTypeRegistry().getIDFor(name);
     };
 
-    std::vector<Disc> getAllDiscs(const Compartment& compartment)
+    std::deque<Disc> getAllDiscs(const Compartment& compartment)
     {
-        std::vector<Disc> discs;
+        std::deque<Disc> discs;
         std::vector<const Compartment*> compartments({&compartment});
 
         while (!compartments.empty())
@@ -74,7 +74,7 @@ protected:
         return discs;
     }
 
-    const Disc& getDisc(const std::vector<Disc>& discs, const std::string& typeName)
+    const Disc& getDisc(const std::deque<Disc>& discs, const std::string& typeName)
     {
         auto iter = std::find_if(discs.begin(), discs.end(), [&](const Disc& d)
                                  { return getDiscTypeRegistry().getByID(d.getTypeID()).getName() == typeName; });
