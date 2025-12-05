@@ -37,7 +37,6 @@ add_library(libcell ${LIBCELL_SRC})
 target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
 
 target_link_libraries(libcell PUBLIC
-    sfml-system
     sfml-window
     sfml-graphics
     nanoflann::nanoflann
