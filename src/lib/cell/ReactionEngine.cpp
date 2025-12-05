@@ -82,6 +82,7 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
     d1->setVelocity((d1Type->getMass() * d1->getVelocity() + d2Type->getMass() * d2->getVelocity()) /
                     resultType.getMass());
     d1->setType(reaction->getProduct1());
+    d1->setPosition((d1->getPosition() + d2->getPosition()) / 2.0);
 
     d2->markDestroyed();
 

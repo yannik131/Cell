@@ -29,6 +29,8 @@ void CollisionDetector::buildMembraneIndex()
 
     for (std::size_t i = 0; i < membranes.size(); ++i)
         membraneEntries_.push_back(createEntry(membranes[i], membraneTypeRegistry_, i, EntryType::Membrane));
+
+    std::sort(membraneEntries_.begin(), membraneEntries_.end(), entryComparator_);
 }
 
 void CollisionDetector::buildDiscIndex()

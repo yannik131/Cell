@@ -79,7 +79,7 @@ const Compartment* Compartment::getParent() const
 
 auto Compartment::detectDiscMembraneCollisions()
 {
-    collisionDetector_.buildDiscIndex();
+    collisionDetector_.buildDiscIndex(); // TODO Already
     return collisionDetector_.detectDiscMembraneCollisions();
 }
 
@@ -191,7 +191,8 @@ void Compartment::moveDiscsBetweenCompartments(const std::vector<CollisionDetect
                 collision.disc->markDestroyed();
             }
             else
-                parent_->addIntrudingDisc(*collision.disc, SearchChildren{false});
+                parent_->addIntrudingDisc(*collision.disc,
+                                          SearchChildren{false}); // TODO Enable search without bad recursion
             break;
         case CollisionDetector::CollisionType::DiscChildMembrane:
             if (mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius,

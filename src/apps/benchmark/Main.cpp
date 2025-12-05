@@ -21,11 +21,14 @@ int main(int argc, char** argv)
     SimulationConfigBuilder builder;
 
     builder.addMembraneType(
-        "M", Radius{100},
+        "M", Radius{500},
         {{"A", MembraneType::Permeability::Inward}, {"B", MembraneType::Permeability::Bidirectional}});
-    builder.addMembrane("M", Position{.x = 500, .y = 500});
 
-    builder.setCellMembraneType(Radius{1000}, {});
+    std::vector<sf::Vector2d> membranePositions;
+    for (int i = 0; i < 5; ++i)
+        builder.addMembrane("M", Position{.x = -3000.0 + i * 1000, .y = -3000.0 + i * 1000});
+
+    builder.setCellMembraneType(Radius{5000}, {});
     builder.addDiscType("A", Radius{10}, Mass{5});
     builder.addDiscType("B", Radius{10}, Mass{5});
     builder.addDiscType("C", Radius{12}, Mass{10});
@@ -33,8 +36,8 @@ int main(int argc, char** argv)
     builder.setDistribution("", {{"A", 1}});
     builder.setDistribution("M", {{"A", 1}});
 
-    builder.setDiscCount("", 800);
-    builder.setDiscCount("M", 30);
+    builder.setDiscCount("", 20000);
+    builder.setDiscCount("M", 1000);
     builder.useDistribution(true);
 
     builder.addReaction("A", "", "B", "", Probability{0.1});
@@ -48,12 +51,15 @@ int main(int argc, char** argv)
     auto& cell = simulationContext.getCell();
     const auto& registry = simulationContext.getSimulationContext().discTypeRegistry;
 
-    const int N = 100000;
     LOG(INFO) << "Starting benchmark";
     auto start = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; i < N; ++i)
+    int N = 0;
+    while ((std::chrono::high_resolution_clock::now() - start).count() < 5 * 1e9)
+    {
         cell.update(1e-3);
+        ++N;
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -61,6 +67,7 @@ int main(int argc, char** argv)
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
+    LOG(INFO) << "Finished updates: " << N;
     LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
 
     for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
