@@ -23,7 +23,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(SFML COMPONENTS window graphics REQUIRED)
+find_package(SFML COMPONENTS system window graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
@@ -37,6 +37,7 @@ add_library(libcell ${LIBCELL_SRC})
 target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
 
 target_link_libraries(libcell PUBLIC
+    sfml-system
     sfml-window
     sfml-graphics
     nanoflann::nanoflann
