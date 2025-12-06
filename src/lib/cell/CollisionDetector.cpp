@@ -62,14 +62,13 @@ void CollisionDetector::addIntrudingDiscsToIndex()
 std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscMembraneCollisions()
 {
     std::vector<Collision> collisions;
-    collisions.reserve(static_cast<std::size_t>(discEntries_.size() * 0.05));
+    collisions.reserve(static_cast<std::size_t>(static_cast<double>(discEntries_.size()) * 0.05));
 
     std::size_t startJ = 0;
 
-    for (std::size_t i = 0; i < discEntries_.size(); ++i)
+    for (const auto& entry : discEntries_)
     {
-        const auto& entry = discEntries_[i];
-        auto* disc = &(*params_.discs)[discEntries_[i].index];
+        auto* disc = &(*params_.discs)[entry.index];
 
         if (!discIsContainedByMembrane(entry))
             collisions.push_back(Collision{.disc = disc,
@@ -108,7 +107,7 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscMembraneC
 std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscDiscCollisions()
 {
     std::vector<Collision> collisions;
-    collisions.reserve(static_cast<std::size_t>(discEntries_.size() * 0.1));
+    collisions.reserve(static_cast<std::size_t>(static_cast<double>(discEntries_.size()) * 0.1));
 
     const auto getDiscPointer = [&](const Entry& entry)
     {

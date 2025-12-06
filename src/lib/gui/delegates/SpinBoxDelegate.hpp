@@ -75,7 +75,7 @@ public:
 struct DoubleSpinBoxParams
 {
     int column;
-    double min = -1e99, max = 1e99;
+    std::optional<double> min, max;
     double step;
     int decimals;
 };

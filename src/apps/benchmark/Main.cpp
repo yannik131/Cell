@@ -51,23 +51,26 @@ int main(int argc, char** argv)
     auto& cell = simulationContext.getCell();
     const auto& registry = simulationContext.getSimulationContext().discTypeRegistry;
 
+    using clock = std::chrono::steady_clock;
+    using namespace std::chrono_literals;
+
     LOG(INFO) << "Starting benchmark";
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = clock::now();
 
     int N = 0;
-    while ((std::chrono::high_resolution_clock::now() - start).count() < 5 * 1e9)
+    while ((clock::now() - start) < 5s)
     {
         cell.update(1e-3);
         ++N;
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end = clock::now();
 
     LOG(INFO) << "Done";
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
-    LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
     LOG(INFO) << "Finished updates: " << N;
+    LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
     LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
 
     for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
