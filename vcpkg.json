@@ -1,5 +1,4 @@
 {
-    "builtin-baseline": "df6921c0b6cdf95269a4a3093e267b59e4bf0f5b",
     "dependencies": [
         "sfml",
         "glog",
@@ -7,11 +6,5 @@
         "qtbase",
         "gtest",
         "nlohmann-json"
-    ],
-    "overrides": [
-        {
-            "name": "sfml",
-            "version": "2.6.2"
-        }
     ]
 }
