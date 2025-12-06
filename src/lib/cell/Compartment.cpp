@@ -12,7 +12,7 @@ Compartment::Compartment(Compartment* parent, Membrane membrane, SimulationConte
     : parent_(parent)
     , membrane_(std::move(membrane))
     , simulationContext_(std::move(simulationContext))
-    , collisionDetector_(simulationContext.discTypeRegistry, simulationContext.membraneTypeRegistry)
+    , collisionDetector_(simulationContext_.discTypeRegistry, simulationContext_.membraneTypeRegistry)
 {
     membrane_.setCompartment(this);
     collisionDetector_.setParams(CollisionDetector::Params{.discs = &discs_,
