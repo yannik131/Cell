@@ -13,7 +13,7 @@ inline void expectNear(const sf::Vector2d& actual, const sf::Vector2d& expected,
     EXPECT_NEAR(actual.y, expected.y, epsilon);
 }
 
-inline std::map<std::string, int> countDiscTypes(const std::deque<cell::Disc>& discs,
+inline std::map<std::string, int> countDiscTypes(const std::vector<cell::Disc>& discs,
                                                  const cell::DiscTypeRegistry& discTypeRegistry)
 {
     std::map<std::string, int> counts;

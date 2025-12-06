@@ -127,25 +127,15 @@ std::vector<CollisionDetector::Collision> CollisionDetector::detectDiscDiscColli
             if (entry2.minX > entry1.maxX)
                 break;
 
-            if (entry2.type == EntryType::IntrudingDisc && entry1.type == EntryType::IntrudingDisc)
-                continue;
+            // TODO ignore collision if it's 2 intruders from the same child membrane to avoid double update (or maybe
+            // that's not a problem?)
 
             if (!mathutils::circlesOverlap(entry1.position, entry1.radius, entry2.position, entry2.radius,
                                            MinOverlap{1e-2}))
                 continue;
 
-            if (entry1.type == EntryType::IntrudingDisc)
-                collisions.push_back(Collision{.disc = &(*params_.discs)[entry2.index],
-                                               .otherDisc = (*params_.intrudingDiscs)[entry1.index],
-                                               .type = CollisionType::DiscIntrudingDisc});
-            else if (entry2.type == EntryType::IntrudingDisc)
-                collisions.push_back(Collision{.disc = &(*params_.discs)[entry1.index],
-                                               .otherDisc = (*params_.intrudingDiscs)[entry2.index],
-                                               .type = CollisionType::DiscIntrudingDisc});
-            else
-                collisions.push_back(Collision{.disc = &(*params_.discs)[entry1.index],
-                                               .otherDisc = &(*params_.discs)[entry2.index],
-                                               .type = CollisionType::DiscDisc});
+            collisions.push_back(Collision{
+                .disc = getDiscPointer(entry1), .otherDisc = getDiscPointer(entry2), .type = CollisionType::DiscDisc});
 
             ++collisionCounts_[getDiscPointer(entry1)->getTypeID()];
             ++collisionCounts_[getDiscPointer(entry2)->getTypeID()];

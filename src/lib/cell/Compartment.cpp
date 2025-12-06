@@ -28,7 +28,7 @@ const Membrane& Compartment::getMembrane() const
     return membrane_;
 }
 
-void Compartment::setDiscs(std::deque<Disc>&& discs)
+void Compartment::setDiscs(std::vector<Disc>&& discs)
 {
     discs_ = std::move(discs);
 }
@@ -38,27 +38,27 @@ void Compartment::addDisc(Disc disc)
     discs_.push_back(std::move(disc));
 }
 
-const std::deque<Disc>& Compartment::getDiscs() const
+const std::vector<Disc>& Compartment::getDiscs() const
 {
     return discs_;
 }
 
-void Compartment::addIntrudingDisc(Disc& disc, SearchChildren searchChildren)
+void Compartment::addIntrudingDisc(Disc& disc, const Compartment* source)
 {
     intrudingDiscs_.push_back(&disc);
-
-    if (!searchChildren.value)
-        return;
 
     const auto discRadius = simulationContext_.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
     for (auto& compartment : compartments_)
     {
+        if (compartment.get() == source)
+            continue;
+
         // TODO In case of many compartments, make search more efficient
         const auto* membraneType =
             &simulationContext_.membraneTypeRegistry.getByID(compartment->getMembrane().getTypeID());
         if (mathutils::circlesOverlap(disc.getPosition(), discRadius, compartment->getMembrane().getPosition(),
                                       membraneType->getRadius()))
-            compartment->addIntrudingDisc(disc, SearchChildren{true});
+            compartment->addIntrudingDisc(disc, source);
     }
 }
 
@@ -89,6 +89,26 @@ auto Compartment::detectDiscDiscCollisions()
     auto collisions = collisionDetector_.detectDiscDiscCollisions();
 
     return collisions;
+}
+
+void Compartment::registerIntruders(const std::vector<CollisionDetector::Collision>& discMembraneCollisions)
+{
+    // Assumptions:
+    // - Called directly after collision detection, so no destroyed discs yet
+    // - parent_ can't be nullptr because the outermost membrane shouldn't be permeable for anything so
+    // collision.allowedToPass would always be false
+    // - Also this function only expects DiscContainingMembrane and DiscChildMembrane collisions
+
+    for (const auto& collision : discMembraneCollisions)
+    {
+        if (!collision.allowedToPass)
+            continue;
+
+        if (collision.type == CollisionDetector::CollisionType::DiscContainingMembrane)
+            parent_->addIntrudingDisc(*collision.disc, this);
+        else
+            collision.membrane->getCompartment()->addIntrudingDisc(*collision.disc, nullptr);
+    }
 }
 
 void Compartment::update(double dt)
@@ -142,7 +162,7 @@ void Compartment::moveDiscsAndCleanUp(double dt)
 void Compartment::bimolecularUpdate()
 {
     auto discMembraneCollisions = detectDiscMembraneCollisions();
-    moveDiscsBetweenCompartments(discMembraneCollisions);
+    registerIntruders(discMembraneCollisions);
 
     for (auto& compartment : compartments_)
         compartment->bimolecularUpdate();
@@ -152,7 +172,7 @@ void Compartment::bimolecularUpdate()
     simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions);
     simulationContext_.collisionHandler.resolveCollisions(discDiscCollisions);
 
-    intrudingDiscs_.clear();
+    captureIntruders();
 }
 
 void Compartment::unimolecularUpdate(double dt)
@@ -163,50 +183,26 @@ void Compartment::unimolecularUpdate(double dt)
         compartment->unimolecularUpdate(dt);
 }
 
-void Compartment::moveDiscsBetweenCompartments(const std::vector<CollisionDetector::Collision>& discMembraneCollisions)
+void Compartment::captureIntruders()
 {
-    const MembraneType* parentMembraneType = nullptr;
-    if (parent_)
-        parentMembraneType = &simulationContext_.membraneTypeRegistry.getByID(parent_->getMembrane().getTypeID());
+    const auto R = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID()).getRadius();
+    const auto& M = membrane_.getPosition();
 
-    for (const auto& collision : discMembraneCollisions)
+    for (auto& intruder : intrudingDiscs_)
     {
-        if (collision.invalidatedByDestroyedDisc() || !collision.allowedToPass)
+        if (intruder->isMarkedDestroyed())
             continue;
 
-        const auto discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
-        const auto membraneRadius =
-            simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID()).getRadius();
+        const auto discRadius = simulationContext_.discTypeRegistry.getByID(intruder->getTypeID()).getRadius();
 
-        switch (collision.type)
+        if (mathutils::circleIsFullyContainedByCircle(intruder->getPosition(), discRadius, M, R))
         {
-        case CollisionDetector::CollisionType::DiscContainingMembrane:
-            if (!parent_)
-                continue;
-
-            if (!mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius,
-                                                           collision.membrane->getPosition(), membraneRadius))
-            {
-                parent_->addDisc(*collision.disc);
-                collision.disc->markDestroyed();
-            }
-            else
-                parent_->addIntrudingDisc(*collision.disc,
-                                          SearchChildren{false}); // TODO Enable search without bad recursion
-            break;
-        case CollisionDetector::CollisionType::DiscChildMembrane:
-            if (mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius,
-                                                          collision.membrane->getPosition(), membraneRadius))
-            {
-                collision.membrane->getCompartment()->addDisc(*collision.disc);
-                collision.disc->markDestroyed();
-            }
-            else
-                collision.membrane->getCompartment()->addIntrudingDisc(*collision.disc, SearchChildren{true});
-            break;
-        default: return; // Silent fail
+            discs_.push_back(*intruder);
+            intruder->markDestroyed();
         }
     }
+
+    intrudingDiscs_.clear();
 }
 
 void Compartment::updateChildCompartments(double dt)

@@ -6,7 +6,6 @@
 #include "Types.hpp"
 #include "Vector2d.hpp"
 
-#include <deque>
 #include <optional>
 #include <set>
 #include <vector>
@@ -19,7 +18,7 @@ class CollisionDetector
 public:
     struct Params
     {
-        std::deque<Disc>* discs = nullptr;
+        std::vector<Disc>* discs = nullptr;
         std::vector<Membrane>* membranes = nullptr;
         std::vector<Disc*>* intrudingDiscs = nullptr;
         Membrane* containingMembrane = nullptr;
@@ -35,7 +34,6 @@ public:
     enum class CollisionType
     {
         DiscDisc,
-        DiscIntrudingDisc,
         DiscContainingMembrane,
         DiscChildMembrane,
         None

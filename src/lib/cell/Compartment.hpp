@@ -5,7 +5,6 @@
 #include "Membrane.hpp"
 #include "SimulationContext.hpp"
 
-#include <deque>
 #include <list>
 #include <vector>
 
@@ -26,10 +25,10 @@ public:
     Compartment(Compartment&&) = delete;
 
     const Membrane& getMembrane() const;
-    void setDiscs(std::deque<Disc>&& discs);
+    void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc disc);
-    const std::deque<Disc>& getDiscs() const;
-    void addIntrudingDisc(Disc& disc, SearchChildren searchChildren);
+    const std::vector<Disc>& getDiscs() const;
+    void addIntrudingDisc(Disc& disc, const Compartment* source);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
@@ -39,7 +38,8 @@ public:
 private:
     auto detectDiscMembraneCollisions();
     auto detectDiscDiscCollisions();
-    void moveDiscsBetweenCompartments(const std::vector<CollisionDetector::Collision>& discMembraneCollisions);
+    void registerIntruders(const std::vector<CollisionDetector::Collision>& discMembraneCollisions);
+    void captureIntruders();
     void updateChildCompartments(double dt);
     void moveDiscsAndCleanUp(double dt);
     void bimolecularUpdate();
@@ -48,7 +48,7 @@ private:
 private:
     Compartment* parent_;
     Membrane membrane_;
-    std::deque<Disc> discs_;
+    std::vector<Disc> discs_;
     std::vector<Disc*> intrudingDiscs_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
     std::vector<Membrane> membranes_;
