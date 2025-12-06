@@ -63,7 +63,6 @@ private:
     std::unique_ptr<MembraneTypeRegistry> membraneTypeRegistry_;
     std::unique_ptr<ReactionTable> reactionTable_;
     std::unique_ptr<ReactionEngine> reactionEngine_;
-    std::unique_ptr<CollisionDetector> collisionDetector_;
     std::unique_ptr<CollisionHandler> collisionHandler_;
     std::unique_ptr<Cell> cell_;
 };

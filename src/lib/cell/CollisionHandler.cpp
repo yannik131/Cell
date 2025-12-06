@@ -14,9 +14,8 @@ CollisionHandler::CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
 {
 }
 
-void CollisionHandler::resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions) const
+void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions) const
 {
-    const auto& collisions = detectedCollisions.collisions;
     if (collisions.empty())
         return;
 
@@ -67,8 +66,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     const bool isMembraneCollision =
         collision.type == CollisionType::DiscContainingMembrane || collision.type == CollisionType::DiscChildMembrane;
 
-    if (collision.isInvalidatedByDestroyedDisc() ||
-        (isMembraneCollision && canGoThrough(collision.disc, collision.membrane, collision.type)))
+    if (collision.invalidatedByDestroyedDisc() || collision.allowedToPass)
     {
         context.skipCollision = true;
         return context;
@@ -121,26 +119,6 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     context.impulseChange = -context.effMass * (1 + e) * relativeNormalSpeed;
 
     return context;
-}
-
-bool CollisionHandler::canGoThrough(Disc* disc, Membrane* membrane,
-                                    CollisionDetector::CollisionType collisionType) const
-{
-    using CollisionType = CollisionDetector::CollisionType;
-
-    const auto permeability =
-        membraneTypeRegistry_.getByID(membrane->getTypeID()).getPermeabilityFor(disc->getTypeID());
-
-    if (permeability == MembraneType::Permeability::Bidirectional ||
-        (collisionType == CollisionType::DiscChildMembrane && permeability == MembraneType::Permeability::Inward) ||
-        (collisionType == CollisionType::DiscContainingMembrane && permeability == MembraneType::Permeability::Outward))
-    {
-        double angle = mathutils::getAngleBetween(disc->getVelocity(), membrane->getPosition() - disc->getPosition());
-        if (std::abs(90.0 - angle) > 30)
-            return true;
-    }
-
-    return false;
 }
 
 } // namespace cell

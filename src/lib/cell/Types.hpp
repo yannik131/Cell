@@ -87,6 +87,11 @@ struct MinOverlap
     double value;
 };
 
+struct SearchChildren
+{
+    bool value;
+};
+
 } // namespace cell
 
 #endif /* TYPES_HPP */

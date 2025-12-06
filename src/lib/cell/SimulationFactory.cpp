@@ -50,8 +50,6 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     {
         reactionEngine_ =
             std::make_unique<ReactionEngine>(std::as_const(*discTypeRegistry_), std::as_const(*reactionTable_));
-        collisionDetector_ = std::make_unique<CollisionDetector>(std::as_const(*discTypeRegistry_),
-                                                                 std::as_const(*membraneTypeRegistry_));
         collisionHandler_ = std::make_unique<CollisionHandler>(std::as_const(*discTypeRegistry_),
                                                                std::as_const(*membraneTypeRegistry_));
 
@@ -65,13 +63,12 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
 
 SimulationContext SimulationFactory::getSimulationContext()
 {
-    if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionDetector_ || !collisionHandler_)
+    if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionHandler_)
         throw ExceptionWithLocation("Can't get simulation context, dependencies haven't been fully created yet");
 
     return SimulationContext{.discTypeRegistry = *discTypeRegistry_,
                              .membraneTypeRegistry = *membraneTypeRegistry_,
                              .reactionEngine = *reactionEngine_,
-                             .collisionDetector = *collisionDetector_,
                              .collisionHandler = *collisionHandler_};
 }
 
@@ -90,10 +87,7 @@ bool SimulationFactory::cellIsBuilt() const
 
 DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
 {
-    if (!collisionDetector_)
-        throw ExceptionWithLocation("Can't access collision detector, it hasn't been created yet");
-
-    return collisionDetector_->getAndResetCollisionCounts();
+    return CollisionDetector::getAndResetCollisionCounts();
 }
 
 DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig)
@@ -206,7 +200,6 @@ void SimulationFactory::reset()
     membraneTypeRegistry_.reset();
     reactionTable_.reset();
     reactionEngine_.reset();
-    collisionDetector_.reset();
     collisionHandler_.reset();
     cell_.reset();
 }

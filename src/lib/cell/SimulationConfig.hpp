@@ -18,6 +18,7 @@ namespace config
 {
 
 inline const std::string cellMembraneTypeName = "Cell membrane";
+inline const double cellMembraneTypeDefaultRadius = 1000;
 
 using PermeabilityMap = std::unordered_map<std::string, cell::MembraneType::Permeability>;
 using DiscTypeDistribution = std::unordered_map<std::string, double>;
@@ -73,7 +74,8 @@ struct SimulationConfig
     std::vector<config::MembraneType> membraneTypes;
     std::vector<config::Reaction> reactions;
 
-    config::MembraneType cellMembraneType{.name = config::cellMembraneTypeName, .radius = 1000, .permeabilityMap = {}};
+    config::MembraneType cellMembraneType{
+        .name = config::cellMembraneTypeName, .radius = config::cellMembraneTypeDefaultRadius, .permeabilityMap = {}};
 
     /**
      * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but

@@ -33,11 +33,10 @@ private:
 public:
     explicit CollisionHandler(const DiscTypeRegistry& discTypeRegistry,
                               const MembraneTypeRegistry& membraneTypeRegistry);
-    void resolveCollisions(const CollisionDetector::DetectedCollisions& detectedCollisions) const;
+    void resolveCollisions(const std::vector<CollisionDetector::Collision>& collisions) const;
 
 private:
     CollisionContext calculateCollisionContext(const CollisionDetector::Collision& collision) const;
-    bool canGoThrough(Disc* disc, Membrane* membrane, CollisionDetector::CollisionType collisionType) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;

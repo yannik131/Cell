@@ -16,7 +16,10 @@ void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxPar
     QObject::connect(spinBox, &SpinBoxDelegate::editorCreated,
                      [params](QWidget* spinBox)
                      {
-                         safeCast<QDoubleSpinBox*>(spinBox)->setRange(params.min, params.max);
+                         const double min = params.min ? *params.min : -1e99;
+                         const double max = params.max ? *params.max : 1e99;
+
+                         safeCast<QDoubleSpinBox*>(spinBox)->setRange(min, max);
                          safeCast<QDoubleSpinBox*>(spinBox)->setSingleStep(params.step);
                          safeCast<QDoubleSpinBox*>(spinBox)->setDecimals(params.decimals);
                      });

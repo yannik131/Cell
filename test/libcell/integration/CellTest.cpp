@@ -225,3 +225,33 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("C")));
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("D")));
 }
+
+TEST_F(ACell, SimulatesDiscsPassingThroughMembranesInBothDirections)
+{
+    builder.addMembraneType(
+        "M", Radius{100},
+        {{"A", MembraneType::Permeability::Bidirectional}, {"B", MembraneType::Permeability::Bidirectional}});
+    builder.addMembrane("M", Position{.x = 0, .y = 0});
+
+    // Collision between disc moving from parent to child compartment with a disc in the child compartment
+    builder.addDisc("A", Position{.x = -106, .y = 0}, Velocity{.x = 8, .y = 0}); // Parent -> child
+    builder.addDisc("A", Position{.x = -94, .y = 0}, Velocity{.x = 0, .y = 0});  // Child
+
+    // Collision between disc moving from child to parent compartment with a disc in the child compartment
+    builder.addDisc("A", Position{.x = 94, .y = 0}, Velocity{.x = 8, .y = 0});  // M -> Cell
+    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = 0, .y = 0}); // Cell -> M
+
+    builder.addReaction("A", "A", "C", "", Probability{1});
+
+    auto& cell = createAndUpdateCell();
+    auto discs = getAllDiscs(cell);
+    EXPECT_EQ(discs.size(), 4);
+
+    cell.update(timeStep);
+    discs = getAllDiscs(cell);
+    EXPECT_EQ(discs.size(), 2);
+
+    auto counts = countDiscTypes(discs, getDiscTypeRegistry());
+    ASSERT_TRUE(counts.contains("C"));
+    EXPECT_EQ(counts["C"], 2);
+}

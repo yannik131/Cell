@@ -74,17 +74,17 @@ public:
 
 struct DoubleSpinBoxParams
 {
-    int column;
-    double min, max;
-    double step;
-    int decimals;
+    int column{};
+    std::optional<double> min, max;
+    double step{};
+    int decimals{};
 };
 
 struct IntegerSpinBoxParams
 {
-    int column;
-    int min, max;
-    int step;
+    int column{};
+    int min{}, max{};
+    int step{};
 };
 
 void insertDoubleSpinBoxIntoView(QAbstractItemView* view, const DoubleSpinBoxParams& params);

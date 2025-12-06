@@ -19,11 +19,16 @@ public:
     Compartment(Compartment* parent, Membrane membrane, SimulationContext simulationContext);
     ~Compartment();
 
+    Compartment& operator=(const Compartment&) = delete;
+    Compartment(const Compartment&) = delete;
+    Compartment& operator=(Compartment&&) = delete;
+    Compartment(Compartment&&) = delete;
+
     const Membrane& getMembrane() const;
     void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc disc);
     const std::vector<Disc>& getDiscs() const;
-    void addIntrudingDisc(Disc& disc);
+    void addIntrudingDisc(Disc& disc, const Compartment* source);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
@@ -31,11 +36,14 @@ public:
     Compartment* createSubCompartment(Membrane membrane);
 
 private:
-    void moveDiscsAndApplyUnimolecularReactions(double dt);
-    auto detectCollisions();
-    void moveDiscsIntoChildCompartments(const CollisionDetector::DetectedCollisions& detectedCollisions);
-    void moveDiscsIntoParentCompartment(const CollisionDetector::DetectedCollisions& detectedCollisions);
+    auto detectDiscMembraneCollisions();
+    auto detectDiscDiscCollisions();
+    void registerIntruders(const std::vector<CollisionDetector::Collision>& discMembraneCollisions);
+    void captureIntruders();
     void updateChildCompartments(double dt);
+    void moveDiscsAndCleanUp(double dt);
+    void bimolecularUpdate();
+    void unimolecularUpdate(double dt);
 
 private:
     Compartment* parent_;
@@ -45,6 +53,7 @@ private:
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
+    CollisionDetector collisionDetector_;
 };
 
 } // namespace cell

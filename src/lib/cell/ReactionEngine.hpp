@@ -57,7 +57,7 @@ public:
      */
     std::optional<Disc> applyUnimolecularReactions(Disc& disc, double dt) const;
 
-    void applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const;
+    void applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions) const;
 
 private:
     template <typename MapType, typename KeyType, typename Condition>

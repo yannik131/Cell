@@ -82,6 +82,7 @@ bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
     d1->setVelocity((d1Type->getMass() * d1->getVelocity() + d2Type->getMass() * d2->getVelocity()) /
                     resultType.getMass());
     d1->setType(reaction->getProduct1());
+    d1->setPosition((d1->getPosition() + d2->getPosition()) / 2.0);
 
     d2->markDestroyed();
 
@@ -94,49 +95,83 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
     if (!reaction)
         return false;
 
-    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
-    const auto& product1Type = discTypeRegistry_.getByID(reaction->getProduct1());
-    const auto& product2Type = discTypeRegistry_.getByID(reaction->getProduct2());
+    auto product1TypeID = reaction->getProduct1();
+    auto product2TypeID = reaction->getProduct2();
 
-    d1->scaleVelocity(std::sqrt(d1Type.getMass() / product1Type.getMass()));
-    d1->setType(reaction->getProduct1());
+    const auto* d1Type = &discTypeRegistry_.getByID(d1->getTypeID());
+    const auto* d2Type = &discTypeRegistry_.getByID(d2->getTypeID());
+    const auto* product1Type = &discTypeRegistry_.getByID(product1TypeID);
+    const auto* product2Type = &discTypeRegistry_.getByID(product2TypeID);
 
-    d2->scaleVelocity(std::sqrt(d2Type.getMass() / product2Type.getMass()));
-    d2->setType(reaction->getProduct2());
+    // Sort both product types and educt discs by radius
+    // Now the smallest/largest disc gets the smallest/largest product type
+
+    if (product1Type->getRadius() > product2Type->getRadius())
+    {
+        std::swap(product1Type, product2Type);
+        std::swap(product1TypeID, product2TypeID);
+    }
+    if (d1Type->getRadius() > d2Type->getRadius())
+    {
+        std::swap(d1, d2);
+        std::swap(d1Type, d2Type);
+    }
+
+    // Prefer the assignment that keeps
+    // as many discs as possible with their original type.
+
+    int leaveAsIs = (d1->getTypeID() == product1TypeID) + (d2->getTypeID() == product2TypeID);
+    int swapAgain = (d1->getTypeID() == product2TypeID) + (d2->getTypeID() == product1TypeID);
+
+    if (swapAgain > leaveAsIs)
+    {
+        std::swap(product1Type, product2Type);
+        std::swap(product1TypeID, product2TypeID);
+    }
+
+    d1->scaleVelocity(std::sqrt(d1Type->getMass() / product1Type->getMass()));
+    d1->setType(product1TypeID);
+
+    d2->scaleVelocity(std::sqrt(d2Type->getMass() / product2Type->getMass()));
+    d2->setType(product2TypeID);
 
     return true;
 }
 
 std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc, double dt) const
 {
-    // TODO random shuffle all reactions
-    if (transformationReaction(&disc, dt))
-        return {};
+    // TODO random shuffle all reactions. For now we'll keep it simple
+    static bool transformationFirst = true;
+    if (transformationFirst)
+    {
+        transformationFirst = !transformationFirst;
+        if (transformationReaction(&disc, dt))
+            return {};
 
-    return decompositionReaction(&disc, dt);
+        return decompositionReaction(&disc, dt);
+    }
+    else
+    {
+        transformationFirst = !transformationFirst;
+        if (auto newDisc = decompositionReaction(&disc, dt))
+            return newDisc;
+
+        transformationReaction(&disc, dt);
+        return {};
+    }
 }
 
-void ReactionEngine::applyBimolecularReactions(CollisionDetector::DetectedCollisions& detectedCollisions) const
+void ReactionEngine::applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions) const
 {
-    for (auto collisionType :
-         {CollisionDetector::CollisionType::DiscDisc, CollisionDetector::CollisionType::DiscIntrudingDisc})
+    for (const auto& collision : collisions)
     {
-        auto indexes = detectedCollisions.indexes.find(collisionType);
-        if (indexes == detectedCollisions.indexes.end())
+        if (collision.invalidatedByDestroyedDisc())
             continue;
 
-        for (std::size_t index : indexes->second)
-        {
-            const auto& collision = detectedCollisions.collisions[index];
-            if (collision.isInvalidatedByDestroyedDisc())
-                continue;
-
-            if (combinationReaction(collision.disc, collision.otherDisc))
-                continue;
-            else
-                exchangeReaction(collision.disc, collision.otherDisc);
-        }
+        if (combinationReaction(collision.disc, collision.otherDisc))
+            continue;
+        else
+            exchangeReaction(collision.disc, collision.otherDisc);
     }
 }
 

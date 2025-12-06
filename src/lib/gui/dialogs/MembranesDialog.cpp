@@ -9,11 +9,8 @@ MembranesDialog::MembranesDialog(QWidget* parent, SimulationConfigUpdater* simul
 {
     insertMembraneTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, Column{0});
 
-    const auto cellRadius = simulationConfigUpdater->getSimulationConfig().cellMembraneType.radius;
-    insertDoubleSpinBoxIntoView(ui->tableView,
-                                DoubleSpinBoxParams{.column = 1, .min = -cellRadius, .max = cellRadius, .step = 1});
-    insertDoubleSpinBoxIntoView(ui->tableView,
-                                DoubleSpinBoxParams{.column = 2, .min = -cellRadius, .max = cellRadius, .step = 1});
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1, .step = 1});
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 2, .step = 1});
 
     insertDeleteButtonIntoView(model_, ui->tableView, Column{3});
 }
