@@ -4,7 +4,6 @@
 #include "DiscType.hpp"
 
 #include <optional>
-#include <vector>
 
 namespace cell
 {

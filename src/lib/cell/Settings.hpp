@@ -30,8 +30,8 @@ extern const double MaxCellWidth;
 extern const double MinCellHeight;
 extern const double MaxCellHeight;
 
-extern const double MinMaxVelocity;
-extern const double MaxMaxVelocity;
+extern const double MinMostProbableSpeed;
+extern const double MaxMostProbableSpeed;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

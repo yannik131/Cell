@@ -58,7 +58,7 @@
                 "y": 0.0
             }
         ],
-        "maxVelocity": 600.0,
+        "mostProbableSpeed": 600.0,
         "membraneTypes": [
             {
                 "discCount": 20,

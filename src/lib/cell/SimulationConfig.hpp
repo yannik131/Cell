@@ -91,7 +91,7 @@ struct SimulationConfig
      * call the update() method of the world 2 * 1000/simulationTimeStep_ times per second
      */
     double simulationTimeScale = 1;
-    double maxVelocity = 600;
+    double mostProbableSpeed = 600;
 
     bool useDistribution = true;
 
@@ -116,7 +116,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2,
 } // namespace config
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
-                                   simulationTimeStep, simulationTimeScale, maxVelocity, useDistribution, discs,
+                                   simulationTimeStep, simulationTimeScale, mostProbableSpeed, useDistribution, discs,
                                    membranes)
 
 cell::config::MembraneType& findMembraneTypeByName(cell::SimulationConfig& simulationConfig,

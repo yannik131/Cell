@@ -138,12 +138,14 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     {
         const auto count = static_cast<int>(std::round(frequency * static_cast<double>(discCount)));
         const auto discTypeID = simulationContext_.discTypeRegistry.getIDFor(discTypeName);
+        const auto& discType = simulationContext_.discTypeRegistry.getByID(discTypeID);
 
         for (int i = 0; i < count && !gridPoints.empty(); ++i)
         {
             Disc newDisc(discTypeID);
             newDisc.setPosition(gridPoints.back());
-            newDisc.setVelocity(sampleVelocityFromDistribution());
+            newDisc.setVelocity(
+                sampleVelocityFromDistribution(simulationConfig_.mostProbableSpeed, discType.getMass()));
 
             compartment.addDisc(std::move(newDisc));
             gridPoints.pop_back();
@@ -154,23 +156,11 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
         populateCompartmentWithDistribution(*subCompartment, maxRadius);
 }
 
-sf::Vector2d CellPopulator::sampleVelocityFromDistribution() const
+sf::Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed, double m) const
 {
-    static thread_local std::random_device rd;
-    static thread_local std::mt19937 gen(rd());
-
-    const auto sigma = simulationConfig_.maxVelocity;
-
-    // 2D maxwell distribution is a rayleigh distribution
-    // weibull distribution with k=2 and lambda = sigma*sqrt(2) is rayleigh distribution
-
-    std::uniform_real_distribution<double> angleDistribution(0, 2 * std::numbers::pi);
-    std::weibull_distribution<double> speedDistribution(2, std::numbers::sqrt2 * sigma);
-
-    const auto angle = angleDistribution(gen);
-    const auto speed = speedDistribution(gen);
-
-    return sf::Vector2d{speed * std::cos(angle), speed * std::sin(angle)};
+    static thread_local std::mt19937 gen(std::random_device{}());
+    std::normal_distribution<double> normalDistribution(0, mostProbableSpeed / std::sqrt(m));
+    return sf::Vector2d{normalDistribution(gen), normalDistribution(gen)};
 }
 
 Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)

@@ -6,6 +6,8 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 
+namespace chrono = std::chrono;
+
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
@@ -14,6 +16,7 @@ SimulationWidget::SimulationWidget(QWidget* parent)
 void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
+    actualFPS_ = simulationConfigUpdater->getFPS();
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -93,11 +96,14 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
 
 void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
 {
-    if (frame.elapsedSimulationTimeUs > 0 &&
-        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(simulationConfigUpdater_->getFPS())))
+    const auto targetTimePerFrame = sf::seconds(1.f / static_cast<float>(actualFPS_));
+    if (frame.elapsedSimulationTimeUs > 0 && clock_.getElapsedTime() < targetTimePerFrame)
         return;
 
     clock_.restart();
+
+    using clock = chrono::steady_clock;
+    const auto start = clock::now();
 
     sf::RenderWindow::clear(sf::Color::Black);
     rebuildTypeShapes(discTypeRegistry); // TODO Only update cache when needed, same for compartments/membranes
@@ -116,4 +122,11 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     }
 
     sf::RenderWindow::display();
+
+    const auto renderTime = clock::now() - start;
+    const auto ratio = chrono::duration<float>(renderTime).count() / targetTimePerFrame.asSeconds();
+    if (ratio > 1)
+        actualFPS_ = static_cast<int>(1.f / ratio * static_cast<float>(actualFPS_)) - 1;
+    else if (ratio < 0.9 && actualFPS_ < simulationConfigUpdater_->getFPS())
+        ++actualFPS_;
 }

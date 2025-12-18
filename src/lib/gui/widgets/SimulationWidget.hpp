@@ -5,8 +5,6 @@
 #include "widgets/QSFMLWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Clock.hpp>
 
 class SimulationConfigUpdater;
@@ -42,6 +40,7 @@ private:
     std::vector<sf::CircleShape> typeShapes_;
     sf::Clock clock_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
+    int actualFPS_;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

@@ -75,9 +75,9 @@ void SimulationConfigBuilder::setTimeScale(double simulationTimeScale)
     simulationConfig_.simulationTimeScale = simulationTimeScale;
 }
 
-void SimulationConfigBuilder::setMaxVelocity(double maxVelocity)
+void SimulationConfigBuilder::setMostProbableSpeed(double mostProbableSpeed)
 {
-    simulationConfig_.maxVelocity = maxVelocity;
+    simulationConfig_.mostProbableSpeed = mostProbableSpeed;
 }
 
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const

@@ -25,9 +25,9 @@ void SetupModel::setTimeScale(double timeScale)
     simulationConfig_.simulationTimeScale = timeScale;
 }
 
-void SetupModel::setMaxVelocity(int maxVelocity)
+void SetupModel::setMostProbableSpeed(int mostProbableSpeed)
 {
-    simulationConfig_.maxVelocity = static_cast<double>(maxVelocity);
+    simulationConfig_.mostProbableSpeed = static_cast<double>(mostProbableSpeed);
 }
 
 void SetupModel::setFPS(int FPS)

@@ -24,15 +24,15 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     connect(ui->useDistributionRadioButton, &QRadioButton::toggled, setupModel_, &SetupModel::setUseDistribution);
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
-    connect(ui->maxVelocitySpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMaxVelocity);
+    connect(ui->mostProbableSpeedSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMostProbableSpeed);
     connect(ui->FPSSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setFPS);
 
     ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
                                   static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
     ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
                                          cell::SettingsLimits::MaxSimulationTimeScale);
-    ui->maxVelocitySpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMaxVelocity),
-                                     static_cast<int>(cell::SettingsLimits::MaxMaxVelocity));
+    ui->mostProbableSpeedSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMostProbableSpeed),
+                                           static_cast<int>(cell::SettingsLimits::MaxMostProbableSpeed));
     ui->FPSSpinBox->setRange(1, 240);
 
     displayCurrentConfig();
@@ -52,6 +52,6 @@ void SetupDialog::displayCurrentConfig()
     ui->useDistributionRadioButton->setChecked(config.useDistribution);
     ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep * 1e6)));
     ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);
-    ui->maxVelocitySpinBox->setValue(static_cast<int>(std::round(config.maxVelocity)));
+    ui->mostProbableSpeedSpinBox->setValue(static_cast<int>(std::round(config.mostProbableSpeed)));
     ui->FPSSpinBox->setValue(simulationConfigUpdater_->getFPS());
 }
