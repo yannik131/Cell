@@ -50,6 +50,7 @@ void SetupDialog::displayCurrentConfig()
 {
     const auto& config = simulationConfigUpdater_->getSimulationConfig();
     ui->useDistributionRadioButton->setChecked(config.useDistribution);
+    ui->manualPositionsRadioButton->setChecked(!config.useDistribution);
     ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep * 1e6)));
     ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);
     ui->mostProbableSpeedSpinBox->setValue(static_cast<int>(std::round(config.mostProbableSpeed)));

@@ -52,6 +52,11 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
     connect(ui->simulationControlWidget, &SimulationControlWidget::editSetupClicked, setupDialog_, &QDialog::show);
 
+    connect(ui->simulationWidget, &SimulationWidget::renderData, ui->simulationInfoWidget,
+            &SimulationInfoWidget::setRenderData);
+    connect(simulation_.get(), &Simulation::simulationData, ui->simulationInfoWidget,
+            &SimulationInfoWidget::setSimulationData);
+
     ui->plotWidget->setModel(plotModel_);
 
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,

@@ -14,7 +14,7 @@ namespace cell::stringutils
 /**
  * @brief Creates a string with the passed time in a sensible unit
  */
-std::string timeString(long long timeNs);
+std::string timeString(long long timeNs, int digits = -1);
 
 /**
  * @brief Fall-back to std::string

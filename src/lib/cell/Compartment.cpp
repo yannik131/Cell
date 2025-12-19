@@ -43,11 +43,12 @@ const std::vector<Disc>& Compartment::getDiscs() const
     return discs_;
 }
 
-void Compartment::addIntrudingDisc(Disc& disc, const Compartment* source)
+void Compartment::addIntrudingDisc(Disc* disc, const Compartment* source, bool shouldBeCaptured)
 {
-    intrudingDiscs_.push_back(&disc);
+    intrudingDiscs_.push_back(disc);
+    intruderCaptureStatus_.push_back(static_cast<char>(shouldBeCaptured));
 
-    const auto discRadius = simulationContext_.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
+    const auto discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
     for (auto& compartment : compartments_)
     {
         if (compartment.get() == source)
@@ -56,9 +57,9 @@ void Compartment::addIntrudingDisc(Disc& disc, const Compartment* source)
         // TODO In case of many compartments, make search more efficient
         const auto* membraneType =
             &simulationContext_.membraneTypeRegistry.getByID(compartment->getMembrane().getTypeID());
-        if (mathutils::circlesOverlap(disc.getPosition(), discRadius, compartment->getMembrane().getPosition(),
+        if (mathutils::circlesOverlap(disc->getPosition(), discRadius, compartment->getMembrane().getPosition(),
                                       membraneType->getRadius()))
-            compartment->addIntrudingDisc(disc, source);
+            compartment->addIntrudingDisc(disc, source, shouldBeCaptured);
     }
 }
 
@@ -77,13 +78,63 @@ const Compartment* Compartment::getParent() const
     return parent_;
 }
 
-auto Compartment::detectDiscMembraneCollisions()
+void Compartment::update(double dt)
 {
-    collisionDetector_.buildDiscIndex(); // TODO Already
+    // TODO Remove recursing twice and just accept destroyed discs at the end of update?
+    bimolecularUpdate();
+    unimolecularUpdate(dt);
+}
+
+void Compartment::bimolecularUpdate()
+{
+    allocateMemoryForIntruders();
+    auto discMembraneCollisions = detectDiscMembraneCollisions();
+    registerIntruders(discMembraneCollisions);
+
+    for (auto& compartment : compartments_)
+        compartment->bimolecularUpdate();
+
+    captureIntruders();
+    auto discDiscCollisions = detectDiscDiscCollisions();
+    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
+    simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions);
+    simulationContext_.collisionHandler.resolveCollisions(discDiscCollisions);
+}
+
+void Compartment::unimolecularUpdate(double dt)
+{
+    for (auto& compartment : compartments_)
+        compartment->unimolecularUpdate(dt);
+
+    moveDiscsAndCleanUp(dt);
+}
+
+void Compartment::allocateMemoryForIntruders()
+{
+    if (!needMoreMemoryForIntruders_)
+        return;
+
+    discs_.reserve(std::max(discs_.size() * 2, static_cast<std::size_t>(2))); // Let's be generous here
+    needMoreMemoryForIntruders_ = false;
+}
+
+Compartment* Compartment::createSubCompartment(Membrane membrane)
+{
+    auto compartment = std::make_unique<Compartment>(this, std::move(membrane), simulationContext_);
+    membranes_.push_back(compartment->getMembrane());
+    compartments_.push_back(std::move(compartment));
+    collisionDetector_.buildMembraneIndex();
+
+    return compartments_.back().get();
+}
+
+std::vector<cell::CollisionDetector::Collision> Compartment::detectDiscMembraneCollisions()
+{
+    collisionDetector_.buildDiscIndex();
     return collisionDetector_.detectDiscMembraneCollisions();
 }
 
-auto Compartment::detectDiscDiscCollisions()
+std::vector<cell::CollisionDetector::Collision> Compartment::detectDiscDiscCollisions()
 {
     collisionDetector_.addIntrudingDiscsToIndex();
     auto collisions = collisionDetector_.detectDiscDiscCollisions();
@@ -104,28 +155,55 @@ void Compartment::registerIntruders(const std::vector<CollisionDetector::Collisi
         if (!collision.allowedToPass)
             continue;
 
+        const auto discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
+
         if (collision.type == CollisionDetector::CollisionType::DiscContainingMembrane)
-            parent_->addIntrudingDisc(*collision.disc, this);
+        {
+            const auto containingMembranePosition = parent_->getMembrane().getPosition();
+            const auto containingMembraneRadius =
+                simulationContext_.membraneTypeRegistry.getByID(parent_->getMembrane().getTypeID()).getRadius();
+            const bool shouldBeCaptured = !mathutils::circlesOverlap(
+                collision.disc->getPosition(), discRadius, containingMembranePosition, containingMembraneRadius);
+
+            parent_->addIntrudingDisc(collision.disc, this, shouldBeCaptured);
+        }
         else
-            collision.membrane->getCompartment()->addIntrudingDisc(*collision.disc, nullptr);
+        {
+            const auto M = collision.membrane->getPosition();
+            const auto membraneRadius =
+                simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID()).getRadius();
+            const bool shouldBeCaptured =
+                mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius, M, membraneRadius);
+
+            collision.membrane->getCompartment()->addIntrudingDisc(collision.disc, nullptr, shouldBeCaptured);
+        }
     }
 }
 
-void Compartment::update(double dt)
+void Compartment::captureIntruders()
 {
-    // TODO Remove recursing twice and just accept destroyed discs at the end of update?
-    bimolecularUpdate();
-    unimolecularUpdate(dt);
-}
+    // Intruders can safely be added without reallocation (which would invalidate any pointers/intruders in other
+    // compartments)
+    if (discs_.capacity() >= discs_.size() + intrudingDiscs_.size())
+    {
+        for (std::size_t i = 0; i < intrudingDiscs_.size(); ++i)
+        {
+            auto& intruder = intrudingDiscs_[i];
+            if (intruder->isMarkedDestroyed())
+                continue;
 
-Compartment* Compartment::createSubCompartment(Membrane membrane)
-{
-    auto compartment = std::make_unique<Compartment>(this, std::move(membrane), simulationContext_);
-    membranes_.push_back(compartment->getMembrane());
-    compartments_.push_back(std::move(compartment));
-    collisionDetector_.buildMembraneIndex();
+            if (intruderCaptureStatus_[i])
+            {
+                discs_.push_back(*intruder);
+                intruder->markDestroyed();
+            }
+        }
+    }
+    else
+        needMoreMemoryForIntruders_ = true;
 
-    return compartments_.back().get();
+    intrudingDiscs_.clear();
+    intruderCaptureStatus_.clear();
 }
 
 void Compartment::moveDiscsAndCleanUp(double dt)
@@ -157,58 +235,6 @@ void Compartment::moveDiscsAndCleanUp(double dt)
 
     if (!newDiscs.empty())
         discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
-}
-
-void Compartment::bimolecularUpdate()
-{
-    auto discMembraneCollisions = detectDiscMembraneCollisions();
-    registerIntruders(discMembraneCollisions);
-
-    for (auto& compartment : compartments_)
-        compartment->bimolecularUpdate();
-
-    auto discDiscCollisions = detectDiscDiscCollisions();
-    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
-    simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions);
-    simulationContext_.collisionHandler.resolveCollisions(discDiscCollisions);
-
-    captureIntruders();
-}
-
-void Compartment::unimolecularUpdate(double dt)
-{
-    moveDiscsAndCleanUp(dt);
-
-    for (auto& compartment : compartments_)
-        compartment->unimolecularUpdate(dt);
-}
-
-void Compartment::captureIntruders()
-{
-    const auto R = simulationContext_.membraneTypeRegistry.getByID(membrane_.getTypeID()).getRadius();
-    const auto& M = membrane_.getPosition();
-
-    for (auto& intruder : intrudingDiscs_)
-    {
-        if (intruder->isMarkedDestroyed())
-            continue;
-
-        const auto discRadius = simulationContext_.discTypeRegistry.getByID(intruder->getTypeID()).getRadius();
-
-        if (mathutils::circleIsFullyContainedByCircle(intruder->getPosition(), discRadius, M, R))
-        {
-            discs_.push_back(*intruder);
-            intruder->markDestroyed();
-        }
-    }
-
-    intrudingDiscs_.clear();
-}
-
-void Compartment::updateChildCompartments(double dt)
-{
-    for (auto& compartment : compartments_)
-        compartment->update(dt);
 }
 
 } // namespace cell

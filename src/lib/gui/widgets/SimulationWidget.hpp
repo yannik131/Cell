@@ -16,6 +16,7 @@ class SimulationConfigUpdater;
 class SimulationWidget : public QSFMLWidget
 {
     Q_OBJECT
+
 public:
     SimulationWidget(QWidget* parent);
 
@@ -26,21 +27,24 @@ public:
 
 signals:
     void requestExitFullscreen();
+    void renderData(int targetFPS, int actualFPS, std::chrono::nanoseconds renderTime);
 
 public slots:
-    /**
-     * @brief Clears the render window and displays circles based on the given `FrameDTO`
-     */
     void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
 
 private:
     void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry);
+    void drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
+    void restartTimers(const FrameDTO& frame);
 
 private:
     std::vector<sf::CircleShape> typeShapes_;
-    sf::Clock clock_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
-    int actualFPS_;
+    std::chrono::steady_clock::time_point currentRenderInterval_;
+    std::chrono::steady_clock::time_point nextAllowedRenderTime_;
+    std::chrono::steady_clock::duration elapsedRenderTime_;
+    int renderedFrames_;
+    bool renderingStarted_ = false;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

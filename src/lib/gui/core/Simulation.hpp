@@ -9,7 +9,6 @@
 
 #include <QObject>
 #include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/System/Time.hpp>
 
 #include <vector>
 
@@ -44,6 +43,8 @@ private:
 
 signals:
     void frame(const FrameDTO& frame);
+    void simulationData(double targetScale, double actualScale, std::chrono::nanoseconds updateTime,
+                        std::chrono::nanoseconds simulationUpdateTime);
 
 private:
     cell::SimulationFactory simulationFactory_;

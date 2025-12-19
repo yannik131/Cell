@@ -5,19 +5,24 @@
 namespace cell::stringutils
 {
 
-std::string timeString(long long timeNs)
+std::string timeString(long long timeNs, int digits)
 {
-    const static std::vector<std::string> timeUnits = {"ns", "us", "ms", "s"};
+    static const std::vector<std::string> units = {"ns", "us", "ms", "s"};
 
-    auto convertedTime = static_cast<long double>(timeNs);
+    long double value = static_cast<long double>(timeNs);
     std::size_t i = 0;
-    while (convertedTime > 1e3 && i < timeUnits.size())
+    while (value >= 1e3 && i + 1 < units.size())
     {
-        convertedTime /= 1e3;
+        value /= 1e3;
         ++i;
     }
 
-    return std::to_string(convertedTime) + timeUnits[i];
+    std::ostringstream oss;
+    if (digits >= 0)
+        oss << std::fixed << std::setprecision(digits);
+
+    oss << value << units[i];
+    return oss.str();
 }
 
 } // namespace cell::stringutils

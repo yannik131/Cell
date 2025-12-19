@@ -58,7 +58,6 @@
                 "y": 0.0
             }
         ],
-        "mostProbableSpeed": 600.0,
         "membraneTypes": [
             {
                 "discCount": 20,
@@ -82,6 +81,7 @@
                 "y": 0.0
             }
         ],
+        "mostProbableSpeed": 600.0,
         "reactions": [
             {
                 "educt1": "Good",
@@ -128,7 +128,7 @@
         ],
         "simulationTimeScale": 1.0,
         "simulationTimeStep": 0.0010000000474974513,
-        "useDistribution": false
+        "useDistribution": true
     },
     "discTypeColorMap": {
         "Bad": [
