@@ -1,0 +1,21 @@
+Problem: Particles are moving very quickly from outside of the membrane into it, sometimes from very far away
+
+Reason: The main issue is that captureIntruders does a push_back, invalidating the pointers in the intruding discs: 
+- parent adds intruder to child (i1) 
+- recurse into child 
+- child adds intruder to parent (i2) 
+- child captures i1, causing a push back 
+- i2 is now invalid
+- parent captures i2, random ass disc in memory is moved instead of the real intruder
+
+Solution: Added needMemoryForIntruders_ flag for this reason to avoid push_backs that invalidate pointers and reallocate memory 
+for intruders before the next simulation update. At the beginning there aren't any pointers to discs_ yet, so .reserve() is save there.
+And capturing intruders can be delayed, as long as they are detected they take part in the collision handling
+
+---------------------------------------------------------------------------------------------------
+
+Problem: Particles move seemingly without collision detection through others
+
+Reason: captureIntruders() was called before disc-disc collision detection, clearing intrudingDiscs_ too early so that they couldn't take part in the collision detection
+
+Solution: Moved captureIntruders() to the end of bimolecular update

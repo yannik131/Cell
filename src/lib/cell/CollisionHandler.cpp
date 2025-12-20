@@ -30,8 +30,6 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
 
         if (context.impulseChange <= 0)
         {
-            if (context.penetration > 100)
-                bool oops = true;
             // Separation will always happen within 2 time steps
             double beta = context.penetration / 2;
 

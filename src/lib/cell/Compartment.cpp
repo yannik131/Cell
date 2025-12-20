@@ -48,6 +48,9 @@ void Compartment::addIntrudingDisc(Disc* disc, const Compartment* source, bool s
     intrudingDiscs_.push_back(disc);
     intruderCaptureStatus_.push_back(static_cast<char>(shouldBeCaptured));
 
+    if (compartments_.size() <= 1)
+        return;
+
     const auto discRadius = simulationContext_.discTypeRegistry.getByID(disc->getTypeID()).getRadius();
     for (auto& compartment : compartments_)
     {
@@ -94,11 +97,12 @@ void Compartment::bimolecularUpdate()
     for (auto& compartment : compartments_)
         compartment->bimolecularUpdate();
 
-    captureIntruders();
     auto discDiscCollisions = detectDiscDiscCollisions();
     simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
     simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions);
     simulationContext_.collisionHandler.resolveCollisions(discDiscCollisions);
+
+    captureIntruders();
 }
 
 void Compartment::unimolecularUpdate(double dt)
@@ -200,7 +204,7 @@ void Compartment::captureIntruders()
         }
     }
     else
-        needMoreMemoryForIntruders_ = true;
+        needMoreMemoryForIntruders_ = true; // Better luck next time
 
     intrudingDiscs_.clear();
     intruderCaptureStatus_.clear();

@@ -2,9 +2,19 @@
 #include "core/ColorMapping.hpp"
 #include "core/Utility.hpp"
 
-const QMap<QString, PlotCategory> PlotCategoryNameMapping{{"Type counts", PlotCategory::TypeCounts},
-                                                          {"Collision count", PlotCategory::CollisionCounts},
-                                                          {"Impulse", PlotCategory::AbsoluteMomentum},
-                                                          {"Kinetic energy", PlotCategory::KineticEnergy}};
+namespace PlotCategoryKeys
+{
+inline const QString TypeCounts = "Type counts";
+inline const QString CollisionCounts = "Collision count";
+inline const QString Impulse = "Impulse";
+inline const QString KineticEnergy = "Kinetic energy";
+} // namespace PlotCategoryKeys
 
-const QStringList SupportedPlotCategoryNames = PlotCategoryNameMapping.keys();
+const QStringList SupportedPlotCategoryNames{PlotCategoryKeys::TypeCounts, PlotCategoryKeys::CollisionCounts,
+                                             PlotCategoryKeys::Impulse, PlotCategoryKeys::KineticEnergy};
+
+const QMap<QString, PlotCategory> PlotCategoryNameMapping{
+    {PlotCategoryKeys::TypeCounts, PlotCategory::TypeCounts},
+    {PlotCategoryKeys::CollisionCounts, PlotCategory::CollisionCounts},
+    {PlotCategoryKeys::Impulse, PlotCategory::AbsoluteMomentum},
+    {PlotCategoryKeys::KineticEnergy, PlotCategory::KineticEnergy}};
