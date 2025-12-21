@@ -25,36 +25,26 @@ public:
 
     /**
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
-     * @param d1 The disc to transform
      */
-    std::optional<Disc> transformationReaction(Disc* d1, double dt) const;
+    Disc transformationReaction(Disc* educt, DiscTypeID productID) const;
 
     /**
      * @brief Decomposition reaction A -> B + C.
-     * @param d1 The disc to decompose
      */
-    std::optional<std::pair<Disc, Disc>> decompositionReaction(Disc* d1, double dt) const;
+    std::pair<Disc, Disc> decompositionReaction(Disc* educt, DiscTypeID product1ID, DiscTypeID product2ID) const;
 
     /**
      * @brief Combination reaction A + B -> C. Destroys one of the 2 educt discs and changes the other if a reaction
      * occurs.
-     * @param d1 Colliding disc 1
-     * @param d2 Colliding disc 2
      */
-    std::optional<Disc> combinationReaction(Disc* d1, Disc* d2) const;
+    Disc combinationReaction(Disc* educt1, Disc* educt2, DiscTypeID productID) const;
 
     /**
      * @brief Exchange reaction A + B -> C + D. Just changes the disc types of the reacting discs.
-     * @param d1 Colliding disc 1
-     * @param d2 Colliding disc 2
      */
-    std::optional<std::pair<Disc, Disc>> exchangeReaction(Disc* d1, Disc* d2) const;
+    std::pair<Disc, Disc> exchangeReaction(Disc* educt1, Disc* educt2, DiscTypeID product1ID,
+                                           DiscTypeID product2ID) const;
 
-    /**
-     * @brief Lets decomposition and transformation reactions occur for the passed discs. Only 1 of the 2 reaction types
-     * will occur for each disc.
-     * @param discs Discs to transform/decompose
-     */
     void applyUnimolecularReactions(Disc& disc, double dt, std::vector<Disc>& newDiscs) const;
 
     void applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions,
@@ -64,16 +54,14 @@ private:
     template <typename MapType, typename KeyType, typename Condition>
     const Reaction* selectReaction(const MapType& map, const KeyType& key, const Condition& condition) const;
 
-    const Reaction* selectUnimolecularReaction(const SingleLookupMap& map, const DiscTypeID& key, double dt) const;
-    const Reaction* selectBimolecularReaction(const PairLookupMap& map,
-                                              const std::pair<DiscTypeID, DiscTypeID>& key) const;
+    const Reaction* selectUnimolecularReaction(const DiscTypeID& key, double dt) const;
+    const Reaction* selectBimolecularReaction(const std::pair<DiscTypeID, DiscTypeID>& key) const;
+    void combineReactionsIntoSingleMaps(const AbstractReactionTable& reactionTable);
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;
-    const SingleLookupMap* transformations_;
-    const SingleLookupMap* decompositions_;
-    const PairLookupMap* combinations_;
-    const PairLookupMap* exchanges_;
+    SingleLookupMap unimolecularReactions_;
+    PairLookupMap bimolecularReactions_;
 };
 
 template <typename MapType, typename KeyType, typename Condition>
@@ -85,6 +73,8 @@ inline const Reaction* ReactionEngine::selectReaction(const MapType& map, const 
         return nullptr;
 
     const auto& reactions = iter->second;
+
+    // ReactionTable never constructs empty vectors, so reaction.size() is always > 0
     auto start = mathutils::getRandomNumber<std::size_t>(0, reactions.size() - 1);
 
     for (std::size_t i = 0; i < reactions.size(); ++i)

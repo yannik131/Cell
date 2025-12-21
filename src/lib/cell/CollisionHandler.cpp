@@ -2,7 +2,7 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 
-#include <numbers>
+#include <ranges>
 
 namespace cell
 {
@@ -19,42 +19,19 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     if (collisions.empty())
         return;
 
-    using CollisionType = CollisionDetector::CollisionType;
+    // Sweep-and-prune always returns collisions in left-to-right order
+    // Handling collisions always in the same order will give the discs a drift to the left
+    // We randomly change the order to avoid that
 
-    for (const auto& collision : collisions)
+    if (mathutils::getRandomInt() % 2 == 0)
     {
-        const auto context = calculateCollisionContext(collision);
-
-        if (context.skipCollision)
-            continue;
-
-        if (context.impulseChange <= 0)
-        {
-            // Separation will always happen within 2 time steps
-            double beta = context.penetration / 2;
-
-            switch (collision.type)
-            {
-            case CollisionType::DiscContainingMembrane:
-            case CollisionType::DiscChildMembrane: context.disc->move(beta * context.normal); break;
-            default:
-                context.disc->move(-beta * context.invMass1 * context.effMass * context.normal);
-                context.obj2->move(beta * context.invMass2 * context.effMass * context.normal);
-            }
-        }
-        else
-        {
-            switch (collision.type)
-            {
-            case CollisionType::DiscContainingMembrane:
-            case CollisionType::DiscChildMembrane:
-                context.disc->accelerate(context.impulseChange * context.normal * context.invMass1);
-                break;
-            default:
-                context.disc->accelerate(-context.impulseChange * context.normal * context.invMass1);
-                context.obj2->accelerate(context.impulseChange * context.normal * context.invMass2);
-            }
-        }
+        for (const auto& collision : collisions)
+            handleCollision(collision);
+    }
+    else
+    {
+        for (const auto& collision : std::ranges::reverse_view(collisions))
+            handleCollision(collision);
     }
 }
 
@@ -120,6 +97,44 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     context.impulseChange = -context.effMass * (1 + e) * relativeNormalSpeed;
 
     return context;
+}
+
+void CollisionHandler::handleCollision(const CollisionDetector::Collision& collision) const
+{
+    using CollisionType = CollisionDetector::CollisionType;
+
+    const auto context = calculateCollisionContext(collision);
+
+    if (context.skipCollision)
+        return;
+
+    if (context.impulseChange <= 0)
+    {
+        // Separation will always happen within 2 time steps
+        double beta = context.penetration / 2;
+
+        switch (collision.type)
+        {
+        case CollisionType::DiscContainingMembrane:
+        case CollisionType::DiscChildMembrane: context.disc->move(beta * context.normal); break;
+        default:
+            context.disc->move(-beta * context.invMass1 * context.effMass * context.normal);
+            context.obj2->move(beta * context.invMass2 * context.effMass * context.normal);
+        }
+    }
+    else
+    {
+        switch (collision.type)
+        {
+        case CollisionType::DiscContainingMembrane:
+        case CollisionType::DiscChildMembrane:
+            context.disc->accelerate(context.impulseChange * context.normal * context.invMass1);
+            break;
+        default:
+            context.disc->accelerate(-context.impulseChange * context.normal * context.invMass1);
+            context.obj2->accelerate(context.impulseChange * context.normal * context.invMass2);
+        }
+    }
 }
 
 } // namespace cell
