@@ -1,0 +1,44 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 10000,
+            "discTypeDistribution": {
+                "Type0": 1.0
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 1000.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Type0",
+                "radius": 10.0
+            }
+        ],
+        "discs": [],
+        "membraneTypes": [],
+        "membranes": [],
+        "mostProbableSpeed": 600.0,
+        "reactions": [],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.0010000000474974513,
+        "useDistribution": true
+    },
+    "discTypeColorMap": {
+        "Type0": [
+            0,
+            0,
+            255,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ]
+    }
+}

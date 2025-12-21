@@ -37,6 +37,7 @@ public:
 
 private:
     CollisionContext calculateCollisionContext(const CollisionDetector::Collision& collision) const;
+    void handleCollision(const CollisionDetector::Collision& collision) const;
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;
