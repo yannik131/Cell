@@ -27,7 +27,7 @@
             }
         ],
         "discs": [],
-        "maxVelocity": 600.0,
+        "mostProbableSpeed": 600.0,
         "membraneTypes": [
             {
                 "discCount": 1000,

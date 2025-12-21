@@ -1,10 +1,13 @@
 #include "widgets/SimulationWidget.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
+#include "SimulationWidget.hpp"
 #include <QCloseEvent>
 #include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+
+namespace chrono = std::chrono;
 
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
@@ -93,12 +96,39 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
 
 void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
 {
-    if (frame.elapsedSimulationTimeUs > 0 &&
-        clock_.getElapsedTime() < sf::seconds(1.f / static_cast<float>(simulationConfigUpdater_->getFPS())))
+    using clock = std::chrono::steady_clock;
+    using namespace std::chrono;
+
+    restartTimers(frame);
+    const auto targetRenderTime =
+        duration_cast<clock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
+
+    if (clock::now() < nextAllowedRenderTime_)
         return;
 
-    clock_.restart();
+    const auto start = clock::now();
+    drawFrame(frame, discTypeRegistry);
+    const auto now = clock::now();
+    const auto renderTime = now - start;
 
+    if (frame.elapsedSimulationTimeUs == 0)
+        return;
+
+    nextAllowedRenderTime_ = now + targetRenderTime;
+
+    ++renderedFrames_;
+    elapsedRenderTime_ += renderTime;
+    if (now - currentRenderInterval_ >= 1s)
+    {
+        emit renderData(simulationConfigUpdater_->getFPS(), renderedFrames_, elapsedRenderTime_ / renderedFrames_);
+        renderedFrames_ = 0;
+        currentRenderInterval_ = now;
+        elapsedRenderTime_ = 0ns;
+    }
+}
+
+void SimulationWidget::drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
+{
     sf::RenderWindow::clear(sf::Color::Black);
     rebuildTypeShapes(discTypeRegistry); // TODO Only update cache when needed, same for compartments/membranes
 
@@ -116,4 +146,31 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     }
 
     sf::RenderWindow::display();
+}
+
+void SimulationWidget::restartTimers(const FrameDTO& frame)
+{
+    using clock = std::chrono::steady_clock;
+    using namespace std::chrono;
+
+    // Simulation in progress, do nothing
+    if (renderingStarted_ && frame.elapsedSimulationTimeUs > 0)
+        return;
+
+    // Simulation stopped
+    if (frame.elapsedSimulationTimeUs == 0)
+    {
+        renderingStarted_ = false;
+        return;
+    }
+
+    // Simulation was stopped and now started again - reset timers
+    if (!renderingStarted_ && frame.elapsedSimulationTimeUs > 0)
+    {
+        renderedFrames_ = 0;
+        currentRenderInterval_ = clock::now();
+        nextAllowedRenderTime_ = clock::now();
+        elapsedRenderTime_ = 0ns;
+        renderingStarted_ = true;
+    }
 }

@@ -32,7 +32,7 @@ TEST(ASimulationConfig, CanBeSerialized)
     builder.setDiscCount("Large", 5);
     builder.setTimeScale(0.5);
     builder.setTimeStep(1e-3);
-    builder.setMaxVelocity(100);
+    builder.setMostProbableSpeed(100);
 
     auto config = builder.getSimulationConfig();
 

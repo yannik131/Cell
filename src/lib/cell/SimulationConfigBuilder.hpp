@@ -30,7 +30,7 @@ public:
                              const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);
     void setTimeStep(double simulationTimeStep);
     void setTimeScale(double simulationTimeScale);
-    void setMaxVelocity(double maxVelocity);
+    void setMostProbableSpeed(double mostProbableSpeed);
 
     const SimulationConfig& getSimulationConfig() const;
 

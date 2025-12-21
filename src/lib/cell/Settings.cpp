@@ -20,8 +20,8 @@ const double MaxCellWidth = 100000;
 const double MinCellHeight = 100;
 const double MaxCellHeight = 100000;
 
-const double MinMaxVelocity = 0;
-const double MaxMaxVelocity = 1000;
+const double MinMostProbableSpeed = 0;
+const double MaxMostProbableSpeed = 100000;
 } // namespace SettingsLimits
 
 namespace DiscTypeLimits

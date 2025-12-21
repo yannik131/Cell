@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     auto start = clock::now();
 
     int N = 0;
-    while ((clock::now() - start) < 5s)
+    while ((clock::now() - start) < 10s)
     {
         cell.update(1e-3);
         ++N;

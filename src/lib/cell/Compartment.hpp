@@ -5,7 +5,6 @@
 #include "Membrane.hpp"
 #include "SimulationContext.hpp"
 
-#include <list>
 #include <vector>
 
 namespace cell
@@ -28,7 +27,7 @@ public:
     void setDiscs(std::vector<Disc>&& discs);
     void addDisc(Disc disc);
     const std::vector<Disc>& getDiscs() const;
-    void addIntrudingDisc(Disc& disc, const Compartment* source);
+    void addIntrudingDisc(Disc* disc, const Compartment* source, bool shouldBeCaptured);
     std::vector<std::unique_ptr<Compartment>>& getCompartments();
     const std::vector<std::unique_ptr<Compartment>>& getCompartments() const;
     const Compartment* getParent() const;
@@ -36,24 +35,27 @@ public:
     Compartment* createSubCompartment(Membrane membrane);
 
 private:
-    auto detectDiscMembraneCollisions();
-    auto detectDiscDiscCollisions();
+    std::vector<cell::CollisionDetector::Collision> detectDiscMembraneCollisions();
+    std::vector<cell::CollisionDetector::Collision> detectDiscDiscCollisions();
     void registerIntruders(const std::vector<CollisionDetector::Collision>& discMembraneCollisions);
     void captureIntruders();
-    void updateChildCompartments(double dt);
     void moveDiscsAndCleanUp(double dt);
     void bimolecularUpdate();
     void unimolecularUpdate(double dt);
+    void allocateMemoryForIntruders();
 
 private:
     Compartment* parent_;
     Membrane membrane_;
     std::vector<Disc> discs_;
     std::vector<Disc*> intrudingDiscs_;
+    std::vector<char> intruderCaptureStatus_;
     std::vector<std::unique_ptr<Compartment>> compartments_; // There are references to these elements (parent)
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
     CollisionDetector collisionDetector_;
+    bool needMoreMemoryForIntruders_ = false;
+    std::vector<Disc> newDiscs_;
 };
 
 } // namespace cell

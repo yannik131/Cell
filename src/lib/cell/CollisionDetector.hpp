@@ -56,7 +56,7 @@ public:
         CollisionType type = CollisionType::None;
         bool allowedToPass = false; // Set in case of membrane collisions depending on permeability
 
-        bool invalidatedByDestroyedDisc() const
+        bool invalidatedByDestroyedDiscs() const
         {
             return disc->isMarkedDestroyed() || (otherDisc && otherDisc->isMarkedDestroyed());
         }

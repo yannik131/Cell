@@ -58,7 +58,6 @@
                 "y": 0.0
             }
         ],
-        "maxVelocity": 600.0,
         "membraneTypes": [
             {
                 "discCount": 20,
@@ -80,13 +79,34 @@
                 "membraneTypeName": "Liver",
                 "x": 0.0,
                 "y": 0.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": 1000.0,
+                "y": 1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": -1000.0,
+                "y": 1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": 1000.0,
+                "y": -1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": -1000.0,
+                "y": -1000.0
             }
         ],
+        "mostProbableSpeed": 600.0,
         "reactions": [
             {
                 "educt1": "Good",
                 "educt2": "",
-                "probability": 0.001,
+                "probability": 0.0005,
                 "product1": "Bad",
                 "product2": ""
             },
@@ -124,11 +144,32 @@
                 "probability": 1.0,
                 "product1": "EnzymeActive",
                 "product2": "Killer"
+            },
+            {
+                "educt1": "Bad",
+                "educt2": "",
+                "probability": 0.01,
+                "product1": "Good",
+                "product2": ""
+            },
+            {
+                "educt1": "Killer",
+                "educt2": "Resource",
+                "probability": 0.2,
+                "product1": "Killer",
+                "product2": "Killer"
+            },
+            {
+                "educt1": "Killer",
+                "educt2": "Good",
+                "probability": 0.5,
+                "product1": "Resource",
+                "product2": "Good"
             }
         ],
         "simulationTimeScale": 1.0,
-        "simulationTimeStep": 0.0010000000474974513,
-        "useDistribution": false
+        "simulationTimeStep": 0.002,
+        "useDistribution": true
     },
     "discTypeColorMap": {
         "Bad": [

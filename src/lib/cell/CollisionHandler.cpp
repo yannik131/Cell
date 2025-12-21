@@ -24,6 +24,7 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     for (const auto& collision : collisions)
     {
         const auto context = calculateCollisionContext(collision);
+
         if (context.skipCollision)
             continue;
 
@@ -66,7 +67,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
     const bool isMembraneCollision =
         collision.type == CollisionType::DiscContainingMembrane || collision.type == CollisionType::DiscChildMembrane;
 
-    if (collision.invalidatedByDestroyedDisc() || collision.allowedToPass)
+    if (collision.invalidatedByDestroyedDiscs() || collision.allowedToPass)
     {
         context.skipCollision = true;
         return context;

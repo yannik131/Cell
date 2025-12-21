@@ -17,7 +17,7 @@ public:
     void setUseDistribution(bool useDistribution);
     void setTimeStepUs(int timeStepUs);
     void setTimeScale(double timeScale);
-    void setMaxVelocity(int maxVelocity);
+    void setMostProbableSpeed(int mostProbableSpeed);
     void setFPS(int FPS);
 
     void saveToConfig() override;

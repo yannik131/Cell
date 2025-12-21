@@ -27,13 +27,13 @@ public:
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
      * @param d1 The disc to transform
      */
-    bool transformationReaction(Disc* d1, double dt) const;
+    std::optional<Disc> transformationReaction(Disc* d1, double dt) const;
 
     /**
      * @brief Decomposition reaction A -> B + C.
      * @param d1 The disc to decompose
      */
-    std::optional<Disc> decompositionReaction(Disc* d1, double dt) const;
+    std::optional<std::pair<Disc, Disc>> decompositionReaction(Disc* d1, double dt) const;
 
     /**
      * @brief Combination reaction A + B -> C. Destroys one of the 2 educt discs and changes the other if a reaction
@@ -41,23 +41,24 @@ public:
      * @param d1 Colliding disc 1
      * @param d2 Colliding disc 2
      */
-    bool combinationReaction(Disc* d1, Disc* d2) const;
+    std::optional<Disc> combinationReaction(Disc* d1, Disc* d2) const;
 
     /**
      * @brief Exchange reaction A + B -> C + D. Just changes the disc types of the reacting discs.
      * @param d1 Colliding disc 1
      * @param d2 Colliding disc 2
      */
-    bool exchangeReaction(Disc* d1, Disc* d2) const;
+    std::optional<std::pair<Disc, Disc>> exchangeReaction(Disc* d1, Disc* d2) const;
 
     /**
      * @brief Lets decomposition and transformation reactions occur for the passed discs. Only 1 of the 2 reaction types
      * will occur for each disc.
      * @param discs Discs to transform/decompose
      */
-    std::optional<Disc> applyUnimolecularReactions(Disc& disc, double dt) const;
+    void applyUnimolecularReactions(Disc& disc, double dt, std::vector<Disc>& newDiscs) const;
 
-    void applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions) const;
+    void applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions,
+                                   std::vector<Disc>& newDiscs) const;
 
 private:
     template <typename MapType, typename KeyType, typename Condition>

@@ -237,9 +237,9 @@ TEST_F(ACell, SimulatesDiscsPassingThroughMembranesInBothDirections)
     builder.addDisc("A", Position{.x = -106, .y = 0}, Velocity{.x = 8, .y = 0}); // Parent -> child
     builder.addDisc("A", Position{.x = -94, .y = 0}, Velocity{.x = 0, .y = 0});  // Child
 
-    // Collision between disc moving from child to parent compartment with a disc in the child compartment
-    builder.addDisc("A", Position{.x = 94, .y = 0}, Velocity{.x = 8, .y = 0});  // M -> Cell
-    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = 0, .y = 0}); // Cell -> M
+    // Collision between disc moving from child to parent compartment with a disc in the parent compartment
+    builder.addDisc("A", Position{.x = 94, .y = 0}, Velocity{.x = 8, .y = 0});  // Child -> parent
+    builder.addDisc("A", Position{.x = 106, .y = 0}, Velocity{.x = 0, .y = 0}); // Parent
 
     builder.addReaction("A", "A", "C", "", Probability{1});
 

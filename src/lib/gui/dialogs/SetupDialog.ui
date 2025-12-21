@@ -153,12 +153,12 @@
          <item>
           <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>Max. velocity</string>
+            <string>Most probable speed</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="maxVelocitySpinBox"/>
+          <widget class="QSpinBox" name="mostProbableSpeedSpinBox"/>
          </item>
         </layout>
        </widget>

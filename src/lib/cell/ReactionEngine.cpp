@@ -15,18 +15,20 @@ ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const A
 {
 }
 
-bool ReactionEngine::transformationReaction(Disc* disc, double dt) const
+std::optional<Disc> ReactionEngine::transformationReaction(Disc* disc, double dt) const
 {
     const Reaction* reaction = selectUnimolecularReaction(*transformations_, disc->getTypeID(), dt);
     if (!reaction)
-        return false;
+        return {};
 
-    disc->setType(reaction->getProduct1());
+    Disc product(*disc);
+    product.setType(reaction->getProduct1());
+    disc->markDestroyed();
 
-    return true;
+    return product;
 }
 
-std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) const
+std::optional<std::pair<Disc, Disc>> ReactionEngine::decompositionReaction(Disc* d1, double dt) const
 {
     const Reaction* reaction = selectUnimolecularReaction(*decompositions_, d1->getTypeID(), dt);
     if (!reaction)
@@ -44,56 +46,54 @@ std::optional<Disc> ReactionEngine::decompositionReaction(Disc* d1, double dt) c
     const sf::Vector2d eductNormalizedVelocity = d1->getVelocity() / v;
     const sf::Vector2d n{-eductNormalizedVelocity.y, eductNormalizedVelocity.x};
 
-    d1->setType(reaction->getProduct1());
-    d1->setVelocity(v * n);
-
+    Disc product1(*d1);
     Disc product2(reaction->getProduct2());
+
+    product1.setType(reaction->getProduct1());
+    product1.setVelocity(v * n);
+
     product2.setPosition(d1->getPosition());
     product2.setVelocity(-v * n);
 
-    const auto R1 = discTypeRegistry_.getByID(d1->getTypeID()).getRadius();
+    const auto R1 = discTypeRegistry_.getByID(product1.getTypeID()).getRadius();
     const auto R2 = discTypeRegistry_.getByID(product2.getTypeID()).getRadius();
     const auto overlap = R1 + R2 + 1e-6; // Discs at same position always have maximum overlap R1 + R2
 
-    d1->move(0.5 * overlap * n);
+    product1.move(0.5 * overlap * n);
     product2.move(-0.5 * overlap * n);
 
-    return product2;
+    d1->markDestroyed();
+
+    return std::make_pair(std::move(product1), std::move(product2));
 }
 
-bool ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
+std::optional<Disc> ReactionEngine::combinationReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction =
         selectBimolecularReaction(*combinations_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
-        return false;
+        return {};
 
     const auto& resultType = discTypeRegistry_.getByID(reaction->getProduct1());
-    const auto* d1Type = &discTypeRegistry_.getByID(d1->getTypeID());
-    const auto* d2Type = &discTypeRegistry_.getByID(d2->getTypeID());
+    const auto& d1Type = discTypeRegistry_.getByID(d1->getTypeID());
+    const auto& d2Type = discTypeRegistry_.getByID(d2->getTypeID());
 
-    // For reactions of type A + B -> C, we keep the one closer in size to C and destroy the other
-    if (std::abs(resultType.getRadius() - d1Type->getRadius()) > std::abs(resultType.getRadius() - d2Type->getRadius()))
-    {
-        std::swap(d1, d2);
-        std::swap(d1Type, d2Type);
-    }
+    Disc newDisc(reaction->getProduct1());
+    newDisc.setVelocity((d1Type.getMass() * d1->getVelocity() + d2Type.getMass() * d2->getVelocity()) /
+                        resultType.getMass());
+    newDisc.setPosition((d1->getPosition() + d2->getPosition()) / 2.0);
 
-    d1->setVelocity((d1Type->getMass() * d1->getVelocity() + d2Type->getMass() * d2->getVelocity()) /
-                    resultType.getMass());
-    d1->setType(reaction->getProduct1());
-    d1->setPosition((d1->getPosition() + d2->getPosition()) / 2.0);
-
+    d1->markDestroyed();
     d2->markDestroyed();
 
-    return true;
+    return newDisc;
 }
 
-bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
+std::optional<std::pair<Disc, Disc>> ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
 {
     const Reaction* reaction = selectBimolecularReaction(*exchanges_, std::make_pair(d1->getTypeID(), d2->getTypeID()));
     if (!reaction)
-        return false;
+        return {};
 
     auto product1TypeID = reaction->getProduct1();
     auto product2TypeID = reaction->getProduct2();
@@ -129,49 +129,52 @@ bool ReactionEngine::exchangeReaction(Disc* d1, Disc* d2) const
         std::swap(product1TypeID, product2TypeID);
     }
 
-    d1->scaleVelocity(std::sqrt(d1Type->getMass() / product1Type->getMass()));
-    d1->setType(product1TypeID);
+    Disc product1(*d1);
+    Disc product2(*d2);
 
-    d2->scaleVelocity(std::sqrt(d2Type->getMass() / product2Type->getMass()));
-    d2->setType(product2TypeID);
+    product1.scaleVelocity(std::sqrt(d1Type->getMass() / product1Type->getMass()));
+    product1.setType(product1TypeID);
 
-    return true;
+    product2.scaleVelocity(std::sqrt(d2Type->getMass() / product2Type->getMass()));
+    product2.setType(product2TypeID);
+
+    d1->markDestroyed();
+    d2->markDestroyed();
+
+    return std::make_pair(std::move(product1), std::move(product2));
 }
 
-std::optional<Disc> ReactionEngine::applyUnimolecularReactions(Disc& disc, double dt) const
+void ReactionEngine::applyUnimolecularReactions(Disc& disc, double dt, std::vector<Disc>& newDiscs) const
 {
     // TODO random shuffle all reactions. For now we'll keep it simple
-    static bool transformationFirst = true;
-    if (transformationFirst)
-    {
-        transformationFirst = !transformationFirst;
-        if (transformationReaction(&disc, dt))
-            return {};
 
-        return decompositionReaction(&disc, dt);
-    }
-    else
+    if (auto product = transformationReaction(&disc, dt))
+        newDiscs.push_back(std::move(*product));
+    else if (auto products = decompositionReaction(&disc, dt))
     {
-        transformationFirst = !transformationFirst;
-        if (auto newDisc = decompositionReaction(&disc, dt))
-            return newDisc;
-
-        transformationReaction(&disc, dt);
-        return {};
+        newDiscs.push_back(std::move(products->first));
+        newDiscs.push_back(std::move(products->second));
     }
 }
 
-void ReactionEngine::applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions) const
+void ReactionEngine::applyBimolecularReactions(const std::vector<CollisionDetector::Collision>& collisions,
+                                               std::vector<Disc>& newDiscs) const
 {
     for (const auto& collision : collisions)
     {
-        if (collision.invalidatedByDestroyedDisc())
+        if (collision.invalidatedByDestroyedDiscs())
             continue;
 
-        if (combinationReaction(collision.disc, collision.otherDisc))
+        if (auto product = combinationReaction(collision.disc, collision.otherDisc))
+        {
+            newDiscs.push_back(std::move(*product));
             continue;
-        else
-            exchangeReaction(collision.disc, collision.otherDisc);
+        }
+        else if (auto products = exchangeReaction(collision.disc, collision.otherDisc))
+        {
+            newDiscs.push_back(std::move(products->first));
+            newDiscs.push_back(std::move(products->second));
+        }
     }
 }
 

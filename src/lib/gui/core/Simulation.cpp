@@ -5,9 +5,6 @@
 
 #include <QThread>
 #include <QTimer>
-#include <SFML/System/Clock.hpp>
-
-#include <iostream>
 
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
@@ -16,24 +13,56 @@ Simulation::Simulation(QObject* parent)
 
 void Simulation::run()
 {
-    sf::Clock clock;
-    double timeSinceLastUpdate = 0;
+    using clock = std::chrono::steady_clock;
+    using namespace std::chrono;
+
+    auto lastUpdate = clock::now();
+    auto timeSinceLastUpdate = duration<double>(0s);
+    auto start = clock::now();
+    auto simulationUpdateTime = duration<double>(0s);
+    int updates = 0;
 
     // Since every change to the config causes an immediate context rebuild, it's always up to date
     const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
-    const auto simulationTimeScale = simulationConfig.simulationTimeScale;
-    const auto simulationTimeStep = simulationConfig.simulationTimeStep;
+    const double simulationTimeScale = simulationConfig.simulationTimeScale;
+    const auto simulationTimeStep = duration<double>(simulationConfig.simulationTimeStep);
+
+    const auto emitSimulationData = [&]()
+    {
+        const auto elapsed = clock::now() - start;
+        if (elapsed < 1s || updates == 0)
+            return;
+
+        const double simulationTime = updates * simulationConfig.simulationTimeStep;
+        const double elapsedSeconds = duration<double>(elapsed).count();
+        const double actualScale = simulationTime / elapsedSeconds;
+        emit simulationData(simulationTimeScale, actualScale, duration_cast<nanoseconds>(elapsed / updates),
+                            duration_cast<nanoseconds>(simulationUpdateTime / updates));
+
+        start = clock::now();
+        updates = 0;
+        simulationUpdateTime = 0s;
+    };
 
     while (!QThread::currentThread()->isInterruptionRequested())
     {
-        timeSinceLastUpdate += clock.restart().asSeconds();
+        auto now = clock::now();
+        timeSinceLastUpdate += now - lastUpdate;
+        lastUpdate = now;
+
+        emitSimulationData();
 
         while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep &&
                !QThread::currentThread()->isInterruptionRequested())
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-            simulationFactory_.getCell().update(simulationTimeStep);
 
+            const auto updateStart = clock::now();
+            simulationFactory_.getCell().update(simulationTimeStep.count());
+            simulationUpdateTime += clock::now() - updateStart;
+            ++updates;
+
+            emitSimulationData();
             emitFrame(RedrawOnly{false});
         }
     }
