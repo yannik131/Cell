@@ -161,23 +161,23 @@ void Compartment::registerIntruders(const std::vector<CollisionDetector::Collisi
 
         const auto discRadius = simulationContext_.discTypeRegistry.getByID(collision.disc->getTypeID()).getRadius();
 
+        const auto& membranePosition = collision.membrane->getPosition();
+        const auto membraneRadius =
+            simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID()).getRadius();
+
         if (collision.type == CollisionDetector::CollisionType::DiscContainingMembrane)
         {
-            const auto containingMembranePosition = parent_->getMembrane().getPosition();
-            const auto containingMembraneRadius =
-                simulationContext_.membraneTypeRegistry.getByID(parent_->getMembrane().getTypeID()).getRadius();
-            const bool shouldBeCaptured = !mathutils::circlesOverlap(
-                collision.disc->getPosition(), discRadius, containingMembranePosition, containingMembraneRadius);
+            // collision.membrane is the membrane of this compartment
+            const bool shouldBeCaptured =
+                !mathutils::circlesOverlap(collision.disc->getPosition(), discRadius, membranePosition, membraneRadius);
 
             parent_->addIntrudingDisc(collision.disc, this, shouldBeCaptured);
         }
         else
         {
-            const auto M = collision.membrane->getPosition();
-            const auto membraneRadius =
-                simulationContext_.membraneTypeRegistry.getByID(collision.membrane->getTypeID()).getRadius();
-            const bool shouldBeCaptured =
-                mathutils::circleIsFullyContainedByCircle(collision.disc->getPosition(), discRadius, M, membraneRadius);
+            // collision.membrane is the child membrane the disc collided with
+            const bool shouldBeCaptured = mathutils::circleIsFullyContainedByCircle(
+                collision.disc->getPosition(), discRadius, membranePosition, membraneRadius);
 
             collision.membrane->getCompartment()->addIntrudingDisc(collision.disc, nullptr, shouldBeCaptured);
         }
