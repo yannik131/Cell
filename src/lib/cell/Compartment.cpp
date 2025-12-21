@@ -98,9 +98,9 @@ void Compartment::bimolecularUpdate()
         compartment->bimolecularUpdate();
 
     auto discDiscCollisions = detectDiscDiscCollisions();
-    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions);
     simulationContext_.collisionHandler.resolveCollisions(discMembraneCollisions);
     simulationContext_.collisionHandler.resolveCollisions(discDiscCollisions);
+    simulationContext_.reactionEngine.applyBimolecularReactions(discDiscCollisions, newDiscs_);
 
     captureIntruders();
 }
@@ -212,33 +212,30 @@ void Compartment::captureIntruders()
 
 void Compartment::moveDiscsAndCleanUp(double dt)
 {
-    std::vector<Disc> newDiscs;
-
-    const auto swapAndPop = [&](std::size_t& i)
-    {
-        discs_[i] = std::move(discs_.back());
-        discs_.pop_back();
-        --i;
-    };
-
     for (std::size_t i = 0; i < discs_.size(); ++i)
     {
         auto& disc = discs_[i];
+        simulationContext_.reactionEngine.applyUnimolecularReactions(disc, dt, newDiscs_);
+
         if (disc.isMarkedDestroyed())
         {
-            swapAndPop(i);
+            discs_[i] = std::move(discs_.back());
+            discs_.pop_back();
+            --i;
             continue;
         }
-
-        // A -> B returns nothing, A -> B + C returns 1 new disc
-        if (auto newDisc = simulationContext_.reactionEngine.applyUnimolecularReactions(disc, dt))
-            newDiscs.push_back(std::move(*newDisc));
 
         disc.move(disc.getVelocity() * dt);
     }
 
-    if (!newDiscs.empty())
-        discs_.insert(discs_.end(), newDiscs.begin(), newDiscs.end());
+    for (auto& disc : newDiscs_)
+        disc.move(disc.getVelocity() * dt);
+
+    if (!newDiscs_.empty())
+    {
+        discs_.insert(discs_.end(), newDiscs_.begin(), newDiscs_.end());
+        newDiscs_.clear();
+    }
 }
 
 } // namespace cell

@@ -96,7 +96,7 @@ private:
 
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
-    PlotCategory plotCategory_ = PlotCategory::CollisionCounts;
+    PlotCategory plotCategory_ = SupportedPlotCategories.front();
 
     Simulation* simulation_;
 

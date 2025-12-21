@@ -1,5 +1,6 @@
 #include "PhysicalObject.hpp"
 #include "ExceptionWithLocation.hpp"
+#include "MathUtils.hpp"
 
 #include <cmath>
 

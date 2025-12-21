@@ -55,6 +55,7 @@ private:
     SimulationContext simulationContext_;
     CollisionDetector collisionDetector_;
     bool needMoreMemoryForIntruders_ = false;
+    std::vector<Disc> newDiscs_;
 };
 
 } // namespace cell
