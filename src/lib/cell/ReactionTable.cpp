@@ -94,9 +94,7 @@ void ReactionTable::createLookupMaps()
         else
         {
             auto& map = binaryMap(*this, reaction);
-            map[std::make_pair(reaction.getEduct1(), reaction.getEduct2())].push_back(reaction);
-            if (reaction.getEduct1() != reaction.getEduct2())
-                map[std::make_pair(reaction.getEduct2(), reaction.getEduct1())].push_back(reaction);
+            map[std::minmax(reaction.getEduct1(), reaction.getEduct2())].push_back(reaction);
         }
     }
 }
@@ -114,9 +112,9 @@ void ReactionTable::checkIfIsDuplicateReaction(const Reaction& reaction) const
     else
     {
         const auto& map = binaryMap(*this, reaction);
-        if (!map.contains(std::make_pair(reaction.getEduct1(), reaction.getEduct2())))
+        if (!map.contains(std::minmax(reaction.getEduct1(), reaction.getEduct2())))
             return;
-        reactions = &map.at(std::make_pair(reaction.getEduct1(), reaction.getEduct2()));
+        reactions = &map.at(std::minmax(reaction.getEduct1(), reaction.getEduct2()));
     }
 
     for (const auto& existingReaction : *reactions)

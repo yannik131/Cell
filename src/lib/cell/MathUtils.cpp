@@ -30,11 +30,11 @@ double abs(const sf::Vector2d& vec)
     return std::hypot(vec.x, vec.y);
 }
 
-sf::Vector2d calculateNormal(const sf::Vector2d& v1, const sf::Vector2d& v2)
+unsigned int getRandomInt()
 {
-    const auto diff = v2 - v1;
+    static thread_local std::minstd_rand rng{std::random_device{}()};
 
-    return diff / abs(diff);
+    return rng();
 }
 
 std::vector<sf::Vector2d> calculateGrid(double width, double height, double edgeLength)

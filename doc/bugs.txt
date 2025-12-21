@@ -25,3 +25,13 @@ Solution:
 - All reaction methods destroy their educts and create new discs as products
 - Move bimolecular reaction handling after disc collision handling. 
 Not sure if both are necessary, maybe the second would have been enough, but it makes sense to prevent discs from changing physical properties mid-frame.
+
+---------------------------------------------------------------------------------------------------
+
+Problem: Reaction probabilities had order-based biases
+Reason: 
+- If transformation/combination is checked before decomposition/exchange, they occur with higher probability 
+- For bimolecular reactions, non-identical keys [e1, e2] were inserted twice with [e2, e1] as well, whereas identical keys weren't
+Solution:
+- Combined all uni-/bimolecular reactions into single maps, random shuffled all reactions, randomly selected starting point
+- Used std::minmax for bimolecular reaction map keys 

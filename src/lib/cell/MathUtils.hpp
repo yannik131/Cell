@@ -74,8 +74,6 @@ namespace cell::mathutils
  */
 double abs(const sf::Vector2d& vec);
 
-sf::Vector2d calculateNormal(const sf::Vector2d& v1, const sf::Vector2d& v2);
-
 /**
  * @brief Returns a number in the given range
  */
@@ -93,6 +91,8 @@ template <typename T> T getRandomNumber(std::type_identity_t<T> low, std::type_i
         return dist(gen);
     }
 }
+
+unsigned int getRandomInt();
 
 /**
  * @brief Calculates a grid of starting positions for discs based on the largest radius of all disc types in the

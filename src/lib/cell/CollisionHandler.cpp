@@ -19,13 +19,11 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     if (collisions.empty())
         return;
 
-    static thread_local std::minstd_rand rng{std::random_device{}()};
-
     // Sweep-and-prune always returns collisions in left-to-right order
     // Handling collisions always in the same order will give the discs a drift to the left
     // We randomly change the order to avoid that
 
-    if (rng() % 2 == 0)
+    if (mathutils::getRandomInt() % 2 == 0)
     {
         for (const auto& collision : collisions)
             handleCollision(collision);
