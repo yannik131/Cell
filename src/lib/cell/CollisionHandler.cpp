@@ -2,7 +2,7 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 
-#include <numbers>
+#include <ranges>
 
 namespace cell
 {
@@ -30,8 +30,8 @@ void CollisionHandler::resolveCollisions(const std::vector<CollisionDetector::Co
     }
     else
     {
-        for (auto iter = collisions.rbegin(); iter != collisions.rend(); ++iter)
-            handleCollision(*iter);
+        for (const auto& collision : std::ranges::reverse_view(collisions))
+            handleCollision(collision);
     }
 }
 
