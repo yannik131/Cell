@@ -40,10 +40,10 @@ private:
 private:
     std::vector<sf::CircleShape> typeShapes_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
-    std::chrono::steady_clock::time_point currentRenderInterval_;
-    std::chrono::steady_clock::time_point nextAllowedRenderTime_;
-    std::chrono::steady_clock::duration elapsedRenderTime_;
-    int renderedFrames_;
+    std::chrono::steady_clock::time_point currentRenderInterval_{};
+    std::chrono::steady_clock::time_point nextAllowedRenderTime_{};
+    std::chrono::steady_clock::duration elapsedRenderTime_{};
+    int renderedFrames_ = 0;
     bool renderingStarted_ = false;
 };
 

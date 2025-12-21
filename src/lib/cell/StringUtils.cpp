@@ -9,7 +9,7 @@ std::string timeString(long long timeNs, int digits)
 {
     static const std::vector<std::string> units = {"ns", "us", "ms", "s"};
 
-    long double value = static_cast<long double>(timeNs);
+    auto value = static_cast<long double>(timeNs);
     std::size_t i = 0;
     while (value >= 1e3 && i + 1 < units.size())
     {
