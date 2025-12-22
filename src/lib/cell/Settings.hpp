@@ -4,8 +4,6 @@
 #include "ExceptionWithLocation.hpp"
 #include "StringUtils.hpp"
 
-#include <SFML/System/Time.hpp>
-
 #include <map>
 #include <utility>
 #include <vector>
@@ -15,8 +13,8 @@ namespace cell
 
 namespace SettingsLimits
 {
-extern const sf::Time MinSimulationTimeStep;
-extern const sf::Time MaxSimulationTimeStep;
+extern const std::chrono::microseconds MinSimulationTimeStep;
+extern const std::chrono::microseconds MaxSimulationTimeStep;
 
 extern const double MinSimulationTimeScale;
 extern const double MaxSimulationTimeScale;

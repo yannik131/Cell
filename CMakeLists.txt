@@ -37,9 +37,6 @@ add_library(libcell ${LIBCELL_SRC})
 target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
 
 target_link_libraries(libcell PUBLIC
-    sfml-system
-    sfml-window
-    sfml-graphics
     nanoflann::nanoflann
     glog::glog
     nlohmann_json::nlohmann_json
@@ -72,6 +69,9 @@ target_include_directories(libcellgui PUBLIC
 
 target_link_libraries(libcellgui PUBLIC 
     libcell 
+    sfml-system
+    sfml-window
+    sfml-graphics
     Qt6::Core 
     Qt6::Widgets 
     Qt6::OpenGLWidgets 

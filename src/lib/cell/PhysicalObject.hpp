@@ -12,38 +12,53 @@ public:
     /**
      * @brief Sets the velocity of the disc in px/s
      */
-    void setVelocity(const sf::Vector2d& velocity);
+    void setVelocity(const Vector2d& velocity);
 
     /**
      * @brief Multiplies both velocity components with `factor`
      */
-    void scaleVelocity(double factor);
+    void scaleVelocity(double factor) noexcept
+    {
+        velocity_ *= factor;
+    }
 
     /**
      * @brief Adds `acceleration` to the velocity of the disc
      */
-    void accelerate(const sf::Vector2d& acceleration);
+    void accelerate(const Vector2d& acceleration) noexcept
+    {
+        velocity_ += acceleration;
+    }
 
     /**
      * @brief Sets the position with no checks.
      * @note In debug mode, checks for invalid values (nan, inf)
      */
-    void setPosition(const sf::Vector2d& position);
+    void setPosition(const Vector2d& position);
 
     /**
      * @brief Changes the disc's position by the given `distance`
      */
-    void move(const sf::Vector2d& distance);
+    void move(const Vector2d& distance) noexcept
+    {
+        position_ += distance;
+    }
 
     /**
      * @returns Velocity of the disc (px/s)
      */
-    const sf::Vector2d& getVelocity() const;
+    const Vector2d& getVelocity() const noexcept
+    {
+        return velocity_;
+    }
 
     /**
      * @returns Position of the disc (px)
      */
-    const sf::Vector2d& getPosition() const;
+    const Vector2d& getPosition() const noexcept
+    {
+        return position_;
+    }
 
     /**
      * @returns |mv|
@@ -51,28 +66,26 @@ public:
     double getAbsoluteMomentum(double mass) const;
 
     /**
-     * @returns mv
-     */
-    sf::Vector2d getMomentum(double mass) const;
-
-    /**
      * @returns 1/2*m*v^2
      */
-    double getKineticEnergy(double mass) const;
+    double getKineticEnergy(double mass) const noexcept
+    {
+        return 0.5 * mass * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
+    }
 
 private:
-    bool isNanOrInf(const sf::Vector2d& vec) const;
+    bool isNanOrInf(const Vector2d& vec) const;
 
 private:
     /**
      * @brief Velocity in px/s
      */
-    sf::Vector2d velocity_;
+    Vector2d velocity_;
 
     /**
      * @brief Position in px
      */
-    sf::Vector2d position_;
+    Vector2d position_;
 };
 
 } // namespace cell

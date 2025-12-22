@@ -22,7 +22,7 @@ private:
         double invMass1 = 0, invMass2 = 0;
         double effMass = 0;
 
-        sf::Vector2d normal;
+        Vector2d normal;
         double penetration = 0;
 
         double impulseChange = 0;

@@ -21,7 +21,12 @@ public:
     /**
      * @brief Creates a new disc type
      */
-    DiscType(const std::string& name, Radius radius, Mass mass);
+    DiscType(const std::string& name, Radius radius, Mass mass)
+    {
+        setName(name);
+        setRadius(radius.value);
+        setMass(mass.value);
+    }
 
     /**
      * @brief Disc types should be shared across all discs and be unique
@@ -34,37 +39,67 @@ public:
     /**
      * @returns The name of this DiscType
      */
-    const std::string& getName() const;
+    const std::string& getName() const noexcept
+    {
+        return name_;
+    }
 
     /**
      * @brief Sets the name for this DiscType (can't be empty)
      */
-    void setName(const std::string& name);
+    void setName(const std::string& name)
+    {
+        if (name.empty())
+            throw ExceptionWithLocation("Disc type name cannot be empty");
+
+        name_ = name;
+    }
 
     /**
      * @returns The radius of this DiscType in px
      */
-    double getRadius() const;
+    double getRadius() const noexcept
+    {
+        return radius_;
+    }
 
     /**
      * @brief Sets the radius of this DiscType in px (must be > 0)
      */
-    void setRadius(double radius);
+    void setRadius(double radius)
+    {
+        if (radius <= 0)
+            throw ExceptionWithLocation("Disc type radius must be positive");
+
+        radius_ = radius;
+    }
 
     /**
      * @returns The mass of this DiscType (arbitrary unit right now)
      */
-    double getMass() const;
+    double getMass() const noexcept
+    {
+        return mass_;
+    }
 
     /**
      * @brief Sets the mass of this DiscType (must be > 0, arbitrary unit)
      */
-    void setMass(double mass);
+    void setMass(double mass)
+    {
+        if (mass <= 0)
+            throw ExceptionWithLocation("Disc type mass must be positive");
+
+        mass_ = mass;
+    }
 
     /**
      * @brief Comparison by all members
      */
-    bool operator==(const DiscType& other) const;
+    bool operator==(const DiscType& other) const noexcept
+    {
+        return name_ == other.name_ && radius_ == other.radius_ && mass_ == other.mass_;
+    }
 
 private:
     /**

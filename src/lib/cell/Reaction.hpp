@@ -48,24 +48,87 @@ public:
 
     // Boilerplate getters and setters with no additional documentation
 
-    DiscTypeID getEduct1() const;
-    void setEduct1(DiscTypeID educt1);
+    DiscTypeID getEduct1() const noexcept
+    {
+        return educt1_;
+    }
 
-    DiscTypeID getEduct2() const;
-    bool hasEduct2() const;
-    void setEduct2(DiscTypeID educt2);
+    void setEduct1(DiscTypeID educt1) noexcept
+    {
+        educt1_ = educt1;
+    }
 
-    DiscTypeID getProduct1() const;
-    void setProduct1(DiscTypeID product1);
+    DiscTypeID getEduct2() const
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't get educt2 for reaction of type" + toString(type_));
+#endif
 
-    DiscTypeID getProduct2() const;
-    bool hasProduct2() const;
-    void setProduct2(DiscTypeID product2);
+        return *educt2_;
+    }
 
-    double getProbability() const;
+    bool hasEduct2() const noexcept
+    {
+        return type_ == Type::Combination || type_ == Type::Exchange;
+    }
+
+    void setEduct2(DiscTypeID educt2)
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't set educt2 for reaction of type" + toString(type_));
+#endif
+
+        educt2_ = educt2;
+    }
+
+    DiscTypeID getProduct1() const noexcept
+    {
+        return product1_;
+    }
+
+    void setProduct1(DiscTypeID product1) noexcept
+    {
+        product1_ = product1;
+    }
+
+    DiscTypeID getProduct2() const
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't get product2 for reaction of type" + toString(type_));
+#endif
+
+        return *product2_;
+    }
+
+    bool hasProduct2() const noexcept
+    {
+        return type_ == Type::Decomposition || type_ == Type::Exchange;
+    }
+
+    void setProduct2(DiscTypeID product2)
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't set product2 for reaction of type" + toString(type_));
+#endif
+
+        product2_ = product2;
+    }
+
+    double getProbability() const noexcept
+    {
+        return probability_;
+    }
+
     void setProbability(double probability);
 
-    const Type& getType() const;
+    Type getType() const noexcept
+    {
+        return type_;
+    }
 
     /**
      * @brief Validates that

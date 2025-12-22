@@ -3,8 +3,6 @@
 
 #include "SimulationConfig.hpp"
 
-#include <SFML/System/Time.hpp>
-
 namespace cell
 {
 

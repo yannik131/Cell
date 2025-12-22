@@ -7,7 +7,7 @@
 namespace cell
 {
 
-void PhysicalObject::setVelocity(const sf::Vector2d& velocity)
+void PhysicalObject::setVelocity(const Vector2d& velocity)
 {
 #ifdef DEBUG
     if (isNanOrInf(velocity))
@@ -16,17 +16,7 @@ void PhysicalObject::setVelocity(const sf::Vector2d& velocity)
     velocity_ = velocity;
 }
 
-void PhysicalObject::scaleVelocity(double factor)
-{
-    setVelocity(velocity_ * factor);
-}
-
-void PhysicalObject::accelerate(const sf::Vector2d& acceleration)
-{
-    setVelocity(velocity_ + acceleration);
-}
-
-void PhysicalObject::setPosition(const sf::Vector2d& position)
+void PhysicalObject::setPosition(const Vector2d& position)
 {
 #ifdef DEBUG
     if (isNanOrInf(position))
@@ -35,37 +25,12 @@ void PhysicalObject::setPosition(const sf::Vector2d& position)
     position_ = position;
 }
 
-void PhysicalObject::move(const sf::Vector2d& distance)
-{
-    setPosition(position_ + distance);
-}
-
-const sf::Vector2d& PhysicalObject::getVelocity() const
-{
-    return velocity_;
-}
-
-const sf::Vector2d& PhysicalObject::getPosition() const
-{
-    return position_;
-}
-
 double PhysicalObject::getAbsoluteMomentum(double mass) const
 {
     return mass * std::hypot(velocity_.x, velocity_.y);
 }
 
-sf::Vector2d PhysicalObject::getMomentum(double mass) const
-{
-    return mass * velocity_;
-}
-
-double PhysicalObject::getKineticEnergy(double mass) const
-{
-    return 0.5 * mass * (velocity_.x * velocity_.x + velocity_.y * velocity_.y);
-}
-
-bool PhysicalObject::isNanOrInf(const sf::Vector2d& vec) const
+bool PhysicalObject::isNanOrInf(const Vector2d& vec) const
 {
     return std::isnan(vec.x) || std::isnan(vec.y) || std::isinf(vec.x) || std::isinf(vec.y);
 }

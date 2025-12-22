@@ -14,12 +14,25 @@ class Compartment;
 class Membrane : public PhysicalObject
 {
 public:
-    explicit Membrane(const MembraneTypeID& membraneTypeID);
+    explicit Membrane(const MembraneTypeID& membraneTypeID)
+        : membraneTypeID_(membraneTypeID)
+    {
+    }
 
-    MembraneTypeID getTypeID() const;
+    MembraneTypeID getTypeID() const noexcept
+    {
+        return membraneTypeID_;
+    }
 
-    void setCompartment(Compartment* compartment);
-    Compartment* getCompartment() const;
+    void setCompartment(Compartment* compartment) noexcept
+    {
+        compartment_ = compartment;
+    }
+
+    Compartment* getCompartment() const noexcept
+    {
+        return compartment_;
+    }
 
 private:
     MembraneTypeID membraneTypeID_;

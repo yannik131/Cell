@@ -70,7 +70,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
 
     context.effMass = 1.0 / (context.invMass1 + context.invMass2);
 
-    const sf::Vector2d diff = context.obj2->getPosition() - context.disc->getPosition();
+    const Vector2d diff = context.obj2->getPosition() - context.disc->getPosition();
     const double distance = mathutils::abs(diff);
 
     if (collision.type == CollisionType::DiscContainingMembrane)
@@ -80,7 +80,7 @@ CollisionHandler::calculateCollisionContext(const CollisionDetector::Collision& 
 
     // The normal points in the direction of the impulse change
     if (std::abs(distance) < 1e-3)
-        context.normal = sf::Vector2d{1, 0};
+        context.normal = Vector2d{1, 0};
     else if (collision.type == CollisionType::DiscChildMembrane)
         context.normal = -diff / distance;
     else

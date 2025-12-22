@@ -8,14 +8,4 @@ Cell::Cell(Membrane membrane, SimulationContext simulationContext)
 {
 }
 
-double Cell::getInitialKineticEnergy() const
-{
-    return initialKineticEnergy_;
-}
-
-double Cell::getCurrentKineticEnergy() const
-{
-    return currentKineticEnergy_;
-}
-
 } // namespace cell

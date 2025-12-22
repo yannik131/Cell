@@ -20,27 +20,42 @@ public:
     /**
      * @brief Creates a new disc with the given type
      */
-    explicit Disc(DiscTypeID discTypeID);
+    explicit Disc(DiscTypeID discTypeID) noexcept
+        : discTypeID_(discTypeID)
+    {
+    }
 
     /**
      * @brief Assigns a new disc type (no checks)
      */
-    void setType(DiscTypeID discTypeID);
+    void setType(DiscTypeID discTypeID) noexcept
+    {
+        discTypeID_ = discTypeID;
+    }
 
     /**
      * @brief Sets the internal destroyed flag (used for removing discs in the simulation)
      */
-    void markDestroyed();
+    void markDestroyed() noexcept
+    {
+        destroyed_ = true;
+    }
 
     /**
      * @returns DiscType of the disc
      */
-    DiscTypeID getTypeID() const;
+    DiscTypeID getTypeID() const noexcept
+    {
+        return discTypeID_;
+    }
 
     /**
      * @returns `true` if `markDestroyed()` has been called
      */
-    bool isMarkedDestroyed() const;
+    bool isMarkedDestroyed() const noexcept
+    {
+        return destroyed_;
+    }
 
 private:
     /**

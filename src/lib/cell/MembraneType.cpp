@@ -20,14 +20,4 @@ MembraneType::Permeability MembraneType::getPermeabilityFor(const DiscTypeID& di
     return iter->second;
 }
 
-const std::string& MembraneType::getName() const
-{
-    return name_;
-}
-
-double MembraneType::getRadius() const
-{
-    return radius_;
-}
-
 } // namespace cell

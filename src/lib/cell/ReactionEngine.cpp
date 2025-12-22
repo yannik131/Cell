@@ -2,11 +2,12 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 #include "Reaction.hpp"
+#include "ReactionTable.hpp"
 
 namespace cell
 {
 
-ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const AbstractReactionTable& reactionTable)
+ReactionEngine::ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const ReactionTable& reactionTable)
     : discTypeRegistry_(discTypeRegistry)
 {
     combineReactionsIntoSingleMaps(reactionTable);
@@ -29,12 +30,12 @@ std::pair<Disc, Disc> ReactionEngine::decompositionReaction(Disc* educt, DiscTyp
     {
         // If the disc is stationary and wants to split apart, we'll give it a random velocity to do so
         educt->setVelocity(
-            sf::Vector2d{mathutils::getRandomNumber<double>(-10, 10), mathutils::getRandomNumber<double>(-10, 10)});
+            Vector2d{mathutils::getRandomNumber<double>(-10, 10), mathutils::getRandomNumber<double>(-10, 10)});
         v = mathutils::abs(educt->getVelocity());
     }
 
-    const sf::Vector2d eductNormalizedVelocity = educt->getVelocity() / v;
-    const sf::Vector2d n{-eductNormalizedVelocity.y, eductNormalizedVelocity.x};
+    const Vector2d eductNormalizedVelocity = educt->getVelocity() / v;
+    const Vector2d n{-eductNormalizedVelocity.y, eductNormalizedVelocity.x};
 
     Disc product1(*educt);
     Disc product2(product2ID);
@@ -183,7 +184,7 @@ const Reaction* ReactionEngine::selectBimolecularReaction(const std::pair<DiscTy
                           { return mathutils::getRandomNumber<double>(0, 1) <= reaction.getProbability(); });
 }
 
-void ReactionEngine::combineReactionsIntoSingleMaps(const AbstractReactionTable& reactionTable)
+void ReactionEngine::combineReactionsIntoSingleMaps(const ReactionTable& reactionTable)
 {
     for (const auto& table : {reactionTable.getTransformations(), reactionTable.getDecompositions()})
     {

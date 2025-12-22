@@ -27,8 +27,8 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     connect(ui->mostProbableSpeedSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMostProbableSpeed);
     connect(ui->FPSSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setFPS);
 
-    ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
-                                  static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
+    ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.count()),
+                                  static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.count()));
     ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
                                          cell::SettingsLimits::MaxSimulationTimeScale);
     ui->mostProbableSpeedSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMostProbableSpeed),

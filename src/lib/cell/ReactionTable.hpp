@@ -1,7 +1,6 @@
 #ifndef EBF12521_1715_4669_88B2_124B8D0C2AEA_HPP
 #define EBF12521_1715_4669_88B2_124B8D0C2AEA_HPP
 
-#include "AbstractReactionTable.hpp"
 #include "DiscType.hpp"
 #include "Reaction.hpp"
 
@@ -17,15 +16,15 @@ namespace cell
  *
  * - `pair<DiscType, DiscType>` -> combination/exchange reactions
  */
-class ReactionTable : public AbstractReactionTable
+class ReactionTable
 {
 public:
     ReactionTable(const DiscTypeRegistry& discTypeRegistry);
 
-    const DiscTypeMap<std::vector<Reaction>>& getTransformations() const override;
-    const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const override;
-    const DiscTypePairMap<std::vector<Reaction>>& getCombinations() const override;
-    const DiscTypePairMap<std::vector<Reaction>>& getExchanges() const override;
+    const DiscTypeMap<std::vector<Reaction>>& getTransformations() const;
+    const DiscTypeMap<std::vector<Reaction>>& getDecompositions() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getCombinations() const;
+    const DiscTypePairMap<std::vector<Reaction>>& getExchanges() const;
 
     /**
      * @brief Adds a new reaction to the table and updates all lookup maps

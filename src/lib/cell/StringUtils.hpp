@@ -4,7 +4,6 @@
 #include "MathUtils.hpp"
 #include "Vector2d.hpp"
 
-#include <SFML/System/Time.hpp>
 #include <sstream>
 #include <string>
 
@@ -24,15 +23,12 @@ template <typename T> std::string toString(const T& value)
     return std::to_string(value);
 }
 
-/**
- * @brief Specialization for sf::Time
- */
-template <> inline std::string toString<sf::Time>(const sf::Time& value)
+template <> inline std::string toString<std::chrono::nanoseconds>(const std::chrono::nanoseconds& value)
 {
-    return timeString(value.asMicroseconds() * 1000);
+    return timeString(value.count());
 }
 
-template <> inline std::string toString<sf::Vector2d>(const sf::Vector2d& value)
+template <> inline std::string toString<Vector2d>(const Vector2d& value)
 {
     std::ostringstream oss;
     oss << value;

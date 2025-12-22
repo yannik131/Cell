@@ -1,7 +1,7 @@
 #include "widgets/SimulationWidget.hpp"
 #include "core/SimulationConfigUpdater.hpp"
+#include "core/Utility.hpp"
 
-#include "SimulationWidget.hpp"
 #include <QCloseEvent>
 #include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -134,7 +134,7 @@ void SimulationWidget::drawFrame(const FrameDTO& frame, const cell::DiscTypeRegi
 
     for (const auto& disc : frame.discs_)
     {
-        typeShapes_[disc.getTypeID()].setPosition(static_cast<sf::Vector2f>(disc.getPosition()));
+        typeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
         sf::RenderWindow::draw(typeShapes_[disc.getTypeID()]);
     }
 

@@ -42,3 +42,10 @@ Problem: Discs fly outside of the containing cell
 Reason: If an inner membrane is close to the containing cell membrane, traversal time through the small gap is too small for allocation of additional space for 
 intruders if they can't be captured yet due to low capacity and many intruders. 
 Solution: Use the actual intruder count to rapidly increase capacity of discs_ to make space for the intruders in the next frame
+
+---------------------------------------------------------------------------------------------------
+
+Problem: Functions aren't inlined
+Reason: Took me 15 years to realize that the compiler can only inline functions if it knows their definitions at the call site, so inlining small functions 
+declared in hpp and defined in cpp isn't possible outside of that cpp file
+Solution: Move function definitions of functions used in hot paths into their header files

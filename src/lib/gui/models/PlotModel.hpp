@@ -8,8 +8,6 @@
 
 #include <QObject>
 
-#include <SFML/System/Time.hpp>
-
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
  */

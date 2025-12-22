@@ -4,6 +4,7 @@
 #include "delegates/ComboBoxDelegate.hpp"
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <QMessageBox>
 
@@ -11,9 +12,40 @@ namespace utility
 {
 
 /**
+ * @brief Entry-wise addition of 2 maps, i. e. {1: 1, 2: 3} + {1: 0, 2: 4} = {1: 1, 2: 7}
+ */
+template <typename T1, typename T2, typename T3, typename T4>
+void addMaps(std::unordered_map<T1, T2, T3, T4>& a, const std::unordered_map<T1, T2, T3, T4>& b)
+{
+    for (const auto& [key, value] : b)
+        a[key] += value;
+}
+
+/**
+ * @brief Entry-wise division of 2 maps
+ */
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+void divideValuesBy(std::unordered_map<T1, T2, T3, T5>& a, const T4& b)
+{
+    for (const auto& [key, value] : a)
+        a[key] /= b;
+}
+
+/*template <typename T1, typename T2, typename T3, typename T4, typename T5>
+std::unordered_map<T1, T2, T3, T5> multiplyValuesBy(std::unordered_map<T1, T2, T3, T5> a, const T4& b)
+{
+    for (const auto& [key, value] : a)
+        a[key] *= b;
+
+    return a;
+}*/
+
+/**
  * @brief Converts a sfml color to a QColor
  */
 QColor sfColorToQColor(const sf::Color& sfColor);
+
+sf::Vector2f toVector2f(const cell::Vector2d& v);
 
 /**
  * @brief Turns a QMap<key, value> into a map<value, key>

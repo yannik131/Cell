@@ -85,83 +85,12 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     setProbability(probability);
 }
 
-DiscTypeID Reaction::getEduct1() const
-{
-    return educt1_;
-}
-
-void Reaction::setEduct1(DiscTypeID educt1)
-{
-    educt1_ = educt1;
-}
-
-DiscTypeID Reaction::getEduct2() const
-{
-    if (!educt2_)
-        throw ExceptionWithLocation("Can't get educt2 for reaction of type" + toString(type_));
-
-    return *educt2_;
-}
-
-bool Reaction::hasEduct2() const
-{
-    return type_ == Type::Combination || type_ == Type::Exchange;
-}
-
-void Reaction::setEduct2(DiscTypeID educt2)
-{
-    if (!educt2_)
-        throw ExceptionWithLocation("Can't set educt2 for reaction of type" + toString(type_));
-    educt2_ = educt2;
-}
-
-DiscTypeID Reaction::getProduct1() const
-{
-    return product1_;
-}
-
-void Reaction::setProduct1(DiscTypeID product1)
-{
-    product1_ = product1;
-}
-
-DiscTypeID Reaction::getProduct2() const
-{
-    if (!product2_)
-        throw ExceptionWithLocation("Can't get product2 for reaction of type" + toString(type_));
-
-    return *product2_;
-}
-
-bool Reaction::hasProduct2() const
-{
-    return type_ == Type::Decomposition || type_ == Type::Exchange;
-}
-
-void Reaction::setProduct2(DiscTypeID product2)
-{
-    if (!product2_)
-        throw ExceptionWithLocation("Can't set product2 for reaction of type" + toString(type_));
-
-    product2_ = product2;
-}
-
-double Reaction::getProbability() const
-{
-    return probability_;
-}
-
 void Reaction::setProbability(double probability)
 {
     if (probability < 0 || probability > 1)
         throw ExceptionWithLocation("Probability must be between 0 and 1");
 
     probability_ = probability;
-}
-
-const Reaction::Type& Reaction::getType() const
-{
-    return type_;
 }
 
 void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const

@@ -30,8 +30,15 @@ public:
 
     Permeability getPermeabilityFor(const DiscTypeID& discTypeID) const;
 
-    const std::string& getName() const;
-    double getRadius() const;
+    const std::string& getName() const noexcept
+    {
+        return name_;
+    }
+
+    double getRadius() const noexcept
+    {
+        return radius_;
+    };
 
 private:
     std::string name_;
