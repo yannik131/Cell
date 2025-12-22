@@ -11,6 +11,18 @@ struct Vector2d
     double x;
     double y;
 
+    Vector2d()
+        : x(0)
+        , y(0)
+    {
+    }
+
+    Vector2d(double x, double y)
+        : x(x)
+        , y(y)
+    {
+    }
+
     Vector2d& operator+=(const Vector2d& rhs) noexcept
     {
         x += rhs.x;
