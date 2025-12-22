@@ -69,6 +69,8 @@ public:
      */
     double getCurrentZoom() const;
 
+    void setMinimumSize(const QSize& s);
+
 signals:
     void renderRequired();
 

@@ -23,7 +23,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(SFML COMPONENTS system window graphics REQUIRED)
+find_package(SFML COMPONENTS System Window Graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
@@ -69,9 +69,9 @@ target_include_directories(libcellgui PUBLIC
 
 target_link_libraries(libcellgui PUBLIC 
     libcell 
-    sfml-system
-    sfml-window
-    sfml-graphics
+    SFML::System
+    SFML::Window
+    SFML::Graphics
     Qt6::Core 
     Qt6::Widgets 
     Qt6::OpenGLWidgets 
@@ -94,9 +94,9 @@ target_include_directories(benchmark PUBLIC ${CMAKE_SOURCE_DIR}/src/lib/)
 # target for trying stuff out
 add_executable(playground src/apps/playground/Main.cpp)
 target_link_libraries(playground PRIVATE
-    sfml-system
-    sfml-window
-    sfml-graphics
+    SFML::System
+    SFML::Window
+    SFML::Graphics
     nanoflann::nanoflann
     glog::glog
     nlohmann_json::nlohmann_json

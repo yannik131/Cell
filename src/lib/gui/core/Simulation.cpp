@@ -143,7 +143,7 @@ sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& 
 
     shape.setPointCount(100);
     shape.setRadius(R);
-    shape.setOrigin(R, R);
+    shape.setOrigin({R, R});
     shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineThickness(1);

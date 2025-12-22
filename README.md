@@ -23,7 +23,8 @@ I'm pinning SFML to version 2.6.2 with vcpkg overlays because 3.0.x currently do
 
 ## VS Code
 
-There is a `CMakePresets.json` located in `doc/` that currently only works on windows that I personally use with vs code. I wanted to use `clang-tidy` on windows and needed to use `ninja` for that, but I had trouble convincing `ninja` to use the `msvc` compiler over `gcc`, so I manually set the compiler to `cl` in the presets. It of course selected the x86 version over the x64 one for whatever reason. So I told `cmake` where to find `cl` and all the dependencies by adding `"cmake.environment": { "PATH": ..., "LIB": ..., "INCLUDE": "... }` to my `.vscode/settings.json`. I obtained the environmental variables by starting the "x64 Native Tools Command Prompt for VS 2022" and echoed `%PATH%`, `%LIB%` and `%INCLUDE%`. Took me a few days to get this to work.
+There is a `CMakePresetsWindows.json` located in `scripts/` that currently on
+ly works on windows that I personally use with vs code. I wanted to use `clang-tidy` on windows and needed to use `ninja` for that, but I had trouble convincing `ninja` to use the `msvc` compiler over `gcc`, so I manually set the compiler to `cl` in the presets. It of course selected the x86 version over the x64 one for whatever reason. So I told `cmake` where to find `cl` and all the dependencies by adding `"cmake.environment": { "PATH": ..., "LIB": ..., "INCLUDE": "... }` to my `.vscode/settings.json`. I obtained the environmental variables by starting the "x64 Native Tools Command Prompt for VS 2022" and echoed `%PATH%`, `%LIB%` and `%INCLUDE%`. Took me a few days to get this to work.
 
 To not get any include errors you need to add the respective folder to the `.vscode/c_cpp_properties.json`, here's mine as an example (currently working on windows):
 
