@@ -5,22 +5,6 @@
 namespace cell
 {
 
-namespace
-{
-std::string toString(Reaction::Type type)
-{
-    switch (type)
-    {
-    case Reaction::Type::Decomposition: return "Decomposition";
-    case Reaction::Type::Transformation: return "Transformation";
-    case Reaction::Type::Combination: return "Combination";
-    case Reaction::Type::Exchange: return "Exchange";
-    case Reaction::Type::None: return "None";
-    default: throw ExceptionWithLocation("Invalid reaction type");
-    }
-}
-} // namespace
-
 bool operator==(const Reaction& a, const Reaction& b)
 {
     return a.getEduct1() == b.getEduct1() && a.hasEduct2() == b.hasEduct2() &&
@@ -61,19 +45,6 @@ Reaction::Type inferReactionType(bool educt2, bool product2)
         return Reaction::Type::Exchange;
 }
 
-size_t ReactionHash::operator()(const Reaction& reaction) const
-{
-    auto hash = calculateHash(reaction.getEduct1(), reaction.getProduct1());
-
-    if (reaction.hasEduct2())
-        hashCombine(hash, reaction.getEduct2());
-
-    if (reaction.hasProduct2())
-        hashCombine(hash, reaction.getProduct2());
-
-    return hash;
-}
-
 Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, DiscTypeID product1,
                    const std::optional<DiscTypeID>& product2, double probability)
     : educt1_(educt1)
@@ -106,6 +77,19 @@ void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
 
     if (type_ == Type::Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
+}
+
+std::string Reaction::getTypeString() const
+{
+    switch (type_)
+    {
+    case Reaction::Type::Decomposition: return "Decomposition";
+    case Reaction::Type::Transformation: return "Transformation";
+    case Reaction::Type::Combination: return "Combination";
+    case Reaction::Type::Exchange: return "Exchange";
+    case Reaction::Type::None: return "None";
+    default: throw ExceptionWithLocation("Invalid reaction type");
+    }
 }
 
 } // namespace cell
