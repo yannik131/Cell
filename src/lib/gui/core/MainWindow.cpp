@@ -68,8 +68,8 @@ MainWindow::MainWindow(QWidget* parent)
     resizeTimer_.setSingleShot(true);
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
-    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, this,
-            &MainWindow::fitSimulationIntoView);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
+            &SimulationWidget::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
@@ -102,7 +102,7 @@ void MainWindow::resetSimulation()
 
     simulation_->rebuildContext();
     plotModel_->reset();
-    fitSimulationIntoView();
+    ui->simulationWidget->fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -137,16 +137,6 @@ void MainWindow::loadSettingsFromJson()
     {
         QMessageBox::warning(this, "Couldn't open file", e.what());
     }
-}
-
-void MainWindow::fitSimulationIntoView()
-{
-    const auto& widgetSize = ui->simulationWidget->size();
-    auto config = simulationConfigUpdater_->getSimulationConfig();
-    auto smallestEdge = std::min(widgetSize.height() / 2, widgetSize.width() / 2);
-    auto zoom = config.cellMembraneType.radius / smallestEdge;
-
-    ui->simulationWidget->resetView(Zoom{zoom});
 }
 
 void MainWindow::toggleSimulationFullscreen()

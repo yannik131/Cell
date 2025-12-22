@@ -31,11 +31,13 @@ signals:
 
 public slots:
     void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
+    void fitSimulationIntoView();
 
 private:
     void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry);
     void drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
     void restartTimers(const FrameDTO& frame);
+    double calculateIdealZoom() const;
 
 private:
     std::vector<sf::CircleShape> typeShapes_;

@@ -2,6 +2,8 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
+#include "SimulationWidget.hpp"
+#include <QApplication>
 #include <QCloseEvent>
 #include <QLayout>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -28,53 +30,40 @@ void SimulationWidget::closeEvent(QCloseEvent* event)
 
 void SimulationWidget::toggleFullscreen()
 {
-    // This was ChatGPT-generated, so it's still pretty ugly.
-    // TODO Fix fullscreen issue on window, repeated calls to this don't fill out the entire screen
-
-    static QWidget* origParent = nullptr;
-    static QLayout* origLayout = nullptr;
+    static QWidget* origParent = parentWidget();
+    static QLayout* origLayout = parentWidget()->layout();
     static QWidget* placeholder = nullptr;
-    static Qt::WindowFlags origFlags;
 
-    if (!placeholder)
+    if (!isFullScreen())
     {
-        // Detach to full screen
-        origParent = parentWidget();
-        origLayout = origParent ? origParent->layout() : nullptr;
-        origFlags = windowFlags();
-
-        if (origLayout)
-        {
-            placeholder = new QWidget(origParent);
-            placeholder->setSizePolicy(sizePolicy());
-            origLayout->replaceWidget(this, placeholder);
-        }
-
+        placeholder = new QWidget(origParent);
+        origLayout->replaceWidget(this, placeholder);
         setParent(nullptr);
-        setWindowFlag(Qt::Window, true);
+        setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
         showFullScreen();
-        raise();
-        activateWindow();
     }
     else
     {
-        // Restore to original place
-        showNormal(); // leave full screen
-        setWindowFlags(origFlags & ~Qt::Window);
         setParent(origParent);
-
-        if (origLayout)
-        {
-            origLayout->replaceWidget(placeholder, this);
-            placeholder->deleteLater();
-        }
-
+        origLayout->replaceWidget(placeholder, this);
+        placeholder->deleteLater();
         placeholder = nullptr;
-        origParent = nullptr;
-        origLayout = nullptr;
-
-        show(); // apply new flags/parent
+        showNormal();
     }
+
+    sf::Vector2u widgetSize = sf::VideoMode::getDesktopMode().size;
+    if (!isFullScreen())
+        widgetSize = sf::Vector2u(static_cast<unsigned>(size().width()), static_cast<unsigned>(size().height()));
+    sf::RenderWindow::close();
+    sf::RenderWindow::create((sf::WindowHandle)winId());
+    sf::RenderWindow::setSize(widgetSize);
+    QSFMLWidget::resetView(Zoom{calculateIdealZoom()}, static_cast<sf::Vector2f>(widgetSize));
+}
+
+void SimulationWidget::fitSimulationIntoView()
+{
+    const auto zoom = calculateIdealZoom();
+    resetView(Zoom{zoom});
 }
 
 void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry)
@@ -173,4 +162,19 @@ void SimulationWidget::restartTimers(const FrameDTO& frame)
         elapsedRenderTime_ = 0ns;
         renderingStarted_ = true;
     }
+}
+
+double SimulationWidget::calculateIdealZoom() const
+{
+    if (!simulationConfigUpdater_)
+        return 1.0;
+
+    auto widgetSize = static_cast<sf::Vector2i>(sf::VideoMode::getDesktopMode().size);
+    if (!isFullScreen())
+        widgetSize = sf::Vector2i(QWidget::size().width(), QWidget::size().height());
+
+    auto config = simulationConfigUpdater_->getSimulationConfig();
+    auto smallestEdge = std::min(widgetSize.x / 2, widgetSize.y / 2);
+
+    return config.cellMembraneType.radius / smallestEdge;
 }

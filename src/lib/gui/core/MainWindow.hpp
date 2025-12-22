@@ -78,7 +78,6 @@ private:
      */
     void loadSettingsFromJson();
 
-    void fitSimulationIntoView();
     void toggleSimulationFullscreen();
 
 private:

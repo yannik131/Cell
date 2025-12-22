@@ -90,10 +90,12 @@ void QSFMLWidget::keyPressEvent(QKeyEvent* event)
         QWidget::keyPressEvent(event);
 }
 
-void QSFMLWidget::resetView(Zoom zoom)
+void QSFMLWidget::resetView(Zoom zoom, std::optional<sf::Vector2f> size)
 {
-    view_ = sf::View(sf::FloatRect(
-        {0.f, 0.f}, {static_cast<float>(QWidget::size().width()), static_cast<float>(QWidget::size().height())}));
+    if (!size)
+        size = {static_cast<float>(QWidget::size().width()), static_cast<float>(QWidget::size().height())};
+
+    view_ = sf::View(sf::FloatRect({0.f, 0.f}, *size));
     view_.setCenter({0.f, 0.f});
     currentZoom_ = zoom.value;
     view_.zoom(static_cast<float>(currentZoom_));
