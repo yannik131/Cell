@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Fail on missing argument
-if [ -z "$1" ]; then
-    echo "Usage: $0 <output-file>"
+if [ -z "$2" ]; then
+    echo "Usage: $0 <path> <output-file>"
     exit 1
 fi
 
-OUTFILE="$1"
+OUTFILE="$2"
 
 cd "$(dirname "$0")"
 cd ../..
@@ -15,7 +15,7 @@ cd ../..
 > "$OUTFILE"
 
 # Find only .cpp and .hpp files recursively
-find src -type f \( -name '*.cpp' -o -name '*.hpp' \) | \
+find "$1" -type f \( -name '*.cpp' -o -name '*.hpp' \) | \
 while IFS= read -r file; do
     echo "$file" >> "$OUTFILE"
     cat "$file" >> "$OUTFILE"
