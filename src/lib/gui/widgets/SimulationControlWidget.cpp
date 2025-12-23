@@ -33,6 +33,7 @@ void SimulationControlWidget::updateWidgets(SimulationRunning simulationRunning)
 void SimulationControlWidget::setWidgetsEnabled(bool value)
 {
     ui->settingsWidget->setEnabled(value);
+    ui->reinitializeButton->setEnabled(value);
 }
 
 void SimulationControlWidget::toggleStartStopButtonState()
