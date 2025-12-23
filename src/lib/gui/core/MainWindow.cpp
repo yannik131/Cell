@@ -170,7 +170,7 @@ void MainWindow::showAboutDialog()
     <html>
         <head/>
         <body>
-            <p>This is <b>cell</b>, version 1.0.0</p>
+            <p>This is <b>cell</b>, version 1.0.0.</p>
             <p>Application for simulation reaction networks.</p>
             <p>Build time: %1 %2</p>
             <p>Developed by: Yannik Schroeder</p>
