@@ -36,7 +36,7 @@ void DiscTypesTableModel::addRow()
 
     rows_.push_back(cell::config::DiscType{.name = "Type" + std::to_string(rows_.size()), .radius = 1, .mass = 1});
     discColors_.push_back(
-        getSupportedDiscColors()[discColors_.size() % static_cast<std::size_t>(getSupportedDiscColors().size())]);
+        getSupportedDiscColors()[static_cast<qsizetype>(discColors_.size()) % getSupportedDiscColors().size()]);
 
     endInsertRows();
 }

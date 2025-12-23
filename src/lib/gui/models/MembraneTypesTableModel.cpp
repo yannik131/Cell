@@ -44,7 +44,7 @@ void MembraneTypesTableModel::addRow()
     rows_.push_back(cell::config::MembraneType{
         .name = "Type" + std::to_string(rows_.size()), .radius = 1, .permeabilityMap = {}, .discCount = 0});
     membraneColors_.push_back(
-        getSupportedDiscColors()[membraneColors_.size() % static_cast<std::size_t>(getSupportedDiscColors().size())]);
+        getSupportedDiscColors()[static_cast<qsizetype>(membraneColors_.size()) % getSupportedDiscColors().size()]);
 
     endInsertRows();
 }
