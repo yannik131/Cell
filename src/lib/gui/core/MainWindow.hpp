@@ -78,6 +78,8 @@ private:
 
     void toggleSimulationFullscreen();
 
+    void showAboutDialog();
+
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QThread* simulationThread_ = nullptr;

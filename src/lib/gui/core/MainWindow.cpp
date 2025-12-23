@@ -12,6 +12,7 @@
 
 #include <glog/logging.h>
 
+#include "MainWindow.hpp"
 #include <QKeyEvent>
 #include <QMessageBox>
 
@@ -67,6 +68,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
+    connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::showAboutDialog);
 
     resizeTimer_.setSingleShot(true);
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
@@ -160,6 +162,24 @@ void MainWindow::toggleSimulationFullscreen()
     ui->simulationWidget->toggleFullscreen();
     fullscreenIsToggled_ = !fullscreenIsToggled_;
     simulation_->emitFrame(RedrawOnly{true});
+}
+
+void MainWindow::showAboutDialog()
+{
+    const QString aboutMessage = R"(
+    <html>
+        <head/>
+        <body>
+            <p>This is <b>cell</b>, version 1.0.0</p>
+            <p>Application for simulation reaction networks.</p>
+            <p>Build time: %1 %2</p>
+            <p>Developed by: Yannik Schroeder</p>
+            <p>More: <a href='https://github.com/yannik131/Cell'>https://github.com/yannik131/Cell</a></p>
+        </body>
+    </html>
+)";
+
+    QMessageBox::about(this, QStringLiteral("About"), aboutMessage.arg(__DATE__).arg(__TIME__));
 }
 
 MainWindow::~MainWindow()
