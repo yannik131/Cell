@@ -32,9 +32,9 @@ void PermeabilityTableModel::addRow()
     endInsertRows();
 }
 
-QVariant PermeabilityTableModel::getField(const PermeabilityMapEntry& row, int column) const
+QVariant PermeabilityTableModel::getField(const PermeabilityMapEntry& row, const QModelIndex& index) const
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: return QString::fromStdString(row.first);
     case 1: return getPermeabilityNameMapping()[row.second];
@@ -43,9 +43,9 @@ QVariant PermeabilityTableModel::getField(const PermeabilityMapEntry& row, int c
     }
 }
 
-bool PermeabilityTableModel::setField(PermeabilityMapEntry& row, int column, const QVariant& value)
+bool PermeabilityTableModel::setField(PermeabilityMapEntry& row, const QModelIndex& index, const QVariant& value)
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: row.first = value.toString().toStdString(); break;
     case 1: row.second = getNamePermeabilityMapping()[value.toString()]; break;

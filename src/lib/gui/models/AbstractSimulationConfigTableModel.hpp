@@ -45,9 +45,9 @@ public:
     const std::vector<T>& getRows() const;
 
 protected:
-    virtual QVariant getField(const T& row, int column) const = 0;        // for data(...)
-    virtual bool setField(T& row, int column, const QVariant& value) = 0; // for setData(...)
-    virtual bool isEditable(const QModelIndex& index) const = 0;          // for flags(...)
+    virtual QVariant getField(const T& row, const QModelIndex& index) const = 0;        // for data(...)
+    virtual bool setField(T& row, const QModelIndex& index, const QVariant& value) = 0; // for setData(...)
+    virtual bool isEditable(const QModelIndex& index) const = 0;                        // for flags(...)
     virtual bool isEnabled(const QModelIndex& index) const;
 
 protected:
@@ -93,7 +93,7 @@ inline QVariant AbstractSimulationConfigTableModel<T>::data(const QModelIndex& i
     if (!index.isValid() || index.row() >= static_cast<int>(rows_.size()))
         return {};
 
-    return getField(rows_[index.row()], index.column());
+    return getField(rows_[index.row()], index);
 }
 
 template <typename T>
@@ -102,7 +102,7 @@ inline bool AbstractSimulationConfigTableModel<T>::setData(const QModelIndex& in
     if (role != Qt::EditRole || !index.isValid() || index.row() >= static_cast<int>(rows_.size()))
         return false;
 
-    bool changed = setField(rows_[index.row()], index.column(), value);
+    bool changed = setField(rows_[index.row()], index, value);
     if (changed)
         emit dataChanged(index, index);
 

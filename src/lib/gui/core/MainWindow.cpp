@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
 
+    connect(simulationConfigUpdater_, &SimulationConfigUpdater::simulationResetRequired, this,
+            &MainWindow::resetSimulation);
+
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
@@ -130,8 +133,8 @@ void MainWindow::loadSettingsFromJson()
 
     try
     {
+        // Will emit a signal for simulation reset
         simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
-        resetSimulation();
     }
     catch (const std::exception& e)
     {

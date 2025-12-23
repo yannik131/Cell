@@ -29,9 +29,9 @@ void DiscTypeDistributionTableModel::addRow()
     endInsertRows();
 }
 
-QVariant DiscTypeDistributionTableModel::getField(const DiscTypeDistributionEntry& row, int column) const
+QVariant DiscTypeDistributionTableModel::getField(const DiscTypeDistributionEntry& row, const QModelIndex& index) const
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: return QString::fromStdString(row.first);
     case 1: return row.second;
@@ -40,9 +40,10 @@ QVariant DiscTypeDistributionTableModel::getField(const DiscTypeDistributionEntr
     }
 }
 
-bool DiscTypeDistributionTableModel::setField(DiscTypeDistributionEntry& row, int column, const QVariant& value)
+bool DiscTypeDistributionTableModel::setField(DiscTypeDistributionEntry& row, const QModelIndex& index,
+                                              const QVariant& value)
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: row.first = value.toString().toStdString(); break;
     case 1: row.second = value.toDouble(); break;

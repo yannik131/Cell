@@ -14,8 +14,8 @@ public:
     void saveToConfig() override;
 
 private:
-    QVariant getField(const cell::config::Disc& row, int column) const override;
-    bool setField(cell::config::Disc& row, int column, const QVariant& value) override;
+    QVariant getField(const cell::config::Disc& row, const QModelIndex& index) const override;
+    bool setField(cell::config::Disc& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

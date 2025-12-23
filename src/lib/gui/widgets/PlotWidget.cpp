@@ -25,7 +25,7 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
     reset();
 
     if (labels.size() != colors.size())
-        throw std::logic_error("Must have equal number of labels and colors");
+        throw ExceptionWithLocation("Must have equal number of labels and colors");
 
     for (std::size_t i = 0; i < labels.size(); ++i)
     {

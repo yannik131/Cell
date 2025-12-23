@@ -12,8 +12,8 @@ public:
     void addRow() override;
 
 private:
-    QVariant getField(const DiscTypeDistributionEntry& row, int column) const override;
-    bool setField(DiscTypeDistributionEntry& row, int column, const QVariant& value) override;
+    QVariant getField(const DiscTypeDistributionEntry& row, const QModelIndex& index) const override;
+    bool setField(DiscTypeDistributionEntry& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

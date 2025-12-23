@@ -29,7 +29,7 @@ public:
     void loadConfigFromFile(const fs::path& path);
 
 signals:
-    void discTypesChanged();
+    void simulationResetRequired();
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;
@@ -70,7 +70,7 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         simulationConfigCopy.discTypes = newTypes;
         setSimulationConfigWithoutSignals(simulationConfigCopy);
         discTypeColorMap_ = colorMap;
-        emit discTypesChanged();
+        emit simulationResetRequired(); // This will update the plot, needing the updated color map
     }
     else if constexpr (std::is_same_v<T, cell::config::MembraneType>)
     {

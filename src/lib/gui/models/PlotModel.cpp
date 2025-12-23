@@ -31,14 +31,6 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     // With an averaging time of 100ms, we save 10 datapoints for 1 second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*10
     dataPoints_.reserve(3000);
-
-    connect(&simulation_->getSimulationConfigUpdater(), &SimulationConfigUpdater::discTypesChanged,
-            [this]()
-            {
-                reset();
-                updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
-                emitGraphs();
-            });
 }
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
@@ -74,7 +66,10 @@ void PlotModel::reset()
     dataPointForPlotting_ = {};
     averagingCount_ = 0;
 
+    updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
+
     emitPlot();
+    emitGraphs();
 }
 
 void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames)
