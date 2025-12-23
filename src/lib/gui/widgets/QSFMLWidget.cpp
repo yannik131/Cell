@@ -24,9 +24,9 @@ void QSFMLWidget::resizeEvent(QResizeEvent* event)
 
     RenderWindow::setSize(newSize);
     // The old Views position would now be wrong, simply place a new view with the correct size
-    view_ = sf::View(sf::FloatRect(0, 0, static_cast<float>(newSize.x), static_cast<float>(newSize.y)));
-    view_.setCenter(0.f, 0.f);
-    view_.move(static_cast<float>(offset_.x()), static_cast<float>(offset_.y()));
+    view_ = sf::View(sf::FloatRect({0.f, 0.f}, {static_cast<float>(newSize.x), static_cast<float>(newSize.y)}));
+    view_.setCenter({0.f, 0.f});
+    view_.move({static_cast<float>(offset_.x()), static_cast<float>(offset_.y())});
     view_.zoom(static_cast<float>(currentZoom_));
 
     RenderWindow::setView(view_);
@@ -90,11 +90,13 @@ void QSFMLWidget::keyPressEvent(QKeyEvent* event)
         QWidget::keyPressEvent(event);
 }
 
-void QSFMLWidget::resetView(Zoom zoom)
+void QSFMLWidget::resetView(Zoom zoom, std::optional<sf::Vector2f> size)
 {
-    view_ = sf::View(
-        sf::FloatRect(0, 0, static_cast<float>(QWidget::size().width()), static_cast<float>(QWidget::size().height())));
-    view_.setCenter(0.f, 0.f);
+    if (!size)
+        size = {static_cast<float>(QWidget::size().width()), static_cast<float>(QWidget::size().height())};
+
+    view_ = sf::View(sf::FloatRect({0.f, 0.f}, *size));
+    view_.setCenter({0.f, 0.f});
     currentZoom_ = zoom.value;
     view_.zoom(static_cast<float>(currentZoom_));
     offset_ = QPoint(0, 0);
@@ -107,6 +109,11 @@ void QSFMLWidget::resetView(Zoom zoom)
 double QSFMLWidget::getCurrentZoom() const
 {
     return currentZoom_;
+}
+
+void QSFMLWidget::setMinimumSize(const QSize& s)
+{
+    QWidget::setMinimumSize(s);
 }
 
 QPaintEngine* QSFMLWidget::paintEngine() const

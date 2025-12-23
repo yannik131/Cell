@@ -24,7 +24,7 @@ int main(int argc, char** argv)
         "M", Radius{500},
         {{"A", MembraneType::Permeability::Inward}, {"B", MembraneType::Permeability::Bidirectional}});
 
-    std::vector<sf::Vector2d> membranePositions;
+    std::vector<Vector2d> membranePositions;
     for (int i = 0; i < 5; ++i)
         builder.addMembrane("M", Position{.x = -3000.0 + i * 1000, .y = -3000.0 + i * 1000});
 

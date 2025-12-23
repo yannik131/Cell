@@ -24,8 +24,8 @@ signals:
     void newRowRequested();
 
 private:
-    QVariant getField(const cell::config::Reaction& row, int column) const override;
-    bool setField(cell::config::Reaction& row, int column, const QVariant& value) override;
+    QVariant getField(const cell::config::Reaction& row, const QModelIndex& index) const override;
+    bool setField(cell::config::Reaction& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

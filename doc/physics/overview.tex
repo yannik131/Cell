@@ -23,272 +23,9 @@
 
 \begin{document}
 	\section{Collision physics}
-	\subsection{Collision with the bounds}
-	\subsubsection{Rectangular bounds}
-	We'll describe the rectangular bounds by their 2 corner points $(x_{min}, y_{min})$ and $(x_{max}, y_{max})$. 
-	The circle is at position $(x(t), y(t))$ with radius $R$. The penetration $l$ through the wall is $l > 0$ if the circle is overlapping with the bounds. To handle the collision, negate the offending velocity component and move the disc $\Delta x_i = \pm 2 l$ along the respective axis:
-
-	\subsubsection*{Left wall}
-	\begin{align*}
-		l(t) &= R + x_{min} - x(t)\\
-		\Delta x &= 2 l\\
-		v_x' &= -v_x
-	\end{align*}
-
-	\subsubsection*{Right wall}
-	\begin{align*}
-		l(t) &= R - x_{max} + x(t)\\
-		\Delta x &= - 2 l\\
-		v_x' &= -v_x
-	\end{align*}
-
-	\subsubsection*{Top wall}
-	\begin{align*}
-		l(t) &= R + y_{min} - y(t)\\
-		\Delta y &= 2 l\\
-		v_y' &= -v_y
-	\end{align*}
-
-	\subsubsection*{Bottom wall}
-	\begin{align*}
-		l(t) &= R - y_{max} + y(t)\\
-		\Delta y &= - 2 l\\
-		v_y' &= -v_y
-	\end{align*}
-
-    \subsubsection{Circular bounds}
-    Bounds given by middle point $M$ and radius $R_m$. Circle at position $\vec{r} = (x(t), y(t))$ with radius $R_c$ and velocity $\vec{v}$. Penetration occurs when
-
-    \begin{align*}
-        |M - \vec{r}| + R_c &\ge R_m \\
-        \Leftrightarrow |M - \vec{r}| + R_c - R_m &\ge 0\\
-        \Rightarrow l(t) \ge 0 \text{\ with\ } l(t) &= |M - \vec{r}| + R_c - R_m
-    \end{align*}
-
-    where $l(t)$ is the penetration of the circle into the bounds. To avoid the root, numerical testing would use 
-    
-    \begin{align*}
-        |M - \vec{r}| &\ge R_m - R_c \\
-        &\Leftrightarrow \sqrt{(M_x - r_x)^2 + (M_y - r_y)^2} \ge R_m - R_c \\
-        &\Leftrightarrow (M_x - r_x)^2 + (M_y - r_y)^2 \ge (R_m - R_c)^2
-    \end{align*}
-    
-    Collision response: Bounds are stationary, no impulse is exchanged. First, solve for time $\Delta t$ when $l(t) = 0$. Reminder: $\|\vec{v}\|^2 = \vec{v}\cdot\vec{v} = (\vec{v})^2$.
-    
-    \begin{align*}
-        l(t) &= \|M - \vec{r}(t)\| + R_c - R_m \overset{!}{=} 0 \\
-        &\Leftrightarrow \|M - (\vec{r} + t\vec{v})\| = R_m - R_c\\
-		&\Leftrightarrow \|(M - \vec{r}) - t\vec{v}\|^2 = (R_m - R_c)^2\\
-		&\Leftrightarrow ((M-\vec{r}) - t\vec{v})^2 = (R_m - R_c)^2\\
-		&\Leftrightarrow (M-\vec{r})^2 - (R_m - R_c)^2 - 2(M-\vec{r})t\vec{v} + t^2(\vec{v})^2 = 0\\
-		&\Leftrightarrow t^2(\vec{v}\cdot\vec{v}) - 2(M-\vec{r})\vec{v}t + (M-\vec{r})^2 - (R_m - R_c)^2 = 0\\
-		&\Leftrightarrow t^2 - 2(M-\vec{r})\frac{\vec{v}}{\vec{v}\cdot\vec{v}}t + \frac{(M-\vec{r})^2 - (R_m - R_c)^2}{\vec{v}\cdot\vec{v}} = 0\\
-		&\Leftrightarrow t^2 + pt + q = 0 \text{\ with}\\
-		&p = - 2(M-\vec{r})\frac{\vec{v}}{\vec{v}\cdot\vec{v}}\\
-		&q = \frac{(M-\vec{r})^2 - (R_m - R_c)^2}{\vec{v}\cdot\vec{v}}\\
-		&\Rightarrow \Delta t = -\frac{p}{2} \pm \sqrt{\left(\frac{p}{2}\right)^2 - q}\\
-		&\Leftrightarrow \Delta t = \frac{-p \pm \sqrt{p^2-4q}}{2}
-    \end{align*}
-    
-    Both solutions for $\Delta t$ are negative. Both solutions refer to the times where the disc intersects with the bounds if it followed it's current velocity backward in time. We need the more recent solution, i. e. the one with $+ \sqrt{\dots}$. Move the circle by $\Delta t$. Now, the contact normal is given by the vector 
-    
-    \begin{align*}
-        \vec{n} = \frac{\vec{r} - M}{|\vec{r} - M|} = \frac{\vec{r} - M}{R_c - R_m}.
-    \end{align*}
-
-    Note that the contact normal has to point outward, so $M - \vec{r}$ would be wrong. Simply reflect $\vec{v}$ on $\vec{n}$ to get the new velocity:
-
-    \begin{align*}
-        \vec{v}' = \vec{v} - 2(\vec{v}\cdot\vec{n})\vec{n}
-    \end{align*}
-
-    Now just move the circle forward by $\Delta t$ again and it's done.
-	
-	\subsection{Overlap between circles}
-    \label{section_overlap_circles}
-	The overlap $l$ of 2 circles is the sum of their radii minus the distance between them. If the overlap is $> 0$, we have a collision. The current positions of the circles are $\vec{r}_{i, 0}$.
-	\begin{equation}
-		l = R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0}\right|
-	\end{equation}
-	We want to move the circles to the positions they had just before the collision (when they were just touching without intersection). For this, we need to move them back in time using their velocities multiplied with a time $\Delta t$ we have to calculate. At that time, the overlap should be 0:
-	
-	\begin{align*}
-		l(t) &= R_1 + R_2 - \left|\vec{r_2}(t) - \vec{r_1}(t)\right|\\
-	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} + t\cdot\vec{v_2} - \vec{r}_{1, 0} - t\cdot\vec{v_1}\right|\\
-	 &= R_1 + R_2 - \left|\vec{r}_{2, 0} - \vec{r}_{1, 0} + t\left(\vec{v_2} - \vec{v_1}\right)\right|\\
-	 &= R_1 + R_2 - \left|\vec{r} + t\cdot\vec{v}\right| \overset{!}{=} 0\\
-	 &\Leftrightarrow \sqrt{\left(\left(r_x+t\cdot v_x\right)^2+\left(r_x+t\cdot v_y\right)^2\right)} = R_1 + R_2\\
-	 &\Leftrightarrow \Delta t = \frac{-r_x v_x - r_y v_y \pm \sqrt{(R_1 + R_2)^2 (v_x^2 + v_y^2) - (r_x v_y - r_y v_x)^2}}{v_x^2 + v_y^2}\\
-     &\Leftrightarrow \Delta t = \frac{-\vec{r}\cdot\vec{v} \pm \sqrt{(R_1 + R_2)^2 (v_x^2 + v_y^2) - (r_x v_y - r_y v_x)^2}}{v_x^2 + v_y^2}
-	\end{align*}
-
-	with distance vector $\vec{r} = \vec{r_{2, 0}} - \vec{r_{1, 0}}$ and relative velocity $\vec{v} = \vec{v_2} - \vec{v_1}$ of the circles. The 2 solutions for $\Delta t$ refer to the first point of contact before overlap and the point in time exactly after the circles have passed through each other. The first contact happened in the past, so $\Delta t \overset{!}{<} 0$, so select the solution with $-\sqrt{\dots}$.\\
-	Now the correct initial positions $\vec{r}_{i, c}$ at the time of collision can easily be calculated:
-	\begin{equation}
-		\vec{r}_{i, c} =\vec{r}_{i, 0} + \Delta t \cdot \vec{v}_i
-	\end{equation}
-	After the collision was handled and the new velocities $\vec{v}'_i$ have been calculated, the circles need to be wound forward in time with their corrected velocities:
-	\begin{equation}
-		\vec{r}_{i} =\vec{r}_{i, c} - \Delta t \cdot \vec{v}'_i
-	\end{equation}
-	
-	\begin{lstlisting}[caption={Code to calculate $t$}]
-from sympy import symbols, Eq, solve, simplify, sqrt
-
-rx, ry, vx, vy, R1, R2, t = symbols("rx ry vx vy R1 R2 t")
-eq = Eq(sqrt((rx + t*vx)**2+(ry+t*vy)**2), R1+R2)
-solution = solve(eq, t)
-
-simplified = [simplify(sol) for sol in solution]
-
-for sol in simplified:
-	print(sol)
-	\end{lstlisting}
-
-    \subsection{Iterative collision handling}
-    We consider $n$ circles and found $L$ overlaps between various circles (a circle might overlap with several others) and circular bounds with a total of $N$ distinct circles partaking in collisions. The following is a recipe to solve overlap iteratively:
-
-    \begin{enumerate}
-        \item Construct $M \in \mathbb{R}^{2N \times 2N}$: \\
-        $M = 
-        \begin{pmatrix}
-        m_1 I_2 & \cdots & 0_{2\times 2}\\
-        \vdots & \ddots & \vdots\\
-        0_{2 \times 2} & \cdots & m_N I_2
-        \end{pmatrix} = \text{diag}(m_1I_2, \ldots, m_NI_2)$ with the $2\times 2$ identity matrix $I_2$. The paper included moments of inertia. We have no rotation, so we ignore that. If the collision is between circle and bounds, set the "mass" of the bounds to $\infty$, making the entry in $M^{-1}$ for it $0$.
-        \item Calculate $M^{-1} \in \mathbb{R}^{2N \times 2N} = \text{diag}(m_1^{-1}I_2, \ldots, m_N^{-1}I_2)$
-        \item Construct $V \in \mathbb{R}^{2N \times 1}$: Stack velocities of each body $V = \begin{pmatrix}
-            \vec{v}_1\\ \ldots\\ \vec{v}_N
-        \end{pmatrix}$. Velocities for bounds are $0$.
-        \item Construct $J \in \mathbb{R}^{L \times 2N}$: For each collision pair with indices $(i, j)$ relative to the discs array of length $N$, calculate the collision normal $\vec{n}_{i, j} = (\vec{r}_j - \vec{r}_i)/|\vec{r}_j - \vec{r}_i|$ and add a row of $2N$ zeros. With 0-indexing, set columns $2i$ and $2i + 1$ to $\vec{n}_{i, j}$ and columns $2j$ and $2j + 1$ to $-\vec{n}_{i, j}$.  If the collision pair is between disc and bounds, flip the signs.
-        \item Construct $C \in \mathbb{R}^{L \times 1}$: For each collision pair, add a row containing the value $|\vec{r}_i - \vec{r}_j| - (R_i + R_j)$
-        \item Solve the linear system $(J M^{-1} J^T) \lambda = -(1 + e)JV$ for $e = 1$ (elastic collision)
-        \item Calculate $V' = V + M^{-1}J^{T}\lambda$
-    \end{enumerate}
-
-    \subsubsection{$J$ for circle-circle collisions}
-
-    For two circles with positions $\vec{r}_i$ and radii $R_i$, the constraint function would be 
-    
-    \begin{align*}
-        C &= |\vec{r}_2 - \vec{r}_1| - (R_1 + R_2)\\
-    \end{align*}
-
-    The normal always points from body $1$ to body $2$.
-    
-    $C = 0$ for just touching, $C > 0$ for separated and $C < 0$ for penetration. We want to enforce $C \ge 0$. 
-
-    The time derivative of $C$ gives the velocity contraint vector if the s-by-2n Jacobian $J$ is defined such as 
-
-    \begin{align*}
-        \dot{C} = JV = 0
-    \end{align*}
-
-    For two circles we have 
-
-    \begin{align*}
-        \dot{C} &= \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}(\dot{\vec{r}}_2 - \dot{\vec{r}}_1)\\
-        &= \vec{n}(\vec{v}_2 - \vec{v}_1) \quad \text{with\ } \vec{n} =  \frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}.
-    \end{align*}
-
-    This gives an equation we can solve for $J$:
-
-    \begin{align*}
-        JV &= \vec{n}(\vec{v}_2 - \vec{v}_1)\\
-        \Leftrightarrow(J_1, J_2)\begin{pmatrix}\vec{v}_1\\\vec{v}_2\end{pmatrix} &= \vec{n}(\vec{v}_2 - \vec{v}_1)\\
-        \Leftrightarrow J_1 \vec{v}_1 + J_2 \vec{v}_2 &= \vec{n}\vec{v}_2 - \vec{n}\vec{v}_1\\
-        \Rightarrow J &= \begin{pmatrix} -\vec{n}^T & \vec{n}^T \end{pmatrix}
-    \end{align*}
-
-    \subsubsection{$J$ for circle-bounds collision}
-    Let the bounds be body 1 and the circle body 2. Using the same approach, we get
-
-    \begin{align*}
-        &C = R_1 - R_2 - |\vec{r}_2 - \vec{r}_1|.\\
-        &\Rightarrow \dot{C} = -\frac{\vec{r}_2 - \vec{r}_1}{|\vec{r}_2 - \vec{r}_1|}(\vec{v}_2 - \vec{v}_1) = -\vec{n}(\vec{v}_2 - \vec{v}_1).\\
-        &\Rightarrow JV = -\vec{n}(\vec{v}_2 - \vec{v}_1)\\
-        &\Rightarrow J = \begin{pmatrix} \vec{n}^T & -\vec{n}^T \end{pmatrix}
-    \end{align*}
-
-    \subsubsection{Solving the system iteratively}
-
-    So we have 
-
-    \begin{align*}
-        &(J M^{-1} J^T) \lambda = -(1 + e)JV\\
-        &\Leftrightarrow A\lambda = b.
-    \end{align*}
-
-    Gauß-Seidel (GS) solves iteratively using this formula 
-
-    \begin{align*}
-        \lambda_k^{\mathrm{new}} = \frac{b_k - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}
-    \end{align*}
-
-    Generally, entries $A_{kj}$ of $A$ and $b_k$ of $b$ are given by 
-
-    \begin{align*}
-        A_{kj} = J_kM^{-1}J_j^T\\
-        b_{k} = -(1 + e)JV
-    \end{align*}
-
-    We'll define an effective mass with 
-
-    \begin{align*}
-        m_{\mathrm{eff},k} = \frac{1}{A_{kk}}
-    \end{align*}
-
-    Plugging this into the GS formula we get 
-
-    \begin{align*}
-        \lambda_k^{\mathrm{new}} = \frac{-(1+e)JV - \sum_{j<k}(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{new}} - \sum_{j>k}(J_kM^{-1}J_j^T)\lambda_j^{\mathrm{old}}}{A_{kk}}
-    \end{align*}
-
-    Very ugly. To simplify, look at the velocity update formula: 
-
-    \begin{align*}
-        V' &= V + M^{-1}J^T\lambda\\
-        &= V + \sum_j M^{-1}J_j^T \lambda_j.\\
-        &\Leftrightarrow J_kV' = J_kV + \sum_j (J_kM^{-1}J_j^T)\lambda_j\\
-        &\Leftrightarrow J_kV' = J_kV + \sum_j A_{kj}\lambda_j\\
-        &\Leftrightarrow J_kV' = J_kV + \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}\\
-        &\Leftrightarrow \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} + \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}} = J_kV' - J_kV
-    \end{align*}
-
-    Note that $V'$ here is referring to the original velocity $V$ still being updated. Using this, we can give an algorithm to update the velocities of the two bodies taking part in collision $k$ where objects $i$ and $j$ are colliding. Initially, we set all entries of $\lambda$ to $0$. Each step of the GS iteration immediately uses the previously updated velocities. This is where collisions are coupled. This also means that $\lambda_k^\mathrm{new}$ is now just a $\Delta \lambda_k$ instead of the new, updated value and it can be calculated with this formula:
-
-    \begin{align*}
-        \Delta \lambda_k &= \frac{-(1 + e)JV - \sum_{j<k}A_{kj}\lambda_j^{\mathrm{new}} - \sum_{j>k}A_{kj}\lambda_j^{\mathrm{old}}}{A_{kk}}\\
-        &= \frac{-(1 + e)JV - J_kV' + J_kV}{A_{kk}}\\
-        &= \frac{-(1 + e)JV'}{A_{kk}}
-    \end{align*}
-
-    \begin{enumerate}
-        \item Calculate $J_k V$, using the correct $J$ for the constraint: $\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-circle, $-\vec{n}(\vec{v}_j - \vec{v}_i)$ for circle-bounds, etc.
-        \item Calculate $A_{kk} = J_kM^{-1}J_k^T$.\\
-        Circle-circle: $\begin{pmatrix} -\vec{n}^Tm_i^{-1} & \vec{n}^T m_j^{-1}\end{pmatrix}J_k^T = m_i^{-1} + m_j^{-1}$\\
-        Bounds-circle: Entry for bounds is $0$ in $M^{-1}$, so for circle $j$ we have $m_j^{-1}$
-        \item Now calculate $\Delta \lambda_k^\mathrm{raw} = -m_{\mathrm{eff},k}(1+e)JV$ for collision $k$, add it to the old $\lambda$ with $\lambda_k^\mathrm{tmp} = \lambda_k^\mathrm{old} + \Delta \lambda_k^\mathrm{raw}$, set the new $\lambda$ with $\lambda_k^\mathrm{new} = \max\{0, \lambda_k^\mathrm{tmp}\}$ and calculate the actual delta with $\Delta \lambda_k = \lambda_k^\mathrm{new} - \lambda_k^\mathrm{old}$. We clamp at zero because the objects might already be moving away from each other, in which case $\lambda_k^\mathrm{new} < 0$ to satisfy the $C = 0$ constraint, which would effectively be an attractive force, which we don't want.
-        \item Update the velocities for both bodies in collision $k$ immediately: $V = V + M^{-1}J_k^T \Delta \lambda_k = V + \Delta V$ where $\Delta V$ is\\
-        Circle-circle: $\Delta V = \begin{pmatrix}-\vec{n}m_i^{-1}\\ \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
-        Bounds-circle: $\Delta V = \begin{pmatrix}0\\ - \vec{n}m_j^{-1}\end{pmatrix}\Delta \lambda_k$\\
-        Note that the notation is a little off here, obviously not the whole $V$ is being updated, just the two velocities in the collision pair $\vec{v}_i$ and $\vec{v}_j$
-    \end{enumerate}
-
-    The actual implementation will follow this scheme:
-
-        \begin{enumerate}
-        \item Insert all simulation objects into a \texttt{std::vector<Entry> entries}.
-        \item The detection step simply creates a \texttt{std::vector<std::pair<std::size\_t, std::size\_t>>}, where each pair represents a collision and contains the indices of the corresponding entries.
-        \item Compute all collision normals and store them in a \texttt{std::vector<sf::Vector2d> normals}; the indices correspond to the collision pairs.
-        \item Compute $\beta C$ for each collision pair.
-        \item Now the collisions are iterated $n$ times (maybe 5 or so), and steps 2--5 of the list are applied.
-    \end{enumerate}
-
-
 	\subsection{Collision handling}
 
-	For a collision of 2 circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
+	For a collision of two circles with masses $m_i$ and velocities $v_{i-}$ before and $v_{i+}$ after the collision, the impulse exchange  along the line connecting the centers of the circles (the collision normal) is given by these equations\footnote{See Bourg, David M.; Bywalec, Bryan: Physics for Game Developers, O'REILLY, Second Edition, p. 112}:
 	
 	\begin{align*}
 		\Delta p &= m_1\left(v_{1+} - v_{1-}\right),\\
@@ -329,6 +66,24 @@ for sol in simplified:
 	\end{align*}
 
 	Here, $\vec{v}_{1-}$ and $\vec{v}_{2-}$ are the full velocities before the collision, not just the projection along the normal.
+
+    \subsection{Iterative collision handling}
+    We know that for two colliding discs the necessary impulse change along the normal is 
+
+    \begin{equation}
+        \label{dp}
+        \Delta p = -\frac{v_r(e + 1)}{\frac{1}{m_1} + \frac{1}{m_2}}.
+    \end{equation}
+
+    To solve multiple collisions, iterate the collisions and calculate $\Delta p$ using \cref{dp} for each pair, using previously updated velocities directly. Note that $\Delta p \le 0$ if $v_r \ge 0$, meaning the discs are either already separating ($> 0$) or not moving along the collision normal ($= 0$). In that case just let them move apart and/or apply a positional correction based on current overlap. \\
+
+    \cref{dp} can also be used to resolve collisions with boundaries (child or parent membranes) by setting $m_2 = \infty$. \cref{dp} then simplifies to 
+
+    \begin{equation*}
+        \Delta p = -m_1v_r(e + 1).
+    \end{equation*}
+
+    Just make sure that the normal points in the direction of the impulse change: For disc-child membrane collisions, the normal points from the center of the membrane to the disc, and for disc-parent membrane collisions, the normal points from the disc to the membrane center.
 
 	\section{Reactions}
 	

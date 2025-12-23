@@ -1,5 +1,4 @@
 #include "dialogs/SetupDialog.hpp"
-#include "cell/Settings.hpp"
 #include "core/Utility.hpp"
 #include "models/SetupModel.hpp"
 #include "ui_SetupDialog.h"
@@ -27,12 +26,10 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     connect(ui->mostProbableSpeedSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMostProbableSpeed);
     connect(ui->FPSSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setFPS);
 
-    ui->timeStepSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinSimulationTimeStep.asMicroseconds()),
-                                  static_cast<int>(cell::SettingsLimits::MaxSimulationTimeStep.asMicroseconds()));
-    ui->timeScaleDoubleSpinBox->setRange(cell::SettingsLimits::MinSimulationTimeScale,
-                                         cell::SettingsLimits::MaxSimulationTimeScale);
-    ui->mostProbableSpeedSpinBox->setRange(static_cast<int>(cell::SettingsLimits::MinMostProbableSpeed),
-                                           static_cast<int>(cell::SettingsLimits::MaxMostProbableSpeed));
+    ui->timeStepSpinBox->setRange(
+        1, static_cast<int>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::seconds{1}).count()));
+    ui->timeScaleDoubleSpinBox->setRange(0, 100);
+    ui->mostProbableSpeedSpinBox->setRange(0, static_cast<int>(1e6));
     ui->FPSSpinBox->setRange(1, 240);
 
     displayCurrentConfig();

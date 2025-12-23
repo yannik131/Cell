@@ -62,12 +62,14 @@ public:
     /**
      * @brief Creates a new view without zoom and translation and resets zoom and translation offset
      */
-    void resetView(Zoom zoom = Zoom{1});
+    void resetView(Zoom zoom = Zoom{1}, std::optional<sf::Vector2f> size = {});
 
     /**
      * @returns the accumulative zoom of the view
      */
     double getCurrentZoom() const;
+
+    void setMinimumSize(const QSize& s);
 
 signals:
     void renderRequired();
@@ -85,9 +87,11 @@ private:
 
     void zoom(ZoomDirection direction);
 
+protected:
+    sf::View view_;
+
 private:
     bool initialized_ = false;
-    sf::View view_;
     QPoint offset_;
     QPoint startPosition_;
     bool dragging_ = false;

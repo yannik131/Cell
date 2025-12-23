@@ -5,22 +5,6 @@
 namespace cell
 {
 
-namespace
-{
-std::string toString(Reaction::Type type)
-{
-    switch (type)
-    {
-    case Reaction::Type::Decomposition: return "Decomposition";
-    case Reaction::Type::Transformation: return "Transformation";
-    case Reaction::Type::Combination: return "Combination";
-    case Reaction::Type::Exchange: return "Exchange";
-    case Reaction::Type::None: return "None";
-    default: throw ExceptionWithLocation("Invalid reaction type");
-    }
-}
-} // namespace
-
 bool operator==(const Reaction& a, const Reaction& b)
 {
     return a.getEduct1() == b.getEduct1() && a.hasEduct2() == b.hasEduct2() &&
@@ -61,19 +45,6 @@ Reaction::Type inferReactionType(bool educt2, bool product2)
         return Reaction::Type::Exchange;
 }
 
-size_t ReactionHash::operator()(const Reaction& reaction) const
-{
-    auto hash = calculateHash(reaction.getEduct1(), reaction.getProduct1());
-
-    if (reaction.hasEduct2())
-        hashCombine(hash, reaction.getEduct2());
-
-    if (reaction.hasProduct2())
-        hashCombine(hash, reaction.getProduct2());
-
-    return hash;
-}
-
 Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, DiscTypeID product1,
                    const std::optional<DiscTypeID>& product2, double probability)
     : educt1_(educt1)
@@ -85,83 +56,12 @@ Reaction::Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, D
     setProbability(probability);
 }
 
-DiscTypeID Reaction::getEduct1() const
-{
-    return educt1_;
-}
-
-void Reaction::setEduct1(DiscTypeID educt1)
-{
-    educt1_ = educt1;
-}
-
-DiscTypeID Reaction::getEduct2() const
-{
-    if (!educt2_)
-        throw ExceptionWithLocation("Can't get educt2 for reaction of type" + toString(type_));
-
-    return *educt2_;
-}
-
-bool Reaction::hasEduct2() const
-{
-    return type_ == Type::Combination || type_ == Type::Exchange;
-}
-
-void Reaction::setEduct2(DiscTypeID educt2)
-{
-    if (!educt2_)
-        throw ExceptionWithLocation("Can't set educt2 for reaction of type" + toString(type_));
-    educt2_ = educt2;
-}
-
-DiscTypeID Reaction::getProduct1() const
-{
-    return product1_;
-}
-
-void Reaction::setProduct1(DiscTypeID product1)
-{
-    product1_ = product1;
-}
-
-DiscTypeID Reaction::getProduct2() const
-{
-    if (!product2_)
-        throw ExceptionWithLocation("Can't get product2 for reaction of type" + toString(type_));
-
-    return *product2_;
-}
-
-bool Reaction::hasProduct2() const
-{
-    return type_ == Type::Decomposition || type_ == Type::Exchange;
-}
-
-void Reaction::setProduct2(DiscTypeID product2)
-{
-    if (!product2_)
-        throw ExceptionWithLocation("Can't set product2 for reaction of type" + toString(type_));
-
-    product2_ = product2;
-}
-
-double Reaction::getProbability() const
-{
-    return probability_;
-}
-
 void Reaction::setProbability(double probability)
 {
     if (probability < 0 || probability > 1)
         throw ExceptionWithLocation("Probability must be between 0 and 1");
 
     probability_ = probability;
-}
-
-const Reaction::Type& Reaction::getType() const
-{
-    return type_;
 }
 
 void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
@@ -177,6 +77,19 @@ void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
 
     if (type_ == Type::Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
+}
+
+std::string Reaction::getTypeString() const
+{
+    switch (type_)
+    {
+    case Reaction::Type::Decomposition: return "Decomposition";
+    case Reaction::Type::Transformation: return "Transformation";
+    case Reaction::Type::Combination: return "Combination";
+    case Reaction::Type::Exchange: return "Exchange";
+    case Reaction::Type::None: return "None";
+    default: throw ExceptionWithLocation("Invalid reaction type");
+    }
 }
 
 } // namespace cell

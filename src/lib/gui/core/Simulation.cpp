@@ -2,6 +2,7 @@
 #include "cell/Cell.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
+#include "core/Utility.hpp"
 
 #include <QThread>
 #include <QTimer>
@@ -142,8 +143,8 @@ sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& 
 
     shape.setPointCount(100);
     shape.setRadius(R);
-    shape.setOrigin(R, R);
-    shape.setPosition(static_cast<sf::Vector2f>(compartment.getMembrane().getPosition()));
+    shape.setOrigin({R, R});
+    shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineThickness(1);
 

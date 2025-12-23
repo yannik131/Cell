@@ -1,9 +1,10 @@
 {
     "config": {
         "cellMembraneType": {
-            "discCount": 50,
+            "discCount": 1000,
             "discTypeDistribution": {
-                "Resource": 1.0
+                "PreySpawn": 0.1,
+                "Resource": 0.9
             },
             "name": "Cell membrane",
             "permeabilityMap": {},
@@ -13,12 +14,12 @@
             {
                 "mass": 1.0,
                 "name": "Predator",
-                "radius": 15.0
+                "radius": 7.0
             },
             {
                 "mass": 1.0,
                 "name": "Prey",
-                "radius": 15.0
+                "radius": 5.0
             },
             {
                 "mass": 1.0,
@@ -28,23 +29,23 @@
             {
                 "mass": 1.0,
                 "name": "PredatorSpawn",
-                "radius": 5.0
+                "radius": 10.0
             },
             {
                 "mass": 1.0,
                 "name": "PreySpawn",
-                "radius": 5.0
+                "radius": 10.0
             }
         ],
         "discs": [],
-        "mostProbableSpeed": 100.0,
         "membraneTypes": [
             {
-                "discCount": 50,
+                "discCount": 1000,
                 "discTypeDistribution": {
-                    "Resource": 1.0
+                    "PreySpawn": 0.1,
+                    "Resource": 0.9
                 },
-                "name": "PredatorSpawn",
+                "name": "1",
                 "permeabilityMap": {
                     "Predator": 2,
                     "Resource": 2
@@ -52,11 +53,12 @@
                 "radius": 200.0
             },
             {
-                "discCount": 50,
+                "discCount": 1000,
                 "discTypeDistribution": {
-                    "Resource": 1.0
+                    "PredatorSpawn": 0.5,
+                    "Resource": 0.5
                 },
-                "name": "PreySpawn",
+                "name": "2",
                 "permeabilityMap": {
                     "Predator": 2,
                     "Resource": 2
@@ -64,11 +66,12 @@
                 "radius": 100.0
             },
             {
-                "discCount": 50,
+                "discCount": 1000,
                 "discTypeDistribution": {
-                    "Resource": 1.0
+                    "PreySpawn": 0.1,
+                    "Resource": 0.9
                 },
-                "name": "Type3",
+                "name": "3",
                 "permeabilityMap": {
                     "Predator": 2,
                     "Resource": 2
@@ -76,11 +79,12 @@
                 "radius": 300.0
             },
             {
-                "discCount": 50,
+                "discCount": 1000,
                 "discTypeDistribution": {
-                    "Resource": 1.0
+                    "PreySpawn": 0.1,
+                    "Resource": 0.9
                 },
-                "name": "Type4",
+                "name": "4",
                 "permeabilityMap": {
                     "Predator": 2,
                     "Resource": 2
@@ -90,38 +94,39 @@
         ],
         "membranes": [
             {
-                "membraneTypeName": "PredatorSpawn",
+                "membraneTypeName": "1",
                 "x": 0.0,
                 "y": 0.0
             },
             {
-                "membraneTypeName": "PreySpawn",
+                "membraneTypeName": "2",
                 "x": 0.0,
                 "y": 0.0
             },
             {
-                "membraneTypeName": "Type3",
+                "membraneTypeName": "3",
                 "x": 0.0,
                 "y": 0.0
             },
             {
-                "membraneTypeName": "Type4",
+                "membraneTypeName": "4",
                 "x": 0.0,
                 "y": 0.0
             }
         ],
+        "mostProbableSpeed": 200.0,
         "reactions": [
             {
                 "educt1": "Resource",
                 "educt2": "Prey",
-                "probability": 0.2,
+                "probability": 0.1,
                 "product1": "Prey",
                 "product2": "Prey"
             },
             {
                 "educt1": "Predator",
                 "educt2": "Prey",
-                "probability": 0.3,
+                "probability": 0.6,
                 "product1": "Predator",
                 "product2": "Predator"
             },
@@ -135,29 +140,30 @@
             {
                 "educt1": "Predator",
                 "educt2": "",
-                "probability": 0.75,
+                "probability": 0.9,
                 "product1": "Resource",
                 "product2": ""
             },
             {
-                "educt1": "Resource",
-                "educt2": "",
-                "probability": 0.01,
-                "product1": "Prey",
-                "product2": ""
+                "educt1": "PredatorSpawn",
+                "educt2": "Resource",
+                "probability": 0.5,
+                "product1": "PredatorSpawn",
+                "product2": "Predator"
             },
             {
-                "educt1": "Resource",
-                "educt2": "",
+                "educt1": "PreySpawn",
+                "educt2": "Resource",
                 "probability": 0.01,
-                "product1": "Predator",
-                "product2": ""
+                "product1": "PreySpawn",
+                "product2": "Prey"
             }
         ],
         "simulationTimeScale": 1.0,
         "simulationTimeStep": 0.0010000000474974513,
         "useDistribution": true
     },
+    "configVersion": "1",
     "discTypeColorMap": {
         "Predator": [
             255,
@@ -191,31 +197,31 @@
         ]
     },
     "membraneTypeColorMap": {
+        "1": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "2": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "3": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "4": [
+            255,
+            255,
+            0,
+            255
+        ],
         "Cell membrane": [
-            255,
-            255,
-            0,
-            255
-        ],
-        "PredatorSpawn": [
-            0,
-            255,
-            255,
-            255
-        ],
-        "PreySpawn": [
-            0,
-            0,
-            255,
-            255
-        ],
-        "Type3": [
-            255,
-            0,
-            255,
-            255
-        ],
-        "Type4": [
             255,
             255,
             0,

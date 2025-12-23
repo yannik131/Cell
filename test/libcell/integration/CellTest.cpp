@@ -3,7 +3,6 @@
 #include "cell/Disc.hpp"
 #include "cell/Membrane.hpp"
 #include "cell/MembraneType.hpp"
-#include "cell/Settings.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
 #include "cell/SimulationFactory.hpp"
 

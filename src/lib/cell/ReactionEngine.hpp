@@ -1,7 +1,6 @@
 #ifndef REACTIONENGINE_HPP
 #define REACTIONENGINE_HPP
 
-#include "AbstractReactionTable.hpp"
 #include "CollisionDetector.hpp"
 #include "MathUtils.hpp"
 
@@ -14,6 +13,7 @@ namespace cell
 
 class DiscType;
 class Disc;
+class ReactionTable;
 
 using SingleLookupMap = DiscTypeMap<std::vector<Reaction>>;
 using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
@@ -21,7 +21,7 @@ using PairLookupMap = DiscTypePairMap<std::vector<Reaction>>;
 class ReactionEngine
 {
 public:
-    ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const AbstractReactionTable& reactionTable);
+    ReactionEngine(const DiscTypeRegistry& discTypeRegistry, const ReactionTable& reactionTable);
 
     /**
      * @brief Transformation reaction A -> B. Changes the type of the disc to a new one if a reaction occurs.
@@ -56,7 +56,7 @@ private:
 
     const Reaction* selectUnimolecularReaction(const DiscTypeID& key, double dt) const;
     const Reaction* selectBimolecularReaction(const std::pair<DiscTypeID, DiscTypeID>& key) const;
-    void combineReactionsIntoSingleMaps(const AbstractReactionTable& reactionTable);
+    void combineReactionsIntoSingleMaps(const ReactionTable& reactionTable);
 
 private:
     const DiscTypeRegistry& discTypeRegistry_;

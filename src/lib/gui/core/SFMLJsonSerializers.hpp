@@ -19,8 +19,7 @@ template <> struct adl_serializer<sf::Color>
 
     static void from_json(const json& j, sf::Color& c)
     {
-        using sf::Uint8;
-        std::tie(c.r, c.g, c.b, c.a) = j.get<std::tuple<Uint8, Uint8, Uint8, Uint8>>();
+        std::tie(c.r, c.g, c.b, c.a) = j.get<std::tuple<std::uint8_t, std::uint8_t, std::uint8_t, std::uint8_t>>();
     }
 };
 

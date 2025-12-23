@@ -43,7 +43,7 @@ public:
     {
         std::size_t index = 0;
         double radius = 0;
-        sf::Vector2d position;
+        Vector2d position;
         double minX = 0, maxX = 0;
         EntryType type = EntryType::Disc;
     };

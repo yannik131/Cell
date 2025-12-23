@@ -1,6 +1,7 @@
 #include "models/PlotModel.hpp"
 #include "cell/MathUtils.hpp"
 #include "core/Simulation.hpp"
+#include "core/Utility.hpp"
 
 #include <cmath>
 #include <unordered_set>
@@ -13,11 +14,11 @@ void averageDataPoint(DataPoint& dataPoint, int length)
     double dt = dataPoint.elapsedTime_;
 
     // Collisions per second = All registered collisions / dt
-    dataPoint.collisionCounts_ /= dt;
+    utility::divideValuesBy(dataPoint.collisionCounts_, dt);
 
-    dataPoint.totalKineticEnergyMap_ /= length;
-    dataPoint.totalMomentumMap_ /= length;
-    dataPoint.discTypeCountMap_ /= length;
+    utility::divideValuesBy(dataPoint.totalKineticEnergyMap_, length);
+    utility::divideValuesBy(dataPoint.totalMomentumMap_, length);
+    utility::divideValuesBy(dataPoint.discTypeCountMap_, length);
 }
 
 } // namespace
@@ -30,14 +31,6 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     // With an averaging time of 100ms, we save 10 datapoints for 1 second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*10
     dataPoints_.reserve(3000);
-
-    connect(&simulation_->getSimulationConfigUpdater(), &SimulationConfigUpdater::discTypesChanged,
-            [this]()
-            {
-                reset();
-                updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
-                emitGraphs();
-            });
 }
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
@@ -73,7 +66,10 @@ void PlotModel::reset()
     dataPointForPlotting_ = {};
     averagingCount_ = 0;
 
+    updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
+
     emitPlot();
+    emitGraphs();
 }
 
 void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames)
@@ -275,11 +271,11 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
 {
     lhs.elapsedTime_ += rhs.elapsedTime_;
-    lhs.collisionCounts_ += rhs.collisionCounts_;
-    lhs.discTypeCountMap_ += rhs.discTypeCountMap_;
 
-    lhs.totalKineticEnergyMap_ += rhs.totalKineticEnergyMap_;
-    lhs.totalMomentumMap_ += rhs.totalMomentumMap_;
+    utility::addMaps(lhs.collisionCounts_, rhs.collisionCounts_);
+    utility::addMaps(lhs.discTypeCountMap_, rhs.discTypeCountMap_);
+    utility::addMaps(lhs.totalKineticEnergyMap_, rhs.totalKineticEnergyMap_);
+    utility::addMaps(lhs.totalMomentumMap_, rhs.totalMomentumMap_);
 
     return lhs;
 }

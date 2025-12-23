@@ -31,9 +31,9 @@ void DiscsTableModel::saveToConfig()
     simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
-QVariant DiscsTableModel::getField(const cell::config::Disc& row, int column) const
+QVariant DiscsTableModel::getField(const cell::config::Disc& row, const QModelIndex& index) const
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: return QString::fromStdString(row.discTypeName);
     case 1: return row.x;
@@ -45,9 +45,9 @@ QVariant DiscsTableModel::getField(const cell::config::Disc& row, int column) co
     }
 }
 
-bool DiscsTableModel::setField(cell::config::Disc& row, int column, const QVariant& value)
+bool DiscsTableModel::setField(cell::config::Disc& row, const QModelIndex& index, const QVariant& value)
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: row.discTypeName = value.toString().toStdString(); break;
     case 1: row.x = value.toDouble(); break;

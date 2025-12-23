@@ -54,7 +54,7 @@ private:
     std::vector<Membrane> membranes_;
     SimulationContext simulationContext_;
     CollisionDetector collisionDetector_;
-    bool needMoreMemoryForIntruders_ = false;
+    std::size_t intruderAllocationCount_ = 0;
     std::vector<Disc> newDiscs_;
 };
 

@@ -12,8 +12,8 @@ public:
     void addRow() override;
 
 private:
-    QVariant getField(const PermeabilityMapEntry& row, int column) const override;
-    bool setField(PermeabilityMapEntry& row, int column, const QVariant& value) override;
+    QVariant getField(const PermeabilityMapEntry& row, const QModelIndex& index) const override;
+    bool setField(PermeabilityMapEntry& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
 };
 

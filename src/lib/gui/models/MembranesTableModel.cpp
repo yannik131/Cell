@@ -31,9 +31,9 @@ void MembranesTableModel::saveToConfig()
     simulationConfigUpdater_->setSimulationConfig(currentConfig);
 }
 
-QVariant MembranesTableModel::getField(const cell::config::Membrane& row, int column) const
+QVariant MembranesTableModel::getField(const cell::config::Membrane& row, const QModelIndex& index) const
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: return QString::fromStdString(row.membraneTypeName);
     case 1: return row.x;
@@ -43,9 +43,9 @@ QVariant MembranesTableModel::getField(const cell::config::Membrane& row, int co
     }
 }
 
-bool MembranesTableModel::setField(cell::config::Membrane& row, int column, const QVariant& value)
+bool MembranesTableModel::setField(cell::config::Membrane& row, const QModelIndex& index, const QVariant& value)
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: row.membraneTypeName = value.toString().toStdString(); break;
     case 1: row.x = value.toDouble(); break;

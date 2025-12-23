@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>160</width>
-    <height>340</height>
+    <height>364</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>160</width>
-    <height>340</height>
+    <height>360</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -28,13 +28,51 @@
      <property name="minimumSize">
       <size>
        <width>140</width>
-       <height>240</height>
+       <height>220</height>
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
        <number>10</number>
       </property>
+      <item>
+       <widget class="QPushButton" name="discTypesPushButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Disc types</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reactionsPushButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Reactions</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QPushButton" name="membraneTypesPushButton">
         <property name="minimumSize">
@@ -74,25 +112,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="discTypesPushButton">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Disc types</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="discsPushButton">
         <property name="minimumSize">
          <size>
@@ -108,25 +127,6 @@
         </property>
         <property name="text">
          <string>Discs</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="reactionsPushButton">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Reactions</string>
         </property>
        </widget>
       </item>
@@ -149,25 +149,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="reinitializeButton">
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>120</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Reinitialize</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -176,7 +157,7 @@
      <property name="minimumSize">
       <size>
        <width>140</width>
-       <height>75</height>
+       <height>120</height>
       </size>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -199,6 +180,25 @@
         </property>
         <property name="text">
          <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reinitializeButton">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Reinitialize</string>
         </property>
        </widget>
       </item>

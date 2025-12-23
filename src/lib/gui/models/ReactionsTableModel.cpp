@@ -50,9 +50,9 @@ void ReactionsTableModel::saveToConfig()
     simulationConfigUpdater_->setSimulationConfig(config);
 }
 
-QVariant ReactionsTableModel::getField(const cell::config::Reaction& row, int column) const
+QVariant ReactionsTableModel::getField(const cell::config::Reaction& row, const QModelIndex& index) const
 {
-    switch (column)
+    switch (index.column())
     {
     case 0: return QString::fromStdString(row.educt1);
     case 2: return QString::fromStdString(row.educt2);
@@ -64,8 +64,9 @@ QVariant ReactionsTableModel::getField(const cell::config::Reaction& row, int co
     }
 }
 
-bool ReactionsTableModel::setField(cell::config::Reaction& row, int column, const QVariant& value)
+bool ReactionsTableModel::setField(cell::config::Reaction& row, const QModelIndex& index, const QVariant& value)
 {
+    int column = index.column();
     if (column == 0 || column == 2 || column == 4 || column == 6)
     {
         std::string valueString = value.toString().toStdString();

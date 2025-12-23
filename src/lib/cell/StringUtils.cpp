@@ -1,5 +1,6 @@
 #include "StringUtils.hpp"
 
+#include <iomanip>
 #include <vector>
 
 namespace cell::stringutils

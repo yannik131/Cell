@@ -2,7 +2,6 @@
 #define CB5591CC_6EF7_4F94_AEED_D2110A4FB7CE_HPP
 
 #include "MembraneType.hpp"
-#include "Settings.hpp"
 #include "Vector2d.hpp"
 
 #include <map>
@@ -78,11 +77,11 @@ struct SimulationConfig
         .name = config::cellMembraneTypeName, .radius = config::cellMembraneTypeDefaultRadius, .permeabilityMap = {}};
 
     /**
-     * @brief Time that passes between single simulation steps. Smaller value means more accurate collisions, but
-     * requires more updates to advance the simulation in time. If this value is too small, the simulation might not be
-     * able to keep up and start lagging
+     * @brief Time that passes between single simulation steps in seconds. Smaller value means more accurate collisions,
+     * but requires more updates to advance the simulation in time. If this value is too small, the simulation might not
+     * be able to keep up and start lagging
      */
-    double simulationTimeStep = sf::milliseconds(1).asSeconds();
+    double simulationTimeStep = 1e-3;
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.
@@ -95,7 +94,7 @@ struct SimulationConfig
 
     bool useDistribution = true;
 
-    // In case not:
+    // In case of no distribution, these are used
     std::vector<config::Disc> discs;
 
     // These never use a distribution

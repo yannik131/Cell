@@ -32,7 +32,7 @@ const QMap<QString, sf::Color>& getNameColorMapping();
 /**
  * @returns Keys of the color mapping: These are all the colors supported in the GUI for disc types
  */
-const QList<sf::Color>& getSupportedDiscColors();
+const QVector<sf::Color>& getSupportedDiscColors();
 
 /**
  * @returns Human readable color names for the supported colors in the GUI in the same order as

@@ -7,7 +7,6 @@
 #include "Membrane.hpp"
 #include "ReactionEngine.hpp"
 #include "ReactionTable.hpp"
-#include "Settings.hpp"
 #include "SimulationContext.hpp"
 #include "StringUtils.hpp"
 

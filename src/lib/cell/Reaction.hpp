@@ -2,11 +2,29 @@
 #define ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
 
 #include "DiscType.hpp"
+#include "StringUtils.hpp"
 
 #include <optional>
 
 namespace cell
 {
+
+class Reaction;
+
+/**
+ * @brief Checks if all products and educts have identical disc type names
+ */
+bool operator==(const Reaction& reaction1, const Reaction& reaction2);
+
+/**
+ * @brief String representation in the form of A + B -> C + D
+ */
+std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
+
+/**
+ * @returns `true` if the given disctype is part of the educts or products of the reaction
+ */
+bool contains(const Reaction& reaction, DiscTypeID discType);
 
 /**
  * @brief Contains a uni- or bimolecular reaction.
@@ -48,24 +66,87 @@ public:
 
     // Boilerplate getters and setters with no additional documentation
 
-    DiscTypeID getEduct1() const;
-    void setEduct1(DiscTypeID educt1);
+    DiscTypeID getEduct1() const noexcept
+    {
+        return educt1_;
+    }
 
-    DiscTypeID getEduct2() const;
-    bool hasEduct2() const;
-    void setEduct2(DiscTypeID educt2);
+    void setEduct1(DiscTypeID educt1) noexcept
+    {
+        educt1_ = educt1;
+    }
 
-    DiscTypeID getProduct1() const;
-    void setProduct1(DiscTypeID product1);
+    DiscTypeID getEduct2() const
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't get educt2 for reaction of type" + getTypeString());
+#endif
 
-    DiscTypeID getProduct2() const;
-    bool hasProduct2() const;
-    void setProduct2(DiscTypeID product2);
+        return *educt2_;
+    }
 
-    double getProbability() const;
+    bool hasEduct2() const noexcept
+    {
+        return type_ == Type::Combination || type_ == Type::Exchange;
+    }
+
+    void setEduct2(DiscTypeID educt2)
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't set educt2 for reaction of type" + getTypeString());
+#endif
+
+        educt2_ = educt2;
+    }
+
+    DiscTypeID getProduct1() const noexcept
+    {
+        return product1_;
+    }
+
+    void setProduct1(DiscTypeID product1) noexcept
+    {
+        product1_ = product1;
+    }
+
+    DiscTypeID getProduct2() const
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't get product2 for reaction of type" + getTypeString());
+#endif
+
+        return *product2_;
+    }
+
+    bool hasProduct2() const noexcept
+    {
+        return type_ == Type::Decomposition || type_ == Type::Exchange;
+    }
+
+    void setProduct2(DiscTypeID product2)
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't set product2 for reaction of type" + getTypeString());
+#endif
+
+        product2_ = product2;
+    }
+
+    double getProbability() const noexcept
+    {
+        return probability_;
+    }
+
     void setProbability(double probability);
 
-    const Type& getType() const;
+    Type getType() const noexcept
+    {
+        return type_;
+    }
 
     /**
      * @brief Validates that
@@ -77,6 +158,9 @@ public:
     void validate(const DiscTypeRegistry& discTypeRegistry) const;
 
 private:
+    std::string getTypeString() const;
+
+private:
     DiscTypeID educt1_;
     std::optional<DiscTypeID> educt2_;
     DiscTypeID product1_;
@@ -84,26 +168,6 @@ private:
     double probability_ = 0;
     Type type_ = Type::None;
 };
-
-struct ReactionHash
-{
-    size_t operator()(const Reaction& reaction) const;
-};
-
-/**
- * @brief Checks if all products and educts have identical disc type names
- */
-bool operator==(const Reaction& reaction1, const Reaction& reaction2);
-
-/**
- * @brief String representation in the form of A + B -> C + D
- */
-std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
-
-/**
- * @returns `true` if the given disctype is part of the educts or products of the reaction
- */
-bool contains(const Reaction& reaction, DiscTypeID discType);
 
 Reaction::Type inferReactionType(bool educt2, bool product2);
 

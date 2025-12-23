@@ -24,13 +24,13 @@ public:
     void saveToConfig() override;
 
 private:
-    QVariant getField(const cell::config::DiscType& row, int column) const override;
-    bool setField(cell::config::DiscType& row, int column, const QVariant& value) override;
+    QVariant getField(const cell::config::DiscType& row, const QModelIndex& index) const override;
+    bool setField(cell::config::DiscType& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
-    void updateDiscTypeName(cell::config::DiscType& discType, const std::string& newName);
 
 private:
-    std::map<std::string, sf::Color> discTypeColorMap_;
+    std::vector<sf::Color> discColors_;
+    std::vector<std::string> originalDiscTypeNames_;
     std::unordered_set<std::string> removedDiscTypes_;
 };
 

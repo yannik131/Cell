@@ -29,7 +29,7 @@ public:
     void loadConfigFromFile(const fs::path& path);
 
 signals:
-    void discTypesChanged();
+    void simulationResetRequired();
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;
@@ -62,6 +62,7 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
 {
     auto simulationConfigCopy = simulationConfig_;
 
+    // I'll make it DRY once there is a third case I guess, not worth it right now
     if constexpr (std::is_same_v<T, cell::config::DiscType>)
     {
         removeDiscTypes(simulationConfigCopy, removedTypes);
@@ -70,7 +71,6 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         simulationConfigCopy.discTypes = newTypes;
         setSimulationConfigWithoutSignals(simulationConfigCopy);
         discTypeColorMap_ = colorMap;
-        emit discTypesChanged();
     }
     else if constexpr (std::is_same_v<T, cell::config::MembraneType>)
     {
@@ -78,9 +78,11 @@ inline void SimulationConfigUpdater::setTypes(const std::vector<T>& newTypes,
         auto changeMap = createChangeMap(newTypes, simulationConfig_.membraneTypes, removedTypes);
         updateMembraneTypes(simulationConfigCopy, changeMap);
         simulationConfigCopy.membraneTypes = newTypes;
-        setSimulationConfig(simulationConfigCopy);
+        setSimulationConfigWithoutSignals(simulationConfigCopy);
         membraneTypeColorMap_ = colorMap;
     }
+
+    emit simulationResetRequired();
 }
 
 template <typename T>

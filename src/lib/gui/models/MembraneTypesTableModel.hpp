@@ -24,14 +24,14 @@ public:
     void saveToConfig() override;
 
 private:
-    QVariant getField(const cell::config::MembraneType& row, int column) const override;
-    bool setField(cell::config::MembraneType& row, int column, const QVariant& value) override;
+    QVariant getField(const cell::config::MembraneType& row, const QModelIndex& index) const override;
+    bool setField(cell::config::MembraneType& row, const QModelIndex& index, const QVariant& value) override;
     bool isEditable(const QModelIndex& index) const override;
     bool isEnabled(const QModelIndex& index) const override;
-    void updateMembraneTypeName(cell::config::MembraneType& membraneType, const std::string& newName);
 
 private:
-    std::map<std::string, sf::Color> membraneTypeColorMap_;
+    std::vector<sf::Color> membraneColors_; // TODO DRY violation with DiscTypesTableModel (colors and original names)
+    std::vector<std::string> originalMembraneTypeNames_;
     std::unordered_set<std::string> removedMembraneTypes_;
 };
 

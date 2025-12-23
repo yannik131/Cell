@@ -62,14 +62,17 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
 
+    connect(simulationConfigUpdater_, &SimulationConfigUpdater::simulationResetRequired, this,
+            &MainWindow::resetSimulation);
+
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
 
     resizeTimer_.setSingleShot(true);
     connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
-    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, this,
-            &MainWindow::fitSimulationIntoView);
+    connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
+            &SimulationWidget::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
@@ -84,10 +87,23 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
 
     // Application-wide shortcuts so they work even when the widget is a separate window
-    auto* scFull = new QShortcut(QKeySequence(Qt::Key_F), this);
-    scFull->setContext(Qt::ApplicationShortcut);
+    const auto addShortcut = [&](auto key, auto callback)
+    {
+        auto* shortcut = new QShortcut(QKeySequence(key), this);
+        shortcut->setContext(Qt::ApplicationShortcut);
+        connect(shortcut, &QShortcut::activated, this, callback);
+    };
 
-    connect(scFull, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
+    addShortcut(Qt::Key_F, &MainWindow::toggleSimulationFullscreen);
+    addShortcut(Qt::Key_Space,
+                [&]()
+                {
+                    if (simulationThread_)
+                        simulationThread_->requestInterruption();
+                    else
+                        startSimulation();
+                });
+
     connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,
             &MainWindow::toggleSimulationFullscreen);
 
@@ -102,7 +118,7 @@ void MainWindow::resetSimulation()
 
     simulation_->rebuildContext();
     plotModel_->reset();
-    fitSimulationIntoView();
+    ui->simulationWidget->fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -130,23 +146,13 @@ void MainWindow::loadSettingsFromJson()
 
     try
     {
+        // Will emit a signal for simulation reset
         simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
-        resetSimulation();
     }
     catch (const std::exception& e)
     {
         QMessageBox::warning(this, "Couldn't open file", e.what());
     }
-}
-
-void MainWindow::fitSimulationIntoView()
-{
-    const auto& widgetSize = ui->simulationWidget->size();
-    auto config = simulationConfigUpdater_->getSimulationConfig();
-    auto smallestEdge = std::min(widgetSize.height() / 2, widgetSize.width() / 2);
-    auto zoom = config.cellMembraneType.radius / smallestEdge;
-
-    ui->simulationWidget->resetView(Zoom{zoom});
 }
 
 void MainWindow::toggleSimulationFullscreen()
@@ -183,17 +189,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     resizeTimer_.start(50);
 
     QMainWindow::resizeEvent(event);
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* event)
-{
-    if (event->key() == Qt::Key_F)
-    {
-        if (ui->simulationWidget->isFullScreen())
-            ui->simulationWidget->showNormal();
-        else
-            ui->simulationWidget->showFullScreen();
-    }
 }
 
 void MainWindow::startSimulation()

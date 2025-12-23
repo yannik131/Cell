@@ -115,11 +115,12 @@ void Compartment::unimolecularUpdate(double dt)
 
 void Compartment::allocateMemoryForIntruders()
 {
-    if (!needMoreMemoryForIntruders_)
+    if (intruderAllocationCount_ == 0)
         return;
 
-    discs_.reserve(std::max(discs_.size() * 2, static_cast<std::size_t>(2))); // Let's be generous here
-    needMoreMemoryForIntruders_ = false;
+    discs_.reserve(
+        std::max(2 * discs_.capacity(), discs_.capacity() + intruderAllocationCount_ * 2)); // Let's be generous here
+    intruderAllocationCount_ = 0;
 }
 
 Compartment* Compartment::createSubCompartment(Membrane membrane)
@@ -204,7 +205,7 @@ void Compartment::captureIntruders()
         }
     }
     else
-        needMoreMemoryForIntruders_ = true; // Better luck next time
+        intruderAllocationCount_ = intrudingDiscs_.size();
 
     intrudingDiscs_.clear();
     intruderCaptureStatus_.clear();

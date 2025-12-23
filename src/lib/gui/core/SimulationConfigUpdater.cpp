@@ -16,12 +16,16 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
 
 void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
 {
-    const bool discTypesDidChange = simulationConfig_.discTypes != simulationConfig.discTypes;
+    auto oldConfig = simulationConfig_;
 
     setSimulationConfigWithoutSignals(simulationConfig);
 
-    if (discTypesDidChange)
-        emit discTypesChanged();
+    // These can be changed mid-simulation without needing to reset everything
+    oldConfig.simulationTimeScale = simulationConfig.simulationTimeScale;
+    oldConfig.simulationTimeStep = simulationConfig.simulationTimeStep;
+
+    if (oldConfig != simulationConfig)
+        emit simulationResetRequired();
 }
 
 const std::map<std::string, sf::Color>& SimulationConfigUpdater::getDiscTypeColorMap() const
@@ -53,6 +57,7 @@ void SimulationConfigUpdater::saveConfigToFile(const fs::path& path) const
     j["config"] = simulationConfig_;
     j["discTypeColorMap"] = discTypeColorMap_;
     j["membraneTypeColorMap"] = membraneTypeColorMap_;
+    j["configVersion"] = "1";
 
     std::ofstream file(path);
     file << j.dump(4);

@@ -61,8 +61,8 @@ double CellPopulator::calculateDistributionSum(const std::map<std::string, doubl
                            [](double currentSum, auto& entryPair) { return currentSum + entryPair.second; });
 }
 
-std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment& compartment, double maxRadius,
-                                                                        int discCount) const
+std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment& compartment, double maxRadius,
+                                                                    int discCount) const
 {
     const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
     const auto& membraneCenter = compartment.getMembrane().getPosition();
@@ -70,7 +70,7 @@ std::vector<sf::Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartm
 
     auto gridPoints = mathutils::calculateGrid(2 * membraneRadius, 2 * membraneRadius, 2 * maxRadius);
 
-    const auto& topLeft = membraneCenter - sf::Vector2d{membraneRadius, membraneRadius};
+    const auto& topLeft = membraneCenter - Vector2d{membraneRadius, membraneRadius};
     for (size_t i = 0; i < gridPoints.size();)
     {
         gridPoints[i] += topLeft;
@@ -117,12 +117,14 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
         simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
     const auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
-
     const auto& distribution = membraneType.discTypeDistribution;
 
     if (membraneType.discCount < 0)
         throw ExceptionWithLocation("Disc count for membrane type \"" + membraneTypeName + "\" is negative (" +
                                     std::to_string(membraneType.discCount) + ")");
+
+    if (membraneType.discCount == 0 || distribution.empty())
+        return;
 
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, membraneType.discCount);
     const auto discCount = std::min(static_cast<std::size_t>(membraneType.discCount), gridPoints.size());
@@ -156,11 +158,11 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
         populateCompartmentWithDistribution(*subCompartment, maxRadius);
 }
 
-sf::Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed, double m) const
+Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed, double m) const
 {
     static thread_local std::mt19937 gen(std::random_device{}());
     std::normal_distribution<double> normalDistribution(0, mostProbableSpeed / std::sqrt(m));
-    return sf::Vector2d{normalDistribution(gen), normalDistribution(gen)};
+    return Vector2d{normalDistribution(gen), normalDistribution(gen)};
 }
 
 Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)

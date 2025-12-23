@@ -19,7 +19,8 @@ public:
                           const std::source_location location = std::source_location::current());
 
 private:
-    static std::string buildMessage(const std::string& description, const std::source_location& location);
+    static std::string buildMessage(const std::string& description,
+                                    [[maybe_unused]] const std::source_location& location);
 };
 
 #endif /* DB3936AF_D015_42C0_9199_2F1767F8E56C_HPP */
