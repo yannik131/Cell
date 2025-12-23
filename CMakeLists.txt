@@ -23,6 +23,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# On Linux, Qt6 must be found before sfml, otherwise sfml will re-define a target (egl) and screw things up
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
 find_package(SFML COMPONENTS System Window Graphics REQUIRED)
 find_package(glog REQUIRED)

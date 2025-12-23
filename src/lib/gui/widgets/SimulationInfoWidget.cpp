@@ -25,8 +25,8 @@ void SimulationInfoWidget::setSimulationData(double targetScale, double actualSc
                                              std::chrono::nanoseconds updateTime,
                                              std::chrono::nanoseconds simulationUpdateTime)
 {
-    ui->targetScaleLabel->setText(QString("Target scale: %1").arg(targetScale));
-    ui->actualScaleLabel->setText(QString("Actual scale: %1").arg(actualScale));
+    ui->targetScaleLabel->setText(QString("Target scale: %1").arg(targetScale, 0, 'f', 3));
+    ui->actualScaleLabel->setText(QString("Actual scale: %1").arg(actualScale, 0, 'f', 3));
 
     const std::string simulationTimeString = cell::stringutils::timeString(updateTime.count(), 3);
     ui->updateTimeLabel->setText(QString("Update time: %1").arg(QString::fromStdString(simulationTimeString)));

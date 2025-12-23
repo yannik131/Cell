@@ -1,7 +1,7 @@
 {
     "config": {
         "cellMembraneType": {
-            "discCount": 250,
+            "discCount": 500,
             "discTypeDistribution": {
                 "Resource": 1.0
             },
@@ -34,14 +34,14 @@
             {
                 "educt1": "Prey",
                 "educt2": "Predator",
-                "probability": 0.4,
+                "probability": 0.3,
                 "product1": "Predator",
                 "product2": "Predator"
             },
             {
                 "educt1": "Prey",
                 "educt2": "Resource",
-                "probability": 0.18,
+                "probability": 0.1,
                 "product1": "Prey",
                 "product2": "Prey"
             },
@@ -55,7 +55,7 @@
             {
                 "educt1": "Predator",
                 "educt2": "",
-                "probability": 0.8,
+                "probability": 0.9,
                 "product1": "Resource",
                 "product2": ""
             },
@@ -74,10 +74,11 @@
                 "product2": ""
             }
         ],
-        "simulationTimeScale": 1.0,
-        "simulationTimeStep": 0.0010000000474974513,
+        "simulationTimeScale": 0.5,
+        "simulationTimeStep": 0.001,
         "useDistribution": true
     },
+    "configVersion": "1",
     "discTypeColorMap": {
         "Predator": [
             255,

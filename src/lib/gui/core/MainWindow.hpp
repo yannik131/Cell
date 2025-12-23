@@ -49,8 +49,6 @@ protected:
      */
     void resizeEvent(QResizeEvent* event) override;
 
-    void keyPressEvent(QKeyEvent* event) override;
-
 private:
     /**
      * @brief Starts the simulation in a separate thread and waits for it to exit before moving it back to the main

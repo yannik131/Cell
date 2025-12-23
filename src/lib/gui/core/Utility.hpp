@@ -31,15 +31,6 @@ void divideValuesBy(std::unordered_map<T1, T2, T3, T5>& a, const T4& b)
         a[key] /= b;
 }
 
-/*template <typename T1, typename T2, typename T3, typename T4, typename T5>
-std::unordered_map<T1, T2, T3, T5> multiplyValuesBy(std::unordered_map<T1, T2, T3, T5> a, const T4& b)
-{
-    for (const auto& [key, value] : a)
-        a[key] *= b;
-
-    return a;
-}*/
-
 /**
  * @brief Converts a sfml color to a QColor
  */
@@ -79,11 +70,11 @@ template <typename F> auto safeSlot(QWidget* parent, F&& f)
         }
         catch (const std::exception& e)
         {
-            QMessageBox::warning(parent, QStringLiteral("Epic fail!"), QString::fromUtf8(e.what()));
+            QMessageBox::warning(parent, QStringLiteral("That didn't work!"), QString::fromUtf8(e.what()));
         }
         catch (...)
         {
-            QMessageBox::warning(parent, QStringLiteral("Epic unknown fail!"),
+            QMessageBox::warning(parent, QStringLiteral("That didn't work!"),
                                  QStringLiteral("Unknown error occurred while executing callback!"));
         }
     };

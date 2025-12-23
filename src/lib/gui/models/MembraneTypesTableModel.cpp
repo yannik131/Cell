@@ -62,8 +62,8 @@ void MembraneTypesTableModel::loadFromConfig()
     rows_.insert(rows_.end(), config.membraneTypes.begin(), config.membraneTypes.end());
 
     membraneColors_.push_back(sf::Color::Yellow);
-    for (const auto& row : rows_)
-        membraneColors_.push_back(simulationConfigUpdater_->getMembraneTypeColorMap().at(row.name));
+    for (std::size_t i = 1; i < rows_.size(); ++i)
+        membraneColors_.push_back(simulationConfigUpdater_->getMembraneTypeColorMap().at(rows_[i].name));
 
     endResetModel();
 }
@@ -80,8 +80,9 @@ void MembraneTypesTableModel::saveToConfig()
     rows.erase(rows.begin());
 
     std::map<std::string, sf::Color> membraneTypeColorMap;
+    membraneTypeColorMap[config.cellMembraneType.name] = sf::Color::Yellow;
     for (std::size_t i = 1; i < membraneColors_.size(); ++i)
-        membraneTypeColorMap[rows_[i - 1].name] = membraneColors_[i];
+        membraneTypeColorMap[rows_[i].name] = membraneColors_[i];
 
     simulationConfigUpdater_->setTypes(rows, removedMembraneTypes_, membraneTypeColorMap);
 
@@ -125,7 +126,7 @@ bool MembraneTypesTableModel::isEditable(const QModelIndex& index) const
 bool MembraneTypesTableModel::isEnabled(const QModelIndex& index) const
 {
     if (index.row() == 0)
-        return index.column() != 0 && index.column() != 3 && index.column() != 6;
+        return index.column() != 0 && index.column() != 2 && index.column() != 3 && index.column() != 6;
 
     return true;
 }

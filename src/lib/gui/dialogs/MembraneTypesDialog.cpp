@@ -13,10 +13,8 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
     , permeabilityDialog_(new PermeabilityDialog(nullptr, simulationConfigUpdater))
     , discTypeDistributionDialog_(new DiscTypeDistributionDialog(nullptr, simulationConfigUpdater))
 {
-    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1,
-                                                                   .min = cell::MembraneTypeLimits::MinRadius,
-                                                                   .max = cell::MembraneTypeLimits::MaxRadius,
-                                                                   .step = 1});
+    // Radius
+    insertDoubleSpinBoxIntoView(ui->tableView, DoubleSpinBoxParams{.column = 1, .step = 1, .decimals = 3});
     insertColorComboBoxIntoView(ui->tableView, Column{2});
 
     auto* editPermeabilityPushButtonDelegate = new ButtonDelegate(ui->tableView, "Edit");
@@ -59,6 +57,8 @@ MembraneTypesDialog::MembraneTypesDialog(QWidget* parent, SimulationConfigUpdate
             });
 
     ui->tableView->setItemDelegateForColumn(4, editDistributionPushButtonDelegate);
+    insertIntegerSpinBoxIntoView(ui->tableView,
+                                 IntegerSpinBoxParams{.column = 5, .min = 0, .max = static_cast<int>(1e6)});
 
     insertDeleteButtonIntoView(model_, ui->tableView, Column{6});
 }

@@ -122,7 +122,7 @@
          <item>
           <widget class="QDoubleSpinBox" name="timeScaleDoubleSpinBox">
            <property name="decimals">
-            <number>4</number>
+            <number>6</number>
            </property>
            <property name="singleStep">
             <double>1.000000000000000</double>

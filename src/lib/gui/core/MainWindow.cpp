@@ -87,10 +87,23 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
 
     // Application-wide shortcuts so they work even when the widget is a separate window
-    auto* scFull = new QShortcut(QKeySequence(Qt::Key_F), this);
-    scFull->setContext(Qt::ApplicationShortcut);
+    const auto addShortcut = [&](auto key, auto callback)
+    {
+        auto* shortcut = new QShortcut(QKeySequence(key), this);
+        shortcut->setContext(Qt::ApplicationShortcut);
+        connect(shortcut, &QShortcut::activated, this, callback);
+    };
 
-    connect(scFull, &QShortcut::activated, this, &MainWindow::toggleSimulationFullscreen);
+    addShortcut(Qt::Key_F, &MainWindow::toggleSimulationFullscreen);
+    addShortcut(Qt::Key_Space,
+                [&]()
+                {
+                    if (simulationThread_)
+                        simulationThread_->requestInterruption();
+                    else
+                        startSimulation();
+                });
+
     connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,
             &MainWindow::toggleSimulationFullscreen);
 
@@ -176,17 +189,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     resizeTimer_.start(50);
 
     QMainWindow::resizeEvent(event);
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* event)
-{
-    if (event->key() == Qt::Key_F)
-    {
-        if (ui->simulationWidget->isFullScreen())
-            ui->simulationWidget->showNormal();
-        else
-            ui->simulationWidget->showFullScreen();
-    }
 }
 
 void MainWindow::startSimulation()
