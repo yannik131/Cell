@@ -24,7 +24,7 @@ fi
 if [ ! -d "build_release" ]; then
     mkdir build_release
     cd build_release
-    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../contrib/vcpkg/scripts/buildsystems/vcpkg.cmake
     cmake --build . --config Release --parallel 4
     cd ..
 fi
@@ -33,7 +33,7 @@ fi
 if [ ! -d "build_debug" ]; then
     mkdir build_debug
     cd build_debug
-    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_TOOLCHAIN_FILE=../contrib/vcpkg/scripts/buildsystems/vcpkg.cmake
     cmake --build . --config Debug --parallel 4
     cd ..
 fi
