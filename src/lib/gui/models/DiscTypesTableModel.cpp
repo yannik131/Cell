@@ -12,7 +12,6 @@ DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdate
 
 void DiscTypesTableModel::removeRow(int row)
 {
-    const auto name = rows_[row].name;
     Base::removeRow(row);
     discColors_.erase(discColors_.begin() + row);
     if (row < originalDiscTypeNames_.size())
@@ -36,7 +35,8 @@ void DiscTypesTableModel::addRow()
     beginInsertRows(QModelIndex(), static_cast<int>(rows_.size()), static_cast<int>(rows_.size()));
 
     rows_.push_back(cell::config::DiscType{.name = "Type" + std::to_string(rows_.size()), .radius = 1, .mass = 1});
-    discColors_.push_back(getSupportedDiscColors()[discColors_.size() % getSupportedDiscColors().size()]);
+    discColors_.push_back(
+        getSupportedDiscColors()[discColors_.size() % static_cast<std::size_t>(getSupportedDiscColors().size())]);
 
     endInsertRows();
 }

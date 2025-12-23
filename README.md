@@ -8,9 +8,14 @@ Physics simulation for colliding discs. Idea:
   - bimolecular: combination (A + B -> C), exchange (A + B -> C + D)
   - with time-based (unimolecular) or collision-based (bimolecular) probabilities
 - Define compartments with semi-permeable membranes
-  - Define membrane types (radius, disc type distribution, permeabilities, position)
-  - Inward, outward, bidirectional or no permeability based on disc type
+  - Define membrane types (radius, disc count)
+  - Set permeabilities: Inward, outward, bidirectional or no permeability based on disc type
+  - Set distribution: Frequency for each disc type
+  - Add membranes at specified positions (currently only manually with a table)
+  - If use distribution is disabled in Setup, add discs manually as well
+- Set time step, time scale and average velocity in Setup
 - Track state of the simulation with plots and a real-time view
+- Shortcuts: Press `F` to toggle fullscreen, `Space` to toggle simulation start/stop
 
 ![](doc/screenshot.png)
 
