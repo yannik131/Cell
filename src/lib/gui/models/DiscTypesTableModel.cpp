@@ -15,12 +15,11 @@ void DiscTypesTableModel::removeRow(int row)
     const auto name = rows_[row].name;
     Base::removeRow(row);
     discColors_.erase(discColors_.begin() + row);
-
-    const auto& originalDiscTypes = simulationConfigUpdater_->getSimulationConfig().discTypes;
-    const auto originalIndex = row + removedDiscTypes_.size();
-
-    if (originalIndex < originalDiscTypes.size())
-        removedDiscTypes_.insert(originalDiscTypes[originalIndex].name);
+    if (row < originalDiscTypeNames_.size())
+    {
+        removedDiscTypes_.insert(originalDiscTypeNames_[row]);
+        originalDiscTypeNames_.erase(originalDiscTypeNames_.begin() + row);
+    }
 }
 
 void DiscTypesTableModel::clearRows()
@@ -46,11 +45,15 @@ void DiscTypesTableModel::loadFromConfig()
 {
     removedDiscTypes_.clear();
     discColors_.clear();
+    originalDiscTypeNames_.clear();
 
     beginResetModel();
     rows_ = simulationConfigUpdater_->getSimulationConfig().discTypes;
     for (const auto& row : rows_)
+    {
         discColors_.push_back(simulationConfigUpdater_->getDiscTypeColorMap().at(row.name));
+        originalDiscTypeNames_.push_back(row.name);
+    }
     endResetModel();
 }
 
@@ -61,8 +64,6 @@ void DiscTypesTableModel::saveToConfig()
     for (std::size_t i = 0; i < discColors_.size(); ++i)
         discTypeColorMap[rows_[i].name] = discColors_[i];
     simulationConfigUpdater_->setTypes(rows_, removedDiscTypes_, discTypeColorMap);
-
-    removedDiscTypes_.clear();
 }
 
 QVariant DiscTypesTableModel::getField(const cell::config::DiscType& row, const QModelIndex& index) const

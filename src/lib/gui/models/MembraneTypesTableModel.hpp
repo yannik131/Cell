@@ -30,7 +30,8 @@ private:
     bool isEnabled(const QModelIndex& index) const override;
 
 private:
-    std::vector<sf::Color> membraneColors_;
+    std::vector<sf::Color> membraneColors_; // TODO DRY violation with DiscTypesTableModel (colors and original names)
+    std::vector<std::string> originalMembraneTypeNames_;
     std::unordered_set<std::string> removedMembraneTypes_;
 };
 

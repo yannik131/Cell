@@ -30,6 +30,7 @@ private:
 
 private:
     std::vector<sf::Color> discColors_;
+    std::vector<std::string> originalDiscTypeNames_;
     std::unordered_set<std::string> removedDiscTypes_;
 };
 

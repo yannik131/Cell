@@ -117,12 +117,14 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
         simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
     const auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
-
     const auto& distribution = membraneType.discTypeDistribution;
 
     if (membraneType.discCount < 0)
         throw ExceptionWithLocation("Disc count for membrane type \"" + membraneTypeName + "\" is negative (" +
                                     std::to_string(membraneType.discCount) + ")");
+
+    if (membraneType.discCount == 0 || distribution.empty())
+        return;
 
     auto gridPoints = calculateCompartmentGridPoints(compartment, maxRadius, membraneType.discCount);
     const auto discCount = std::min(static_cast<std::size_t>(membraneType.discCount), gridPoints.size());
