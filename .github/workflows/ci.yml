@@ -1,0 +1,64 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on all branches
+
+jobs:
+  setup_and_build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Print debug info 
+      run: | 
+        printf "PATH: %s\nHOME: %s\nDate: %s\n" "$PATH" "$HOME" "$(date)"
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true 
+
+    - name: clang-format
+      run: |
+        find src/ -type f \( -name '*.cpp' -o -name '*.hpp' \) \
+          -exec clang-format --dry-run --Werror {} +
+
+    - name: Set up vcpkg
+      run: |
+        cd contrib/vcpkg/
+        if [ "$(git rev-parse --is-shallow-repository)" == "true" ]; then
+            echo "Repository is shallow, fetching full history..."
+            git fetch --unshallow
+        fi
+        
+        ./bootstrap-vcpkg.sh
+
+    - name: Create build directory
+      run: mkdir build_debug
+
+    - name: Configure with CMake
+      run: |
+        cd build_debug
+        cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../contrib/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage"
+
+    - name: Build with CMake
+      run: |
+        cd build_debug
+        cmake --build . --config Debug --parallel 4
+
+    - name: Run tests
+      run: |
+        ./build_debug/Debug/tests-libcell
+    
+    - name: Generate html for test coverage
+      run: |
+        cd build_debug
+        lcov --capture --exclude '/usr/*' --exclude '*build_debug*' --exclude '*test/*' --directory . --output-file coverage.info
+        lcov --list coverage.info
+        genhtml coverage.info --output-directory /home/github-runner/cellcoverage/
+
+    - name: clang-tidy
+      run: |
+        chmod +x ./scripts/unix/clang-tidy-check.sh
+        ./scripts/unix/clang-tidy-check.sh

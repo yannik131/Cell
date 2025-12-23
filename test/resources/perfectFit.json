@@ -1,0 +1,172 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 10,
+            "discTypeDistribution": {
+                "Type0": 1.0
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 5.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Type0",
+                "radius": 1.0
+            }
+        ],
+        "discs": [
+            {
+                "discTypeName": "Type0",
+                "vx": 5.0,
+                "vy": 10.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 4.0,
+                "vy": 20.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 3.0,
+                "vy": 2.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 1.0,
+                "vy": 1.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 3.0,
+                "vy": 2.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 3.0,
+                "vy": 2.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 4.0,
+                "vy": 1.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Type0",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            }
+        ],
+        "membraneTypes": [],
+        "membranes": [],
+        "mostProbableSpeed": 1.0,
+        "reactions": [],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.001,
+        "useDistribution": false
+    },
+    "configVersion": "1",
+    "discTypeColorMap": {
+        "Type0": [
+            0,
+            128,
+            128,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {}
+}

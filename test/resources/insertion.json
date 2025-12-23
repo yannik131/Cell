@@ -1,0 +1,178 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 1000,
+            "discTypeDistribution": {
+                "Producer": 1.0
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 1000.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Producer",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Product",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Educt",
+                "radius": 5.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Enzyme",
+                "radius": 10.0
+            }
+        ],
+        "discs": [],
+        "membraneTypes": [
+            {
+                "discCount": 6000,
+                "discTypeDistribution": {
+                    "Educt": 1.0
+                },
+                "name": "Containment",
+                "permeabilityMap": {
+                    "Educt": 2,
+                    "Product": 0
+                },
+                "radius": 960.0
+            },
+            {
+                "discCount": 100,
+                "discTypeDistribution": {
+                    "Enzyme": 1.0
+                },
+                "name": "Inner",
+                "permeabilityMap": {
+                    "Educt": 2,
+                    "Product": 2
+                },
+                "radius": 100.0
+            },
+            {
+                "discCount": 100,
+                "discTypeDistribution": {
+                    "Producer": 1.0
+                },
+                "name": "ProducerSmall",
+                "permeabilityMap": {
+                    "Educt": 2,
+                    "Product": 2
+                },
+                "radius": 100.0
+            }
+        ],
+        "membranes": [
+            {
+                "membraneTypeName": "ProducerSmall",
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "membraneTypeName": "Containment",
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "membraneTypeName": "Inner",
+                "x": 500.0,
+                "y": 500.0
+            },
+            {
+                "membraneTypeName": "Inner",
+                "x": -500.0,
+                "y": 500.0
+            },
+            {
+                "membraneTypeName": "Inner",
+                "x": 500.0,
+                "y": -500.0
+            },
+            {
+                "membraneTypeName": "Inner",
+                "x": -500.0,
+                "y": -500.0
+            }
+        ],
+        "mostProbableSpeed": 200.0,
+        "reactions": [
+            {
+                "educt1": "Producer",
+                "educt2": "Educt",
+                "probability": 0.5,
+                "product1": "Producer",
+                "product2": "Product"
+            },
+            {
+                "educt1": "Enzyme",
+                "educt2": "Product",
+                "probability": 0.5,
+                "product1": "Enzyme",
+                "product2": "Educt"
+            }
+        ],
+        "simulationTimeScale": 3.0,
+        "simulationTimeStep": 0.002,
+        "useDistribution": true
+    },
+    "discTypeColorMap": {
+        "Educt": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Enzyme": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Producer": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "Product": [
+            0,
+            0,
+            255,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Containment": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "Inner": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "ProducerSmall": [
+            0,
+            0,
+            255,
+            255
+        ]
+    }
+}

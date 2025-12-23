@@ -1,0 +1,176 @@
+#ifndef ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
+#define ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP
+
+#include "DiscType.hpp"
+#include "StringUtils.hpp"
+
+#include <optional>
+
+namespace cell
+{
+
+class Reaction;
+
+/**
+ * @brief Checks if all products and educts have identical disc type names
+ */
+bool operator==(const Reaction& reaction1, const Reaction& reaction2);
+
+/**
+ * @brief String representation in the form of A + B -> C + D
+ */
+std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
+
+/**
+ * @returns `true` if the given disctype is part of the educts or products of the reaction
+ */
+bool contains(const Reaction& reaction, DiscTypeID discType);
+
+/**
+ * @brief Contains a uni- or bimolecular reaction.
+ *
+ * Given `DiscType`s A, B, C and D, and reaction probability 0 <= p <=
+ * 1, supported reaction types are:
+ * ```cpp
+ * Reaction(A, nullopt, B, nullopt, p); // Transformation reaction: A -> B
+ * Reaction(A, nullopt, B, C, p); // Decomposition reaction: A -> B + C
+ * Reaction(A, B, C, nullopt, p); // Combination reaction: A + B -> C
+ * Reaction(A, B, C, D, p); // Exchange reaction: A + B -> C + D
+ * ```
+ *
+ * For transformation and decomposition reactions, p is interpreted in terms of probability per second for each disc in
+ * the simulation. For combination and exchange reactions, p is the reaction probability for a single collision
+ * @note For bimolecular reactions, probabilities are per second, but the edge case p = 1 breaks this and will cause an
+ * immediate reaction no matter how small the simulation time step is. Use a value close to, but not equal to 1 to avoid
+ * this (like 0.99)
+ */
+class Reaction
+{
+public:
+    enum class Type
+    {
+        Transformation,
+        Decomposition,
+        Combination,
+        Exchange,
+        None
+    };
+
+public:
+    /**
+     * @brief Creates a new reaction, inferring the type from the provided arguments. Throws if the given probability is
+     * not in the interval [0, 1]
+     */
+    Reaction(DiscTypeID educt1, const std::optional<DiscTypeID>& educt2, DiscTypeID product1,
+             const std::optional<DiscTypeID>& product2, double probability);
+
+    // Boilerplate getters and setters with no additional documentation
+
+    DiscTypeID getEduct1() const noexcept
+    {
+        return educt1_;
+    }
+
+    void setEduct1(DiscTypeID educt1) noexcept
+    {
+        educt1_ = educt1;
+    }
+
+    DiscTypeID getEduct2() const
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't get educt2 for reaction of type" + getTypeString());
+#endif
+
+        return *educt2_;
+    }
+
+    bool hasEduct2() const noexcept
+    {
+        return type_ == Type::Combination || type_ == Type::Exchange;
+    }
+
+    void setEduct2(DiscTypeID educt2)
+    {
+#ifdef DEBUG
+        if (!educt2_)
+            throw ExceptionWithLocation("Can't set educt2 for reaction of type" + getTypeString());
+#endif
+
+        educt2_ = educt2;
+    }
+
+    DiscTypeID getProduct1() const noexcept
+    {
+        return product1_;
+    }
+
+    void setProduct1(DiscTypeID product1) noexcept
+    {
+        product1_ = product1;
+    }
+
+    DiscTypeID getProduct2() const
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't get product2 for reaction of type" + getTypeString());
+#endif
+
+        return *product2_;
+    }
+
+    bool hasProduct2() const noexcept
+    {
+        return type_ == Type::Decomposition || type_ == Type::Exchange;
+    }
+
+    void setProduct2(DiscTypeID product2)
+    {
+#ifdef DEBUG
+        if (!product2_)
+            throw ExceptionWithLocation("Can't set product2 for reaction of type" + getTypeString());
+#endif
+
+        product2_ = product2;
+    }
+
+    double getProbability() const noexcept
+    {
+        return probability_;
+    }
+
+    void setProbability(double probability);
+
+    Type getType() const noexcept
+    {
+        return type_;
+    }
+
+    /**
+     * @brief Validates that
+     *
+     * - educts and products of transformation reactions A -> B are not identical (A must be unequal B)
+     *
+     * - educt and product masses are the same
+     */
+    void validate(const DiscTypeRegistry& discTypeRegistry) const;
+
+private:
+    std::string getTypeString() const;
+
+private:
+    DiscTypeID educt1_;
+    std::optional<DiscTypeID> educt2_;
+    DiscTypeID product1_;
+    std::optional<DiscTypeID> product2_;
+    double probability_ = 0;
+    Type type_ = Type::None;
+};
+
+Reaction::Type inferReactionType(bool educt2, bool product2);
+
+} // namespace cell
+
+#endif /* ED35F035_9593_4A1C_8F2D_8CE870BB9BF9_HPP */

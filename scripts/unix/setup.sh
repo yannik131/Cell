@@ -9,29 +9,22 @@ set -e
 # Change to workspace folder
 cd "$(dirname "$0")/../../"
 
+# common vcpkg dependencies include (also see https://learn.microsoft.com/en-us/vcpkg/concepts/supported-hosts)
+# apt install autoconf-archive flex bison curl zip unzip tar pkgconfig autoconf automake libtool build-essentials ninja-build
+# for qt-base we also need:
+# apt install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev
+
 # Check if contrib/vcpkg exists
-if [ ! -d "contrib/vcpkg/buildtrees/qtbase" ]; then
-    git submodule update --init
+if [ ! -d "contrib/vcpkg/" ]; then
+    git submodule update
     ./contrib/vcpkg/bootstrap-vcpkg.sh
-fi
-
-#required on mac/linux:
-# autoconf autoconf-archive automake make libtool curl zip unzip pkgconfig
-
-export MACOSX_DEPLOYMENT_TARGET=14.0
-export VCPKG_KEEP_ENV_VARS=MACOSX_DEPLOYMENT_TARGET
-./contrib/vcpkg/vcpkg install glog sfml nanoflann qtbase
-
-CONFIGURE_OPTIONS=""
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    CONFIGURE_OPTIONS="-DCMAKE_OSX_ARCHITECTURES=arm64"
 fi
 
 # Release build
 if [ ! -d "build_release" ]; then
     mkdir build_release
     cd build_release
-    cmake .. -DCMAKE_BUILD_TYPE=Release $CONFIGURE_OPTIONS
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../contrib/vcpkg/scripts/buildsystems/vcpkg.cmake
     cmake --build . --config Release --parallel 4
     cd ..
 fi
@@ -40,7 +33,7 @@ fi
 if [ ! -d "build_debug" ]; then
     mkdir build_debug
     cd build_debug
-    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $CONFIGURE_OPTIONS
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_TOOLCHAIN_FILE=../contrib/vcpkg/scripts/buildsystems/vcpkg.cmake
     cmake --build . --config Debug --parallel 4
     cd ..
 fi

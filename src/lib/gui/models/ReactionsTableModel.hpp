@@ -1,0 +1,32 @@
+#ifndef C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP
+#define C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP
+
+#include "cell/Reaction.hpp"
+#include "cell/SimulationConfig.hpp"
+#include "models/AbstractSimulationConfigTableModel.hpp"
+
+class ReactionsTableModel : public AbstractSimulationConfigTableModel<cell::config::Reaction>,
+                            public AbstractConfigChanger
+{
+    Q_OBJECT
+public:
+    ReactionsTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
+
+    void addRow() override
+    {
+        emit newRowRequested();
+    };
+    void addRow(cell::Reaction::Type type);
+    void loadFromConfig() override;
+    void saveToConfig() override;
+
+signals:
+    void newRowRequested();
+
+private:
+    QVariant getField(const cell::config::Reaction& row, const QModelIndex& index) const override;
+    bool setField(cell::config::Reaction& row, const QModelIndex& index, const QVariant& value) override;
+    bool isEditable(const QModelIndex& index) const override;
+};
+
+#endif /* C914B4C9_59E7_4A19_90BC_AB93E0A68106_HPP */

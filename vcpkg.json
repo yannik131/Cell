@@ -1,0 +1,10 @@
+{
+    "dependencies": [
+        "sfml",
+        "glog",
+        "nanoflann",
+        "qtbase",
+        "gtest",
+        "nlohmann-json"
+    ]
+}

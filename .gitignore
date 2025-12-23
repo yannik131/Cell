@@ -3,11 +3,17 @@ conan_debug
 build_release
 build_debug
 env
+vcpkg_installed
 *.aux
 *.out
 *.log
 *.gz
 *.toc
 *.pdf
+*fls
+*latexmk
 CMakeUserPresets.json
+CMakePresets.json
+.vscode
+test/output/
 .DS_Store

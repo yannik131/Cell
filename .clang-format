@@ -3,7 +3,7 @@ ColumnLimit: 120            #Avoid lines that exceed screen width
 UseTab: Never               #Mixing tabs and spaces is bad
 IndentWidth: 4              #Unify indentation
 BreakBeforeBraces: Allman   #Avoid lines with lots of spaces in front
-AccessModifierOffset: -4    #LLVM style for access modifiers (public, private, protected) 
+AccessModifierOffset: -4    #LLVM style for access modifiers (public, private, protected)
                             #confuses VS Code tabulator handling
 BreakConstructorInitializers: BeforeComma
 AllowShortLoopsOnASingleLine: false
