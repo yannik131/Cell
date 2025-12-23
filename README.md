@@ -49,7 +49,7 @@ To not get any include errors you need to add the respective folder to the `.vsc
                 "${workspaceFolder}/src/lib/gui/dialogs/",
                 "${workspaceFolder}/src/lib/gui/models/",
                 "${workspaceFolder}/src/lib/gui/widgets/",
-                "${workspaceFolder}/build_debug/cell-gui_autogen/include",
+                "${workspaceFolder}/build_debug/libcellgui_autogen/include",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/QtConcurrent",
                 "${workspaceFolder}/build_debug/vcpkg_installed/x64-windows/include/Qt6/QtCore",

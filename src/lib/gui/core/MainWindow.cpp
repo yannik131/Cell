@@ -170,11 +170,10 @@ void MainWindow::showAboutDialog()
     <html>
         <head/>
         <body>
-            <p>This is <b>cell</b>, version 1.0.0.</p>
-            <p>Application for simulation reaction networks.</p>
-            <p>Build time: %1 %2</p>
+            <p>This is <b>Cell</b>, version 1.0.0. Build time: %1 %2.</p>
+            <p>Application for simulating reaction networks.</p>
             <p>Developed by: Yannik Schroeder</p>
-            <p>More: <a href='https://github.com/yannik131/Cell'>https://github.com/yannik131/Cell</a></p>
+            <p>For additional information, see: <a href='https://github.com/yannik131/Cell'>https://github.com/yannik131/Cell</a></p>
         </body>
     </html>
 )";
