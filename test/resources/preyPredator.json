@@ -1,7 +1,7 @@
 {
     "config": {
         "cellMembraneType": {
-            "discCount": 500,
+            "discCount": 1000,
             "discTypeDistribution": {
                 "Resource": 1.0
             },
@@ -34,21 +34,21 @@
             {
                 "educt1": "Prey",
                 "educt2": "Predator",
-                "probability": 0.3,
+                "probability": 0.4,
                 "product1": "Predator",
                 "product2": "Predator"
             },
             {
                 "educt1": "Prey",
                 "educt2": "Resource",
-                "probability": 0.1,
+                "probability": 0.05,
                 "product1": "Prey",
                 "product2": "Prey"
             },
             {
                 "educt1": "Prey",
                 "educt2": "",
-                "probability": 0.08,
+                "probability": 0.05,
                 "product1": "Resource",
                 "product2": ""
             },
