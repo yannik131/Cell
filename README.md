@@ -19,17 +19,17 @@ Physics simulation for colliding discs. Idea:
 
 ![](doc/screenshot.png)
 
-Uses an `sf::RenderWindow` for rendering in the OpenGL context of Qt for performance reasons (I haven't tested performance of `QtGraphicsView` but I don't think it can display thousands of circles with decent FPS so I'm sticking with SFML). Fullscreen can be toggled by pressing `F`.
+Uses an `sf::RenderWindow` for rendering in the OpenGL context of Qt for performance reasons (I haven't tested performance of `QtGraphicsView` but I don't think it can display thousands of circles with decent FPS so I'm sticking with SFML).
+
+Test code coverage (currently only libcell, didn't write tests for the GUI): [cellcoverage.myactivities.net](https://cellcoverage.myactivities.net)
 
 ## Build
 
-You can find the necessary build steps for linux/mac in the `scripts/unix/setup.sh` script and for windows in `scripts/windows/setup.ps1`. If you run them, they might even compile everything for you, but I wouldn't count on it since there are some dependencies vcpkg won't install (especially on linux/mac, see `setup.sh`).
-I'm pinning SFML to version 2.6.2 with vcpkg overlays because 3.0.x currently does not work on windows when creating a `sf::RenderWindow` from an existing OpenGL context (fix comes with [this PR](https://github.com/SFML/SFML/pull/3469) in 3.1).
+You can find the necessary build steps for linux/mac in the `scripts/unix/setup.sh` script and for windows in `scripts/windows/setup.ps1`. If you run them, they might even compile everything for you, but I wouldn't count on it since there are some dependencies vcpkg won't install (especially on linux/mac, see `setup.sh`). Binaries are dumped into `build_release/Release/` and `build_debug/Debug/`.
 
 ## VS Code
 
-There is a `CMakePresetsWindows.json` located in `scripts/` that currently on
-ly works on windows that I personally use with vs code. I wanted to use `clang-tidy` on windows and needed to use `ninja` for that, but I had trouble convincing `ninja` to use the `msvc` compiler over `gcc`, so I manually set the compiler to `cl` in the presets. It of course selected the x86 version over the x64 one for whatever reason. So I told `cmake` where to find `cl` and all the dependencies by adding `"cmake.environment": { "PATH": ..., "LIB": ..., "INCLUDE": "... }` to my `.vscode/settings.json`. I obtained the environmental variables by starting the "x64 Native Tools Command Prompt for VS 2022" and echoed `%PATH%`, `%LIB%` and `%INCLUDE%`. Took me a few days to get this to work.
+There is a `CMakePresetsWindows.json` located in `scripts/` that currently only works on windows that I personally use with vs code. I wanted to use `clang-tidy` on windows and needed to use `ninja` for that, but I had trouble convincing `ninja` to use the `msvc` compiler over `gcc`, so I manually set the compiler to `cl` in the presets. It of course selected the x86 version over the x64 one for whatever reason. So I told `cmake` where to find `cl` and all the dependencies by adding `"cmake.environment": { "PATH": ..., "LIB": ..., "INCLUDE": "... }` to my `.vscode/settings.json`. I obtained the environmental variables by starting the "x64 Native Tools Command Prompt for VS 2022" and echoed `%PATH%`, `%LIB%` and `%INCLUDE%`. Took me a few days to get this to work.
 
 To not get any include errors you need to add the respective folder to the `.vscode/c_cpp_properties.json`, here's mine as an example (currently working on windows):
 
@@ -80,7 +80,3 @@ To not get any include errors you need to add the respective folder to the `.vsc
 ```
 
 </details>
-
-## Tests
-
-Code coverage (currently only libcell): [cellcoverage.myactivities.net](https://cellcoverage.myactivities.net)

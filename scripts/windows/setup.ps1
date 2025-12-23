@@ -25,7 +25,7 @@ if (-Not (Test-Path "contrib\vcpkg\buildtrees\")) {
 if (-Not (Test-Path "build_release")) {
     New-Item -ItemType Directory -Path "build_release"
     Set-Location -Path "build_release"
-    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake .. -DCMAKE_BUILD_TYPE=Release "-DCMAKE_TOOLCHAIN_FILE=..\contrib\vcpkg\scripts\buildsystems\vcpkg.cmake"
     cmake --build . --config Release --parallel 4
     Set-Location ..
     # Move the .dll's to the executable, won't work without this!
@@ -36,7 +36,7 @@ if (-Not (Test-Path "build_release")) {
 if (-Not (Test-Path "build_debug")) {
     New-Item -ItemType Directory -Path "build_debug"
     Set-Location -Path "build_debug"
-    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "-DCMAKE_TOOLCHAIN_FILE=..\contrib\vcpkg\scripts\buildsystems\vcpkg.cmake"
     cmake --build . --config Debug --parallel 4
     Set-Location ..
     .\build_debug\vcpkg_installed\x64-windows\tools\Qt6\bin\windeployqt.debug.bat .\build_debug\Debug\cell-gui.exe
