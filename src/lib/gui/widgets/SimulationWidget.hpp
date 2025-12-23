@@ -38,6 +38,7 @@ private:
     void drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
     void restartTimers(const FrameDTO& frame);
     double calculateIdealZoom() const;
+    sf::Vector2i getWidgetSize() const;
 
 private:
     std::vector<sf::CircleShape> typeShapes_;

@@ -53,6 +53,7 @@ void SimulationConfigUpdater::saveConfigToFile(const fs::path& path) const
     j["config"] = simulationConfig_;
     j["discTypeColorMap"] = discTypeColorMap_;
     j["membraneTypeColorMap"] = membraneTypeColorMap_;
+    j["configVersion"] = "1";
 
     std::ofstream file(path);
     file << j.dump(4);

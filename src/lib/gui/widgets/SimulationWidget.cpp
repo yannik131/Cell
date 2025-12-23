@@ -31,32 +31,32 @@ void SimulationWidget::closeEvent(QCloseEvent* event)
 void SimulationWidget::toggleFullscreen()
 {
     static QWidget* origParent = parentWidget();
-    static QLayout* origLayout = parentWidget()->layout();
     static QWidget* placeholder = nullptr;
 
     if (!isFullScreen())
     {
         placeholder = new QWidget(origParent);
-        origLayout->replaceWidget(this, placeholder);
+        origParent->layout()->replaceWidget(this, placeholder);
         setParent(nullptr);
         setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
         showFullScreen();
     }
     else
     {
+        if (!placeholder) // clang-tidy bullshit
+            throw ExceptionWithLocation("The simulation widget was initialized in full screen mode for some reason.");
+
         setParent(origParent);
-        origLayout->replaceWidget(placeholder, this);
+        origParent->layout()->replaceWidget(placeholder, this);
         placeholder->deleteLater();
         placeholder = nullptr;
         showNormal();
     }
 
-    sf::Vector2u widgetSize = sf::VideoMode::getDesktopMode().size;
-    if (!isFullScreen())
-        widgetSize = sf::Vector2u(static_cast<unsigned>(size().width()), static_cast<unsigned>(size().height()));
+    const auto widgetSize = getWidgetSize();
     sf::RenderWindow::close();
     sf::RenderWindow::create((sf::WindowHandle)winId());
-    sf::RenderWindow::setSize(widgetSize);
+    sf::RenderWindow::setSize(static_cast<sf::Vector2u>(widgetSize));
     QSFMLWidget::resetView(Zoom{calculateIdealZoom()}, static_cast<sf::Vector2f>(widgetSize));
 }
 
@@ -169,12 +169,17 @@ double SimulationWidget::calculateIdealZoom() const
     if (!simulationConfigUpdater_)
         return 1.0;
 
-    auto widgetSize = static_cast<sf::Vector2i>(sf::VideoMode::getDesktopMode().size);
-    if (!isFullScreen())
-        widgetSize = sf::Vector2i(QWidget::size().width(), QWidget::size().height());
-
-    auto config = simulationConfigUpdater_->getSimulationConfig();
-    auto smallestEdge = std::min(widgetSize.x / 2, widgetSize.y / 2);
+    const auto config = simulationConfigUpdater_->getSimulationConfig();
+    const auto widgetSize = getWidgetSize();
+    const auto smallestEdge = std::min(widgetSize.x / 2, widgetSize.y / 2);
 
     return config.cellMembraneType.radius / smallestEdge;
+}
+
+sf::Vector2i SimulationWidget::getWidgetSize() const
+{
+    if (isFullScreen())
+        return static_cast<sf::Vector2i>(sf::VideoMode::getDesktopMode().size);
+
+    return sf::Vector2i(QWidget::size().width(), QWidget::size().height());
 }
