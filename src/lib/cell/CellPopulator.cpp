@@ -113,6 +113,9 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
 
 void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment, double maxRadius)
 {
+    for (auto& subCompartment : compartment.getCompartments())
+        populateCompartmentWithDistribution(*subCompartment, maxRadius);
+
     const auto& membraneTypeName =
         simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
 
@@ -153,9 +156,6 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
             gridPoints.pop_back();
         }
     }
-
-    for (auto& subCompartment : compartment.getCompartments())
-        populateCompartmentWithDistribution(*subCompartment, maxRadius);
 }
 
 Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed, double m) const

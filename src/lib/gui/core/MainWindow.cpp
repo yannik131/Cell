@@ -110,7 +110,12 @@ MainWindow::MainWindow(QWidget* parent)
             &MainWindow::toggleSimulationFullscreen);
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this, [&]() { resetSimulation(); });
+    QTimer::singleShot(0, this,
+                       [&]()
+                       {
+                           resetSimulation();
+                           ui->simulationWidget->fitSimulationIntoView();
+                       });
 }
 
 void MainWindow::resetSimulation()
@@ -120,7 +125,7 @@ void MainWindow::resetSimulation()
 
     simulation_->rebuildContext();
     plotModel_->reset();
-    ui->simulationWidget->fitSimulationIntoView();
+    simulation_->emitFrame(RedrawOnly{true});
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -150,6 +155,7 @@ void MainWindow::loadSettingsFromJson()
     {
         // Will emit a signal for simulation reset
         simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
+        ui->simulationWidget->fitSimulationIntoView();
     }
     catch (const std::exception& e)
     {
