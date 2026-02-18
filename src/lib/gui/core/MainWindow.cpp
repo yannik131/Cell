@@ -120,7 +120,7 @@ void MainWindow::resetSimulation()
 
     simulation_->rebuildContext();
     plotModel_->reset();
-    ui->simulationWidget->fitSimulationIntoView();
+    simulation_->emitFrame(RedrawOnly{true});
 }
 
 void MainWindow::saveSettingsAsJson()

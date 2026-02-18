@@ -2,10 +2,12 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QLayout>
+#include <QMenu>
+#include <QMessageBox>
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 
@@ -14,6 +16,7 @@ namespace chrono = std::chrono;
 SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
+    setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
 void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
@@ -58,6 +61,36 @@ void SimulationWidget::toggleFullscreen()
     sf::RenderWindow::create((sf::WindowHandle)winId());
     sf::RenderWindow::setSize(static_cast<sf::Vector2u>(widgetSize));
     QSFMLWidget::resetView(Zoom{calculateIdealZoom()}, static_cast<sf::Vector2f>(widgetSize));
+}
+
+void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
+{
+    QMenu menu(this);
+    const QPoint cursorPosition = event->pos();
+
+    auto fillMenu = [this, cursorPosition](QMenu* subMenu, const auto& types, auto handler)
+    {
+        if (types.empty())
+        {
+            QAction* action = subMenu->addAction("No types defined");
+            action->setEnabled(false);
+            return;
+        }
+
+        for (const auto& type : types)
+        {
+            QAction* action = subMenu->addAction(QString::fromStdString(type.name));
+            const auto typeName = type.name;
+            connect(action, &QAction::triggered, this,
+                    [this, handler, cursorPosition, typeName]() { (this->*handler)(cursorPosition, typeName); });
+        }
+    };
+
+    const auto& config = simulationConfigUpdater_->getSimulationConfig();
+    fillMenu(menu.addMenu("Add membrane..."), config.membraneTypes, &SimulationWidget::addMembraneAtCursor);
+    fillMenu(menu.addMenu("Add disc..."), config.discTypes, &SimulationWidget::addDiscAtCursor);
+
+    menu.exec(event->globalPos());
 }
 
 void SimulationWidget::fitSimulationIntoView()
@@ -182,4 +215,49 @@ sf::Vector2i SimulationWidget::getWidgetSize() const
         return static_cast<sf::Vector2i>(sf::VideoMode::getDesktopMode().size);
 
     return sf::Vector2i(QWidget::size().width(), QWidget::size().height());
+}
+
+template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
+void SimulationWidget::addObjectAtCursor(SimulationWidget* self, const QPoint& cursorPosition,
+                                         const std::string& typeName, ObjectsGetter getObjects, NameSetter setTypeName,
+                                         ObjectsSetter setObjects)
+{
+    // TODO Use the static trick for other templates as well to avoid unnecessary includes
+    const sf::Vector2f worldCoordinates = self->mapPixelToCoords(sf::Vector2i{cursorPosition.x(), cursorPosition.y()});
+
+    auto config = self->simulationConfigUpdater_->getSimulationConfig();
+
+    ObjectType object{};
+    setTypeName(object, typeName);
+    object.x = static_cast<double>(worldCoordinates.x);
+    object.y = static_cast<double>(worldCoordinates.y);
+
+    auto objects = getObjects(config);
+    objects.push_back(std::move(object));
+    setObjects(config, std::move(objects));
+
+    try
+    {
+        self->simulationConfigUpdater_->setSimulationConfig(config);
+    }
+    catch (const std::exception& exception)
+    {
+        QMessageBox::critical(self, "Error", exception.what());
+    }
+}
+
+void SimulationWidget::addDiscAtCursor(const QPoint& cursorPosition, const std::string& typeName)
+{
+    addObjectAtCursor<cell::config::Disc>(
+        this, cursorPosition, typeName, [](const auto& config) { return config.discs; },
+        [](auto& disc, const std::string& typeName) { disc.discTypeName = typeName; },
+        [](auto& config, auto discs) { config.discs = std::move(discs); });
+}
+
+void SimulationWidget::addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName)
+{
+    addObjectAtCursor<cell::config::Membrane>(
+        this, cursorPosition, typeName, [](const auto& config) { return config.membranes; },
+        [](auto& membrane, const std::string& typeName) { membrane.membraneTypeName = typeName; },
+        [](auto& config, auto membranes) { config.membranes = std::move(membranes); });
 }
