@@ -43,8 +43,7 @@ private:
     double calculateIdealZoom() const;
     sf::Vector2i getWidgetSize() const;
     template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
-    static void addObjectAtCursor(SimulationWidget*, const QPoint&, const std::string&, ObjectsGetter, NameSetter,
-                                  ObjectsSetter);
+    void addObjectAtCursor(const QPoint& cursorPosition, const std::string&, ObjectsGetter, NameSetter, ObjectsSetter);
     void addDiscAtCursor(const QPoint& cursorPosition, const std::string& typeName);
     void addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName);
 

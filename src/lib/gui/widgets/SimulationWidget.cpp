@@ -65,6 +65,9 @@ void SimulationWidget::toggleFullscreen()
 
 void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
 {
+    if (renderingStarted_)
+        return;
+
     QMenu menu(this);
     const QPoint cursorPosition = event->pos();
 
@@ -218,14 +221,12 @@ sf::Vector2i SimulationWidget::getWidgetSize() const
 }
 
 template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
-void SimulationWidget::addObjectAtCursor(SimulationWidget* self, const QPoint& cursorPosition,
-                                         const std::string& typeName, ObjectsGetter getObjects, NameSetter setTypeName,
-                                         ObjectsSetter setObjects)
+void SimulationWidget::addObjectAtCursor(const QPoint& cursorPosition, const std::string& typeName,
+                                         ObjectsGetter getObjects, NameSetter setTypeName, ObjectsSetter setObjects)
 {
-    // TODO Use the static trick for other templates as well to avoid unnecessary includes
-    const sf::Vector2f worldCoordinates = self->mapPixelToCoords(sf::Vector2i{cursorPosition.x(), cursorPosition.y()});
+    const sf::Vector2f worldCoordinates = mapPixelToCoords(sf::Vector2i{cursorPosition.x(), cursorPosition.y()});
 
-    auto config = self->simulationConfigUpdater_->getSimulationConfig();
+    auto config = simulationConfigUpdater_->getSimulationConfig();
 
     ObjectType object{};
     setTypeName(object, typeName);
@@ -238,18 +239,18 @@ void SimulationWidget::addObjectAtCursor(SimulationWidget* self, const QPoint& c
 
     try
     {
-        self->simulationConfigUpdater_->setSimulationConfig(config);
+        simulationConfigUpdater_->setSimulationConfig(config);
     }
     catch (const std::exception& exception)
     {
-        QMessageBox::critical(self, "Error", exception.what());
+        QMessageBox::critical(this, "Error", exception.what());
     }
 }
 
 void SimulationWidget::addDiscAtCursor(const QPoint& cursorPosition, const std::string& typeName)
 {
     addObjectAtCursor<cell::config::Disc>(
-        this, cursorPosition, typeName, [](const auto& config) { return config.discs; },
+        cursorPosition, typeName, [](const auto& config) { return config.discs; },
         [](auto& disc, const std::string& typeName) { disc.discTypeName = typeName; },
         [](auto& config, auto discs) { config.discs = std::move(discs); });
 }
@@ -257,7 +258,7 @@ void SimulationWidget::addDiscAtCursor(const QPoint& cursorPosition, const std::
 void SimulationWidget::addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName)
 {
     addObjectAtCursor<cell::config::Membrane>(
-        this, cursorPosition, typeName, [](const auto& config) { return config.membranes; },
+        cursorPosition, typeName, [](const auto& config) { return config.membranes; },
         [](auto& membrane, const std::string& typeName) { membrane.membraneTypeName = typeName; },
         [](auto& config, auto membranes) { config.membranes = std::move(membranes); });
 }
