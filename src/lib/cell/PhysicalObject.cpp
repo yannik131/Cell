@@ -25,11 +25,6 @@ void PhysicalObject::setPosition(const Vector2d& position)
     position_ = position;
 }
 
-double PhysicalObject::getAbsoluteMomentum(double mass) const
-{
-    return mass * std::hypot(velocity_.x, velocity_.y);
-}
-
 bool PhysicalObject::isNanOrInf(const Vector2d& vec) const
 {
     return std::isnan(vec.x) || std::isnan(vec.y) || std::isinf(vec.x) || std::isinf(vec.y);

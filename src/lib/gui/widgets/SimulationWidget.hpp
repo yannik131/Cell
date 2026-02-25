@@ -46,6 +46,7 @@ private:
     void addObjectAtCursor(const QPoint& cursorPosition, const std::string&, ObjectsGetter, NameSetter, ObjectsSetter);
     void addDiscAtCursor(const QPoint& cursorPosition, const std::string& typeName);
     void addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName);
+    void addEditContextMenus(QMenu* menu);
 
 private:
     std::vector<sf::CircleShape> typeShapes_;

@@ -61,9 +61,12 @@ public:
     }
 
     /**
-     * @returns |mv|
+     * @returns m*v
      */
-    double getAbsoluteMomentum(double mass) const;
+    Vector2d getMomentum(double mass) const noexcept
+    {
+        return mass * velocity_;
+    }
 
     /**
      * @returns 1/2*m*v^2

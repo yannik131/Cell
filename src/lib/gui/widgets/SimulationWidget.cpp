@@ -2,6 +2,7 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
+#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
@@ -92,6 +93,7 @@ void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
     const auto& config = simulationConfigUpdater_->getSimulationConfig();
     fillMenu(menu.addMenu("Add membrane..."), config.membraneTypes, &SimulationWidget::addMembraneAtCursor);
     fillMenu(menu.addMenu("Add disc..."), config.discTypes, &SimulationWidget::addDiscAtCursor);
+    addEditContextMenus(&menu);
 
     menu.exec(event->globalPos());
 }
@@ -261,4 +263,8 @@ void SimulationWidget::addMembraneAtCursor(const QPoint& cursorPosition, const s
         cursorPosition, typeName, [](const auto& config) { return config.membranes; },
         [](auto& membrane, const std::string& typeName) { membrane.membraneTypeName = typeName; },
         [](auto& config, auto membranes) { config.membranes = std::move(membranes); });
+}
+
+void SimulationWidget::addEditContextMenus(QMenu* menu)
+{
 }

@@ -144,6 +144,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
 
     dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000;
+    std::unordered_map<std::string, cell::Vector2d> momentumMap;
 
     for (const auto& disc : frameDTO.discs_)
     {
@@ -151,9 +152,11 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         ++dataPoint.discTypeCountMap_[discTypeName];
         dataPoint.totalKineticEnergyMap_[discTypeName] +=
             disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        dataPoint.totalMomentumMap_[discTypeName] +=
-            disc.getAbsoluteMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
+        momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
     }
+
+    for (const auto& [discTypeName, momentum] : momentumMap)
+        dataPoint.totalMomentumMap_[discTypeName] = cell::mathutils::abs(momentum);
 
     return dataPoint;
 }
