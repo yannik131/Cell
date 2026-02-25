@@ -8,6 +8,14 @@
 
 #include <QObject>
 
+struct Histogram
+{
+    double binWidth_ = 0;
+    double leftX_ = 0;
+    int binCount_ = 0;
+    std::unordered_map<std::string, std::unordered_map<int, int>> histogramsByType_;
+};
+
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
  */
@@ -18,6 +26,7 @@ struct DataPoint
     std::unordered_map<std::string, double> totalMomentumMap_;
     std::unordered_map<std::string, double> totalKineticEnergyMap_;
     std::unordered_map<std::string, double> discTypeCountMap_;
+    Histogram velocityHistogram_{};
 };
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
@@ -26,8 +35,6 @@ class Simulation;
 
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
- * @todo This is currently very slow: For small time steps, hundreds of data points are stored for a single point in the
- * plot
  */
 class PlotModel : public QObject
 {
@@ -45,7 +52,7 @@ public:
     const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
 
 public slots:
-    void processFrame(const FrameDTO& frameDTO);
+    void processFrame(FrameDTO& frameDTO);
 
 signals:
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
@@ -63,7 +70,7 @@ private:
      * @brief Turns a given FrameDTO into a DataPoint by summing up all relevant properties of all discs in the given
      * frame
      */
-    DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
+    DataPoint dataPointFromFrameDTO(FrameDTO& frameDTO);
 
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
 

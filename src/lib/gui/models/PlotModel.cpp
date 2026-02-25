@@ -4,6 +4,7 @@
 #include "core/Utility.hpp"
 
 #include <cmath>
+#include <glog/logging.h>
 #include <unordered_set>
 
 namespace
@@ -87,7 +88,7 @@ const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
     return activePlotDiscTypes_;
 }
 
-void PlotModel::processFrame(const FrameDTO& frameDTO)
+void PlotModel::processFrame(FrameDTO& frameDTO)
 {
     // Elapsed time 0 means this DTO was only emitted for a redraw
     if (frameDTO.elapsedSimulationTimeUs == 0)
@@ -135,25 +136,48 @@ void PlotModel::emitPlot()
     emit addDataPoints(fullPlotData, plotTimeInterval_);
 }
 
-DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
+DataPoint PlotModel::dataPointFromFrameDTO(FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
     const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
+    auto& discs = frameDTO.discs_;
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
         dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
 
-    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000;
+    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000.0;
     std::unordered_map<std::string, cell::Vector2d> momentumMap;
 
-    for (const auto& disc : frameDTO.discs_)
+    std::sort(discs.begin(), discs.end(),
+              [](const cell::Disc& lhs, const cell::Disc& rhs) { return lhs.getVelocity().x < rhs.getVelocity().x; });
+
+    const auto getValue = [](const cell::Disc& disc) { return disc.getVelocity().x; };
+    const double Q25 = utility::quantile(discs, 0.25, getValue);
+    const double Q75 = utility::quantile(discs, 0.75, getValue);
+    const double IQR = Q75 - Q25;
+    double BinWidth = 2 * IQR / std::cbrt(static_cast<double>(discs.size()));
+    const int BinCount =
+        BinWidth > 0
+            ? std::max(1, static_cast<int>(std::ceil((getValue(discs.back()) - getValue(discs.front())) / BinWidth)))
+            : 1;
+    const double LeftX = getValue(discs.front());
+
+    for (const auto& disc : discs)
     {
         std::string discTypeName = discTypeRegistry.getByID(disc.getTypeID()).getName();
         ++dataPoint.discTypeCountMap_[discTypeName];
         dataPoint.totalKineticEnergyMap_[discTypeName] +=
             disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
         momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
+        int bin = BinWidth > 0
+                      ? std::min(BinCount - 1, static_cast<int>(std::floor((getValue(disc) - LeftX) / BinWidth)))
+                      : 0;
+        ++dataPoint.velocityHistogram_.histogramsByType_[discTypeName][bin];
     }
+
+    dataPoint.velocityHistogram_.binCount_ = BinCount;
+    dataPoint.velocityHistogram_.binWidth_ = BinWidth;
+    dataPoint.velocityHistogram_.leftX_ = LeftX;
 
     for (const auto& [discTypeName, momentum] : momentumMap)
         dataPoint.totalMomentumMap_[discTypeName] = cell::mathutils::abs(momentum);

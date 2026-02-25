@@ -80,6 +80,24 @@ template <typename F> auto safeSlot(QWidget* parent, F&& f)
     };
 }
 
+template <typename T, typename GetValue> double quantile(const std::vector<T>& v, double q, GetValue getValue)
+{
+    if (v.empty())
+        throw ExceptionWithLocation("Empty vector passed");
+
+    if (q < 0 || q > 1)
+        throw ExceptionWithLocation("q must be in [0, 1]");
+
+    double pos = q * static_cast<double>(v.size() - 1);
+    std::size_t i = static_cast<std::size_t>(std::floor(pos));
+    double epsilon = pos - i;
+
+    if (i + 1 < v.size())
+        return getValue(v[i]) * (1.0 - epsilon) + getValue(v[i + 1]) * epsilon;
+
+    return getValue(v[i]);
+}
+
 }; // namespace utility
 
 #endif /* DCDB89B2_8FE4_4EB9_A8EA_6C13300ADEBA_HPP */

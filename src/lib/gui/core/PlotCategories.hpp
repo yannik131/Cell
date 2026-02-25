@@ -12,7 +12,8 @@ enum class PlotCategory
     TypeCounts,
     CollisionCounts,
     AbsoluteMomentum,
-    KineticEnergy
+    KineticEnergy,
+    VelocityDistribution
 };
 
 /**
