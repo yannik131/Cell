@@ -8,14 +8,6 @@
 
 #include <QObject>
 
-struct Histogram
-{
-    double binWidth_ = 0;
-    double leftX_ = 0;
-    int binCount_ = 0;
-    std::unordered_map<std::string, std::unordered_map<int, int>> histogramsByType_;
-};
-
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
  */

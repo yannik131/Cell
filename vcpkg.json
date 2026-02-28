@@ -5,6 +5,7 @@
         "nanoflann",
         "qtbase",
         "gtest",
-        "nlohmann-json"
+        "nlohmann-json",
+        "boost-histogram"
     ]
 }

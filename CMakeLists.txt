@@ -29,6 +29,7 @@ find_package(SFML COMPONENTS System Window Graphics REQUIRED)
 find_package(glog REQUIRED)
 find_package(nanoflann REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Boost COMPONENTS histogram)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
@@ -101,6 +102,7 @@ target_link_libraries(playground PRIVATE
     nanoflann::nanoflann
     glog::glog
     nlohmann_json::nlohmann_json
+    Boost::histogram
 )
 
 # tests for cell
