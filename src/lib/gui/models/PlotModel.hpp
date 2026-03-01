@@ -7,6 +7,11 @@
 #include "core/Types.hpp"
 
 #include <QObject>
+#include <boost/histogram.hpp>
+
+namespace bh = boost::histogram;
+
+using Histogram = bh::histogram<std::tuple<bh::axis::integer<int>, bh::axis::regular<>>, bh::default_storage>;
 
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
@@ -18,7 +23,7 @@ struct DataPoint
     std::unordered_map<std::string, double> totalMomentumMap_;
     std::unordered_map<std::string, double> totalKineticEnergyMap_;
     std::unordered_map<std::string, double> discTypeCountMap_;
-    Histogram velocityHistogram_{};
+    Histogram vxHistogram;
 };
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
@@ -44,7 +49,7 @@ public:
     const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
 
 public slots:
-    void processFrame(FrameDTO& frameDTO);
+    void processFrame(const FrameDTO& frameDTO);
 
 signals:
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
@@ -62,7 +67,7 @@ private:
      * @brief Turns a given FrameDTO into a DataPoint by summing up all relevant properties of all discs in the given
      * frame
      */
-    DataPoint dataPointFromFrameDTO(FrameDTO& frameDTO);
+    DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
 
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
 
@@ -93,7 +98,7 @@ private:
 
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
-    PlotCategory plotCategory_ = SupportedPlotCategories.front();
+    PlotCategory plotCategory_ = SupportedPlotCategories().front();
 
     Simulation* simulation_;
 

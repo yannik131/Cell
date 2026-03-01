@@ -21,6 +21,7 @@ void averageDataPoint(DataPoint& dataPoint, int length)
     utility::divideValuesBy(dataPoint.totalKineticEnergyMap_, length);
     utility::divideValuesBy(dataPoint.totalMomentumMap_, length);
     utility::divideValuesBy(dataPoint.discTypeCountMap_, length);
+    dataPoint.vxHistogram /= length;
 }
 
 } // namespace
@@ -89,7 +90,7 @@ const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
     return activePlotDiscTypes_;
 }
 
-void PlotModel::processFrame(FrameDTO& frameDTO)
+void PlotModel::processFrame(const FrameDTO& frameDTO)
 {
     // Elapsed time 0 means this DTO was only emitted for a redraw
     if (frameDTO.elapsedSimulationTimeUs == 0)
@@ -137,7 +138,7 @@ void PlotModel::emitPlot()
     emit addDataPoints(fullPlotData, plotTimeInterval_);
 }
 
-DataPoint PlotModel::dataPointFromFrameDTO(FrameDTO& frameDTO)
+DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
     const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();

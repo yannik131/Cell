@@ -42,7 +42,7 @@ private:
     sf::CircleShape circleShapeFromCompartment(const cell::Compartment& compartment);
 
 signals:
-    void frame(FrameDTO& frame);
+    void frame(const FrameDTO& frame);
     void simulationData(double targetScale, double actualScale, std::chrono::nanoseconds updateTime,
                         std::chrono::nanoseconds simulationUpdateTime);
 
