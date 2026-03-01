@@ -39,7 +39,7 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
 {
     plotCategory_ = plotCategory;
-    emitPlot();
+    emitWholePlot();
 }
 
 void PlotModel::setPlotTimeInterval(int valueMilliseconds)
@@ -52,14 +52,14 @@ void PlotModel::setPlotTimeInterval(int valueMilliseconds)
         throw ExceptionWithLocation("The plot time interval must be a multiple of 100ms");
 
     plotTimeInterval_ = static_cast<double>(valueMilliseconds) / 1000.0;
-    emitPlot();
+    emitWholePlot();
 }
 
 void PlotModel::setPlotSum(bool value)
 {
     plotSum_ = value;
     emitGraphs();
-    emitPlot();
+    emitWholePlot();
 }
 
 void PlotModel::reset()
@@ -71,7 +71,7 @@ void PlotModel::reset()
 
     updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
 
-    emitPlot();
+    emitWholePlot();
     emitGraphs();
 }
 
@@ -82,7 +82,7 @@ void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDis
         activePlotDiscTypes_[name] = true;
 
     emitGraphs();
-    emitPlot();
+    emitWholePlot();
 }
 
 const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
@@ -99,10 +99,15 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
 
     storeDataPoint(dataPoint);
-    plotDataPoint(dataPoint);
+
+    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
+    {
+        emitPlotPart();
+        dataPointForPlotting_ = {};
+    }
 }
 
-void PlotModel::emitPlot()
+void PlotModel::emitWholePlot()
 {
     switch (plotCategory_)
     {
@@ -110,8 +115,8 @@ void PlotModel::emitPlot()
     case PlotCategory::AbsoluteMomentum:
     case PlotCategory::CollisionCounts:
     case PlotCategory::KineticEnergy: emitLinePlot(); break;
-    case PlotCategory::VelocityDistribution: emitVelocityDistribution(); break;
-    case PlotCategory::VelocityHeatMap: emitVelocityHeatMap(); break;
+    case PlotCategory::VelocityDistribution: emitHistogram(); break;
+    case PlotCategory::VelocityHeatMap: emitHeatMap(); break;
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 }
@@ -150,21 +155,23 @@ void PlotModel::emitLinePlot()
     }
 
     emit createGraphs(labels_, colors_);
-    emit addDataPoints(fullPlotData, plotTimeInterval_);
+    emit linePlotPoints(fullPlotData, plotTimeInterval_);
 }
 
-void PlotModel::emitVelocityDistribution()
+void PlotModel::emitHistogram()
 {
-}
-
-void PlotModel::emitVelocityHeatMap()
-{
+    emit histogram(dataPointForPlotting_.vxHistogram);
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
     DataPoint dataPoint;
     const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
+    auto mostProbableSpeed = simulation_->getSimulationConfigUpdater().getSimulationConfig().mostProbableSpeed;
+    dataPoint.vxHistogram =
+        bh::make_histogram(bh::axis::integer<int>(0, discTypeRegistry.getValues().size(), "Disc types"),
+                           bh::axis::regular<>(20, -2 * mostProbableSpeed, 2 * mostProbableSpeed, "v.x"));
+
     auto& discs = frameDTO.discs_;
 
     for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
@@ -180,6 +187,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.totalKineticEnergyMap_[discTypeName] +=
             disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
         momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
+        dataPoint.vxHistogram(disc.getTypeID(), disc.getVelocity().x);
     }
 
     for (const auto& [discTypeName, momentum] : momentumMap)
@@ -221,30 +229,43 @@ void PlotModel::storeDataPoint(const DataPoint& dataPoint)
         dataPoints_.push_back(dataPointForStorage_);
         dataPointForStorage_ = {};
     }
-}
 
-void PlotModel::plotDataPoint(const DataPoint& dataPoint)
-{
     dataPointForPlotting_ += dataPoint;
     ++averagingCount_;
 
-    if (dataPointForPlotting_.elapsedTime_ < plotTimeInterval_)
-        return;
+    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
+    {
+        averageDataPoint(dataPointForPlotting_, averagingCount_);
+        averagingCount_ = 0;
+    }
+}
 
-    averageDataPoint(dataPointForPlotting_, averagingCount_);
+void PlotModel::emitPlotPart()
+{
+    switch (plotCategory_)
+    {
+    case PlotCategory::TypeCounts:
+    case PlotCategory::AbsoluteMomentum:
+    case PlotCategory::CollisionCounts:
+    case PlotCategory::KineticEnergy: emitLinePlotPoints(); break;
+    case PlotCategory::VelocityDistribution: emitHistogram(); break;
+    case PlotCategory::VelocityHeatMap: emitHeatMapColumn(); break;
+    default: throw ExceptionWithLocation("Invalid plot category");
+    }
+}
+
+void PlotModel::emitLinePlotPoints()
+{
     const auto& activeMap = getActiveMap(dataPointForPlotting_);
 
     if (plotSum_)
     {
         auto sum = std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
                                    [&](double partialSum, const auto& pair) { return pair.second + partialSum; });
-        emit addDataPoint({{"Sum", sum}}, plotTimeInterval_, DoReplot{true});
+        emit linePlotPoint({{"Sum", sum}}, plotTimeInterval_, DoReplot{true});
     }
     else
-        emit addDataPoint(activeMap, plotTimeInterval_, DoReplot{true});
-
-    dataPointForPlotting_ = {};
-    averagingCount_ = 0;
+        emit linePlotPoint(activeMap, plotTimeInterval_, DoReplot{true});
 }
 
 void PlotModel::emitGraphs()

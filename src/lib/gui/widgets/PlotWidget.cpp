@@ -51,7 +51,8 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
     replot();
 }
 
-void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep, DoReplot doReplot)
+void PlotWidget::linePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
+                               DoReplot doReplot)
 {
     double x = xStep * count_++;
 
@@ -75,10 +76,10 @@ void PlotWidget::addDataPoint(const std::unordered_map<std::string, double>& dat
         replot();
 }
 
-void PlotWidget::addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
+void PlotWidget::linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
 {
     for (const auto& dataPoint : dataPoints)
-        addDataPoint(dataPoint, xStep, DoReplot{false});
+        linePlotPoint(dataPoint, xStep, DoReplot{false});
 
     replot();
 }
@@ -116,7 +117,7 @@ void PlotWidget::resetGraphs()
 void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::createGraphs, this, &PlotWidget::createGraphs);
-    connect(plotModel, &PlotModel::addDataPoint, this, &PlotWidget::addDataPoint);
-    connect(plotModel, &PlotModel::addDataPoints, this, &PlotWidget::addDataPoints);
-    connect(plotModel, &PlotModel::setPlotTitle, this, &PlotWidget::setPlotTitle);
+    connect(plotModel, &PlotModel::linePlotPoint, this, &PlotWidget::plotLinePlotPoint);
+    connect(plotModel, &PlotModel::linePlotPoints, this, &PlotWidget::plotLinePlotPoints);
+    connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
 }

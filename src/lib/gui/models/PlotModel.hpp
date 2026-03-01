@@ -53,21 +53,26 @@ public slots:
 
 signals:
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
-    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep, DoReplot doReplot);
-    void addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
-    void setPlotTitle(const std::string& title);
+    void linePlotPoint(const std::unordered_map<std::string, double>& points, double xStep, DoReplot doReplot);
+    void linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
+    void histogram(const Histogram& histogram);
+    void plotTitle(const std::string& title);
 
 private:
-    void emitPlot();
+    // Methods for replacing the existing plot by another one using the stored data
+    void emitWholePlot();
     void emitLinePlot();
-    void emitVelocityDistribution();
-    void emitVelocityHeatMap();
+    void emitHistogram(); // Both for whole plot and plot part
+    void emitHeatMap();
+
+    // Methods for adding new points to an existing plot
+    void emitPlotPart();
+    void emitLinePlotPoints();
+    void emitHeatMapColumn();
+
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
-
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
-
     void storeDataPoint(const DataPoint& dataPoint);
-    void plotDataPoint(const DataPoint& dataPoint);
     void emitGraphs();
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
 
