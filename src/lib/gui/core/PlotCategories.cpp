@@ -12,7 +12,7 @@ const std::vector<Pair> PlotCategoryPairs{
     {PlotCategory::CollisionCounts, "Collision counts"},
     {PlotCategory::AbsoluteMomentum, "Absolute momentum"},
     {PlotCategory::KineticEnergy, "Kinetic energy"},
-    {PlotCategory::CurrentVelocityDistribution, "Velocity distribution"},
+    {PlotCategory::VelocityDistribution, "Velocity distribution"},
     {PlotCategory::VelocityHeatMap, "Velocity heat map"},
 };
 

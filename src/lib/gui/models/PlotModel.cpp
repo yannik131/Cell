@@ -104,6 +104,20 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
 
 void PlotModel::emitPlot()
 {
+    switch (plotCategory_)
+    {
+    case PlotCategory::TypeCounts:
+    case PlotCategory::AbsoluteMomentum:
+    case PlotCategory::CollisionCounts:
+    case PlotCategory::KineticEnergy: emitLinePlot(); break;
+    case PlotCategory::VelocityDistribution: emitVelocityDistribution(); break;
+    case PlotCategory::VelocityHeatMap: emitVelocityHeatMap(); break;
+    default: throw ExceptionWithLocation("Invalid plot category");
+    }
+}
+
+void PlotModel::emitLinePlot()
+{
     std::vector<std::unordered_map<std::string, double>> fullPlotData;
     DataPoint dataPointToAverage;
     int averagingCount = 0;
@@ -112,6 +126,7 @@ void PlotModel::emitPlot()
 
     for (const auto& dataPoint : dataPoints_)
     {
+        // TODO This adds everything, but we only need the current plot category
         dataPointToAverage += dataPoint;
         ++averagingCount;
 
@@ -136,6 +151,14 @@ void PlotModel::emitPlot()
 
     emit createGraphs(labels_, colors_);
     emit addDataPoints(fullPlotData, plotTimeInterval_);
+}
+
+void PlotModel::emitVelocityDistribution()
+{
+}
+
+void PlotModel::emitVelocityHeatMap()
+{
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
@@ -283,6 +306,7 @@ DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
     utility::addMaps(lhs.discTypeCountMap_, rhs.discTypeCountMap_);
     utility::addMaps(lhs.totalKineticEnergyMap_, rhs.totalKineticEnergyMap_);
     utility::addMaps(lhs.totalMomentumMap_, rhs.totalMomentumMap_);
+    lhs.vxHistogram += rhs.vxHistogram;
 
     return lhs;
 }

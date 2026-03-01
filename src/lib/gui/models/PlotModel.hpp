@@ -58,15 +58,10 @@ signals:
     void setPlotTitle(const std::string& title);
 
 private:
-    /**
-     * @brief Emits data for the full plot with all data points
-     */
     void emitPlot();
-
-    /**
-     * @brief Turns a given FrameDTO into a DataPoint by summing up all relevant properties of all discs in the given
-     * frame
-     */
+    void emitLinePlot();
+    void emitVelocityDistribution();
+    void emitVelocityHeatMap();
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
 
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);

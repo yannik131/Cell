@@ -13,7 +13,7 @@ enum class PlotCategory
     CollisionCounts,
     AbsoluteMomentum,
     KineticEnergy,
-    CurrentVelocityDistribution,
+    VelocityDistribution,
     VelocityHeatMap
 };
 
