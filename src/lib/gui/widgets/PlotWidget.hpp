@@ -21,11 +21,13 @@ public:
     void setModel(PlotModel* plotModel);
 
     void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
+    void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
+                         const Histogram& histogram);
 
     void plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
                            DoReplot = DoReplot{true});
-
     void plotLinePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
+    void plotHistogram(const Histogram& histogram);
 
     void setPlotTitle(const std::string& title);
 
@@ -44,6 +46,7 @@ private:
     double xMax_ = 0;
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
+    std::unordered_map<std::string, QCPBars*> histogram_;
 
     int count_ = 0;
 };

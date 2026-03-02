@@ -3,9 +3,7 @@
 #include "core/Simulation.hpp"
 #include "core/Utility.hpp"
 
-#include "PlotModel.hpp"
 #include <cmath>
-#include <glog/logging.h>
 #include <unordered_set>
 
 namespace

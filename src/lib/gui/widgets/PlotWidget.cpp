@@ -2,6 +2,7 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 
+#include "PlotWidget.hpp"
 #include <QFont>
 
 PlotWidget::PlotWidget(QWidget* parent)
@@ -51,6 +52,33 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
     replot();
 }
 
+void PlotWidget::createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
+                                 const Histogram& histogram)
+{
+    reset();
+
+    if (labels.size() != colors.size())
+        throw ExceptionWithLocation("Must have equal number of labels and colors");
+
+    for (std::size_t i = 0; i < labels.size(); ++i)
+    {
+        QCPBars* graph = new QCPBars(xAxis, yAxis);
+        graph->setAntialiased(false);
+        graph->setStackingGap(1);
+
+        if (colors[i] == sf::Color::White)
+            graph->setPen(utility::sfColorToQColor(sf::Color::Black));
+        else
+            graph->setPen(utility::sfColorToQColor(colors[i]));
+
+        graph->setName(QString::fromStdString(labels[i]));
+        histogram_[labels[i]] = graph;
+
+        if (i > 0)
+            histogram_[labels[i]]->moveAbove(histogram_[labels[i - 1]]);
+    }
+}
+
 void PlotWidget::plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
                                    DoReplot doReplot)
 {
@@ -83,6 +111,10 @@ void PlotWidget::plotLinePlotPoints(const std::vector<std::unordered_map<std::st
         plotLinePlotPoint(dataPoint, xStep, DoReplot{false});
 
     replot();
+}
+
+void PlotWidget::plotHistogram(const Histogram& histogram)
+{
 }
 
 void PlotWidget::setPlotTitle(const std::string& title)
@@ -120,5 +152,6 @@ void PlotWidget::setModel(PlotModel* plotModel)
     connect(plotModel, &PlotModel::createGraphs, this, &PlotWidget::createGraphs);
     connect(plotModel, &PlotModel::linePlotPoint, this, &PlotWidget::plotLinePlotPoint);
     connect(plotModel, &PlotModel::linePlotPoints, this, &PlotWidget::plotLinePlotPoints);
+    connect(plotModel, &PlotModel::histogram, this, &PlotWidget::plotHistogram);
     connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
 }
