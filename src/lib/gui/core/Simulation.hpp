@@ -33,6 +33,7 @@ public:
     const cell::DiscTypeRegistry& getDiscTypeRegistry();
 
     SimulationConfigUpdater& getSimulationConfigUpdater();
+    const cell::SimulationConfig& getSimulationConfig() const;
 
     bool cellIsBuilt() const;
 

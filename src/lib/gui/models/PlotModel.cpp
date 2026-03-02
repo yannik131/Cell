@@ -21,7 +21,7 @@ void averageDataPoint(DataPoint& dataPoint, int length)
     utility::divideValuesBy(dataPoint.totalKineticEnergyMap_, length);
     utility::divideValuesBy(dataPoint.totalMomentumMap_, length);
     utility::divideValuesBy(dataPoint.discTypeCountMap_, length);
-    dataPoint.vxHistogram /= length;
+    dataPoint.vxHistogram_ /= length;
 }
 
 } // namespace
@@ -29,11 +29,21 @@ void averageDataPoint(DataPoint& dataPoint, int length)
 PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     : QObject(parent)
     , simulation_(simulation)
+    , dataPointForStorage_(DataPoint(simulation->getSimulationConfig()))
+    , dataPointForPlotting_(DataPoint(simulation->getSimulationConfig()))
 {
     // With a simulation time step of 1ms, we get 1000 data points each second
     // With an averaging time of 100ms, we save 10 datapoints for 1 second
     // We'll reserve enough space for 5 minutes of plotting, 5*60*10
     dataPoints_.reserve(3000);
+
+    // Keep histogram axes up to date
+    connect(&simulation->getSimulationConfigUpdater(), &SimulationConfigUpdater::simulationResetRequired,
+            [&]()
+            {
+                dataPointForStorage_ = DataPoint(simulation_->getSimulationConfig());
+                dataPointForPlotting_ = DataPoint(simulation_->getSimulationConfig());
+            });
 }
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
@@ -65,11 +75,11 @@ void PlotModel::setPlotSum(bool value)
 void PlotModel::reset()
 {
     dataPoints_.clear();
-    dataPointForStorage_ = {};
-    dataPointForPlotting_ = {};
+    dataPointForStorage_.clear();
+    dataPointForPlotting_.clear();
     averagingCount_ = 0;
 
-    updateActivePlotDiscTypes(simulation_->getSimulationConfigUpdater().getSimulationConfig().discTypes);
+    updateActivePlotDiscTypes(simulation_->getSimulationConfig().discTypes);
 
     emitWholePlot();
     emitGraphs();
@@ -103,7 +113,7 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
     if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
     {
         emitPlotPart();
-        dataPointForPlotting_ = {};
+        dataPointForPlotting_.clear();
     }
 }
 
@@ -124,9 +134,9 @@ void PlotModel::emitWholePlot()
 void PlotModel::emitLinePlot()
 {
     std::vector<std::unordered_map<std::string, double>> fullPlotData;
-    DataPoint dataPointToAverage;
+    DataPoint dataPointToAverage(simulation_->getSimulationConfig());
     int averagingCount = 0;
-    double timeStep = simulation_->getSimulationConfigUpdater().getSimulationConfig().simulationTimeStep;
+    double timeStep = simulation_->getSimulationConfig().simulationTimeStep;
     const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
 
     for (const auto& dataPoint : dataPoints_)
@@ -150,7 +160,7 @@ void PlotModel::emitLinePlot()
         else
             fullPlotData.push_back(getActiveMap(dataPointToAverage));
 
-        dataPointToAverage = {};
+        dataPointToAverage.clear();
         averagingCount = 0;
     }
 
@@ -160,17 +170,18 @@ void PlotModel::emitLinePlot()
 
 void PlotModel::emitHistogram()
 {
-    emit histogram(dataPointForPlotting_.vxHistogram);
+    emit histogram(dataPointForPlotting_.vxHistogram_);
+}
+
+void PlotModel::emitHeatMap()
+{
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
-    DataPoint dataPoint;
+    auto mostProbableSpeed = simulation_->getSimulationConfig().mostProbableSpeed;
     const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
-    auto mostProbableSpeed = simulation_->getSimulationConfigUpdater().getSimulationConfig().mostProbableSpeed;
-    dataPoint.vxHistogram =
-        bh::make_histogram(bh::axis::integer<int>(0, discTypeRegistry.getValues().size(), "Disc types"),
-                           bh::axis::regular<>(20, -2 * mostProbableSpeed, 2 * mostProbableSpeed, "v.x"));
+    DataPoint dataPoint(mostProbableSpeed, static_cast<int>(discTypeRegistry.getValues().size()));
 
     auto& discs = frameDTO.discs_;
 
@@ -187,7 +198,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.totalKineticEnergyMap_[discTypeName] +=
             disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
         momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        dataPoint.vxHistogram(disc.getTypeID(), disc.getVelocity().x);
+        dataPoint.vxHistogram_(disc.getTypeID(), disc.getVelocity().x);
     }
 
     for (const auto& [discTypeName, momentum] : momentumMap)
@@ -227,7 +238,7 @@ void PlotModel::storeDataPoint(const DataPoint& dataPoint)
     if (dataPointForStorage_.elapsedTime_ >= storageTime_)
     {
         dataPoints_.push_back(dataPointForStorage_);
-        dataPointForStorage_ = {};
+        dataPointForStorage_.clear();
     }
 
     dataPointForPlotting_ += dataPoint;
@@ -268,12 +279,16 @@ void PlotModel::emitLinePlotPoints()
         emit linePlotPoint(activeMap, plotTimeInterval_, DoReplot{true});
 }
 
+void PlotModel::emitHeatMapColumn()
+{
+}
+
 void PlotModel::emitGraphs()
 {
     labels_.clear();
     colors_.clear();
 
-    const auto& config = simulation_->getSimulationConfigUpdater().getSimulationConfig();
+    const auto& config = simulation_->getSimulationConfig();
     const auto& colorMap = simulation_->getSimulationConfigUpdater().getDiscTypeColorMap();
 
     if (plotSum_)
@@ -327,7 +342,7 @@ DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
     utility::addMaps(lhs.discTypeCountMap_, rhs.discTypeCountMap_);
     utility::addMaps(lhs.totalKineticEnergyMap_, rhs.totalKineticEnergyMap_);
     utility::addMaps(lhs.totalMomentumMap_, rhs.totalMomentumMap_);
-    lhs.vxHistogram += rhs.vxHistogram;
+    lhs.vxHistogram_ += rhs.vxHistogram_;
 
     return lhs;
 }

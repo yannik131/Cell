@@ -18,12 +18,33 @@ using Histogram = bh::histogram<std::tuple<bh::axis::integer<int>, bh::axis::reg
  */
 struct DataPoint
 {
+    DataPoint(double vxSigma, int discTypeCount)
+        : vxHistogram_(bh::make_histogram(bh::axis::integer<int>(0, discTypeCount, "Disc types"),
+                                          bh::axis::regular<>(20, -2 * vxSigma, 2 * vxSigma, "v.x")))
+    {
+    }
+
+    explicit DataPoint(const cell::SimulationConfig& config)
+        : DataPoint(config.mostProbableSpeed, static_cast<int>(config.discTypes.size()))
+    {
+    }
+
+    void clear()
+    {
+        elapsedTime_ = 0;
+        collisionCounts_.clear();
+        totalMomentumMap_.clear();
+        totalKineticEnergyMap_.clear();
+        discTypeCountMap_.clear();
+        vxHistogram_.reset();
+    }
+
     double elapsedTime_ = 0;
     std::unordered_map<std::string, double> collisionCounts_;
     std::unordered_map<std::string, double> totalMomentumMap_;
     std::unordered_map<std::string, double> totalKineticEnergyMap_;
     std::unordered_map<std::string, double> discTypeCountMap_;
-    Histogram vxHistogram;
+    Histogram vxHistogram_;
 };
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
@@ -77,10 +98,8 @@ private:
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
 
 private:
-    /**
-     * @brief All data points received from the simulation
-     */
     std::vector<DataPoint> dataPoints_;
+    Simulation* simulation_;
 
     /**
      * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
@@ -99,8 +118,6 @@ private:
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
     PlotCategory plotCategory_ = SupportedPlotCategories().front();
-
-    Simulation* simulation_;
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;

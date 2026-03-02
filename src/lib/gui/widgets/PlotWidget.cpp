@@ -51,8 +51,8 @@ void PlotWidget::createGraphs(const std::vector<std::string>& labels, const std:
     replot();
 }
 
-void PlotWidget::linePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
-                               DoReplot doReplot)
+void PlotWidget::plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
+                                   DoReplot doReplot)
 {
     double x = xStep * count_++;
 
@@ -76,10 +76,11 @@ void PlotWidget::linePlotPoint(const std::unordered_map<std::string, double>& da
         replot();
 }
 
-void PlotWidget::linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep)
+void PlotWidget::plotLinePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints,
+                                    double xStep)
 {
     for (const auto& dataPoint : dataPoints)
-        linePlotPoint(dataPoint, xStep, DoReplot{false});
+        plotLinePlotPoint(dataPoint, xStep, DoReplot{false});
 
     replot();
 }
