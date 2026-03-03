@@ -103,6 +103,7 @@ target_link_libraries(playground PRIVATE
     glog::glog
     nlohmann_json::nlohmann_json
     Boost::histogram
+    qcustomplot
 )
 
 # tests for cell
