@@ -11,21 +11,21 @@
 
 namespace bh = boost::histogram;
 
-using Histogram = bh::histogram<std::tuple<bh::axis::integer<int>, bh::axis::regular<>>, bh::default_storage>;
+using Histogram = bh::histogram<std::tuple<bh::axis::category<std::string>, bh::axis::regular<>>, bh::default_storage>;
 
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
  */
 struct DataPoint
 {
-    DataPoint(double vxSigma, int discTypeCount)
-        : vxHistogram_(bh::make_histogram(bh::axis::integer<int>(0, discTypeCount, "Disc types"),
+    DataPoint(double vxSigma, std::vector<std::string> discTypes)
+        : vxHistogram_(bh::make_histogram(bh::axis::category<std::string>(std::move(discTypes), "Disc types"),
                                           bh::axis::regular<>(20, -2 * vxSigma, 2 * vxSigma, "v.x")))
     {
     }
 
     explicit DataPoint(const cell::SimulationConfig& config)
-        : DataPoint(config.mostProbableSpeed, static_cast<int>(config.discTypes.size()))
+        : DataPoint(config.mostProbableSpeed, utility::extract(config.discTypes, &cell::config::DiscType::name))
     {
     }
 

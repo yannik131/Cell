@@ -6,29 +6,29 @@
 
 namespace bh = boost::histogram;
 
-using Histogram = bh::histogram<std::tuple<bh::axis::integer<int>, bh::axis::regular<>>, bh::default_storage>;
+using Histogram = bh::histogram<std::tuple<bh::axis::category<QString>, bh::axis::regular<>>, bh::default_storage>;
 
-Histogram createHistogram(double mean, double sigma, int bins, int dimension)
+Histogram createHistogram(double mean, double sigma, int bins, const QVector<QString>& categories)
 {
-    auto h = bh::make_histogram(bh::axis::integer<int>(0, dimension, "Disc types"),
+    auto h = bh::make_histogram(bh::axis::category<QString>(categories, "Disc types"),
                                 bh::axis::regular<>(bins, mean - 2 * sigma, mean + 2 * sigma, "v.x"));
 
     std::random_device rd{};
     std::mt19937 gen(rd());
     std::normal_distribution<double> vDist(mean, sigma);
-    std::uniform_int_distribution<int> dDist(0, dimension - 1);
+    std::uniform_int_distribution<int> dDist(0, categories.size() - 1);
 
     for (int i = 0; i < 10000; ++i)
-        h(dDist(gen), vDist(gen));
+        h(categories[dDist(gen)], vDist(gen));
 
     return h;
 }
 
-std::vector<QCPBars*> createBars(const QVector<QString>& labels, QCustomPlot* customPlot)
+std::unordered_map<QString, QCPBars*> createBars(const QVector<QString>& labels, QCustomPlot* customPlot)
 {
     std::vector<QColor> colors = {QColor(Qt::red),    QColor(Qt::green),   QColor(Qt::blue),
                                   QColor(Qt::yellow), QColor(Qt::magenta), QColor(Qt::cyan)};
-    std::vector<QCPBars*> bars;
+    std::unordered_map<QString, QCPBars*> bars;
 
     for (int i = 0; i < labels.size() && i < (int)colors.size(); ++i)
     {
@@ -37,12 +37,13 @@ std::vector<QCPBars*> createBars(const QVector<QString>& labels, QCustomPlot* cu
         bar->setBrush(colors[i]);
         bar->setName(labels[i]);
         bar->setPen(QPen(Qt::black, 1));
+        bar->setStackingGap(0);
 
         // stacked bars:
         if (i > 0)
-            bar->moveAbove(bars[i - 1]);
+            bar->moveAbove(bars[labels[i - 1]]);
 
-        bars.push_back(bar);
+        bars[labels[i]] = bar;
     }
 
     return bars;
@@ -58,28 +59,32 @@ static QVector<double> binCenters(const Histogram& h)
     return x;
 }
 
-void setDataAndWidths(const std::vector<QCPBars*>& bars, const Histogram& h)
+void setDataAndWidths(const std::unordered_map<QString, QCPBars*>& bars, const Histogram& h)
 {
-    Q_ASSERT((int)bars.size() == (int)h.axis(0).size());
+    auto const& catAx = h.axis<0>(); // axis::category<QString>
+    auto const& regAx = h.axis<1>(); // axis::regular<>
 
-    const auto& ax = h.axis(1);
-    const double binW = ax.bin(0).width(); // regular axis => constant width
+    Q_ASSERT((int)bars.size() == (int)catAx.size());
+
+    const double binW = regAx.bin(0).width();
     const QVector<double> x = binCenters(h);
 
-    for (auto* b : bars)
+    for (auto& [label, bar] : bars)
     {
-        b->setWidthType(QCPBars::wtPlotCoords);
-        b->setWidth(binW); // fill the bin range in plot coordinates
+        bar->setWidthType(QCPBars::wtPlotCoords);
+        bar->setWidth(binW);
     }
 
-    for (int i = 0; i < (int)bars.size(); ++i)
+    for (int i = 0; i < (int)catAx.size(); ++i)
     {
-        QVector<double> counts;
-        counts.reserve((int)ax.size());
-        for (int j = 0; j < (int)ax.size(); ++j)
-            counts << h.at(i, j);
+        const QString label = catAx.value(i); // <-- QString, not double
 
-        bars[i]->setData(x, counts);
+        QVector<double> counts;
+        counts.reserve((int)regAx.size());
+        for (int j = 0; j < (int)regAx.size(); ++j)
+            counts << h.at(i, j); // indices
+
+        bars.at(label)->setData(x, counts); // const map => use at()
     }
 }
 
@@ -96,7 +101,7 @@ int main(int argc, char** argv)
     const double sigma = 100.0;
     const int bins = 30;
 
-    const auto h = createHistogram(mean, sigma, bins, discTypes.size());
+    const auto h = createHistogram(mean, sigma, bins, discTypes);
     auto bars = createBars(discTypes, customPlot);
 
     // Let QCustomPlot manage ticks (default ticker is numeric/automatic).
@@ -108,17 +113,6 @@ int main(int argc, char** argv)
     customPlot->xAxis->setLabel(ax.metadata().empty() ? "x" : ax.metadata().c_str());
     customPlot->xAxis->setNumberFormat("f");  // fixed-point
     customPlot->xAxis->setNumberPrecision(0); // 2 decimals
-
-    QCPRange r = customPlot->xAxis->range();
-    const double bw = ax.bin(0).width();
-    const double origin = ax.value(0);
-    double approxStep = r.size() / 8.0; // want ~8 ticks
-    int k = std::max(1, (int)std::round(approxStep / bw));
-
-    auto t = QSharedPointer<QCPAxisTickerFixed>::create();
-    t->setTickOrigin(origin);
-    t->setTickStep(k * bw);
-    customPlot->xAxis->setTicker(t);
 
     // Prepare y axis:
     double maxBinCount = 0.0;

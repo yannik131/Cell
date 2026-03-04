@@ -60,11 +60,14 @@ void PlotWidget::createHistogram(const std::vector<std::string>& labels, const s
     if (labels.size() != colors.size())
         throw ExceptionWithLocation("Must have equal number of labels and colors");
 
+    const auto& ax = histogram.axis(1);
+    const double binWidth = ax.bin(0).width();
+
     for (std::size_t i = 0; i < labels.size(); ++i)
     {
         QCPBars* graph = new QCPBars(xAxis, yAxis);
         graph->setAntialiased(false);
-        graph->setStackingGap(1);
+        graph->setStackingGap(0);
 
         if (colors[i] == sf::Color::White)
             graph->setPen(utility::sfColorToQColor(sf::Color::Black));
@@ -72,10 +75,13 @@ void PlotWidget::createHistogram(const std::vector<std::string>& labels, const s
             graph->setPen(utility::sfColorToQColor(colors[i]));
 
         graph->setName(QString::fromStdString(labels[i]));
+        graph->setWidthType(QCPBars::wtPlotCoords);
+        graph->setWidth(binWidth);
+
         histogram_[labels[i]] = graph;
 
         if (i > 0)
-            histogram_[labels[i]]->moveAbove(histogram_[labels[i - 1]]);
+            graph->moveAbove(histogram_[labels[i - 1]]);
     }
 }
 
@@ -115,6 +121,11 @@ void PlotWidget::plotLinePlotPoints(const std::vector<std::unordered_map<std::st
 
 void PlotWidget::plotHistogram(const Histogram& histogram)
 {
+    const auto& ax = histogram.axis(1);
+    QVector<double> binCenters;
+    binCenters.reserve(static_cast<int>(ax.size()));
+    for (int i = 0; i < static_cast<int>(ax.size()); ++i)
+        binCenters << ax.bin(i).center();
 }
 
 void PlotWidget::setPlotTitle(const std::string& title)

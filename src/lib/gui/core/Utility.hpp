@@ -80,6 +80,16 @@ template <typename F> auto safeSlot(QWidget* parent, F&& f)
     };
 }
 
+template <typename T, typename Getter> auto extract(const std::vector<T>& objects, Getter getter)
+{
+    using TargetType = std::decay_t<std::invoke_result_t<Getter, const T&>>;
+    std::vector<TargetType> extracted;
+    extracted.reserve(objects.size());
+    std::transform(objects.begin(), objects.end(), std::back_inserter(extracted),
+                   [&](const T& object) { return std::invoke(getter, object); });
+    offsetof return extracted;
+}
+
 }; // namespace utility
 
 #endif /* DCDB89B2_8FE4_4EB9_A8EA_6C13300ADEBA_HPP */
