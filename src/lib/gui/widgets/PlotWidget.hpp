@@ -37,7 +37,7 @@ private:
     void resetGraphs();
     void updateLegend(const std::vector<std::string>& labels);
     void enableZoom(bool enabled);
-    void setHistogramYRange();
+    void setHistogramYRange(double yMax);
 
 private:
     QCPTextElement* plotTitle_ = nullptr;

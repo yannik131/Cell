@@ -135,20 +135,28 @@ void PlotWidget::plotHistogram(const Histogram& histogram)
     for (int i = 0; i < regularAxis.size(); ++i)
         binCenters << regularAxis.bin(i).center();
 
+    const auto nBins = static_cast<qsizetype>(regularAxis.size());
     QVector<double> counts;
-    counts.reserve(static_cast<qsizetype>(regularAxis.size()));
+    QVector<double> stackedCounts(nBins, 0.0);
+    double maxStackedCount = 0;
+    counts.reserve(nBins);
 
     for (int i = 0; i < categoryAxis.size(); ++i)
     {
         const auto& discType = categoryAxis.value(i);
         for (int j = 0; j < regularAxis.size(); ++j)
-            counts << histogram.at(i, j);
+        {
+            const double count = histogram.at(i, j);
+            counts << count;
+            stackedCounts[j] += count;
+            maxStackedCount = std::max(stackedCounts[j], maxStackedCount);
+        }
 
         histogram_.at(discType)->setData(binCenters, counts, true);
         counts.clear();
     }
 
-    setHistogramYRange();
+    setHistogramYRange(maxStackedCount);
     replot();
 }
 
@@ -203,26 +211,17 @@ void PlotWidget::enableZoom(bool enabled)
     setInteraction(QCP::iRangeZoom, enabled); // Allow zoom with mouse wheel
 }
 
-void PlotWidget::setHistogramYRange()
+void PlotWidget::setHistogramYRange(double yMax)
 {
-    double yMax = 0;
-    bool foundRange;
-    for (int i = 0; i < plottableCount(); ++i)
-    {
-        QCPRange r = plottable(i)->getValueRange(foundRange);
-        if (foundRange)
-            yMax = std::max(yMax, r.upper);
-    }
-
     if (yMax > yMax_)
     {
-        yMax_ = yMax;
-        yAxis->setRange(0, yMax);
+        yMax_ = yMax * 1.2;
+        yAxis->setRange(0, yMax_);
     }
-    else if (yMax < 0.9 * yMax_)
+    else if (yMax < yMax_ * 0.8)
     {
         yMax_ = yMax;
-        yAxis->setRange(0, yMax);
+        yAxis->setRange(0, yMax_);
     }
 }
 
