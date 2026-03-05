@@ -20,7 +20,7 @@ public:
      */
     void setModel(PlotModel* plotModel);
 
-    void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
+    void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
     void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
                          const Histogram& histogram);
 
@@ -35,6 +35,9 @@ private:
     void reset();
     void resetRanges();
     void resetGraphs();
+    void updateLegend(const std::vector<std::string>& labels);
+    void enableZoom(bool enabled);
+    void setHistogramYRange();
 
 private:
     QCPTextElement* plotTitle_ = nullptr;

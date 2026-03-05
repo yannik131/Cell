@@ -5,6 +5,7 @@
 #include "core/FrameDTO.hpp"
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
+#include "core/Utility.hpp"
 
 #include <QObject>
 #include <boost/histogram.hpp>
@@ -73,7 +74,9 @@ public slots:
     void processFrame(const FrameDTO& frameDTO);
 
 signals:
-    void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
+    void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
+    void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
+                         const Histogram& histogram);
     void linePlotPoint(const std::unordered_map<std::string, double>& points, double xStep, DoReplot doReplot);
     void linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void histogram(const Histogram& histogram);

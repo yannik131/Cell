@@ -46,7 +46,17 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
 {
+    static const std::unordered_map<PlotCategory, int> graphType{
+        {PlotCategory::AbsoluteMomentum, 1},     {PlotCategory::CollisionCounts, 1},
+        {PlotCategory::KineticEnergy, 1},        {PlotCategory::TypeCounts, 1},
+        {PlotCategory::VelocityDistribution, 2}, {PlotCategory::VelocityHeatMap, 3}};
+
+    const auto oldPlotCategory = plotCategory_;
     plotCategory_ = plotCategory;
+
+    if (graphType.at(oldPlotCategory) != graphType.at(plotCategory))
+        emitGraphs();
+
     emitWholePlot();
 }
 
@@ -79,8 +89,8 @@ void PlotModel::reset()
 
     updateActivePlotDiscTypes(simulation_->getSimulationConfig().discTypes);
 
-    emitWholePlot();
     emitGraphs();
+    emitWholePlot();
 }
 
 void PlotModel::setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames)
@@ -162,7 +172,7 @@ void PlotModel::emitLinePlot()
         averagingCount = 0;
     }
 
-    emit createGraphs(labels_, colors_);
+    emit createLinePlots(labels_, colors_);
     emit linePlotPoints(fullPlotData, plotTimeInterval_);
 }
 
@@ -177,9 +187,8 @@ void PlotModel::emitHeatMap()
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
-    auto mostProbableSpeed = simulation_->getSimulationConfig().mostProbableSpeed;
     const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
-    DataPoint dataPoint(mostProbableSpeed, static_cast<int>(discTypeRegistry.getValues().size()));
+    DataPoint dataPoint(simulation_->getSimulationConfig());
 
     auto& discs = frameDTO.discs_;
 
@@ -196,7 +205,7 @@ DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
         dataPoint.totalKineticEnergyMap_[discTypeName] +=
             disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
         momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        dataPoint.vxHistogram_(disc.getTypeID(), disc.getVelocity().x);
+        dataPoint.vxHistogram_(discTypeName, disc.getVelocity().x);
     }
 
     for (const auto& [discTypeName, momentum] : momentumMap)
@@ -306,7 +315,18 @@ void PlotModel::emitGraphs()
         }
     }
 
-    emit createGraphs(labels_, colors_);
+    switch (plotCategory_)
+    {
+    case PlotCategory::TypeCounts:
+    case PlotCategory::AbsoluteMomentum:
+    case PlotCategory::CollisionCounts:
+    case PlotCategory::KineticEnergy: createLinePlots(labels_, colors_); break;
+    case PlotCategory::VelocityDistribution:
+        createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
+        break;
+    case PlotCategory::VelocityHeatMap:
+    default: throw ExceptionWithLocation("Invalid plot category");
+    }
 }
 
 void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes)

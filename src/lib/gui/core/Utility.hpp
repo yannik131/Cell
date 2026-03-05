@@ -87,7 +87,7 @@ template <typename T, typename Getter> auto extract(const std::vector<T>& object
     extracted.reserve(objects.size());
     std::transform(objects.begin(), objects.end(), std::back_inserter(extracted),
                    [&](const T& object) { return std::invoke(getter, object); });
-    offsetof return extracted;
+    return extracted;
 }
 
 }; // namespace utility

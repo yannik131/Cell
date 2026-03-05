@@ -71,7 +71,6 @@ void setDataAndWidths(const std::unordered_map<QString, QCPBars*>& bars, const H
 
     for (auto& [label, bar] : bars)
     {
-        bar->setWidthType(QCPBars::wtPlotCoords);
         bar->setWidth(binW);
     }
 
