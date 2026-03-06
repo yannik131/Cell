@@ -99,6 +99,7 @@ private:
     void storeDataPoint(const DataPoint& dataPoint);
     void emitGraphs();
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
+    Histogram sumHistogramStacks(const Histogram& histogram);
 
 private:
     std::vector<DataPoint> dataPoints_;

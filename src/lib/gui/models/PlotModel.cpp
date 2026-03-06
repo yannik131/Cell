@@ -178,6 +178,13 @@ void PlotModel::emitLinePlot()
 
 void PlotModel::emitHistogram()
 {
+    if (plotSum_)
+    {
+        const auto h = sumHistogramStacks(dataPointForPlotting_.vxHistogram_);
+        emit histogram(h);
+        return;
+    }
+
     emit histogram(dataPointForPlotting_.vxHistogram_);
 }
 
@@ -320,9 +327,9 @@ void PlotModel::emitGraphs()
     case PlotCategory::TypeCounts:
     case PlotCategory::AbsoluteMomentum:
     case PlotCategory::CollisionCounts:
-    case PlotCategory::KineticEnergy: createLinePlots(labels_, colors_); break;
+    case PlotCategory::KineticEnergy: emit createLinePlots(labels_, colors_); break;
     case PlotCategory::VelocityDistribution:
-        createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
+        emit createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
         break;
     case PlotCategory::VelocityHeatMap:
     default: throw ExceptionWithLocation("Invalid plot category");
@@ -350,6 +357,27 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
         else
             ++iter;
     }
+}
+
+Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
+{
+    const auto& categoryAxis = histogram.axis<0>();
+    const auto& regularAxis = histogram.axis<1>();
+    Histogram sumHistogram =
+        bh::make_histogram(bh::axis::category<std::string>(std::vector<std::string>{{"Sum"}}, "Disc types"),
+                           bh::axis::regular<>(regularAxis.size(), regularAxis.value(0),
+                                               regularAxis.value(regularAxis.size()), regularAxis.metadata()));
+
+    for (int i = 0; i < regularAxis.size(); ++i)
+    {
+        double sum = 0.0;
+        for (int j = 0; j < categoryAxis.size(); ++j)
+            sum += histogram.at(j, i);
+
+        sumHistogram.at(0, i) = sum;
+    }
+
+    return sumHistogram;
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
