@@ -100,6 +100,8 @@ private:
     void emitGraphs();
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
     Histogram sumHistogramStacks(const Histogram& histogram);
+    Histogram discardInactiveDiscTypes(const Histogram& histogram);
+    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
 
 private:
     std::vector<DataPoint> dataPoints_;

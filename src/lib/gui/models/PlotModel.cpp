@@ -3,6 +3,7 @@
 #include "core/Simulation.hpp"
 #include "core/Utility.hpp"
 
+#include "PlotModel.hpp"
 #include <cmath>
 #include <unordered_set>
 
@@ -178,14 +179,11 @@ void PlotModel::emitLinePlot()
 
 void PlotModel::emitHistogram()
 {
+    auto h = discardInactiveDiscTypes(dataPointForPlotting_.vxHistogram_);
     if (plotSum_)
-    {
-        const auto h = sumHistogramStacks(dataPointForPlotting_.vxHistogram_);
-        emit histogram(h);
-        return;
-    }
+        h = sumHistogramStacks(h);
 
-    emit histogram(dataPointForPlotting_.vxHistogram_);
+    emit histogram(h);
 }
 
 void PlotModel::emitHeatMap()
@@ -363,10 +361,7 @@ Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
 {
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
-    Histogram sumHistogram =
-        bh::make_histogram(bh::axis::category<std::string>(std::vector<std::string>{{"Sum"}}, "Disc types"),
-                           bh::axis::regular<>(regularAxis.size(), regularAxis.value(0),
-                                               regularAxis.value(regularAxis.size()), regularAxis.metadata()));
+    Histogram sumHistogram = makeHistogramWithCategories(histogram, {"Sum"});
 
     for (int i = 0; i < regularAxis.size(); ++i)
     {
@@ -378,6 +373,45 @@ Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
     }
 
     return sumHistogram;
+}
+
+Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
+{
+    const auto& categoryAxis = histogram.axis<0>();
+    const auto& regularAxis = histogram.axis<1>();
+    std::vector<std::string> activeDiscTypes;
+    for (int i = 0; i < categoryAxis.size(); ++i)
+    {
+        const auto& discType = categoryAxis.value(i);
+        if (activePlotDiscTypes_[discType])
+            activeDiscTypes.push_back(discType);
+    }
+
+    Histogram filteredHistogram = makeHistogramWithCategories(histogram, activeDiscTypes);
+
+    int category = 0;
+    for (int i = 0; i < categoryAxis.size(); ++i)
+    {
+        const auto& discType = categoryAxis.value(i);
+        if (!activePlotDiscTypes_[discType])
+            continue;
+
+        for (int j = 0; j < regularAxis.size(); ++j)
+            filteredHistogram.at(category, j) = histogram.at(i, j);
+
+        ++category;
+    }
+
+    return filteredHistogram;
+}
+
+Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories)
+{
+    const auto& regularAxis = source.axis<1>();
+
+    return bh::make_histogram(bh::axis::category<std::string>(categories, "Disc types"),
+                              bh::axis::regular<>(regularAxis.size(), regularAxis.value(0),
+                                                  regularAxis.value(regularAxis.size()), regularAxis.metadata()));
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
