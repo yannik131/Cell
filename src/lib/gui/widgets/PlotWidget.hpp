@@ -23,11 +23,13 @@ public:
     void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
     void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
                          const Histogram& histogram);
+    void createHeatMap(double xMin, double xMax, double yMin, double yMax, int xCells, int yCells);
 
     void plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
                            DoReplot = DoReplot{true});
     void plotLinePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void plotHistogram(const Histogram& histogram);
+    void plotHeatMap(const HeatMapData& columns);
 
     void setPlotTitle(const std::string& title);
 
@@ -41,6 +43,7 @@ private:
 
 private:
     QCPTextElement* plotTitle_ = nullptr;
+    QCPColorMap* heatMap_ = nullptr;
 
     double yMin_ = 0;
     double yMax_ = 0;

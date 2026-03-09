@@ -1,10 +1,11 @@
 #include "models/PlotModel.hpp"
+#include "cell/ExceptionWithLocation.hpp"
 #include "cell/MathUtils.hpp"
 #include "core/Simulation.hpp"
 #include "core/Utility.hpp"
 
-#include "PlotModel.hpp"
 #include <cmath>
+#include <numeric>
 #include <unordered_set>
 
 namespace
@@ -42,6 +43,7 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
             {
                 dataPointForStorage_ = DataPoint(simulation_->getSimulationConfig());
                 dataPointForPlotting_ = DataPoint(simulation_->getSimulationConfig());
+                initialVxHistogram_.reset();
             });
 }
 
@@ -63,7 +65,6 @@ void PlotModel::setPlotCategory(PlotCategory plotCategory)
 
 void PlotModel::setPlotTimeInterval(int valueMilliseconds)
 {
-    // To reduce the number of datapoints, we store 100ms intervals
     if (valueMilliseconds < 100)
         throw ExceptionWithLocation("The plot time interval must be at least 100ms");
 
@@ -86,6 +87,7 @@ void PlotModel::reset()
     dataPoints_.clear();
     dataPointForStorage_.clear();
     dataPointForPlotting_.clear();
+    initialVxHistogram_.reset();
     averagingCount_ = 0;
 
     updateActivePlotDiscTypes(simulation_->getSimulationConfig().discTypes);
@@ -109,16 +111,37 @@ const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
     return activePlotDiscTypes_;
 }
 
+void PlotModel::captureInitialHistogram(const FrameDTO& frameDTO)
+{
+    const bool noSimulationDataCollectedYet =
+        dataPoints_.empty() && averagingCount_ == 0 && dataPointForStorage_.elapsedTime_ == 0 &&
+        dataPointForPlotting_.elapsedTime_ == 0 && !initialVxHistogram_.has_value();
+
+    if (!noSimulationDataCollectedYet)
+        return;
+
+    DataPoint initialDataPoint = dataPointFromFrameDTO(frameDTO);
+    initialVxHistogram_ = initialDataPoint.vxHistogram_;
+
+    // Für das normale Histogramm soll beim Start sofort etwas sichtbar sein
+    dataPointForPlotting_ = initialDataPoint;
+}
+
 void PlotModel::processFrame(const FrameDTO& frameDTO)
 {
+    // Elapsed time 0 means this DTO was only emitted for a redraw.
+    // We still use that first redraw to initialize histogram/heatmap with the initial state.
     if (frameDTO.elapsedSimulationTimeUs == 0)
     {
-        emitInitialHistogram(frameDTO);
+        captureInitialHistogram(frameDTO);
+
+        if (plotCategory_ == PlotCategory::VelocityDistribution || plotCategory_ == PlotCategory::VelocityHeatMap)
+            emitWholePlot();
+
         return;
     }
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-
     storeDataPoint(dataPoint);
 
     if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
@@ -152,7 +175,6 @@ void PlotModel::emitLinePlot()
 
     for (const auto& dataPoint : dataPoints_)
     {
-        // TODO This adds everything, but we only need the current plot category
         dataPointToAverage += dataPoint;
         ++averagingCount;
 
@@ -188,37 +210,69 @@ void PlotModel::emitHistogram()
     emit histogram(h);
 }
 
-void PlotModel::emitHeatMap()
+Histogram PlotModel::makeActiveHeatMapHistogram(const Histogram& histogram) const
 {
+    auto filtered = discardInactiveDiscTypes(histogram);
+
+    // Eine einzelne Heatmap kann nur einen Wert pro Zelle darstellen.
+    // Deshalb werden alle aktiven Typen zu einer gemeinsamen Spalte zusammengefasst.
+    return sumHistogramStacks(filtered);
 }
 
-DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
+HeatMapColumn PlotModel::makeHeatMapColumn(const Histogram& histogram) const
 {
-    const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
-    DataPoint dataPoint(simulation_->getSimulationConfig());
+    const auto& regularAxis = histogram.axis<1>();
+    HeatMapColumn column;
+    column.reserve(static_cast<qsizetype>(regularAxis.size()));
 
-    auto& discs = frameDTO.discs_;
+    for (int i = 0; i < regularAxis.size(); ++i)
+        column.push_back(histogram.at(0, i));
 
-    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
+    return column;
+}
 
-    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000.0;
-    std::unordered_map<std::string, cell::Vector2d> momentumMap;
+HeatMapData PlotModel::buildWholeHeatMap() const
+{
+    HeatMapData columns;
 
-    for (const auto& disc : discs)
+    if (initialVxHistogram_.has_value())
+        columns.push_back(makeHeatMapColumn(makeActiveHeatMapHistogram(*initialVxHistogram_)));
+
+    DataPoint dataPointToAverage(simulation_->getSimulationConfig());
+    int averagingCount = 0;
+    double timeStep = simulation_->getSimulationConfig().simulationTimeStep;
+    const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
+
+    for (const auto& dataPoint : dataPoints_)
     {
-        std::string discTypeName = discTypeRegistry.getByID(disc.getTypeID()).getName();
-        ++dataPoint.discTypeCountMap_[discTypeName];
-        dataPoint.totalKineticEnergyMap_[discTypeName] +=
-            disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        dataPoint.vxHistogram_(discTypeName, disc.getVelocity().x);
+        dataPointToAverage += dataPoint;
+        ++averagingCount;
+
+        if (dataPointToAverage.elapsedTime_ < plotTimeInterval_)
+            continue;
+
+        averageDataPoint(dataPointToAverage, averagingCount * dataPointsPerStoredPoint);
+        columns.push_back(makeHeatMapColumn(makeActiveHeatMapHistogram(dataPointToAverage.vxHistogram_)));
+
+        dataPointToAverage.clear();
+        averagingCount = 0;
     }
 
-    for (const auto& [discTypeName, momentum] : momentumMap)
-        dataPoint.totalMomentumMap_[discTypeName] = cell::mathutils::abs(momentum);
+    return columns;
+}
 
-    return dataPoint;
+void PlotModel::emitHeatMap()
+{
+    const auto& axis = dataPointForPlotting_.vxHistogram_.axis<1>();
+    const int yCells = axis.size();
+
+    HeatMapData columns = buildWholeHeatMap();
+
+    const int xCells = std::max(1, static_cast<int>(columns.size()));
+    const double xMax = std::max(plotTimeInterval_, static_cast<double>(columns.size()) * plotTimeInterval_);
+
+    emit createHeatMap(0.0, xMax, axis.value(0), axis.value(axis.size()), xCells, yCells);
+    emit heatMap(columns);
 }
 
 std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint& dataPoint)
@@ -295,6 +349,9 @@ void PlotModel::emitLinePlotPoints()
 
 void PlotModel::emitHeatMapColumn()
 {
+    // Für die Heatmap regenerieren wir den kompletten Plot aus den gespeicherten Intervallen.
+    // Das ist robust bei Plotintervall-Wechseln und beim Umschalten des Plottyps.
+    emitHeatMap();
 }
 
 void PlotModel::emitGraphs()
@@ -332,6 +389,11 @@ void PlotModel::emitGraphs()
         emit createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
         break;
     case PlotCategory::VelocityHeatMap:
+    {
+        const auto& axis = dataPointForPlotting_.vxHistogram_.axis<1>();
+        emit createHeatMap(0.0, plotTimeInterval_, axis.value(0), axis.value(axis.size()), 1, axis.size());
+        break;
+    }
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 }
@@ -340,7 +402,6 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
 {
     std::unordered_set<std::string> discTypeNames;
 
-    // Make all new disc types active by default
     for (const auto& discType : discTypes)
     {
         if (!activePlotDiscTypes_.contains(discType.name))
@@ -349,7 +410,6 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
         discTypeNames.insert(discType.name);
     }
 
-    // Remove disc types that were deleted
     for (auto iter = activePlotDiscTypes_.begin(); iter != activePlotDiscTypes_.end();)
     {
         if (!discTypeNames.contains(iter->first))
@@ -359,7 +419,7 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
     }
 }
 
-Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
+Histogram PlotModel::sumHistogramStacks(const Histogram& histogram) const
 {
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
@@ -377,15 +437,16 @@ Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
     return sumHistogram;
 }
 
-Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
+Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram) const
 {
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
     std::vector<std::string> activeDiscTypes;
+
     for (int i = 0; i < categoryAxis.size(); ++i)
     {
         const auto& discType = categoryAxis.value(i);
-        if (activePlotDiscTypes_[discType])
+        if (activePlotDiscTypes_.at(discType))
             activeDiscTypes.push_back(discType);
     }
 
@@ -395,7 +456,7 @@ Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
     for (int i = 0; i < categoryAxis.size(); ++i)
     {
         const auto& discType = categoryAxis.value(i);
-        if (!activePlotDiscTypes_[discType])
+        if (!activePlotDiscTypes_.at(discType))
             continue;
 
         for (int j = 0; j < regularAxis.size(); ++j)
@@ -407,7 +468,8 @@ Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
     return filteredHistogram;
 }
 
-Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories)
+Histogram PlotModel::makeHistogramWithCategories(const Histogram& source,
+                                                 const std::vector<std::string>& categories) const
 {
     const auto& regularAxis = source.axis<1>();
 
@@ -416,18 +478,33 @@ Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const 
                                                   regularAxis.value(regularAxis.size()), regularAxis.metadata()));
 }
 
-void PlotModel::emitInitialHistogram(const FrameDTO& frameDTO)
+DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
 {
-    const bool simulationDataCollected = !dataPoints_.empty() || averagingCount_ > 0 ||
-                                         dataPointForStorage_.elapsedTime_ > 0 ||
-                                         dataPointForPlotting_.elapsedTime_ > 0;
-    if (simulationDataCollected)
-        return;
+    const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
+    DataPoint dataPoint(simulation_->getSimulationConfig());
 
-    // Store in case user switches to this plot later
-    dataPointForPlotting_ = dataPointFromFrameDTO(frameDTO);
-    if (plotCategory_ == PlotCategory::VelocityDistribution)
-        emitHistogram();
+    const auto& discs = frameDTO.discs_;
+
+    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
+        dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
+
+    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000.0;
+    std::unordered_map<std::string, cell::Vector2d> momentumMap;
+
+    for (const auto& disc : discs)
+    {
+        std::string discTypeName = discTypeRegistry.getByID(disc.getTypeID()).getName();
+        ++dataPoint.discTypeCountMap_[discTypeName];
+        dataPoint.totalKineticEnergyMap_[discTypeName] +=
+            disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
+        momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
+        dataPoint.vxHistogram_(discTypeName, disc.getVelocity().x);
+    }
+
+    for (const auto& [discTypeName, momentum] : momentumMap)
+        dataPoint.totalMomentumMap_[discTypeName] = cell::mathutils::abs(momentum);
+
+    return dataPoint;
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
