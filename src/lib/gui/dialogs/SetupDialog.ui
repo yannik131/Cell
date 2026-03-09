@@ -158,7 +158,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="mostProbableSpeedSpinBox"/>
+          <widget class="QDoubleSpinBox" name="mostProbableSpeedSpinBox"/>
          </item>
         </layout>
        </widget>

@@ -21,7 +21,7 @@ struct DataPoint
 {
     DataPoint(double vxSigma, std::vector<std::string> discTypes)
         : vxHistogram_(bh::make_histogram(bh::axis::category<std::string>(std::move(discTypes), "Disc types"),
-                                          bh::axis::regular<>(20, -2 * vxSigma, 2 * vxSigma, "v.x")))
+                                          bh::axis::regular<>(20, -3 * vxSigma, 3 * vxSigma, "v.x")))
     {
     }
 
@@ -102,6 +102,7 @@ private:
     Histogram sumHistogramStacks(const Histogram& histogram);
     Histogram discardInactiveDiscTypes(const Histogram& histogram);
     Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
+    void emitInitialHistogram(const FrameDTO& frameDTO);
 
 private:
     std::vector<DataPoint> dataPoints_;

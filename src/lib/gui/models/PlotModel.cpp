@@ -111,9 +111,11 @@ const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
 
 void PlotModel::processFrame(const FrameDTO& frameDTO)
 {
-    // Elapsed time 0 means this DTO was only emitted for a redraw
     if (frameDTO.elapsedSimulationTimeUs == 0)
+    {
+        emitInitialHistogram(frameDTO);
         return;
+    }
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
 
@@ -412,6 +414,20 @@ Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const 
     return bh::make_histogram(bh::axis::category<std::string>(categories, "Disc types"),
                               bh::axis::regular<>(regularAxis.size(), regularAxis.value(0),
                                                   regularAxis.value(regularAxis.size()), regularAxis.metadata()));
+}
+
+void PlotModel::emitInitialHistogram(const FrameDTO& frameDTO)
+{
+    const bool simulationDataCollected = !dataPoints_.empty() || averagingCount_ > 0 ||
+                                         dataPointForStorage_.elapsedTime_ > 0 ||
+                                         dataPointForPlotting_.elapsedTime_ > 0;
+    if (simulationDataCollected)
+        return;
+
+    // Store in case user switches to this plot later
+    dataPointForPlotting_ = dataPointFromFrameDTO(frameDTO);
+    if (plotCategory_ == PlotCategory::VelocityDistribution)
+        emitHistogram();
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)

@@ -23,7 +23,8 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     connect(ui->useDistributionRadioButton, &QRadioButton::toggled, setupModel_, &SetupModel::setUseDistribution);
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
-    connect(ui->mostProbableSpeedSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setMostProbableSpeed);
+    connect(ui->mostProbableSpeedSpinBox, &QDoubleSpinBox::valueChanged, setupModel_,
+            &SetupModel::setMostProbableSpeed);
     connect(ui->FPSSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setFPS);
 
     ui->timeStepSpinBox->setRange(
@@ -50,6 +51,6 @@ void SetupDialog::displayCurrentConfig()
     ui->manualPositionsRadioButton->setChecked(!config.useDistribution);
     ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep * 1e6)));
     ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);
-    ui->mostProbableSpeedSpinBox->setValue(static_cast<int>(std::round(config.mostProbableSpeed)));
+    ui->mostProbableSpeedSpinBox->setValue(config.mostProbableSpeed);
     ui->FPSSpinBox->setValue(simulationConfigUpdater_->getFPS());
 }
