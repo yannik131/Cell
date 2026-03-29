@@ -2,9 +2,6 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QTimer>
-#include <algorithm>
-#include <array>
-#include <random>
 #include <vector>
 
 int main(int argc, char** argv)
@@ -44,7 +41,7 @@ int main(int argc, char** argv)
     colorScale->setType(QCPAxis::atRight);
     colorMap->setColorScale(colorScale);
     colorMap->setGradient(QCPColorGradient::gpGrayscale);
-    // colorMap->setInterpolate(false);
+    colorMap->setInterpolate(false);
     auto ticker = QSharedPointer<QCPAxisTickerText>::create();
     for (int i = 0; i < 5; ++i)
         ticker->addTick(i + 0.5, QString("v") + QString::number(i));
