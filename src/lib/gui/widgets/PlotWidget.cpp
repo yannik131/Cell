@@ -2,8 +2,8 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 
+#include "PlotWidget.hpp"
 #include <QFont>
-#include <limits>
 
 PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
@@ -14,6 +14,7 @@ PlotWidget::PlotWidget(QWidget* parent)
     legend->setLayer("legend layer");
     legend->setVisible(true);
 
+    // Place the legend
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignRight);
 }
 
@@ -90,31 +91,6 @@ void PlotWidget::createHistogram(const std::vector<std::string>& labels, const s
     replot();
 }
 
-void PlotWidget::createHeatMap(double xMin, double xMax, double yMin, double yMax, int xCells, int yCells)
-{
-    reset();
-
-    heatMap_ = new QCPColorMap(xAxis, yAxis);
-    heatMap_->data()->setSize(std::max(1, xCells), std::max(1, yCells));
-    heatMap_->data()->setRange(QCPRange(xMin, xMax), QCPRange(yMin, yMax));
-    heatMap_->setInterpolate(true);
-
-    QCPColorGradient gradient;
-    gradient.setColorStopAt(0.0, Qt::black);
-    gradient.setColorStopAt(1.0, Qt::white);
-    heatMap_->setGradient(gradient);
-
-    xAxis->setLabel("t [s]");
-    yAxis->setLabel("v.x");
-    xAxis->setRange(xMin, xMax);
-    yAxis->setRange(yMin, yMax);
-
-    legend->setVisible(false);
-    enableZoom(true);
-
-    replot();
-}
-
 void PlotWidget::plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
                                    DoReplot doReplot)
 {
@@ -184,33 +160,6 @@ void PlotWidget::plotHistogram(const Histogram& histogram)
     replot();
 }
 
-void PlotWidget::plotHeatMap(const HeatMapData& columns)
-{
-    if (!heatMap_)
-        return;
-
-    const int xCells = std::max(1, static_cast<int>(columns.size()));
-    const int yCells = heatMap_->data()->valueSize();
-
-    heatMap_->data()->setSize(xCells, yCells);
-
-    double maxValue = 0.0;
-
-    for (int x = 0; x < columns.size(); ++x)
-    {
-        const auto& column = columns[x];
-        for (int y = 0; y < column.size(); ++y)
-        {
-            const double value = column[y];
-            heatMap_->data()->setCell(x, y, value);
-            maxValue = std::max(maxValue, value);
-        }
-    }
-
-    heatMap_->setDataRange(QCPRange(0.0, std::max(1.0, maxValue)));
-    replot();
-}
-
 void PlotWidget::setPlotTitle(const std::string& title)
 {
     plotTitle_ = new QCPTextElement(this, QString::fromStdString(title), QFont("sans", 12, QFont::Bold));
@@ -230,6 +179,7 @@ void PlotWidget::resetRanges()
     yMin_ = INT_MAX;
     yMax_ = INT_MIN;
 
+    // These seem to be the default values used by QCustomPlot
     yAxis->setRange(0, 5);
     xAxis->setRange(0, 5);
 }
@@ -241,7 +191,6 @@ void PlotWidget::resetGraphs()
 
     graphs_.clear();
     histogram_.clear();
-    heatMap_ = nullptr;
 }
 
 void PlotWidget::updateLegend(const std::vector<std::string>& labels)
@@ -258,8 +207,8 @@ void PlotWidget::updateLegend(const std::vector<std::string>& labels)
 
 void PlotWidget::enableZoom(bool enabled)
 {
-    setInteraction(QCP::iRangeDrag, enabled);
-    setInteraction(QCP::iRangeZoom, enabled);
+    setInteraction(QCP::iRangeDrag, enabled); // Allow dragging the plot by left click-hold
+    setInteraction(QCP::iRangeZoom, enabled); // Allow zoom with mouse wheel
 }
 
 void PlotWidget::setHistogramYRange(double yMax)
@@ -280,12 +229,8 @@ void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, &PlotModel::createLinePlots, this, &PlotWidget::createLinePlots);
     connect(plotModel, &PlotModel::createHistogram, this, &PlotWidget::createHistogram);
-    connect(plotModel, &PlotModel::createHeatMap, this, &PlotWidget::createHeatMap);
-
     connect(plotModel, &PlotModel::linePlotPoint, this, &PlotWidget::plotLinePlotPoint);
     connect(plotModel, &PlotModel::linePlotPoints, this, &PlotWidget::plotLinePlotPoints);
     connect(plotModel, &PlotModel::histogram, this, &PlotWidget::plotHistogram);
-    connect(plotModel, &PlotModel::heatMap, this, &PlotWidget::plotHeatMap);
-
     connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
 }

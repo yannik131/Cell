@@ -8,15 +8,11 @@
 #include "core/Utility.hpp"
 
 #include <QObject>
-#include <QVector>
 #include <boost/histogram.hpp>
-#include <optional>
 
 namespace bh = boost::histogram;
 
 using Histogram = bh::histogram<std::tuple<bh::axis::category<std::string>, bh::axis::regular<>>, bh::default_storage>;
-using HeatMapColumn = QVector<double>;
-using HeatMapData = QVector<HeatMapColumn>;
 
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
@@ -63,6 +59,7 @@ class PlotModel : public QObject
 {
     Q_OBJECT
 public:
+    // TODO Don't use simulation here?
     PlotModel(QObject* parent, Simulation* simulation);
 
     void setPlotCategory(PlotCategory plotCategory);
@@ -80,63 +77,59 @@ signals:
     void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
     void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
                          const Histogram& histogram);
-    void createHeatMap(double xMin, double xMax, double yMin, double yMax, int xCells, int yCells);
-
-    void linePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
-                       DoReplot = DoReplot{true});
+    void linePlotPoint(const std::unordered_map<std::string, double>& points, double xStep, DoReplot doReplot);
     void linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void histogram(const Histogram& histogram);
-    void heatMap(const HeatMapData& columns);
-
     void plotTitle(const std::string& title);
 
 private:
+    // Methods for replacing the existing plot by another one using the stored data
     void emitWholePlot();
     void emitLinePlot();
-    void emitHistogram();
+    void emitHistogram(); // Both for whole plot and plot part
     void emitHeatMap();
 
+    // Methods for adding new points to an existing plot
     void emitPlotPart();
     void emitLinePlotPoints();
     void emitHeatMapColumn();
-    void emitGraphs();
-
-    void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
 
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
     void storeDataPoint(const DataPoint& dataPoint);
-
-    Histogram sumHistogramStacks(const Histogram& histogram) const;
-    Histogram discardInactiveDiscTypes(const Histogram& histogram) const;
-    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories) const;
-    Histogram makeActiveHeatMapHistogram(const Histogram& histogram) const;
-
-    HeatMapColumn makeHeatMapColumn(const Histogram& histogram) const;
-    HeatMapData buildWholeHeatMap() const;
-    void captureInitialHistogram(const FrameDTO& frameDTO);
+    void emitGraphs();
+    void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
+    Histogram sumHistogramStacks(const Histogram& histogram);
+    Histogram discardInactiveDiscTypes(const Histogram& histogram);
+    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
+    void emitInitialHistogram(const FrameDTO& frameDTO);
 
 private:
-    Simulation* simulation_ = nullptr;
-
-    PlotCategory plotCategory_ = PlotCategory::TypeCounts;
-    bool plotSum_ = false;
-
-    std::vector<std::unordered_map<std::string, double>> plotData_;
     std::vector<DataPoint> dataPoints_;
-    std::map<std::string, bool> activePlotDiscTypes_;
+    Simulation* simulation_;
 
+    /**
+     * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
+     * continously add data points to this one
+     */
     DataPoint dataPointForStorage_;
     DataPoint dataPointForPlotting_;
 
-    std::optional<Histogram> initialVxHistogram_;
+    /**
+     * @brief Number of data points already added to the dataPointForStorage_
+     */
+    int averagingCount_ = 0;
+
+    const double storageTime_ = 0.1;
+
+    double plotTimeInterval_ = 0.1;
+    bool plotSum_ = false;
+    PlotCategory plotCategory_ = SupportedPlotCategories().front();
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;
 
-    int averagingCount_ = 0;
-    double plotTimeInterval_ = 0.1;
-    const double storageTime_ = 0.1;
+    std::map<std::string, bool> activePlotDiscTypes_;
 };
 
 #endif /* F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP */
