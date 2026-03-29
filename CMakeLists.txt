@@ -3,6 +3,20 @@ cmake_policy(SET CMP0091 NEW) # conan does not set this but cmake wants it
 cmake_policy(SET CMP0057 NEW) # again..
 project(Cell)
 
+file(GLOB LIBCELL_SRC CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/cell/*.cpp"
+)
+
+file(GLOB_RECURSE QT_GUI_SRC CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/gui/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/gui/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/gui/*.ui"
+)
+
+file(GLOB LIBCELL_TEST_SRC CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/libcell/*.cpp"
+)
+
 message("Build type: ${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -33,7 +47,6 @@ find_package(Boost COMPONENTS histogram)
 
 add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 
-file(GLOB LIBCELL_SRC src/lib/cell/*.cpp)
 add_library(libcell ${LIBCELL_SRC})
 
 target_include_directories(libcell PRIVATE ${CMAKE_SOURCE_DIR}/src/lib/cell/)
@@ -49,15 +62,6 @@ add_library(qcustomplot ${CMAKE_SOURCE_DIR}/contrib/qcustomplot/qcustomplot.h ${
 set_target_properties(qcustomplot PROPERTIES AUTOMOC ON)
 target_include_directories(qcustomplot PUBLIC ${CMAKE_SOURCE_DIR}/contrib/qcustomplot/)
 target_link_libraries(qcustomplot Qt6::Core Qt6::Widgets Qt6::PrintSupport)
-
-# the gui target
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
-file(GLOB_RECURSE QT_GUI_SRC ${CMAKE_SOURCE_DIR}
-    src/lib/gui/*.cpp 
-    src/lib/gui/*.hpp
-)
 
 #the header files have to be added here as well for Q_OBJECT to work
 add_library(libcellgui
@@ -81,6 +85,10 @@ target_link_libraries(libcellgui PUBLIC
 )
 
 add_executable(cell-gui WIN32 src/apps/cell-gui/Main.cpp)
+set_target_properties(libcellgui PROPERTIES
+    AUTOMOC ON
+    AUTOUIC ON
+)
 
 if(WIN32)
     target_sources(cell-gui PRIVATE src/apps/cell-gui/cell-gui.rc)
@@ -106,12 +114,14 @@ target_link_libraries(playground PRIVATE
     qcustomplot
 )
 
+target_precompile_headers(playground PRIVATE
+    "${CMAKE_SOURCE_DIR}/contrib/qcustomplot/qcustomplot.h"
+)
+
 # tests for cell
 enable_testing()
 
 find_package(GTest REQUIRED)
-
-file(GLOB_RECURSE LIBCELL_TEST_SRC ${PROJECT_SOURCE_DIR}/test/libcell/*.cpp)
 
 add_executable(tests-libcell ${LIBCELL_TEST_SRC})
 
