@@ -10,6 +10,15 @@
 #include <QObject>
 #include <boost/histogram.hpp>
 
+/**
+ * Workflow:
+ * - If a plot type is selected, the stored data + the current data point for plotting are emitted
+ * - In this case, the widget creates the appropriate graphs and plots all the points (1 method each: create...Plot)
+ * - If a new data point is added to the storage, this data point is sent to the widget which adds the new data to the
+ * existing plot
+ * - No need for separate create graphs and plotpoints methods
+ */
+
 namespace bh = boost::histogram;
 
 using Histogram = bh::histogram<std::tuple<bh::axis::category<std::string>, bh::axis::regular<>>, bh::default_storage>;
@@ -77,9 +86,11 @@ signals:
     void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
     void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
                          const Histogram& histogram);
+    void createHeatmap(const std::vector<Histogram>& histograms);
     void linePlotPoint(const std::unordered_map<std::string, double>& points, double xStep, DoReplot doReplot);
     void linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
     void histogram(const Histogram& histogram);
+    void heatmapColumn(const Histogram& histogram);
     void plotTitle(const std::string& title);
 
 private:
@@ -108,10 +119,6 @@ private:
     std::vector<DataPoint> dataPoints_;
     Simulation* simulation_;
 
-    /**
-     * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
-     * continously add data points to this one
-     */
     DataPoint dataPointForStorage_;
     DataPoint dataPointForPlotting_;
 

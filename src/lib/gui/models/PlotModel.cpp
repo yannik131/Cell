@@ -118,14 +118,7 @@ void PlotModel::processFrame(const FrameDTO& frameDTO)
     }
 
     DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-
     storeDataPoint(dataPoint);
-
-    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
-    {
-        emitPlotPart();
-        dataPointForPlotting_.clear();
-    }
 }
 
 void PlotModel::emitWholePlot()
@@ -190,6 +183,21 @@ void PlotModel::emitHistogram()
 
 void PlotModel::emitHeatMap()
 {
+    std::vector<Histogram> histograms;
+    histograms.reserve(dataPoints_.size());
+
+    const auto getHistogramFromDataPoint = [&](const DataPoint& dataPoint)
+    {
+        auto h = discardInactiveDiscTypes(dataPoint.vxHistogram_);
+        return sumHistogramStacks(h);
+    };
+
+    for (const auto& dataPoint : dataPoints_)
+        histograms.push_back(getHistogramFromDataPoint(dataPoint));
+
+    histograms.push_back(getHistogramFromDataPoint(dataPointForPlotting_));
+
+    emit createHeatmap(histograms);
 }
 
 DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
@@ -261,7 +269,10 @@ void PlotModel::storeDataPoint(const DataPoint& dataPoint)
     if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
     {
         averageDataPoint(dataPointForPlotting_, averagingCount_);
+        emitPlotPart();
+
         averagingCount_ = 0;
+        dataPointForPlotting_.clear();
     }
 }
 
@@ -295,6 +306,10 @@ void PlotModel::emitLinePlotPoints()
 
 void PlotModel::emitHeatMapColumn()
 {
+    auto h = discardInactiveDiscTypes(dataPointForPlotting_.vxHistogram_);
+    h = sumHistogramStacks(h);
+
+    emit heatmapColumn(h);
 }
 
 void PlotModel::emitGraphs()
@@ -332,6 +347,7 @@ void PlotModel::emitGraphs()
         emit createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
         break;
     case PlotCategory::VelocityHeatMap:
+        emitHeatMap();
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 }
@@ -428,6 +444,8 @@ void PlotModel::emitInitialHistogram(const FrameDTO& frameDTO)
     dataPointForPlotting_ = dataPointFromFrameDTO(frameDTO);
     if (plotCategory_ == PlotCategory::VelocityDistribution)
         emitHistogram();
+    else if (plotCategory_ == PlotCategory::VelocityHeatMap)
+        emitHeatMap();
 }
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
