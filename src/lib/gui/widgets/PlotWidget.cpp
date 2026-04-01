@@ -23,19 +23,14 @@ void PlotWidget::setModel(PlotModel* plotModel)
 {
     connect(plotModel, qOverload<const LinePlotParams&>(&PlotModel::setPlot), this,
             qOverload<const LinePlotParams&>(&PlotWidget::setPlot));
-
     connect(plotModel, qOverload<const HistogramParams&>(&PlotModel::setPlot), this,
             qOverload<const HistogramParams&>(&PlotWidget::setPlot));
-
     connect(plotModel, qOverload<const ColorMapParams&>(&PlotModel::setPlot), this,
             qOverload<const ColorMapParams&>(&PlotWidget::setPlot));
-
     connect(plotModel, qOverload<const LinePlotData&>(&PlotModel::updatePlot), this,
             qOverload<const LinePlotData&>(&PlotWidget::updatePlot));
-
     connect(plotModel, qOverload<const HistogramData&>(&PlotModel::updatePlot), this,
             qOverload<const HistogramData&>(&PlotWidget::updatePlot));
-
     connect(plotModel, qOverload<const ColorMapData&>(&PlotModel::updatePlot), this,
             qOverload<const ColorMapData&>(&PlotWidget::updatePlot));
     connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
