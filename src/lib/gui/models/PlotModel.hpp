@@ -5,6 +5,8 @@
 #include "core/FrameDTO.hpp"
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
+#include "core/Utility.hpp"
+#include "widgets/PlotWidget.hpp"
 
 #include <QObject>
 
@@ -13,11 +15,33 @@
  */
 struct DataPoint
 {
+    DataPoint(double vxSigma, std::vector<std::string> discTypes)
+        : vxHistogram_(bh::make_histogram(bh::axis::category<std::string>(std::move(discTypes), "Disc types"),
+                                          bh::axis::regular<>(20, -3 * vxSigma, 3 * vxSigma, "v_x")))
+    {
+    }
+
+    explicit DataPoint(const cell::SimulationConfig& config)
+        : DataPoint(config.mostProbableSpeed, utility::extract(config.discTypes, &cell::config::DiscType::name))
+    {
+    }
+
+    void clear()
+    {
+        elapsedTime_ = 0;
+        collisionCounts_.clear();
+        totalMomentumMap_.clear();
+        totalKineticEnergyMap_.clear();
+        discTypeCountMap_.clear();
+        vxHistogram_.reset();
+    }
+
     double elapsedTime_ = 0;
     std::unordered_map<std::string, double> collisionCounts_;
     std::unordered_map<std::string, double> totalMomentumMap_;
     std::unordered_map<std::string, double> totalKineticEnergyMap_;
     std::unordered_map<std::string, double> discTypeCountMap_;
+    Histogram vxHistogram_;
 };
 
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
@@ -26,8 +50,6 @@ class Simulation;
 
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
- * @todo This is currently very slow: For small time steps, hundreds of data points are stored for a single point in the
- * plot
  */
 class PlotModel : public QObject
 {
@@ -48,55 +70,50 @@ public slots:
     void processFrame(const FrameDTO& frameDTO);
 
 signals:
-    void createGraphs(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
-    void addDataPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep, DoReplot doReplot);
-    void addDataPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
-    void setPlotTitle(const std::string& title);
+    void setPlot(const PlotWidget::LinePlotParams& linePlotParams);
+    void setPlot(const PlotWidget::HistogramParams& histogramParams);
+    void setPlot(const PlotWidget::ColorMapParams& colorMapParams);
+
+    void updatePlot(const PlotWidget::LinePlotData& linePlotData);
+    void updatePlot(const PlotWidget::HistogramData& histogramData);
+    void updatePlot(const PlotWidget::ColorMapData& colorMapData);
+
+    void plotTitle(const std::string& title);
 
 private:
-    /**
-     * @brief Emits data for the full plot with all data points
-     */
-    void emitPlot();
+    void setPlot();
+    void setLinePlot();
+    void setHistogramPlot();
+    void setColorMapPlot();
 
-    /**
-     * @brief Turns a given FrameDTO into a DataPoint by summing up all relevant properties of all discs in the given
-     * frame
-     */
+    void updatePlot();
+    void updateLinePlot();
+    void updateHistogramPlot();
+    void updateColorMapPlot();
+
+    void updateLabelsAndColors();
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
-
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
-
     void storeDataPoint(const DataPoint& dataPoint);
-    void plotDataPoint(const DataPoint& dataPoint);
-    void emitGraphs();
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
+    Histogram sumHistogramStacks(const Histogram& histogram);
+    Histogram discardInactiveDiscTypes(const Histogram& histogram);
+    Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
+    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
+    void emitInitialHistogram(const FrameDTO& frameDTO);
 
 private:
-    /**
-     * @brief All data points received from the simulation
-     */
     std::vector<DataPoint> dataPoints_;
+    Simulation* simulation_;
 
-    /**
-     * @brief If we collect all data points and average them all at once, visual stutter might be the result, so we
-     * continously add data points to this one
-     */
     DataPoint dataPointForStorage_;
     DataPoint dataPointForPlotting_;
-
-    /**
-     * @brief Number of data points already added to the dataPointForStorage_
-     */
-    int averagingCount_ = 0;
 
     const double storageTime_ = 0.1;
 
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
-    PlotCategory plotCategory_ = SupportedPlotCategories.front();
-
-    Simulation* simulation_;
+    PlotCategory plotCategory_ = PlotCategory::TypeCounts;
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;

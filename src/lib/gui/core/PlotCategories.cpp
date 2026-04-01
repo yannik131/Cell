@@ -2,22 +2,60 @@
 #include "core/ColorMapping.hpp"
 #include "core/Utility.hpp"
 
-namespace PlotCategoryKeys
+namespace
 {
-inline const QString TypeCounts = "Type counts";
-inline const QString CollisionCounts = "Collision count";
-inline const QString AbsoluteMomentum = "Absolute momentum";
-inline const QString KineticEnergy = "Kinetic energy";
-} // namespace PlotCategoryKeys
 
-const QList<PlotCategory> SupportedPlotCategories{PlotCategory::TypeCounts, PlotCategory::CollisionCounts,
-                                                  PlotCategory::AbsoluteMomentum, PlotCategory::KineticEnergy};
+using Pair = std::pair<PlotCategory, QString>;
 
-const QStringList SupportedPlotCategoryNames{PlotCategoryKeys::TypeCounts, PlotCategoryKeys::CollisionCounts,
-                                             PlotCategoryKeys::AbsoluteMomentum, PlotCategoryKeys::KineticEnergy};
+const std::vector<Pair> PlotCategoryPairs{
+    {PlotCategory::TypeCounts, "Type counts"},
+    {PlotCategory::CollisionCounts, "Collision counts"},
+    {PlotCategory::AbsoluteMomentum, "Absolute momentum"},
+    {PlotCategory::KineticEnergy, "Kinetic energy"},
+    {PlotCategory::VelocityDistribution, "Velocity distribution"},
+    {PlotCategory::VelocityColorMap, "Velocity color map"},
+};
 
-const QMap<QString, PlotCategory> PlotCategoryNameMapping{
-    {PlotCategoryKeys::TypeCounts, PlotCategory::TypeCounts},
-    {PlotCategoryKeys::CollisionCounts, PlotCategory::CollisionCounts},
-    {PlotCategoryKeys::AbsoluteMomentum, PlotCategory::AbsoluteMomentum},
-    {PlotCategoryKeys::KineticEnergy, PlotCategory::KineticEnergy}};
+struct PlotCategoryCache
+{
+    QVector<PlotCategory> categories;
+    QStringList names;
+    QMap<QString, PlotCategory> nameToCategory;
+};
+
+const PlotCategoryCache& cache()
+{
+    static const PlotCategoryCache c = []
+    {
+        PlotCategoryCache out;
+        out.categories.reserve(static_cast<qsizetype>(PlotCategoryPairs.size()));
+        out.names.reserve(static_cast<qsizetype>(PlotCategoryPairs.size()));
+
+        for (const auto& [category, name] : PlotCategoryPairs)
+        {
+            out.categories.push_back(category);
+            out.names.push_back(name);
+            out.nameToCategory.insert(name, category);
+        }
+        return out;
+    }();
+
+    return c;
+}
+
+} // namespace
+
+const QVector<PlotCategory>& SupportedPlotCategories()
+{
+    return cache().categories;
+}
+
+const QStringList& SupportedPlotCategoryNames()
+{
+    return cache().names;
+}
+
+const QMap<QString, PlotCategory>& PlotCategoryNameMap()
+{
+    return cache().nameToCategory;
+}

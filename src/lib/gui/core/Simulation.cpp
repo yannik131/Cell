@@ -4,6 +4,7 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
+#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 
@@ -87,6 +88,11 @@ const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
 SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
 {
     return simulationConfigUpdater_;
+}
+
+const cell::SimulationConfig& Simulation::getSimulationConfig() const
+{
+    return simulationConfigUpdater_.getSimulationConfig();
 }
 
 bool Simulation::cellIsBuilt() const

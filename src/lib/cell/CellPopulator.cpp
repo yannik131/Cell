@@ -101,10 +101,8 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
 
     if (static_cast<int>(gridPoints.size()) < discCount)
     {
-        LOG(WARNING) << std::to_string(discCount)
-                     << " discs should be created for membrane of type \"" + membraneType.getName() +
-                            "\", but the grid can only fit "
-                     << std::to_string(gridPoints.size()) << ". " << std::to_string(discCount - gridPoints.size())
+        LOG(WARNING) << discCount << " discs should be created for membrane of type \"" << membraneType.getName()
+                     << "\", but the grid can only fit " << gridPoints.size() << ". " << discCount - gridPoints.size()
                      << " discs will not be created.";
     }
 
