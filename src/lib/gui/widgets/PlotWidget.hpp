@@ -6,35 +6,67 @@
 
 #include "qcustomplot.h"
 
-/**
- * @brief Widget containing the plot displaying information on the simulation
- */
 class PlotWidget : public QCustomPlot
 {
     Q_OBJECT
 public:
+    struct LinePlotParams
+    {
+        const std::vector<std::string>& labels;
+        const std::vector<sf::Color>& colors;
+        const std::vector<std::unordered_map<std::string, double>>& dataPoints;
+        const std::string& yAxisLabel;
+        double xStep;
+    };
+
+    struct LinePlotData
+    {
+        const std::unordered_map<std::string, double>& dataPoint;
+        bool doReplot;
+    };
+
+    struct HistogramParams
+    {
+        const std::vector<std::string>& labels;
+        const std::vector<sf::Color>& colors;
+        const Histogram& histogram;
+    };
+
+    struct HistogramData
+    {
+        const Histogram& histogram;
+    };
+
+    struct ColorMapParams
+    {
+        const std::vector<Histogram>& histograms;
+        double xStep;
+    };
+
+    struct ColorMapData
+    {
+        const Histogram& histogram;
+    };
+
+public:
     explicit PlotWidget(QWidget* parent);
 
-    /**
-     * @brief Connects callbacks to the given model
-     */
     void setModel(PlotModel* plotModel);
 
-    void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
-    void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
-                         const Histogram& histogram);
+    void setPlot(const LinePlotParams& linePlotParams);
+    void setPlot(const HistogramParams& histogramParams);
+    void setPlot(const ColorMapParams& colorMapParams);
 
-    void plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
-                           DoReplot = DoReplot{true});
-    void plotLinePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
-    void plotHistogram(const Histogram& histogram);
+    void updatePlot(const LinePlotData& linePlotData);
+    void updatePlot(const HistogramData& histogramData);
+    void updatePlot(const ColorMapData& colorMapData);
 
     void setPlotTitle(const std::string& title);
 
 private:
-    void reset();
-    void resetRanges();
-    void resetGraphs();
+    void clear();
+    void clearRanges();
+    void clearGraphs();
     void updateLegend(const std::vector<std::string>& labels);
     void enableZoom(bool enabled);
     void setHistogramYRange(double yMax);
@@ -44,12 +76,16 @@ private:
 
     double yMin_ = 0;
     double yMax_ = 0;
-
     double xMin_ = 0;
     double xMax_ = 0;
+    double xStep_;
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
     std::unordered_map<std::string, QCPBars*> histogram_;
+    QCPColorMap* colorMap_;
+    QCPColorScale* colorScale_;
+
+    std::vector<Histogram> colorMapCache_;
 
     int count_ = 0;
 };

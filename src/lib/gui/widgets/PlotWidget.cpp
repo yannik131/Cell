@@ -2,11 +2,12 @@
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 
-#include "PlotWidget.hpp"
 #include <QFont>
 
 PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
+    , colorMap_(new QCPColorMap(xAxis, yAxis))
+    , colorScale_(new QCPColorScale(this))
 {
     xAxis->setLabel("t [s]");
 
@@ -18,9 +19,38 @@ PlotWidget::PlotWidget(QWidget* parent)
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignRight);
 }
 
-void PlotWidget::createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors)
+void PlotWidget::setModel(PlotModel* plotModel)
 {
-    reset();
+    connect(plotModel, qOverload<const LinePlotParams&>(&PlotModel::setPlot), this,
+            qOverload<const LinePlotParams&>(&PlotWidget::setPlot));
+
+    connect(plotModel, qOverload<const HistogramParams&>(&PlotModel::setPlot), this,
+            qOverload<const HistogramParams&>(&PlotWidget::setPlot));
+
+    connect(plotModel, qOverload<const ColorMapParams&>(&PlotModel::setPlot), this,
+            qOverload<const ColorMapParams&>(&PlotWidget::setPlot));
+
+    connect(plotModel, qOverload<const LinePlotData&>(&PlotModel::updatePlot), this,
+            qOverload<const LinePlotData&>(&PlotWidget::updatePlot));
+
+    connect(plotModel, qOverload<const HistogramData&>(&PlotModel::updatePlot), this,
+            qOverload<const HistogramData&>(&PlotWidget::updatePlot));
+
+    connect(plotModel, qOverload<const ColorMapData&>(&PlotModel::updatePlot), this,
+            qOverload<const ColorMapData&>(&PlotWidget::updatePlot));
+    connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
+}
+
+void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
+{
+    const auto& labels = linePlotParams.labels;
+    const auto& colors = linePlotParams.colors;
+    xStep_ = linePlotParams.xStep;
+
+    clear();
+
+    xAxis->setLabel("t [s]");
+    yAxis->setLabel(QString::fromStdString(linePlotParams.yAxisLabel));
 
     if (labels.size() != colors.size())
         throw ExceptionWithLocation("Must have equal number of labels and colors");
@@ -40,18 +70,23 @@ void PlotWidget::createLinePlots(const std::vector<std::string>& labels, const s
     updateLegend(labels);
     enableZoom(true);
 
-    replot();
+    for (const auto& dataPoint : linePlotParams.dataPoints)
+        updatePlot(LinePlotData{.dataPoint = dataPoint, .doReplot = false});
+
+    QCustomPlot::replot();
 }
 
-void PlotWidget::createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
-                                 const Histogram& histogram)
+void PlotWidget::setPlot(const HistogramParams& histogramParams)
 {
-    reset();
+    const auto& labels = histogramParams.labels;
+    const auto& colors = histogramParams.colors;
+
+    clear();
 
     if (labels.size() != colors.size())
         throw ExceptionWithLocation("Must have equal number of labels and colors");
 
-    const auto& ax = histogram.axis(1);
+    const auto& ax = histogramParams.histogram.axis(1);
     const double binWidth = ax.bin(0).width();
 
     for (std::size_t i = 0; i < labels.size(); ++i)
@@ -88,13 +123,55 @@ void PlotWidget::createHistogram(const std::vector<std::string>& labels, const s
     updateLegend(labels);
     enableZoom(false);
 
-    replot();
+    updatePlot(HistogramData{.histogram = histogramParams.histogram});
 }
 
-void PlotWidget::plotLinePlotPoint(const std::unordered_map<std::string, double>& dataPoint, double xStep,
-                                   DoReplot doReplot)
+void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
 {
-    double x = xStep * count_++;
+    xStep_ = colorMapParams.xStep;
+    const auto& histograms = colorMapParams.histograms;
+
+    clear();
+    if (histograms.empty())
+        return;
+
+    const int binCount = histograms.front().axis(1).size();
+    colorMap_->data()->setSize(histograms.size(), binCount);
+
+    xAxis->setRange(0, histograms.size());
+    yAxis->setRange(0, binCount);
+    if (histograms.size() == 1)
+        colorMap_->data()->setRange(QCPRange(0, 1), QCPRange(0.5, binCount - 0.5));
+    else
+        colorMap_->data()->setRange(QCPRange(0.5, histograms.size() - 0.5), QCPRange(0.5, binCount - 0.5));
+
+    for (int x = 0; x < static_cast<int>(histograms.size()); ++x)
+    {
+        for (int y = 0; y < binCount; ++y)
+            colorMap_->data()->setCell(x, y, histograms[x][y]);
+    }
+    colorMapCache_ = histograms;
+
+    colorMap_->rescaleDataRange();
+
+    colorScale_->setType(QCPAxis::atRight);
+    QCustomPlot::plotLayout()->addElement(0, 1, colorScale_);
+    colorMap_->setColorScale(colorScale_);
+
+    colorMap_->setGradient(QCPColorGradient::gpGrayscale);
+    colorMap_->setInterpolate(false);
+
+    auto ticker = QSharedPointer<QCPAxisTickerText>::create();
+    for (int i = 0; i < binCount; ++i)
+        ticker->addTick(i + 0.5, QString::number(histograms.front().axis(1).bin(i).center()));
+    yAxis->setTicker(ticker);
+    QCustomPlot::replot();
+}
+
+void PlotWidget::updatePlot(const LinePlotData& linePlotData)
+{
+    const auto& dataPoint = linePlotData.dataPoint;
+    double x = xStep_ * count_++;
 
     for (auto& [label, graph] : graphs_)
     {
@@ -112,21 +189,14 @@ void PlotWidget::plotLinePlotPoint(const std::unordered_map<std::string, double>
     yAxis->setRange(yMin_ - 1, yMax_ + 1);
     xAxis->setRange(xMin_, x);
 
-    if (doReplot.value)
-        replot();
+    if (linePlotData.doReplot)
+        QCustomPlot::replot();
 }
 
-void PlotWidget::plotLinePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints,
-                                    double xStep)
+void PlotWidget::updatePlot(const HistogramData& histogramData)
 {
-    for (const auto& dataPoint : dataPoints)
-        plotLinePlotPoint(dataPoint, xStep, DoReplot{false});
+    const auto& histogram = histogramData.histogram;
 
-    replot();
-}
-
-void PlotWidget::plotHistogram(const Histogram& histogram)
-{
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
 
@@ -157,40 +227,67 @@ void PlotWidget::plotHistogram(const Histogram& histogram)
     }
 
     setHistogramYRange(maxStackedCount);
-    replot();
+    QCustomPlot::replot();
+}
+
+void PlotWidget::updatePlot(const ColorMapData& colorMapData)
+{
+    colorMapCache_.push_back(colorMapData.histogram);
+    const int binCount = colorMap_->data()->valueSize();
+    colorMap_->data()->setSize(colorMapCache_.size(), binCount);
+
+    for (int x = 0; x < static_cast<int>(colorMapCache_.size()); ++x)
+    {
+        for (int y = 0; y < binCount; ++y)
+            colorMap_->data()->setCell(x, y, colorMapCache_[x][y]);
+    }
+
+    colorMap_->rescaleDataRange();
+    xAxis->setRange(0, colorMapCache_.size());
+    QCustomPlot::replot();
 }
 
 void PlotWidget::setPlotTitle(const std::string& title)
 {
-    plotTitle_ = new QCPTextElement(this, QString::fromStdString(title), QFont("sans", 12, QFont::Bold));
+    if (!plotTitle_)
+        plotTitle_ = new QCPTextElement(this, QString::fromStdString(title), QFont("sans", 12, QFont::Bold));
+    else
+        plotTitle_->setText(QString::fromStdString(title));
 }
 
-void PlotWidget::reset()
+void PlotWidget::clear()
 {
-    resetRanges();
-    resetGraphs();
+    clearRanges();
+    clearGraphs();
     count_ = 0;
+    colorMapCache_.clear();
 }
 
-void PlotWidget::resetRanges()
+void PlotWidget::clearRanges()
 {
     xMin_ = 0;
-    xMax_ = INT_MIN;
-    yMin_ = INT_MAX;
-    yMax_ = INT_MIN;
+    xMax_ = std::numeric_limits<double>::lowest();
+    yMin_ = std::numeric_limits<double>::max();
+    yMax_ = std::numeric_limits<double>::lowest();
+
+    yAxis->setTicker(QSharedPointer<QCPAxisTicker>::create());
 
     // These seem to be the default values used by QCustomPlot
     yAxis->setRange(0, 5);
     xAxis->setRange(0, 5);
 }
 
-void PlotWidget::resetGraphs()
+void PlotWidget::clearGraphs()
 {
-    clearGraphs();
-    clearPlottables();
+    QCustomPlot::clearGraphs();
+    QCustomPlot::clearPlottables();
 
     graphs_.clear();
     histogram_.clear();
+
+    QCustomPlot::plotLayout()->remove(colorScale_);
+    colorScale_ = new QCPColorScale(this);
+    colorMap_ = new QCPColorMap(xAxis, yAxis);
 }
 
 void PlotWidget::updateLegend(const std::vector<std::string>& labels)
@@ -223,14 +320,4 @@ void PlotWidget::setHistogramYRange(double yMax)
         yMax_ = yMax;
         yAxis->setRange(0, yMax_);
     }
-}
-
-void PlotWidget::setModel(PlotModel* plotModel)
-{
-    connect(plotModel, &PlotModel::createLinePlots, this, &PlotWidget::createLinePlots);
-    connect(plotModel, &PlotModel::createHistogram, this, &PlotWidget::createHistogram);
-    connect(plotModel, &PlotModel::linePlotPoint, this, &PlotWidget::plotLinePlotPoint);
-    connect(plotModel, &PlotModel::linePlotPoints, this, &PlotWidget::plotLinePlotPoints);
-    connect(plotModel, &PlotModel::histogram, this, &PlotWidget::plotHistogram);
-    connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
 }

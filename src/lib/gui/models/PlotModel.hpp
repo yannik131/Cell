@@ -6,6 +6,7 @@
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
 #include "core/Utility.hpp"
+#include "widgets/PlotWidget.hpp"
 
 #include <QObject>
 #include <boost/histogram.hpp>
@@ -13,7 +14,8 @@
 /**
  * Workflow:
  * - If a plot type is selected, the stored data + the current data point for plotting are emitted
- * - In this case, the widget creates the appropriate graphs and plots all the points (1 method each: create...Plot)
+ * - In this case, the widget clears all existing graphs, creates the new graphs and plots all the points (1 method
+ * each: create...Plot)
  * - If a new data point is added to the storage, this data point is sent to the widget which adds the new data to the
  * existing plot
  * - No need for separate create graphs and plotpoints methods
@@ -83,14 +85,14 @@ public slots:
     void processFrame(const FrameDTO& frameDTO);
 
 signals:
-    void createLinePlots(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors);
-    void createHistogram(const std::vector<std::string>& labels, const std::vector<sf::Color>& colors,
-                         const Histogram& histogram);
-    void createHeatmap(const std::vector<Histogram>& histograms);
-    void linePlotPoint(const std::unordered_map<std::string, double>& points, double xStep, DoReplot doReplot);
-    void linePlotPoints(const std::vector<std::unordered_map<std::string, double>>& dataPoints, double xStep);
-    void histogram(const Histogram& histogram);
-    void heatmapColumn(const Histogram& histogram);
+    void setPlot(const PlotWidget::LinePlotParams& linePlotParams);
+    void setPlot(const PlotWidget::HistogramParams& histogramParams);
+    void setPlot(const PlotWidget::ColorMapParams& colorMapParams);
+
+    void updatePlot(const PlotWidget::LinePlotData& linePlotData);
+    void updatePlot(const PlotWidget::HistogramData& histogramData);
+    void updatePlot(const PlotWidget::ColorMapData& colorMapData);
+
     void plotTitle(const std::string& title);
 
 private:

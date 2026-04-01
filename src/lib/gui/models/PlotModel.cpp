@@ -346,8 +346,7 @@ void PlotModel::emitGraphs()
     case PlotCategory::VelocityDistribution:
         emit createHistogram(labels_, colors_, dataPointForPlotting_.vxHistogram_);
         break;
-    case PlotCategory::VelocityHeatMap:
-        emitHeatMap();
+    case PlotCategory::VelocityHeatMap: emitHeatMap();
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 }
