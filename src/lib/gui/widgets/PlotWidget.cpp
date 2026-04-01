@@ -138,12 +138,13 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     const int binCount = histograms.front().axis(1).size();
     colorMap_->data()->setSize(histograms.size(), binCount);
 
-    xAxis->setRange(0, histograms.size());
+    xAxis->setRange(0, xStep_ * histograms.size());
     yAxis->setRange(0, binCount);
     if (histograms.size() == 1)
-        colorMap_->data()->setRange(QCPRange(0, 1), QCPRange(0.5, binCount - 0.5));
+        colorMap_->data()->setRange(QCPRange(0, xStep_), QCPRange(0.5, binCount - 0.5));
     else
-        colorMap_->data()->setRange(QCPRange(0.5, histograms.size() - 0.5), QCPRange(0.5, binCount - 0.5));
+        colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * histograms.size() - xStep_ / 2),
+                                    QCPRange(0.5, binCount - 0.5));
 
     for (int x = 0; x < static_cast<int>(histograms.size()); ++x)
     {
@@ -243,7 +244,9 @@ void PlotWidget::updatePlot(const ColorMapData& colorMapData)
     }
 
     colorMap_->rescaleDataRange();
-    xAxis->setRange(0, colorMapCache_.size());
+    xAxis->setRange(0, xStep_ * colorMapCache_.size());
+    colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * colorMapCache_.size() - xStep_ / 2),
+                                QCPRange(0.5, binCount - 0.5));
     QCustomPlot::replot();
 }
 

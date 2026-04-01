@@ -12,6 +12,7 @@ int main(int argc, char** argv)
     window.setCentralWidget(customPlot);
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     QCPColorMap* colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
+    const double xStep = 0.1;
     std::vector<std::vector<int>> histograms;
     auto* timer = new QTimer(customPlot);
     auto addHistogram = [&]()
@@ -27,12 +28,12 @@ int main(int argc, char** argv)
                 colorMap->data()->setCell(i, j, histograms[i][j]);
         }
         if (histograms.size() == 1)
-            colorMap->data()->setRange(QCPRange(0, 1), QCPRange(0.5, 4.5));
+            colorMap->data()->setRange(QCPRange(0, xStep), QCPRange(0.5, 4.5));
         else
-            colorMap->data()->setRange(QCPRange(0.5, histograms.size() - 0.5), QCPRange(0.5, 4.5));
+            colorMap->data()->setRange(QCPRange(xStep / 2, xStep * histograms.size() - xStep / 2), QCPRange(0.5, 4.5));
         colorMap->rescaleDataRange();
         customPlot->yAxis->setRange(0, 5);
-        customPlot->xAxis->setRange(0, histograms.size());
+        customPlot->xAxis->setRange(0, xStep * histograms.size());
         customPlot->replot(QCustomPlot::rpQueuedReplot);
     };
     QObject::connect(timer, &QTimer::timeout, addHistogram);
