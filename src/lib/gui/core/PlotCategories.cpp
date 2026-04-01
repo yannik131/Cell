@@ -28,8 +28,8 @@ const PlotCategoryCache& cache()
     static const PlotCategoryCache c = []
     {
         PlotCategoryCache out;
-        out.categories.reserve(PlotCategoryPairs.size());
-        out.names.reserve(PlotCategoryPairs.size());
+        out.categories.reserve(static_cast<qsizetype>(PlotCategoryPairs.size()));
+        out.names.reserve(static_cast<qsizetype>(PlotCategoryPairs.size()));
 
         for (const auto& [category, name] : PlotCategoryPairs)
         {

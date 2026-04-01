@@ -7,7 +7,8 @@ output=$(run-clang-tidy -p build_debug -j 4 \
     -source-filter="^.*/Cell/(src|test)/.*" \
     -header-filter="^.*/Cell/(src|test)/.*" \
     2>&1 \
-    | grep -v "src/apps/playground/main.cpp" \
+    | grep -v "src/apps/playground/Main.cpp" \
+    | grep -v "ignored because it is not a clang PCH file" \
     | tee /dev/stderr)
 
 if echo "$output" | grep -E "warning:|error:" > /dev/null; then
