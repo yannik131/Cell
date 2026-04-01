@@ -14,7 +14,7 @@ enum class PlotCategory
     AbsoluteMomentum,
     KineticEnergy,
     VelocityDistribution,
-    VelocityHeatMap
+    VelocityColorMap
 };
 
 const QVector<PlotCategory>& SupportedPlotCategories();

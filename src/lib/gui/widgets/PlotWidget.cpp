@@ -1,13 +1,12 @@
 #include "widgets/PlotWidget.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
+#include "models/PlotModel.hpp"
 
 #include <QFont>
 
 PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
-    , colorMap_(new QCPColorMap(xAxis, yAxis))
-    , colorScale_(new QCPColorScale(this))
 {
     xAxis->setLabel("t [s]");
 
@@ -45,7 +44,7 @@ void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
     clear();
 
     xAxis->setLabel("t [s]");
-    yAxis->setLabel(QString::fromStdString(linePlotParams.yAxisLabel));
+    yAxis->setLabel(getYAxisLabelFromPlotCategory(linePlotParams.plotCategory));
 
     if (labels.size() != colors.size())
         throw ExceptionWithLocation("Must have equal number of labels and colors");
@@ -128,11 +127,20 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
 
     clear();
     if (histograms.empty())
-        return;
+        throw ExceptionWithLocation("Can't initialize plot with empty histograms");
+
+    legend->setVisible(false);
+
+    colorMap_ = new QCPColorMap(xAxis, yAxis);
+    colorScale_ = new QCPColorScale(this);
+    colorScale_->setType(QCPAxis::atRight);
+    QCustomPlot::plotLayout()->addElement(0, 1, colorScale_);
+    colorMap_->setColorScale(colorScale_);
 
     const int binCount = histograms.front().axis(1).size();
-    colorMap_->data()->setSize(histograms.size(), binCount);
+    colorMap_->data()->setSize(static_cast<int>(histograms.size()), binCount);
 
+    xAxis->setLabel("t [s]");
     xAxis->setRange(0, xStep_ * histograms.size());
     yAxis->setRange(0, binCount);
     if (histograms.size() == 1)
@@ -144,23 +152,21 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     for (int x = 0; x < static_cast<int>(histograms.size()); ++x)
     {
         for (int y = 0; y < binCount; ++y)
-            colorMap_->data()->setCell(x, y, histograms[x][y]);
+            colorMap_->data()->setCell(x, y, histograms[x].at(0, y));
     }
     colorMapCache_ = histograms;
 
     colorMap_->rescaleDataRange();
 
-    colorScale_->setType(QCPAxis::atRight);
-    QCustomPlot::plotLayout()->addElement(0, 1, colorScale_);
-    colorMap_->setColorScale(colorScale_);
-
     colorMap_->setGradient(QCPColorGradient::gpGrayscale);
-    colorMap_->setInterpolate(false);
+    // colorMap_->setInterpolate(false);
 
     auto ticker = QSharedPointer<QCPAxisTickerText>::create();
     for (int i = 0; i < binCount; ++i)
         ticker->addTick(i + 0.5, QString::number(histograms.front().axis(1).bin(i).center()));
     yAxis->setTicker(ticker);
+    yAxis->setLabel(getYAxisLabelFromPlotCategory(PlotCategory::VelocityColorMap));
+    enableZoom(false);
     QCustomPlot::replot();
 }
 
@@ -230,12 +236,12 @@ void PlotWidget::updatePlot(const ColorMapData& colorMapData)
 {
     colorMapCache_.push_back(colorMapData.histogram);
     const int binCount = colorMap_->data()->valueSize();
-    colorMap_->data()->setSize(colorMapCache_.size(), binCount);
+    colorMap_->data()->setSize(static_cast<int>(colorMapCache_.size()), binCount);
 
     for (int x = 0; x < static_cast<int>(colorMapCache_.size()); ++x)
     {
         for (int y = 0; y < binCount; ++y)
-            colorMap_->data()->setCell(x, y, colorMapCache_[x][y]);
+            colorMap_->data()->setCell(x, y, colorMapCache_[x].at(0, y));
     }
 
     colorMap_->rescaleDataRange();
@@ -273,6 +279,8 @@ void PlotWidget::clearRanges()
     // These seem to be the default values used by QCustomPlot
     yAxis->setRange(0, 5);
     xAxis->setRange(0, 5);
+
+    xAxis->setNumberPrecision(2);
 }
 
 void PlotWidget::clearGraphs()
@@ -283,9 +291,13 @@ void PlotWidget::clearGraphs()
     graphs_.clear();
     histogram_.clear();
 
-    QCustomPlot::plotLayout()->remove(colorScale_);
-    colorScale_ = new QCPColorScale(this);
-    colorMap_ = new QCPColorMap(xAxis, yAxis);
+    if (colorScale_)
+    {
+        QCustomPlot::plotLayout()->remove(colorScale_);
+        colorScale_ = nullptr;
+        colorMap_ = nullptr;
+        QCustomPlot::plotLayout()->simplify();
+    }
 }
 
 void PlotWidget::updateLegend(const std::vector<std::string>& labels)
@@ -317,5 +329,19 @@ void PlotWidget::setHistogramYRange(double yMax)
     {
         yMax_ = yMax;
         yAxis->setRange(0, yMax_);
+    }
+}
+
+QString PlotWidget::getYAxisLabelFromPlotCategory(const PlotCategory& plotCategory) const
+{
+    switch (plotCategory)
+    {
+    case PlotCategory::AbsoluteMomentum: return "|mv|";
+    case PlotCategory::CollisionCounts: return "Collision count";
+    case PlotCategory::KineticEnergy: return "E_kin";
+    case PlotCategory::TypeCounts: return "Number of discs";
+    case PlotCategory::VelocityColorMap: return "v_x";
+    case PlotCategory::VelocityDistribution: return "Count";
+    default: throw ExceptionWithLocation("Invalid plot category");
     }
 }

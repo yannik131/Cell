@@ -32,4 +32,5 @@ set_target_properties(libcellgui PROPERTIES
 
 target_precompile_headers(libcellgui PRIVATE
     "${CMAKE_SOURCE_DIR}/contrib/qcustomplot/qcustomplot.h"
+    <boost/histogram.hpp>
 )

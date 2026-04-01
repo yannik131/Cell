@@ -74,7 +74,7 @@
                 "product2": ""
             }
         ],
-        "simulationTimeScale": 0.5,
+        "simulationTimeScale": 0.3,
         "simulationTimeStep": 0.001,
         "useDistribution": true
     },

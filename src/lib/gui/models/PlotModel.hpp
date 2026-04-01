@@ -9,21 +9,6 @@
 #include "widgets/PlotWidget.hpp"
 
 #include <QObject>
-#include <boost/histogram.hpp>
-
-/**
- * Workflow:
- * - If a plot type is selected, the stored data + the current data point for plotting are emitted
- * - In this case, the widget clears all existing graphs, creates the new graphs and plots all the points (1 method
- * each: create...Plot)
- * - If a new data point is added to the storage, this data point is sent to the widget which adds the new data to the
- * existing plot
- * - No need for separate create graphs and plotpoints methods
- */
-
-namespace bh = boost::histogram;
-
-using Histogram = bh::histogram<std::tuple<bh::axis::category<std::string>, bh::axis::regular<>>, bh::default_storage>;
 
 /**
  * @brief Struct containing information from a FrameDTO relevant for the plot
@@ -32,7 +17,7 @@ struct DataPoint
 {
     DataPoint(double vxSigma, std::vector<std::string> discTypes)
         : vxHistogram_(bh::make_histogram(bh::axis::category<std::string>(std::move(discTypes), "Disc types"),
-                                          bh::axis::regular<>(20, -3 * vxSigma, 3 * vxSigma, "v.x")))
+                                          bh::axis::regular<>(20, -3 * vxSigma, 3 * vxSigma, "v_x")))
     {
     }
 
@@ -96,24 +81,24 @@ signals:
     void plotTitle(const std::string& title);
 
 private:
-    // Methods for replacing the existing plot by another one using the stored data
-    void emitWholePlot();
-    void emitLinePlot();
-    void emitHistogram(); // Both for whole plot and plot part
-    void emitHeatMap();
+    void setPlot();
+    void setLinePlot();
+    void setHistogramPlot();
+    void setColorMapPlot();
 
-    // Methods for adding new points to an existing plot
-    void emitPlotPart();
-    void emitLinePlotPoints();
-    void emitHeatMapColumn();
+    void updatePlot();
+    void updateLinePlot();
+    void updateHistogramPlot();
+    void updateColorMapPlot();
 
+    void updateLabelsAndColors();
     DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
     void storeDataPoint(const DataPoint& dataPoint);
-    void emitGraphs();
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
     Histogram sumHistogramStacks(const Histogram& histogram);
     Histogram discardInactiveDiscTypes(const Histogram& histogram);
+    Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
     Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
     void emitInitialHistogram(const FrameDTO& frameDTO);
 
@@ -124,16 +109,11 @@ private:
     DataPoint dataPointForStorage_;
     DataPoint dataPointForPlotting_;
 
-    /**
-     * @brief Number of data points already added to the dataPointForStorage_
-     */
-    int averagingCount_ = 0;
-
     const double storageTime_ = 0.1;
 
     double plotTimeInterval_ = 0.1;
     bool plotSum_ = false;
-    PlotCategory plotCategory_ = SupportedPlotCategories().front();
+    PlotCategory plotCategory_ = PlotCategory::TypeCounts;
 
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;

@@ -13,7 +13,7 @@ const std::vector<Pair> PlotCategoryPairs{
     {PlotCategory::AbsoluteMomentum, "Absolute momentum"},
     {PlotCategory::KineticEnergy, "Kinetic energy"},
     {PlotCategory::VelocityDistribution, "Velocity distribution"},
-    {PlotCategory::VelocityHeatMap, "Velocity heat map"},
+    {PlotCategory::VelocityColorMap, "Velocity color map"},
 };
 
 struct PlotCategoryCache

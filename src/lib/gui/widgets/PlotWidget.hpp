@@ -1,10 +1,13 @@
 #ifndef EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP
 #define EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP
 
+#include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
-#include "models/PlotModel.hpp"
 
 #include "qcustomplot.h"
+#include <SFML/Graphics/Color.hpp>
+
+class PlotModel;
 
 class PlotWidget : public QCustomPlot
 {
@@ -15,7 +18,7 @@ public:
         const std::vector<std::string>& labels;
         const std::vector<sf::Color>& colors;
         const std::vector<std::unordered_map<std::string, double>>& dataPoints;
-        const std::string& yAxisLabel;
+        const PlotCategory& plotCategory;
         double xStep;
     };
 
@@ -70,6 +73,7 @@ private:
     void updateLegend(const std::vector<std::string>& labels);
     void enableZoom(bool enabled);
     void setHistogramYRange(double yMax);
+    QString getYAxisLabelFromPlotCategory(const PlotCategory& plotCategory) const;
 
 private:
     QCPTextElement* plotTitle_ = nullptr;
@@ -82,8 +86,8 @@ private:
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
     std::unordered_map<std::string, QCPBars*> histogram_;
-    QCPColorMap* colorMap_;
-    QCPColorScale* colorScale_;
+    QCPColorMap* colorMap_ = nullptr;
+    QCPColorScale* colorScale_ = nullptr;
 
     std::vector<Histogram> colorMapCache_;
 
