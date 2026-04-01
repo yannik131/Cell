@@ -85,7 +85,7 @@ void PlotWidget::setPlot(const HistogramParams& histogramParams)
 
     for (std::size_t i = 0; i < labels.size(); ++i)
     {
-        QCPBars* graph = new QCPBars(xAxis, yAxis);
+        auto* graph = new QCPBars(xAxis, yAxis);
         graph->setAntialiased(false);
         graph->setStackingGap(0);
 
@@ -141,12 +141,12 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     colorMap_->data()->setSize(static_cast<int>(histograms.size()), binCount);
 
     xAxis->setLabel("t [s]");
-    xAxis->setRange(0, xStep_ * histograms.size());
+    xAxis->setRange(0, xStep_ * static_cast<double>(histograms.size()));
     yAxis->setRange(0, binCount);
     if (histograms.size() == 1)
         colorMap_->data()->setRange(QCPRange(0, xStep_), QCPRange(0.5, binCount - 0.5));
     else
-        colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * histograms.size() - xStep_ / 2),
+        colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * static_cast<double>(histograms.size()) - xStep_ / 2),
                                     QCPRange(0.5, binCount - 0.5));
 
     for (int x = 0; x < static_cast<int>(histograms.size()); ++x)
@@ -245,8 +245,8 @@ void PlotWidget::updatePlot(const ColorMapData& colorMapData)
     }
 
     colorMap_->rescaleDataRange();
-    xAxis->setRange(0, xStep_ * colorMapCache_.size());
-    colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * colorMapCache_.size() - xStep_ / 2),
+    xAxis->setRange(0, xStep_ * static_cast<double>(colorMapCache_.size()));
+    colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * static_cast<double>(colorMapCache_.size()) - xStep_ / 2),
                                 QCPRange(0.5, binCount - 0.5));
     QCustomPlot::replot();
 }

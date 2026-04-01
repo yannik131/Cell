@@ -82,7 +82,7 @@ private:
     double yMax_ = 0;
     double xMin_ = 0;
     double xMax_ = 0;
-    double xStep_;
+    double xStep_ = 0;
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
     std::unordered_map<std::string, QCPBars*> histogram_;
