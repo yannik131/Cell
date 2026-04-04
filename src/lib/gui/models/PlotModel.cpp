@@ -182,13 +182,13 @@ void PlotModel::setHistogramPlot()
     const int requiredDataPoints = std::max(1, static_cast<int>(std::ceil(plotTimeInterval_ / storageTime_)));
 
     if (static_cast<int>(dataPoints_.size()) < requiredDataPoints)
-        histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{.value = plotSum_});
+        histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{plotSum_});
     else
     {
-        histogram = getVelocityHistogramFromDataPoint(dataPoints_.back(), CalculateSum{.value = plotSum_});
+        histogram = getVelocityHistogramFromDataPoint(dataPoints_.back(), CalculateSum{plotSum_});
 
         for (int i = 1; i < requiredDataPoints; ++i)
-            histogram += getVelocityHistogramFromDataPoint(dataPoints_[i], CalculateSum{.value = plotSum_});
+            histogram += getVelocityHistogramFromDataPoint(dataPoints_[i], CalculateSum{plotSum_});
 
         histogram /= requiredDataPoints;
     }
@@ -213,7 +213,7 @@ void PlotModel::setColorMapPlot()
             continue;
 
         averageDataPoint(dataPointToAverage, averagingCount);
-        histograms.push_back(getVelocityHistogramFromDataPoint(dataPointToAverage, CalculateSum{.value = true}));
+        histograms.push_back(getVelocityHistogramFromDataPoint(dataPointToAverage, CalculateSum{true}));
 
         dataPointToAverage.clear();
         averagingCount = 0;
@@ -221,7 +221,7 @@ void PlotModel::setColorMapPlot()
 
     // Simulation hasn't run yet, display plot for initial data
     if (histograms.empty())
-        histograms.push_back(getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{.value = true}));
+        histograms.push_back(getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{true}));
 
     emit setPlot(PlotWidget::ColorMapParams{.histograms = histograms, .xStep = plotTimeInterval_});
 }
@@ -256,13 +256,13 @@ void PlotModel::updateLinePlot()
 
 void PlotModel::updateHistogramPlot()
 {
-    auto histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{.value = plotSum_});
+    auto histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{plotSum_});
     emit updatePlot(PlotWidget::HistogramData{.histogram = histogram});
 }
 
 void PlotModel::updateColorMapPlot()
 {
-    auto histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{.value = true});
+    auto histogram = getVelocityHistogramFromDataPoint(dataPointForPlotting_, CalculateSum{true});
     emit updatePlot(PlotWidget::ColorMapData{.histogram = histogram});
 }
 
