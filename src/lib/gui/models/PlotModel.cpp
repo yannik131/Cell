@@ -10,12 +10,20 @@
 namespace
 {
 
-void averageDataPoint(DataPoint& dataPoint, int length)
+struct NormalizeCollisionCounts
+{
+    bool value = true;
+};
+
+void averageDataPoint(DataPoint& dataPoint, int length, NormalizeCollisionCounts normalizeCollisionCounts = {})
 {
     double dt = dataPoint.elapsedTime_;
 
-    // Collisions per second = All registered collisions / dt
-    utility::divideValuesBy(dataPoint.collisionCounts_, dt);
+    if (normalizeCollisionCounts.value)
+    {
+        // Collisions per second = All registered collisions / dt
+        utility::divideValuesBy(dataPoint.collisionCounts_, dt);
+    }
 
     utility::divideValuesBy(dataPoint.totalKineticEnergyMap_, length);
     utility::divideValuesBy(dataPoint.totalMomentumMap_, length);
@@ -345,7 +353,7 @@ void PlotModel::storeDataPoint(const DataPoint& dataPoint)
     if (dataPointForStorage_.elapsedTime_ >= storageTime_)
     {
         const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
-        averageDataPoint(dataPointForStorage_, dataPointsPerStoredPoint);
+        averageDataPoint(dataPointForStorage_, dataPointsPerStoredPoint, NormalizeCollisionCounts{false});
         dataPoints_.push_back(dataPointForStorage_);
         dataPointForStorage_.clear();
     }
