@@ -87,7 +87,6 @@ void PlotModel::setPlotSum(bool value)
 void PlotModel::setInterpolate(bool value)
 {
     emit interpolateEnabled(value);
-    setPlot();
 }
 
 void PlotModel::reset()

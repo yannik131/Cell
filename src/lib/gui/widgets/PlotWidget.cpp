@@ -3,9 +3,6 @@
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
 
-#include "PlotWidget.hpp"
-#include <QFont>
-
 PlotWidget::PlotWidget(QWidget* parent)
     : QCustomPlot(parent)
 {
@@ -347,4 +344,5 @@ void PlotWidget::setInterpolate(bool enabled)
         return;
 
     colorMap_->setInterpolate(enabled);
+    replot(QCustomPlot::rpQueuedReplot);
 }

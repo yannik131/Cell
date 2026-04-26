@@ -1,7 +1,6 @@
 #include "widgets/PlotControlWidget.hpp"
 #include "core/PlotCategories.hpp"
 #include "ui_PlotControlWidget.h"
-#include "widgets/PlotWidget.hpp"
 
 PlotControlWidget::PlotControlWidget(QWidget* parent)
     : QWidget(parent)
