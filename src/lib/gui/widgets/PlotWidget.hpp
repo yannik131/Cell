@@ -64,7 +64,7 @@ public:
     void updatePlot(const HistogramData& histogramData);
     void updatePlot(const ColorMapData& colorMapData);
 
-    void setPlotTitle(const std::string& title);
+    void setInterpolate(bool enabled);
 
 private:
     void clear();
@@ -76,8 +76,6 @@ private:
     QString getYAxisLabelFromPlotCategory(const PlotCategory& plotCategory) const;
 
 private:
-    QCPTextElement* plotTitle_ = nullptr;
-
     double yMin_ = 0;
     double yMax_ = 0;
     double xMin_ = 0;
@@ -92,6 +90,7 @@ private:
     std::vector<Histogram> colorMapCache_;
 
     int count_ = 0;
+    bool interpolateEnabled_ = false;
 };
 
 #endif /* EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP */

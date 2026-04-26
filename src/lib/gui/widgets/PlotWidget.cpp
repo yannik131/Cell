@@ -3,6 +3,7 @@
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
 
+#include "PlotWidget.hpp"
 #include <QFont>
 
 PlotWidget::PlotWidget(QWidget* parent)
@@ -32,7 +33,8 @@ void PlotWidget::setModel(PlotModel* plotModel)
             qOverload<const HistogramData&>(&PlotWidget::updatePlot));
     connect(plotModel, qOverload<const ColorMapData&>(&PlotModel::updatePlot), this,
             qOverload<const ColorMapData&>(&PlotWidget::updatePlot));
-    connect(plotModel, &PlotModel::plotTitle, this, &PlotWidget::setPlotTitle);
+
+    connect(plotModel, &PlotModel::interpolateEnabled, this, &PlotWidget::setInterpolate);
 }
 
 void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
@@ -136,6 +138,7 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     colorScale_->setType(QCPAxis::atRight);
     QCustomPlot::plotLayout()->addElement(0, 1, colorScale_);
     colorMap_->setColorScale(colorScale_);
+    colorMap_->setInterpolate(interpolateEnabled_);
 
     const int binCount = histograms.front().axis(1).size();
     colorMap_->data()->setSize(static_cast<int>(histograms.size()), binCount);
@@ -159,7 +162,6 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     colorMap_->rescaleDataRange();
 
     colorMap_->setGradient(QCPColorGradient::gpGrayscale);
-    // colorMap_->setInterpolate(false);
 
     auto ticker = QSharedPointer<QCPAxisTickerText>::create();
     for (int i = 0; i < binCount; ++i)
@@ -251,14 +253,6 @@ void PlotWidget::updatePlot(const ColorMapData& colorMapData)
     QCustomPlot::replot();
 }
 
-void PlotWidget::setPlotTitle(const std::string& title)
-{
-    if (!plotTitle_)
-        plotTitle_ = new QCPTextElement(this, QString::fromStdString(title), QFont("sans", 12, QFont::Bold));
-    else
-        plotTitle_->setText(QString::fromStdString(title));
-}
-
 void PlotWidget::clear()
 {
     clearRanges();
@@ -344,4 +338,13 @@ QString PlotWidget::getYAxisLabelFromPlotCategory(const PlotCategory& plotCatego
     case PlotCategory::VelocityDistribution: return "Count";
     default: throw ExceptionWithLocation("Invalid plot category");
     }
+}
+
+void PlotWidget::setInterpolate(bool enabled)
+{
+    interpolateEnabled_ = enabled;
+    if (!colorMap_)
+        return;
+
+    colorMap_->setInterpolate(enabled);
 }

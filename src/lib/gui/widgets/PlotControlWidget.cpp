@@ -1,6 +1,7 @@
 #include "widgets/PlotControlWidget.hpp"
 #include "core/PlotCategories.hpp"
 #include "ui_PlotControlWidget.h"
+#include "widgets/PlotWidget.hpp"
 
 PlotControlWidget::PlotControlWidget(QWidget* parent)
     : QWidget(parent)
@@ -19,6 +20,7 @@ PlotControlWidget::~PlotControlWidget() = default;
 void PlotControlWidget::setModel(PlotModel* plotModel)
 {
     connect(ui->plotSumCheckBox, &QCheckBox::toggled, plotModel, &PlotModel::setPlotSum);
+    connect(ui->interpolateCheckBox, &QCheckBox::toggled, plotModel, &PlotModel::setInterpolate);
     connect(ui->plotTypeComboBox, &QComboBox::currentTextChanged,
             [plotModel](const QString& text) { plotModel->setPlotCategory(PlotCategoryNameMap()[text]); });
     connect(ui->plotTimeIntervalSpinBox, &QSpinBox::valueChanged, plotModel, &PlotModel::setPlotTimeInterval);

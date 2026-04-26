@@ -84,6 +84,12 @@ void PlotModel::setPlotSum(bool value)
     setPlot();
 }
 
+void PlotModel::setInterpolate(bool value)
+{
+    emit interpolateEnabled(value);
+    setPlot();
+}
+
 void PlotModel::reset()
 {
     dataPoints_.clear();

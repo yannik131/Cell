@@ -61,6 +61,7 @@ public:
     void setPlotCategory(PlotCategory plotCategory);
     void setPlotTimeInterval(int valueMilliseconds);
     void setPlotSum(bool value);
+    void setInterpolate(bool value);
     void reset();
 
     void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
@@ -78,7 +79,7 @@ signals:
     void updatePlot(const PlotWidget::HistogramData& histogramData);
     void updatePlot(const PlotWidget::ColorMapData& colorMapData);
 
-    void plotTitle(const std::string& title);
+    void interpolateEnabled(bool enabled);
 
 private:
     void setPlot();
