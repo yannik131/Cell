@@ -34,6 +34,7 @@ find_package(nanoflann REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost COMPONENTS histogram REQUIRED)
 find_package(GTest REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 enable_testing()
 
@@ -43,4 +44,5 @@ add_subdirectory(src/lib/gui)
 add_subdirectory(src/apps/cell-gui)
 add_subdirectory(src/apps/benchmark)
 add_subdirectory(src/apps/playground)
+add_subdirectory(src/apps/cell-cli)
 add_subdirectory(test/libcell)
