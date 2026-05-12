@@ -1,24 +1,35 @@
 #include "SimulationRunner.hpp"
 #include "Cell.hpp"
 
+#include <fstream>
+
 namespace ch = std::chrono;
 using namespace std::chrono_literals;
+using json = nlohmann::json;
 
 void cell::SimulationRunner::useConfigFile(const fs::path& configFile)
 {
+    json j;
+    std::ifstream file(configFile);
+    file >> j;
+    auto simulationConfig = j["config"].get<SimulationConfig>();
+    simulationFactory_.buildSimulationFromConfig(simulationConfig);
 }
 
-void cell::SimulationRunner::setOutFile(const fs::path& outFile)
+void cell::SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
 {
-}
-
-void cell::SimulationRunner::setSimulationTime(const std::chrono::duration<double>& simulationTime)
-{
+    simulationDuration_ = simulationDuration;
 }
 
 void cell::SimulationRunner::runSimulation()
 {
     thread_ = std::jthread([this](std::stop_token stopToken) { loop(stopToken); });
+}
+
+void cell::SimulationRunner::waitForSimulationToFinish()
+{
+    if (thread_.joinable())
+        thread_.join();
 }
 
 void cell::SimulationRunner::stopSimulation()
@@ -27,12 +38,12 @@ void cell::SimulationRunner::stopSimulation()
         thread_.request_stop();
 }
 
-void cell::SimulationRunner::setPerformanceDataCallback(void (*callback)(PerformanceData))
+void cell::SimulationRunner::setPerformanceDataCallback(std::function<void(PerformanceData)> callback)
 {
     performanceDataCallback_ = callback;
 }
 
-void cell::SimulationRunner::setSimulationStepDataCallback(void (*callback)(SimulationStepData))
+void cell::SimulationRunner::setSimulationStepDataCallback(std::function<void(SimulationStepData)> callback)
 {
     simulationStepDataCallback_ = callback;
 }
@@ -43,6 +54,7 @@ void cell::SimulationRunner::loop(std::stop_token stopToken)
     auto lastUpdate = start;
     auto timeSinceLastUpdate = ch::duration<double>(0s);
     auto simulationUpdateTime = ch::duration<double>(0s);
+    auto simulationDuration = ch::duration<double>(0s);
     const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);
     int updates = 0;
 
@@ -55,16 +67,19 @@ void cell::SimulationRunner::loop(std::stop_token stopToken)
         sendPerformanceData(start, updates, simulationUpdateTime);
 
         while (timeSinceLastUpdate / simulationConfig_.simulationTimeScale > simulationTimeStep &&
-               !stopToken.stop_requested())
+               simulationDuration < simulationDuration_ && !stopToken.stop_requested())
         {
             timeSinceLastUpdate -= simulationTimeStep / simulationConfig_.simulationTimeScale;
 
             const auto updateStart = ch::steady_clock::now();
             simulationFactory_.getCell().update(simulationTimeStep.count());
-            simulationUpdateTime += ch::steady_clock::now() - updateStart;
+            const auto elapsed = ch::steady_clock::now() - updateStart;
+            simulationUpdateTime += elapsed;
+            simulationDuration += elapsed;
             ++updates;
 
             sendPerformanceData(start, updates, simulationUpdateTime);
+            sendSimulationStepData();
         }
     }
 }
@@ -97,7 +112,7 @@ void cell::SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& s
 
 void cell::SimulationRunner::sendSimulationStepData()
 {
-    if (!simulationFactory_.cellIsBuilt())
+    if (!simulationFactory_.cellIsBuilt() || !simulationStepDataCallback_)
         return;
 
     SimulationStepData simulationStepData;
@@ -114,8 +129,7 @@ void cell::SimulationRunner::sendSimulationStepData()
         for (const auto& subCompartment : compartment->getCompartments())
             compartments.push_back(subCompartment.get());
     }
-    
+
     simulationStepData.collisionCounts = simulationFactory_.getAndResetCollisionCounts();
-    
     simulationStepDataCallback_(std::move(simulationStepData));
 }

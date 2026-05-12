@@ -2,9 +2,9 @@
 
 #include <CLI/CLI.hpp>
 
+#include <chrono>
 #include <filesystem>
 #include <iostream>
-#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -43,10 +43,21 @@ int main(int argc, char** argv)
 
     cell::SimulationRunner simulationRunner;
     simulationRunner.useConfigFile(configFile);
-    simulationRunner.setOutFile(outFile);
-    simulationRunner.setSimulationTime(std::chrono::duration<double>{duration});
-    
+    simulationRunner.setSimulationDuration(std::chrono::duration<double>{duration});
+
+    cell::SimulationRecorder simulationRecorder;
+    simulationRecorder.setStorageInterval(100ms);
+    simulationRunner.setPerformanceDataCallback([&](auto data)
+                                                { simulationRecorder.receivePerformanceData(std::move(data)); });
+    simulationRunner.setSimulationStepDataCallback([&](auto data)
+                                                   { simulationRecorder.receiveSimulationStepData(std::move(data)); });
+
     simulationRunner.runSimulation();
-    
+    simulationRunner.waitForSimulationToFinish();
+
+    cell::SimulationRecorderSerializer simulationRecorderSerializer;
+    simulationRecorderSerializer.setOutFile(outFile);
+    simulationRecorderSerializer.serialize(simulationRecorder);
+
     return 0;
 }
