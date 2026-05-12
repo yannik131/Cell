@@ -1,6 +1,7 @@
 #ifndef A0298BEF_1AF7_44D4_A4ED_8921F9D116D7_HPP
 #define A0298BEF_1AF7_44D4_A4ED_8921F9D116D7_HPP
 
+#include "DataPoint.hpp"
 #include "SimulationRunner.hpp"
 
 namespace cell
@@ -15,6 +16,8 @@ public:
 
 private:
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
+    DataPoint dataPointForStorage_;
+    std::vector<DataPoint> dataPoints_;
 };
 
 } // namespace cell
