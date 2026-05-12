@@ -7,7 +7,10 @@ namespace ch = std::chrono;
 using namespace std::chrono_literals;
 using json = nlohmann::json;
 
-void cell::SimulationRunner::useConfigFile(const fs::path& configFile)
+namespace cell
+{
+
+void SimulationRunner::useConfigFile(const fs::path& configFile)
 {
     json j;
     std::ifstream file(configFile);
@@ -16,39 +19,39 @@ void cell::SimulationRunner::useConfigFile(const fs::path& configFile)
     simulationFactory_.buildSimulationFromConfig(simulationConfig);
 }
 
-void cell::SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
+void SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
 {
     simulationDuration_ = simulationDuration;
 }
 
-void cell::SimulationRunner::runSimulation()
+void SimulationRunner::runSimulation()
 {
     thread_ = std::jthread([this](std::stop_token stopToken) { loop(stopToken); });
 }
 
-void cell::SimulationRunner::waitForSimulationToFinish()
+void SimulationRunner::waitForSimulationToFinish()
 {
     if (thread_.joinable())
         thread_.join();
 }
 
-void cell::SimulationRunner::stopSimulation()
+void SimulationRunner::stopSimulation()
 {
     if (thread_.joinable())
         thread_.request_stop();
 }
 
-void cell::SimulationRunner::setPerformanceDataCallback(std::function<void(PerformanceData)> callback)
+void SimulationRunner::setPerformanceDataCallback(std::function<void(PerformanceData)> callback)
 {
     performanceDataCallback_ = callback;
 }
 
-void cell::SimulationRunner::setSimulationStepDataCallback(std::function<void(SimulationStepData)> callback)
+void SimulationRunner::setSimulationStepDataCallback(std::function<void(SimulationStepData)> callback)
 {
     simulationStepDataCallback_ = callback;
 }
 
-void cell::SimulationRunner::loop(std::stop_token stopToken)
+void SimulationRunner::loop(std::stop_token stopToken)
 {
     auto start = ch::steady_clock::now();
     auto lastUpdate = start;
@@ -84,8 +87,8 @@ void cell::SimulationRunner::loop(std::stop_token stopToken)
     }
 }
 
-void cell::SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                                                 ch::duration<double>& simulationUpdateTime) const
+void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
+                                           ch::duration<double>& simulationUpdateTime) const
 {
     if (!performanceDataCallback_)
         return;
@@ -110,7 +113,7 @@ void cell::SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& s
     simulationUpdateTime = 0s;
 }
 
-void cell::SimulationRunner::sendSimulationStepData()
+void SimulationRunner::sendSimulationStepData()
 {
     if (!simulationFactory_.cellIsBuilt() || !simulationStepDataCallback_)
         return;
@@ -118,10 +121,10 @@ void cell::SimulationRunner::sendSimulationStepData()
     SimulationStepData simulationStepData;
     const auto& cell = simulationFactory_.getCell();
 
-    std::vector<const cell::Compartment*> compartments({&cell});
+    std::vector<const Compartment*> compartments({&cell});
     while (!compartments.empty())
     {
-        const cell::Compartment* compartment = compartments.back();
+        const Compartment* compartment = compartments.back();
         compartments.pop_back();
         simulationStepData.discs.insert(simulationStepData.discs.end(), compartment->getDiscs().begin(),
                                         compartment->getDiscs().end());
@@ -133,3 +136,5 @@ void cell::SimulationRunner::sendSimulationStepData()
     simulationStepData.collisionCounts = simulationFactory_.getAndResetCollisionCounts();
     simulationStepDataCallback_(std::move(simulationStepData));
 }
+
+} // namespace cell

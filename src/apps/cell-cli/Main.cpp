@@ -1,15 +1,16 @@
+#include "cell/Logging.hpp"
 #include "cell/SimulationRunner.hpp"
 
 #include <CLI/CLI.hpp>
 
 #include <chrono>
 #include <filesystem>
-#include <iostream>
 
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv)
 {
+    cell::initLogging(argc, argv);
     CLI::App app{"Command line interface for the cell simulation"};
 
     fs::path configFile;

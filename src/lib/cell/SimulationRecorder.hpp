@@ -12,6 +12,9 @@ public:
     void setStorageInterval(const ch::duration<double>& storageInterval);
     void receivePerformanceData(SimulationRunner::PerformanceData data);
     void receiveSimulationStepData(SimulationRunner::SimulationStepData data);
+
+private:
+    ch::duration<double> storageInterval_ = ch::milliseconds{100};
 };
 
 } // namespace cell

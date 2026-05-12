@@ -3,7 +3,6 @@
 #include "core/Simulation.hpp"
 #include "core/Utility.hpp"
 
-#include "PlotModel.hpp"
 #include <cmath>
 #include <unordered_set>
 
