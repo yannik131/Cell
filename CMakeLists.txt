@@ -30,11 +30,9 @@ add_compile_definitions(GLOG_USE_GLOG_EXPORT)
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
 find_package(SFML COMPONENTS System Window Graphics REQUIRED)
 find_package(glog REQUIRED)
-find_package(nanoflann REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost COMPONENTS histogram REQUIRED)
 find_package(GTest REQUIRED)
-find_package(CLI11 CONFIG REQUIRED)
 
 enable_testing()
 

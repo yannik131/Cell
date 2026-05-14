@@ -33,6 +33,7 @@ public:
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
     void
     setPostUpdateCallback(std::function<void(Cell&, const SimulationContext&, const ch::duration<double>&)> callback);
+    SimulationContext getSimulationContext();
 
 private:
     void loop(std::stop_token stopToken);

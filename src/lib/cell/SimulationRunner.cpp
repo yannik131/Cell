@@ -52,6 +52,11 @@ void SimulationRunner::setPostUpdateCallback(
     postUpdateCallback_ = callback;
 }
 
+SimulationContext SimulationRunner::getSimulationContext()
+{
+    return simulationFactory_.getSimulationContext();
+}
+
 void SimulationRunner::loop(std::stop_token stopToken)
 {
     auto start = ch::steady_clock::now();

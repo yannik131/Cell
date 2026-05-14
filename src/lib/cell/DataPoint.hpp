@@ -3,6 +3,8 @@
 
 #include "Types.hpp"
 
+#include <boost/histogram.hpp>
+
 #include <chrono>
 #include <string>
 #include <unordered_map>

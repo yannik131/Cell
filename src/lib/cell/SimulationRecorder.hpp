@@ -16,6 +16,8 @@ public:
     void receivePerformanceData(SimulationRunner::PerformanceData data);
     void processSimulationData(Cell& cell, const SimulationContext& simulationContext,
                                const ch::duration<double>& elapsedTime);
+    void storeRemainingData();
+    const std::vector<DataPoint>& getDataPoints() const;
 
 private:
     void addSimulationDataToDataPoint(Cell& cell, const SimulationContext& simulationContext,

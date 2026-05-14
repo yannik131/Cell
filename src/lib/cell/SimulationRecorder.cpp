@@ -10,7 +10,7 @@ void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageI
     storageInterval_ = storageInterval;
 }
 
-void SimulationRecorder::receivePerformanceData(SimulationRunner::PerformanceData data)
+void SimulationRecorder::receivePerformanceData(SimulationRunner::PerformanceData)
 {
 }
 
@@ -20,6 +20,19 @@ void SimulationRecorder::processSimulationData(Cell& cell, const SimulationConte
     addSimulationDataToDataPoint(cell, simulationContext, elapsedTime);
     if (dataPointForStorage_.elapsedTime_ >= storageInterval_)
         storeDataPoint();
+}
+
+void SimulationRecorder::storeRemainingData()
+{
+    if (frameCount_ == 0)
+        return;
+
+    storeDataPoint();
+}
+
+const std::vector<DataPoint>& SimulationRecorder::getDataPoints() const
+{
+    return dataPoints_;
 }
 
 void SimulationRecorder::addSimulationDataToDataPoint(Cell& cell, const SimulationContext& simulationContext,
