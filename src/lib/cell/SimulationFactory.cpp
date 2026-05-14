@@ -10,8 +10,6 @@
 #include "SimulationContext.hpp"
 #include "StringUtils.hpp"
 
-#include <glog/logging.h>
-
 #include <random>
 
 namespace cell

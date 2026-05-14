@@ -1,9 +1,7 @@
-#include "cell/Logging.hpp"
-
-#include <glog/logging.h>
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <iostream>
 
 bool cdUpUntilInTestDir()
 {
@@ -20,7 +18,7 @@ bool cdUpUntilInTestDir()
         fs::current_path("..");
     }
 
-    LOG(ERROR) << "Folder 'test/output' not found after 3 attempts.";
+    std::cout << "Folder 'test/output' not found after 3 attempts.";
 
     return false;
 }
@@ -30,8 +28,8 @@ bool cdUpUntilInTestDir()
  */
 int main(int argc, char** argv)
 {
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
     testing::InitGoogleTest(&argc, argv);
-    cell::initLogging(argc, argv);
     if (!cdUpUntilInTestDir())
         return 1;
 

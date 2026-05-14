@@ -4,11 +4,10 @@
 #include "MathUtils.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <numbers>
 #include <random>
 #include <vector>
-
-#include <glog/logging.h>
 
 namespace cell
 {
@@ -101,7 +100,7 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
 
     if (static_cast<int>(gridPoints.size()) < discCount)
     {
-        LOG(INFO) << "Grid for \"" << membraneType.getName() << "\" can only fit " << gridPoints.size() << "/"
+        std::cout << "Grid for \"" << membraneType.getName() << "\" can only fit " << gridPoints.size() << "/"
                   << discCount << " discs.";
     }
 
@@ -177,7 +176,7 @@ Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
 
     if (!isFullyContainedIn(cell_))
     {
-        LOG(INFO) << "Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) + ") is not contained by the cell";
+        std::cout << "Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) + ") is not contained by the cell";
         return cell_;
     }
 
