@@ -1,3 +1,4 @@
+#include "cell/SimulationContext.hpp"
 #include "cell/SimulationRecordSerializer.hpp"
 #include "cell/SimulationRecorder.hpp"
 #include "cell/SimulationRunner.hpp"
@@ -42,10 +43,6 @@ int main(int argc, char** argv)
     app.add_option("--duration", duration, "Target simulation time in seconds")->required()->check(positiveDouble);
 
     CLI11_PARSE(app, argc, argv);
-
-    fs::path configFile;
-    fs::path outFile;
-    double duration;
 
     cell::SimulationRunner simulationRunner;
     simulationRunner.useConfigFile(configFile);
