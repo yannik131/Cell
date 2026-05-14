@@ -84,11 +84,6 @@ bool SimulationFactory::cellIsBuilt() const
     return static_cast<bool>(cell_);
 }
 
-DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
-{
-    return CollisionDetector::getAndResetCollisionCounts();
-}
-
 DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig)
 {
     DiscTypeRegistry discTypeRegistry;

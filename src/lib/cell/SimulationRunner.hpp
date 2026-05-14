@@ -31,7 +31,8 @@ public:
     void waitForSimulationToFinish();
     void stopSimulation();
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
-    void setPostUpdateCallback(std::function<void(SimulationFactory&)> callback);
+    void
+    setPostUpdateCallback(std::function<void(Cell&, const SimulationContext&, const ch::duration<double>&)> callback);
 
 private:
     void loop(std::stop_token stopToken);
@@ -43,7 +44,7 @@ private:
     SimulationConfig simulationConfig_;
     std::jthread thread_;
     std::function<void(PerformanceData)> performanceDataCallback_;
-    std::function<void(SimulationFactory&)> postUpdateCallback_;
+    std::function<void(Cell&, const SimulationContext&, const ch::duration<double>&)> postUpdateCallback_;
     ch::duration<double> simulationDuration_ = ch::duration<double>::max();
 };
 

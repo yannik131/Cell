@@ -46,7 +46,8 @@ void SimulationRunner::setPerformanceDataCallback(std::function<void(Performance
     performanceDataCallback_ = callback;
 }
 
-void SimulationRunner::setPostUpdateCallback(std::function<void(SimulationFactory&)> callback)
+void SimulationRunner::setPostUpdateCallback(
+    std::function<void(Cell&, const SimulationContext&, const ch::duration<double>&)> callback)
 {
     postUpdateCallback_ = callback;
 }
@@ -60,6 +61,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
     auto simulationDuration = ch::duration<double>(0s);
     const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);
     int updates = 0;
+    const auto simulationContext = simulationFactory_.getSimulationContext();
 
     while (!stopToken.stop_requested())
     {
@@ -84,7 +86,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
             sendPerformanceData(start, updates, simulationUpdateTime);
 
             if (postUpdateCallback_)
-                postUpdateCallback_(simulationFactory_);
+                postUpdateCallback_(simulationFactory_.getCell(), simulationContext, simulationTimeStep);
         }
     }
 }

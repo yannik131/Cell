@@ -10,36 +10,31 @@
 namespace ch = std::chrono;
 namespace bh = boost::histogram;
 
-using Histogram = bh::histogram<std::tuple<bh::axis::category<std::string>, bh::axis::regular<>>, bh::default_storage>;
-
 namespace cell
 {
+
+using Histogram = bh::histogram<std::tuple<bh::axis::category<DiscTypeID>, bh::axis::regular<>>, bh::default_storage>;
 
 struct NormalizeCollisionCounts
 {
     bool value = true;
 };
 
-std::unordered_map<std::string, double>& operator+=(std::unordered_map<std::string, double>& lhs,
-                                                    const std::unordered_map<std::string, double>& rhs)
+template <typename T>
+void addMapToMap(std::unordered_map<DiscTypeID, double>& lhs, const std::unordered_map<DiscTypeID, T>& rhs)
 {
     for (const auto& [key, value] : rhs)
         lhs[key] += value;
-
-    return lhs;
 }
 
-std::unordered_map<std::string, double>& operator/=(std::unordered_map<std::string, double>& lhs, int rhs)
+template <typename T> void divideMapByValue(std::unordered_map<DiscTypeID, double>& lhs, T rhs)
 {
     for (auto& [key, value] : lhs)
         value /= rhs;
-
-    return lhs;
 }
 
-class DataPoint
+struct DataPoint
 {
-public:
     void clear()
     {
         elapsedTime_ = ch::seconds{0};
@@ -55,10 +50,10 @@ public:
     void add(const DataPoint& rhs)
     {
         elapsedTime_ += rhs.elapsedTime_;
-        collisionCounts_ += rhs.collisionCounts_;
-        totalKineticEnergies_ += rhs.totalKineticEnergies_;
-        totalMomentums_ += rhs.totalMomentums_;
-        discTypeCounts_ += rhs.discTypeCounts_;
+        addMapToMap(collisionCounts_, rhs.collisionCounts_);
+        addMapToMap(totalKineticEnergies_, rhs.totalKineticEnergies_);
+        addMapToMap(totalMomentums_, rhs.totalMomentums_);
+        addMapToMap(discTypeCounts_, rhs.discTypeCounts_);
         vxHistogram_ += rhs.vxHistogram_;
         vyHistogram_ += rhs.vyHistogram_;
         vHistogram_ += rhs.vHistogram_;
@@ -67,22 +62,21 @@ public:
     void average(int n, NormalizeCollisionCounts normalizeCollisionCounts = {})
     {
         if (normalizeCollisionCounts.value && elapsedTime_.count() > 0)
-            collisionCounts_ /= elapsedTime_.count();
+            divideMapByValue(collisionCounts_, elapsedTime_.count());
 
-        totalKineticEnergies_ /= n;
-        totalMomentums_ /= n;
-        discTypeCounts_ /= n;
+        divideMapByValue(totalKineticEnergies_, n);
+        divideMapByValue(totalMomentums_, n);
+        divideMapByValue(discTypeCounts_, n);
         vxHistogram_ /= n;
         vyHistogram_ /= n;
         vHistogram_ /= n;
     }
 
-private:
     ch::duration<double> elapsedTime_;
-    std::unordered_map<std::string, double> collisionCounts_;
-    std::unordered_map<std::string, double> totalMomentums_;
-    std::unordered_map<std::string, double> totalKineticEnergies_;
-    std::unordered_map<std::string, double> discTypeCounts_;
+    std::unordered_map<DiscTypeID, double> collisionCounts_;
+    std::unordered_map<DiscTypeID, double> totalMomentums_;
+    std::unordered_map<DiscTypeID, double> totalKineticEnergies_;
+    std::unordered_map<DiscTypeID, double> discTypeCounts_;
     Histogram vxHistogram_;
     Histogram vyHistogram_;
     Histogram vHistogram_;

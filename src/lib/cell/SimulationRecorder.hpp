@@ -12,24 +12,21 @@ namespace cell
 class SimulationRecorder
 {
 public:
-    struct Options
-    {
-        bool gatherExpensiveData =
-            false; // Calculate velocity histogram, average kinetic energy etc. by iterating all discs in the simulation
-    };
-
-private:
-    void setOptions(const Options& options);
     void setStorageInterval(const ch::duration<double>& storageInterval);
     void receivePerformanceData(SimulationRunner::PerformanceData data);
-    void processSimulationData(SimulationFactory& simulationFactory);
-    void clearDataPoint(DataPoint& dataPoint);
+    void processSimulationData(Cell& cell, const SimulationContext& simulationContext,
+                               const ch::duration<double>& elapsedTime);
 
 private:
-    Options options_;
+    void addSimulationDataToDataPoint(Cell& cell, const SimulationContext& simulationContext,
+                                      const ch::duration<double>& elapsedTime);
+    void storeDataPoint();
+
+private:
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
     DataPoint dataPointForStorage_;
     std::vector<DataPoint> dataPoints_;
+    int frameCount_ = 0;
 };
 
 } // namespace cell
