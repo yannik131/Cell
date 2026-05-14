@@ -24,12 +24,6 @@ public:
         ch::nanoseconds timePerSimulationUpdate;
     };
 
-    struct SimulationStepData
-    {
-        std::vector<Disc> discs;
-        DiscTypeMap<int> collisionCounts;
-    };
-
 public:
     void useConfigFile(const fs::path& configFile);
     void setSimulationDuration(const ch::duration<double>& simulationDuration);
@@ -37,20 +31,19 @@ public:
     void waitForSimulationToFinish();
     void stopSimulation();
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
-    void setSimulationStepDataCallback(std::function<void(SimulationStepData)> callback);
+    void setPostUpdateCallback(std::function<void(SimulationFactory&)> callback);
 
 private:
     void loop(std::stop_token stopToken);
     void sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
                              ch::duration<double>& simulationUpdateTime) const;
-    void sendSimulationStepData();
 
 private:
     SimulationFactory simulationFactory_;
     SimulationConfig simulationConfig_;
     std::jthread thread_;
     std::function<void(PerformanceData)> performanceDataCallback_;
-    std::function<void(SimulationStepData)> simulationStepDataCallback_;
+    std::function<void(SimulationFactory&)> postUpdateCallback_;
     ch::duration<double> simulationDuration_ = ch::duration<double>::max();
 };
 

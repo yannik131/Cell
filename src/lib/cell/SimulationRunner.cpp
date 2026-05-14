@@ -46,9 +46,9 @@ void SimulationRunner::setPerformanceDataCallback(std::function<void(Performance
     performanceDataCallback_ = callback;
 }
 
-void SimulationRunner::setSimulationStepDataCallback(std::function<void(SimulationStepData)> callback)
+void SimulationRunner::setPostUpdateCallback(std::function<void(SimulationFactory&)> callback)
 {
-    simulationStepDataCallback_ = callback;
+    postUpdateCallback_ = callback;
 }
 
 void SimulationRunner::loop(std::stop_token stopToken)
@@ -82,7 +82,9 @@ void SimulationRunner::loop(std::stop_token stopToken)
             ++updates;
 
             sendPerformanceData(start, updates, simulationUpdateTime);
-            sendSimulationStepData();
+
+            if (postUpdateCallback_)
+                postUpdateCallback_(simulationFactory_);
         }
     }
 }
@@ -111,30 +113,6 @@ void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, 
     start = ch::steady_clock::now();
     updates = 0;
     simulationUpdateTime = 0s;
-}
-
-void SimulationRunner::sendSimulationStepData()
-{
-    if (!simulationFactory_.cellIsBuilt() || !simulationStepDataCallback_)
-        return;
-
-    SimulationStepData simulationStepData;
-    const auto& cell = simulationFactory_.getCell();
-
-    std::vector<const Compartment*> compartments({&cell});
-    while (!compartments.empty())
-    {
-        const Compartment* compartment = compartments.back();
-        compartments.pop_back();
-        simulationStepData.discs.insert(simulationStepData.discs.end(), compartment->getDiscs().begin(),
-                                        compartment->getDiscs().end());
-
-        for (const auto& subCompartment : compartment->getCompartments())
-            compartments.push_back(subCompartment.get());
-    }
-
-    simulationStepData.collisionCounts = simulationFactory_.getAndResetCollisionCounts();
-    simulationStepDataCallback_(std::move(simulationStepData));
 }
 
 } // namespace cell

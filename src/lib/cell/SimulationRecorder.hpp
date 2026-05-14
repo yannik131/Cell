@@ -4,17 +4,29 @@
 #include "DataPoint.hpp"
 #include "SimulationRunner.hpp"
 
+#include <boost/histogram.hpp>
+
 namespace cell
 {
 
 class SimulationRecorder
 {
 public:
-    void setStorageInterval(const ch::duration<double>& storageInterval);
-    void receivePerformanceData(SimulationRunner::PerformanceData data);
-    void receiveSimulationStepData(SimulationRunner::SimulationStepData data);
+    struct Options
+    {
+        bool gatherExpensiveData =
+            false; // Calculate velocity histogram, average kinetic energy etc. by iterating all discs in the simulation
+    };
 
 private:
+    void setOptions(const Options& options);
+    void setStorageInterval(const ch::duration<double>& storageInterval);
+    void receivePerformanceData(SimulationRunner::PerformanceData data);
+    void processSimulationData(SimulationFactory& simulationFactory);
+    void clearDataPoint(DataPoint& dataPoint);
+
+private:
+    Options options_;
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
     DataPoint dataPointForStorage_;
     std::vector<DataPoint> dataPoints_;

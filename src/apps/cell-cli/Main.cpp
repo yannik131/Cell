@@ -50,8 +50,8 @@ int main(int argc, char** argv)
     simulationRecorder.setStorageInterval(100ms);
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.receivePerformanceData(std::move(data)); });
-    simulationRunner.setSimulationStepDataCallback([&](auto data)
-                                                   { simulationRecorder.receiveSimulationStepData(std::move(data)); });
+    simulationRunner.setPostUpdateCallback([&](auto data)
+                                           { simulationRecorder.receiveSimulationStepData(std::move(data)); });
 
     simulationRunner.runSimulation();
     simulationRunner.waitForSimulationToFinish();
