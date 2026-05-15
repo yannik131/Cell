@@ -19,6 +19,7 @@ int main(int argc, char** argv)
     fs::path configFile;
     fs::path outFile;
     double duration;
+    double storageInterval;
 
     CLI::Validator positiveDouble{[](const std::string& value) -> std::string
                                   {
@@ -42,6 +43,7 @@ int main(int argc, char** argv)
     app.add_option("--config", configFile, "Config file")->required()->check(CLI::ExistingFile);
     app.add_option("--out", outFile, "Output file (type counts)")->required();
     app.add_option("--duration", duration, "Target simulation time in seconds")->required()->check(positiveDouble);
+    app.add_option("--storage-interval", storageInterval, "Storage interval in seconds")->required()->check(positiveDouble);
 
     CLI11_PARSE(app, argc, argv);
 
@@ -51,7 +53,7 @@ int main(int argc, char** argv)
 
     cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
                                                 simulationRunner.getSimulationConfig());
-    simulationRecorder.setStorageInterval(3ms);
+    simulationRecorder.setStorageInterval(ch::duration<double>(storageInterval));
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.receivePerformanceData(std::move(data)); });
     simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
