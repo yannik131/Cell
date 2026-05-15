@@ -74,7 +74,7 @@ struct DataPoint
         vHistogram_ /= n;
     }
 
-    ch::duration<double> elapsedTime_;
+    ch::duration<double> elapsedTime_ = {};
     std::unordered_map<DiscTypeID, double> collisionCounts_;
     std::unordered_map<DiscTypeID, double> totalMomentums_;
     std::unordered_map<DiscTypeID, double> totalKineticEnergies_;

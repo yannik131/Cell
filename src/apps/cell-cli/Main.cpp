@@ -48,14 +48,13 @@ int main(int argc, char** argv)
     simulationRunner.useConfigFile(configFile);
     simulationRunner.setSimulationDuration(std::chrono::duration<double>{duration});
 
-    cell::SimulationRecorder simulationRecorder;
+    cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
+                                                simulationRunner.getSimulationConfig());
     simulationRecorder.setStorageInterval(100ms);
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.receivePerformanceData(std::move(data)); });
-    simulationRunner.setPostUpdateCallback(
-        [&](cell::Cell& cell, const cell::SimulationContext& simulationContext,
-            const std::chrono::duration<double>& elapsedTime)
-        { simulationRecorder.processSimulationData(cell, simulationContext, elapsedTime); });
+    simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+                                           { simulationRecorder.processSimulationData(cell, elapsedTime); });
 
     simulationRunner.runSimulation();
     simulationRunner.waitForSimulationToFinish();

@@ -15,8 +15,8 @@ void SimulationRunner::useConfigFile(const fs::path& configFile)
     json j;
     std::ifstream file(configFile);
     file >> j;
-    auto simulationConfig = j["config"].get<SimulationConfig>();
-    simulationFactory_.buildSimulationFromConfig(simulationConfig);
+    simulationConfig_ = j["config"].get<SimulationConfig>();
+    simulationFactory_.buildSimulationFromConfig(simulationConfig_);
 }
 
 void SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
@@ -46,8 +46,7 @@ void SimulationRunner::setPerformanceDataCallback(std::function<void(Performance
     performanceDataCallback_ = callback;
 }
 
-void SimulationRunner::setPostUpdateCallback(
-    std::function<void(Cell&, const SimulationContext&, const ch::duration<double>&)> callback)
+void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback)
 {
     postUpdateCallback_ = callback;
 }
@@ -55,6 +54,11 @@ void SimulationRunner::setPostUpdateCallback(
 SimulationContext SimulationRunner::getSimulationContext()
 {
     return simulationFactory_.getSimulationContext();
+}
+
+const SimulationConfig& SimulationRunner::getSimulationConfig() const
+{
+    return simulationConfig_;
 }
 
 void SimulationRunner::loop(std::stop_token stopToken)
@@ -68,7 +72,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
     int updates = 0;
     const auto simulationContext = simulationFactory_.getSimulationContext();
 
-    while (!stopToken.stop_requested())
+    while (!stopToken.stop_requested() && simulationDuration < simulationDuration_)
     {
         auto now = ch::steady_clock::now();
         timeSinceLastUpdate += now - lastUpdate;
@@ -91,7 +95,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
             sendPerformanceData(start, updates, simulationUpdateTime);
 
             if (postUpdateCallback_)
-                postUpdateCallback_(simulationFactory_.getCell(), simulationContext, simulationTimeStep);
+                postUpdateCallback_(simulationFactory_.getCell(), simulationTimeStep);
         }
     }
 }
