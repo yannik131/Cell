@@ -14,14 +14,19 @@ namespace ch = std::chrono;
 namespace cell
 {
 
+struct Force
+{
+    bool value = false;
+};
+
 class SimulationRunner
 {
 public:
     struct PerformanceData
     {
         double actualScale;
-        ch::nanoseconds timePerWholeUpdate;
-        ch::nanoseconds timePerSimulationUpdate;
+        ch::duration<double> timePerWholeUpdate;
+        ch::duration<double> timePerSimulationUpdate;
     };
 
 public:
@@ -38,7 +43,7 @@ public:
 private:
     void loop(std::stop_token stopToken);
     void sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                             ch::duration<double>& simulationUpdateTime) const;
+                             ch::duration<double>& simulationUpdateTime, Force force = {}) const;
 
 private:
     SimulationFactory simulationFactory_;

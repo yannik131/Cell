@@ -1,6 +1,9 @@
 #include "SimulationRecorder.hpp"
 #include "Cell.hpp"
 #include "MathUtils.hpp"
+#include "StringUtils.hpp"
+
+#include <iostream>
 
 namespace cell
 {
@@ -27,8 +30,15 @@ void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageI
     storageInterval_ = storageInterval;
 }
 
-void SimulationRecorder::receivePerformanceData(SimulationRunner::PerformanceData)
+void SimulationRecorder::receivePerformanceData(SimulationRunner::PerformanceData data)
 {
+    std::cout << "Actual scale: " << data.actualScale << "\n";
+    std::cout << "Time per simulation update: "
+              << stringutils::timeString(ch::duration_cast<ch::nanoseconds>(data.timePerSimulationUpdate).count())
+              << "\n";
+    std::cout << "Time per update: "
+              << stringutils::timeString(ch::duration_cast<ch::nanoseconds>(data.timePerWholeUpdate).count()) << "\n";
+    std::cout << std::endl;
 }
 
 void SimulationRecorder::processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime)

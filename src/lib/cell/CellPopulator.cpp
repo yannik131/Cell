@@ -101,7 +101,7 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
     if (static_cast<int>(gridPoints.size()) < discCount)
     {
         std::cout << "Grid for \"" << membraneType.getName() << "\" can only fit " << gridPoints.size() << "/"
-                  << discCount << " discs.";
+                  << discCount << " discs\n";
     }
 
     return gridPoints;

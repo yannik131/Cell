@@ -2,6 +2,7 @@
 #include "cell/SimulationRecordSerializer.hpp"
 #include "cell/SimulationRecorder.hpp"
 #include "cell/SimulationRunner.hpp"
+#include "cell/StringUtils.hpp"
 
 #include <CLI/CLI.hpp>
 
@@ -50,14 +51,19 @@ int main(int argc, char** argv)
 
     cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
                                                 simulationRunner.getSimulationConfig());
-    simulationRecorder.setStorageInterval(100ms);
+    simulationRecorder.setStorageInterval(3ms);
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.receivePerformanceData(std::move(data)); });
     simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
                                            { simulationRecorder.processSimulationData(cell, elapsedTime); });
 
+    std::cout << "Starting simulation\n";
+    const auto start = ch::steady_clock::now();
     simulationRunner.runSimulation();
     simulationRunner.waitForSimulationToFinish();
+    const auto elapsed = ch::steady_clock::now() - start;
+    std::cout << "Finished simulation in " << cell::stringutils::timeString(elapsed.count()) << "\n";
+
     simulationRecorder.storeRemainingData();
 
     cell::SimulationRecordSerializer simulationRecordSerializer;
