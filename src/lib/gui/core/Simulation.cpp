@@ -1,5 +1,6 @@
 #include "core/Simulation.hpp"
 #include "cell/Cell.hpp"
+#include "cell/CollisionDetector.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
@@ -135,7 +136,7 @@ void Simulation::emitFrame(RedrawOnly redrawOnly)
 
     frameDTO.elapsedSimulationTimeUs =
         static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().simulationTimeStep * 1e6);
-    frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
+    frameDTO.collisionCounts_ = cell::CollisionDetector::getAndResetCollisionCounts();
 
     emit frame(frameDTO);
 }

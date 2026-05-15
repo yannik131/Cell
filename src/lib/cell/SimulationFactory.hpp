@@ -42,8 +42,6 @@ public:
     Cell& getCell();
     bool cellIsBuilt() const;
 
-    DiscTypeMap<int> getAndResetCollisionCounts();
-
 private:
     ReactionTable buildReactionTable(const SimulationConfig& simulationConfig,
                                      const DiscTypeRegistry& discTypeRegistry);
