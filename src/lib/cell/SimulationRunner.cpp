@@ -61,6 +61,11 @@ const SimulationConfig& SimulationRunner::getSimulationConfig() const
     return simulationConfig_;
 }
 
+void SimulationRunner::setUseScaleFromConfig(bool value)
+{
+    useScaleFromConfig_ = value;
+}
+
 void SimulationRunner::loop(std::stop_token stopToken)
 {
     auto simulationUpdateTime = ch::duration<double>(0s);
@@ -68,6 +73,8 @@ void SimulationRunner::loop(std::stop_token stopToken)
     const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);
     int updates = 0;
     auto start = ch::steady_clock::now();
+    const ch::duration<double> realTimePerStep = simulationTimeStep / simulationConfig_.simulationTimeScale;
+    auto nextTick = start;
 
     while (!stopToken.stop_requested() && simulationDuration < simulationDuration_)
     {
@@ -82,6 +89,12 @@ void SimulationRunner::loop(std::stop_token stopToken)
 
         if (postUpdateCallback_)
             postUpdateCallback_(simulationFactory_.getCell(), simulationTimeStep);
+
+        if (useScaleFromConfig_)
+        {
+            nextTick += ch::duration_cast<ch::steady_clock::duration>(realTimePerStep);
+            std::this_thread::sleep_until(nextTick);
+        }
     }
 
     sendPerformanceData(start, updates, simulationUpdateTime, Force{true});

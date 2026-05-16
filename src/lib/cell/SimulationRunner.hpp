@@ -39,6 +39,7 @@ public:
     void setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
     SimulationContext getSimulationContext();
     const SimulationConfig& getSimulationConfig() const;
+    void setUseScaleFromConfig(bool value);
 
 private:
     void loop(std::stop_token stopToken);
@@ -52,6 +53,7 @@ private:
     std::function<void(PerformanceData)> performanceDataCallback_;
     std::function<void(Cell&, const ch::duration<double>&)> postUpdateCallback_;
     ch::duration<double> simulationDuration_ = ch::duration<double>::max();
+    bool useScaleFromConfig_ = false;
 };
 
 } // namespace cell
