@@ -2,6 +2,8 @@
 #define A0298BEF_1AF7_44D4_A4ED_8921F9D116D7_HPP
 
 #include "DataPoint.hpp"
+#include "Disc.hpp"
+#include "Membrane.hpp"
 #include "SimulationRunner.hpp"
 
 #include <boost/histogram.hpp>
@@ -12,12 +14,31 @@ namespace cell
 class SimulationRecorder
 {
 public:
+    struct Frame
+    {
+        std::vector<Disc> discs;
+        std::vector<Membrane> membranes;
+
+        void clear()
+        {
+            discs.clear();
+            membranes.clear();
+        }
+    };
+
+public:
     SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, double vSigma);
     void setStorageInterval(const ch::duration<double>& storageInterval);
-    void receivePerformanceData(SimulationRunner::PerformanceData data);
+    void printPerformanceData(SimulationRunner::PerformanceData data);
+    void processInitialSimulationData(Cell& cell);
     void processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime);
     void storeRemainingData();
     const std::vector<DataPoint>& getDataPoints() const;
+    void clear();
+    const DataPoint& getCurrentDataPoint() const;
+    void setRecordLastFrame(bool value);
+    const Frame& getLastFrame() const;
+    void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
 
 private:
     void addSimulationDataToDataPoint(Cell& cell, const ch::duration<double>& elapsedTime);
@@ -25,10 +46,13 @@ private:
 
 private:
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
-    DataPoint dataPointForStorage_;
+    DataPoint currentDataPoint_;
     std::vector<DataPoint> dataPoints_;
     int frameCount_ = 0;
     const DiscTypeRegistry& discTypeRegistry_;
+    bool recordLastFrame_ = false;
+    Frame lastFrame_;
+    std::function<void(const DataPoint&)> newDataPointCallback_;
 };
 
 } // namespace cell

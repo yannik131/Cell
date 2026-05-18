@@ -73,7 +73,26 @@ void Simulation::run()
 
 void Simulation::buildContext(const cell::SimulationConfig& config)
 {
-    simulationFactory_.buildSimulationFromConfig(config);
+    simulationRunner_.useConfig(config);
+    simulationRecorder_.reset(new cell::SimulationRecorder(simulationRunner_.getSimulationContext().discTypeRegistry,
+                                                           config.mostProbableSpeed));
+    simulationRunner_.setPostBuildCallback(
+        [&](cell::Cell& cell)
+        {
+            simulationRecorder_->processInitialSimulationData(cell);
+            emit frame(simulationRecorder_->getLastFrame());
+            emit dataPoint(simulationRecorder_->getCurrentDataPoint());
+        });
+    simulationRunner_.setPerformanceDataCallback([&](cell::SimulationRunner::PerformanceData data)
+                                                 { emit performanceData(data); });
+    simulationRunner_.setPostUpdateCallback(
+        [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+        {
+            simulationRecorder_->processSimulationData(cell, elapsedTime);
+            emit frame(simulationRecorder_->getLastFrame());
+        });
+    simulationRecorder_->setNewDataPointCallback([&](const cell::DataPoint& dataPoint)
+                                                 { emit this->dataPoint(dataPoint); });
 }
 
 void Simulation::rebuildContext()

@@ -37,7 +37,7 @@ public:
     void waitForSimulationToFinish();
     void stopSimulation();
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
-    void setPostBuildCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
+    void setPostBuildCallback(std::function<void(Cell&)> callback);
     void setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
     SimulationContext getSimulationContext();
     const SimulationConfig& getSimulationConfig() const;
@@ -54,7 +54,7 @@ private:
     std::jthread thread_;
     std::function<void(PerformanceData)> performanceDataCallback_;
     std::function<void(Cell&, const ch::duration<double>&)> postUpdateCallback_;
-    std::function<void(Cell&, const ch::duration<double>&)> postBuildCallback_;
+    std::function<void(Cell&)> postBuildCallback_;
     ch::duration<double> simulationDuration_ = ch::duration<double>::max();
     bool useScaleFromConfig_ = false;
 };

@@ -57,7 +57,9 @@ int main(int argc, char** argv)
                                                 simulationRunner.getSimulationConfig().mostProbableSpeed);
     simulationRecorder.setStorageInterval(ch::duration<double>(storageInterval));
     simulationRunner.setPerformanceDataCallback([&](auto data)
-                                                { simulationRecorder.receivePerformanceData(std::move(data)); });
+                                                { simulationRecorder.printPerformanceData(std::move(data)); });
+    simulationRunner.setPostBuildCallback([&](cell::Cell& cell)
+                                          { simulationRecorder.processInitialSimulationData(cell); });
     simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
                                            { simulationRecorder.processSimulationData(cell, elapsedTime); });
 

@@ -7,7 +7,10 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
+#include <chrono>
 #include <vector>
+
+namespace ch = std::chrono;
 
 /**
  * @brief POD used to transmit information on all discs in the simulation to the widget drawing it and the plot model
@@ -17,7 +20,7 @@ struct FrameDTO
     std::vector<cell::Disc> discs_;
     std::vector<sf::CircleShape> membranes_;
     cell::DiscTypeMap<int> collisionCounts_;
-    long long elapsedSimulationTimeUs = 0;
+    ch::duration<double> elapsedSimulationTime_;
 };
 
 Q_DECLARE_METATYPE(FrameDTO);
