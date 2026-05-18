@@ -12,7 +12,7 @@ namespace cell
 class SimulationRecorder
 {
 public:
-    explicit SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, const SimulationConfig& simulationConfig);
+    SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, double vSigma);
     void setStorageInterval(const ch::duration<double>& storageInterval);
     void receivePerformanceData(SimulationRunner::PerformanceData data);
     void processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime);
@@ -28,7 +28,7 @@ private:
     DataPoint dataPointForStorage_;
     std::vector<DataPoint> dataPoints_;
     int frameCount_ = 0;
-    const DiscTypeRegistry* discTypeRegistry_ = nullptr;
+    const DiscTypeRegistry& discTypeRegistry_;
 };
 
 } // namespace cell

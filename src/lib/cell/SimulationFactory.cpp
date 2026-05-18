@@ -165,7 +165,7 @@ std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simul
     std::unique_ptr<Cell> cell(std::make_unique<Cell>(std::move(cellMembrane), getSimulationContext()));
     createCompartments(*cell, std::move(membranes));
 
-    CellPopulator cellPopulator(*cell, simulationConfig, getSimulationContext());
+    CellPopulator cellPopulator(*cell, simulationConfig, *discTypeRegistry_, *membraneTypeRegistry_);
     cellPopulator.populateCell();
 
     return cell;

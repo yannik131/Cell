@@ -17,6 +17,17 @@ void SimulationRunner::useConfigFile(const fs::path& configFile)
     file >> j;
     simulationConfig_ = j["config"].get<SimulationConfig>();
     simulationFactory_.buildSimulationFromConfig(simulationConfig_);
+
+    if (postBuildCallback_)
+        postBuildCallback_(simulationFactory_.getCell(), ch::duration<double>(simulationConfig_.simulationTimeStep));
+}
+
+void SimulationRunner::useConfig(const SimulationConfig& simulationConfig)
+{
+    simulationFactory_.buildSimulationFromConfig(simulationConfig);
+
+    if (postBuildCallback_)
+        postBuildCallback_(simulationFactory_.getCell(), ch::duration<double>(simulationConfig_.simulationTimeStep));
 }
 
 void SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
@@ -44,6 +55,11 @@ void SimulationRunner::stopSimulation()
 void SimulationRunner::setPerformanceDataCallback(std::function<void(PerformanceData)> callback)
 {
     performanceDataCallback_ = callback;
+}
+
+void SimulationRunner::setPostBuildCallback(std::function<void(Cell&, const ch::duration<double>&)> callback)
+{
+    postBuildCallback_ = callback;
 }
 
 void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback)

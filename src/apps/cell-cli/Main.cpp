@@ -43,7 +43,9 @@ int main(int argc, char** argv)
     app.add_option("--config", configFile, "Config file")->required()->check(CLI::ExistingFile);
     app.add_option("--out", outFile, "Output file (type counts)")->required();
     app.add_option("--duration", duration, "Target simulation time in seconds")->required()->check(positiveDouble);
-    app.add_option("--storage-interval", storageInterval, "Storage interval in seconds")->required()->check(positiveDouble);
+    app.add_option("--storage-interval", storageInterval, "Storage interval in seconds")
+        ->required()
+        ->check(positiveDouble);
 
     CLI11_PARSE(app, argc, argv);
 
@@ -52,7 +54,7 @@ int main(int argc, char** argv)
     simulationRunner.setSimulationDuration(std::chrono::duration<double>{duration});
 
     cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
-                                                simulationRunner.getSimulationConfig());
+                                                simulationRunner.getSimulationConfig().mostProbableSpeed);
     simulationRecorder.setStorageInterval(ch::duration<double>(storageInterval));
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.receivePerformanceData(std::move(data)); });

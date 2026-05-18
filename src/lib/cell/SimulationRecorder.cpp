@@ -8,21 +8,19 @@
 namespace cell
 {
 
-SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry,
-                                       const SimulationConfig& simulationConfig)
-    : discTypeRegistry_(&discTypeRegistry)
+SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, double vSigma)
+    : discTypeRegistry_(discTypeRegistry)
 {
     std::vector<DiscTypeID> discTypeIDs = discTypeRegistry.getIDs();
-    const double sigma = simulationConfig.mostProbableSpeed;
 
     dataPointForStorage_.vxHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                           bh::axis::regular<>(20, -3 * sigma, 3 * sigma, "v_x"));
+                                                           bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v_x"));
 
     dataPointForStorage_.vyHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                           bh::axis::regular<>(20, -3 * sigma, 3 * sigma, "v_y"));
+                                                           bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v_y"));
 
     dataPointForStorage_.vHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                          bh::axis::regular<>(20, -3 * sigma, 3 * sigma, "v"));
+                                                          bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v"));
 }
 
 void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageInterval)
@@ -76,7 +74,7 @@ void SimulationRecorder::addSimulationDataToDataPoint(Cell& cell, const ch::dura
         for (const auto& disc : compartment->getDiscs())
         {
             const auto discTypeID = disc.getTypeID();
-            const auto mass = discTypeRegistry_->getByID(disc.getTypeID()).getMass();
+            const auto mass = discTypeRegistry_.getByID(disc.getTypeID()).getMass();
 
             ++dataPointForStorage_.discTypeCounts_[discTypeID];
             dataPointForStorage_.totalKineticEnergies_[discTypeID] += disc.getKineticEnergy(mass);

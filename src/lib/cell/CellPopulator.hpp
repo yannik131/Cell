@@ -15,7 +15,8 @@ class Disc;
 class CellPopulator
 {
 public:
-    CellPopulator(Cell& cell, SimulationConfig simulationConfig, SimulationContext simulationContext);
+    CellPopulator(Cell& cell, SimulationConfig simulationConfig, const DiscTypeRegistry& discTypeRegistry,
+                  const MembraneTypeRegistry& membraneTypeRegistry);
 
     void populateCell();
 
@@ -33,7 +34,8 @@ private:
 private:
     Cell& cell_;
     SimulationConfig simulationConfig_;
-    SimulationContext simulationContext_;
+    const DiscTypeRegistry& discTypeRegistry_;
+    const MembraneTypeRegistry& membraneTypeRegistry_;
 };
 
 } // namespace cell
