@@ -24,6 +24,9 @@ void SimulationRunner::useConfigFile(const fs::path& configFile)
 
 void SimulationRunner::useConfig(const SimulationConfig& simulationConfig)
 {
+    if (thread_.joinable())
+        return;
+
     simulationFactory_.buildSimulationFromConfig(simulationConfig);
 
     if (postBuildCallback_)

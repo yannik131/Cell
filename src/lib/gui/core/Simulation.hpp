@@ -27,7 +27,7 @@ public:
     void start();
     void stop();
     void reinitialize();
-    void loadSettingsFromJson(const json& jsonSettings);
+    void loadSettingsFromJson(const fs::path& settingsPath);
 
     const cell::DiscTypeRegistry& getDiscTypeRegistry();
 

@@ -15,6 +15,23 @@ Simulation::Simulation(QObject* parent)
 
 void Simulation::start()
 {
+    simulationRunner_.runSimulation();
+}
+
+void Simulation::stop()
+{
+    simulationRunner_.stopSimulation();
+}
+
+void Simulation::reinitialize()
+{
+    simulationRunner_.useConfig(simulationConfigUpdater_.getSimulationConfig());
+}
+
+void Simulation::loadSettingsFromJson(const fs::path& settingsPath)
+{
+    simulationConfigUpdater_.loadConfigFromFile(settingsPath);
+    reinitialize();
 }
 
 const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
