@@ -13,6 +13,8 @@
 
 #include <vector>
 
+using json = nlohmann::json;
+
 /**
  * @brief Contains and runs the cell for the simulation
  */
@@ -22,22 +24,15 @@ class Simulation : public QObject
 public:
     explicit Simulation(QObject* parent = nullptr);
 
-    void run();
-
-    void buildContext(const cell::SimulationConfig& = {});
-    void rebuildContext();
+    void start();
+    void stop();
+    void reinitialize();
+    void loadSettingsFromJson(const json& jsonSettings);
 
     const cell::DiscTypeRegistry& getDiscTypeRegistry();
 
     SimulationConfigUpdater& getSimulationConfigUpdater();
     const cell::SimulationConfig& getSimulationConfig() const;
-
-    bool cellIsBuilt() const;
-
-    void emitFrame(RedrawOnly redrawOnly);
-
-private:
-    sf::CircleShape circleShapeFromCompartment(const cell::Compartment& compartment);
 
 signals:
     void frame(const cell::SimulationRecorder::Frame& frame);
@@ -48,7 +43,6 @@ private:
     cell::SimulationRunner simulationRunner_;
     std::unique_ptr<cell::SimulationRecorder> simulationRecorder_;
     SimulationConfigUpdater simulationConfigUpdater_;
-    std::vector<sf::CircleShape> membranes_;
 };
 
 #endif /* C79C95D4_043A_4803_8C77_D97B81275A0C_HPP */

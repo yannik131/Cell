@@ -4,7 +4,7 @@
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
 
-#include "qcustomplot.h"
+#include <qcustomplot.h>
 #include <SFML/Graphics/Color.hpp>
 
 class PlotModel;

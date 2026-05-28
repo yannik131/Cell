@@ -1,5 +1,4 @@
 #include "models/MembranesTableModel.hpp"
-#include "MembranesTableModel.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
 MembranesTableModel::MembranesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)

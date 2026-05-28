@@ -1,5 +1,4 @@
 #include "delegates/ComboBoxDelegate.hpp"
-#include "ComboBoxDelegate.hpp"
 #include "core/SafeCast.hpp"
 #include "core/Utility.hpp"
 

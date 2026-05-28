@@ -1,5 +1,4 @@
 #include "widgets/SimulationInfoWidget.hpp"
-#include "SimulationInfoWidget.hpp"
 #include "cell/StringUtils.hpp"
 #include "ui_SimulationInfoWidget.h"
 

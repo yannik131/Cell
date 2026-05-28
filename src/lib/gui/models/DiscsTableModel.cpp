@@ -1,4 +1,3 @@
-#include "DiscsTableModel.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscsTableModel.hpp"
 

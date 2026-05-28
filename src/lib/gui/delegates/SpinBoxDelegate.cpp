@@ -1,5 +1,3 @@
-#include "SpinBoxDelegate.hpp"
-
 #include <QAbstractItemView>
 
 void insertProbabilitySpinBoxIntoView(QAbstractItemView* view, Column column)

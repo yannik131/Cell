@@ -2,7 +2,6 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>

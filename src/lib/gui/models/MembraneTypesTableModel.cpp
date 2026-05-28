@@ -1,5 +1,4 @@
 #include "models/MembraneTypesTableModel.hpp"
-#include "MembraneTypesTableModel.hpp"
 #include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 

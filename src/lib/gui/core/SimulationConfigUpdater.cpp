@@ -1,5 +1,4 @@
 #include "core/SimulationConfigUpdater.hpp"
-#include "SimulationConfigUpdater.hpp"
 #include "cell/SimulationFactory.hpp"
 #include "core/SFMLJsonSerializers.hpp"
 

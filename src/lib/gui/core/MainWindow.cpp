@@ -10,7 +10,6 @@
 #include "dialogs/SetupDialog.hpp"
 #include "ui_MainWindow.h"
 
-#include "MainWindow.hpp"
 #include <QKeyEvent>
 #include <QMessageBox>
 

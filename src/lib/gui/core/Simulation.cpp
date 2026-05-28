@@ -5,7 +5,6 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 
@@ -14,90 +13,8 @@ Simulation::Simulation(QObject* parent)
 {
 }
 
-void Simulation::run()
+void Simulation::start()
 {
-    using clock = std::chrono::steady_clock;
-    using namespace std::chrono;
-
-    auto lastUpdate = clock::now();
-    auto timeSinceLastUpdate = duration<double>(0s);
-    auto start = clock::now();
-    auto simulationUpdateTime = duration<double>(0s);
-    int updates = 0;
-
-    // Since every change to the config causes an immediate context rebuild, it's always up to date
-    const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
-    const double simulationTimeScale = simulationConfig.simulationTimeScale;
-    const auto simulationTimeStep = duration<double>(simulationConfig.simulationTimeStep);
-
-    const auto emitSimulationData = [&]()
-    {
-        const auto elapsed = clock::now() - start;
-        if (elapsed < 1s || updates == 0)
-            return;
-
-        const double simulationTime = updates * simulationConfig.simulationTimeStep;
-        const double elapsedSeconds = duration<double>(elapsed).count();
-        const double actualScale = simulationTime / elapsedSeconds;
-        emit simulationData(simulationTimeScale, actualScale, duration_cast<nanoseconds>(elapsed / updates),
-                            duration_cast<nanoseconds>(simulationUpdateTime / updates));
-
-        start = clock::now();
-        updates = 0;
-        simulationUpdateTime = 0s;
-    };
-
-    while (!QThread::currentThread()->isInterruptionRequested())
-    {
-        auto now = clock::now();
-        timeSinceLastUpdate += now - lastUpdate;
-        lastUpdate = now;
-
-        emitSimulationData();
-
-        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep &&
-               !QThread::currentThread()->isInterruptionRequested())
-        {
-            timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-
-            const auto updateStart = clock::now();
-            simulationFactory_.getCell().update(simulationTimeStep.count());
-            simulationUpdateTime += clock::now() - updateStart;
-            ++updates;
-
-            emitSimulationData();
-            emitFrame(RedrawOnly{false});
-        }
-    }
-}
-
-void Simulation::buildContext(const cell::SimulationConfig& config)
-{
-    simulationRunner_.useConfig(config);
-    simulationRecorder_.reset(new cell::SimulationRecorder(simulationRunner_.getSimulationContext().discTypeRegistry,
-                                                           config.mostProbableSpeed));
-    simulationRunner_.setPostBuildCallback(
-        [&](cell::Cell& cell)
-        {
-            simulationRecorder_->processInitialSimulationData(cell);
-            emit frame(simulationRecorder_->getLastFrame());
-            emit dataPoint(simulationRecorder_->getCurrentDataPoint());
-        });
-    simulationRunner_.setPerformanceDataCallback([&](cell::SimulationRunner::PerformanceData data)
-                                                 { emit performanceData(data); });
-    simulationRunner_.setPostUpdateCallback(
-        [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
-        {
-            simulationRecorder_->processSimulationData(cell, elapsedTime);
-            emit frame(simulationRecorder_->getLastFrame());
-        });
-    simulationRecorder_->setNewDataPointCallback([&](const cell::DataPoint& dataPoint)
-                                                 { emit this->dataPoint(dataPoint); });
-}
-
-void Simulation::rebuildContext()
-{
-    buildContext(simulationConfigUpdater_.getSimulationConfig());
 }
 
 const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
@@ -113,51 +30,6 @@ SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
 const cell::SimulationConfig& Simulation::getSimulationConfig() const
 {
     return simulationConfigUpdater_.getSimulationConfig();
-}
-
-bool Simulation::cellIsBuilt() const
-{
-    return simulationFactory_.cellIsBuilt();
-}
-
-void Simulation::emitFrame(RedrawOnly redrawOnly)
-{
-    if (!simulationFactory_.cellIsBuilt())
-        return;
-
-    FrameDTO frameDTO;
-    const auto& cell = simulationFactory_.getCell();
-
-    const auto gatherData = [&](const cell::Compartment& compartment)
-    {
-        frameDTO.discs_.insert(frameDTO.discs_.end(), compartment.getDiscs().begin(), compartment.getDiscs().end());
-        frameDTO.membranes_.push_back(circleShapeFromCompartment(compartment));
-    };
-
-    std::vector<const cell::Compartment*> compartments({&cell});
-
-    while (!compartments.empty())
-    {
-        const cell::Compartment* compartment = compartments.back();
-        compartments.pop_back();
-
-        gatherData(*compartment);
-
-        for (const auto& subCompartment : compartment->getCompartments())
-            compartments.push_back(subCompartment.get());
-    }
-
-    if (redrawOnly.value)
-    {
-        emit frame(frameDTO);
-        return;
-    }
-
-    frameDTO.elapsedSimulationTimeUs =
-        static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().simulationTimeStep * 1e6);
-    frameDTO.collisionCounts_ = cell::CollisionDetector::getAndResetCollisionCounts();
-
-    emit frame(frameDTO);
 }
 
 sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
