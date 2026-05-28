@@ -34,6 +34,9 @@ public:
     SimulationConfigUpdater& getSimulationConfigUpdater();
     const cell::SimulationConfig& getSimulationConfig() const;
 
+private:
+    void initializeSimulationRecorder();
+
 signals:
     void frame(const cell::SimulationRecorder::Frame& frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);

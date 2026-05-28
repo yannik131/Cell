@@ -5,6 +5,7 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
+#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 
@@ -26,6 +27,7 @@ void Simulation::stop()
 void Simulation::reinitialize()
 {
     simulationRunner_.useConfig(simulationConfigUpdater_.getSimulationConfig());
+    initializeSimulationRecorder();
 }
 
 void Simulation::loadSettingsFromJson(const fs::path& settingsPath)
@@ -47,6 +49,28 @@ SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
 const cell::SimulationConfig& Simulation::getSimulationConfig() const
 {
     return simulationConfigUpdater_.getSimulationConfig();
+}
+
+void Simulation::initializeSimulationRecorder()
+{
+    simulationRecorder_ =
+        std::make_unique<cell::SimulationRecorder>(simulationRunner_.getSimulationContext().discTypeRegistry,
+                                                   simulationRunner_.getSimulationConfig().mostProbableSpeed);
+    simulationRunner_.setPerformanceDataCallback([&](auto data) { emit performanceData(data); });
+    simulationRunner_.setPostBuildCallback(
+        [&](cell::Cell& cell)
+        {
+            simulationRecorder_->processInitialSimulationData(cell);
+            emit frame(simulationRecorder_->getLastFrame());
+        });
+    simulationRunner_.setPostUpdateCallback(
+        [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+        {
+            simulationRecorder_->processSimulationData(cell, elapsedTime);
+            emit frame(simulationRecorder_->getLastFrame());
+        });
+    simulationRecorder_->setNewDataPointCallback([&](const cell::DataPoint& dataPoint)
+                                                 { emit this->dataPoint(dataPoint); });
 }
 
 sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
