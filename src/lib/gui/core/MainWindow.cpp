@@ -52,8 +52,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationWidget, &SimulationWidget::renderData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setRenderData);
-    connect(simulation_.get(), &Simulation::simulationData, ui->simulationInfoWidget,
-            &SimulationInfoWidget::setSimulationData);
 
     ui->plotWidget->setModel(plotModel_);
 
@@ -68,7 +66,6 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::showAboutDialog);
 
     resizeTimer_.setSingleShot(true);
-    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
@@ -76,10 +73,22 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
-    connect(ui->simulationWidget, &SimulationWidget::renderRequired,
-            [this]() { simulation_->emitFrame(RedrawOnly{true}); });
 
     connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
+
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
+            [&]()
+            {
+                ui->menubar->setEnabled(false);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
+            });
+
+    connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
+            [&]()
+            {
+                ui->menubar->setEnabled(true);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
+            });
 
     ui->plotControlWidget->setModel(plotModel_);
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
@@ -97,10 +106,10 @@ MainWindow::MainWindow(QWidget* parent)
     addShortcut(Qt::Key_Space,
                 [&]()
                 {
-                    if (simulationThread_)
-                        simulationThread_->requestInterruption();
+                    if (simulation_->isRunning())
+                        simulation_->stop();
                     else
-                        startSimulation();
+                        simulation_->start();
                 });
 
     connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,
@@ -117,12 +126,8 @@ MainWindow::MainWindow(QWidget* parent)
 
 void MainWindow::resetSimulation()
 {
-    if (simulationThread_)
-        return;
-
-    simulation_->rebuildContext();
+    simulation_->reinitialize();
     plotModel_->reset();
-    simulation_->emitFrame(RedrawOnly{true});
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -164,7 +169,7 @@ void MainWindow::toggleSimulationFullscreen()
 {
     ui->simulationWidget->toggleFullscreen();
     fullscreenIsToggled_ = !fullscreenIsToggled_;
-    simulation_->emitFrame(RedrawOnly{true});
+    simulation_->emitLastFrame();
 }
 
 void MainWindow::showAboutDialog()
@@ -184,14 +189,7 @@ void MainWindow::showAboutDialog()
     QMessageBox::about(this, QStringLiteral("About"), aboutMessage.arg(__DATE__).arg(__TIME__));
 }
 
-MainWindow::~MainWindow()
-{
-    if (simulationThread_ != nullptr)
-    {
-        simulationThread_->requestInterruption();
-        simulationThread_->wait();
-    }
-}
+MainWindow::~MainWindow() = default;
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
@@ -215,44 +213,13 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::startSimulation()
 {
-    if (simulationThread_ != nullptr)
+    if (simulation_->isRunning())
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
-    if (!simulation_->cellIsBuilt())
-        throw ExceptionWithLocation("Can't start simulation: Cell has not been built yet.");
-
-    simulationThread_ = new QThread();
-    simulation_->moveToThread(simulationThread_);
-
-    connect(simulationThread_, &QThread::started, ui->simulationControlWidget,
-            [&]()
-            {
-                ui->menubar->setEnabled(false);
-                ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
-            });
-    connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
-            [&]()
-            {
-                ui->menubar->setEnabled(true);
-                ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
-            });
-
-    connect(simulationThread_, &QThread::started,
-            [&]()
-            {
-                simulation_->run();
-                simulation_->moveToThread(QCoreApplication::instance()->thread());
-                simulationThread_->quit();
-            });
-
-    connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
-    connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
-
-    simulationThread_->start();
+    simulation_->start();
 }
 
 void MainWindow::stopSimulation()
 {
-    if (simulationThread_)
-        simulationThread_->requestInterruption();
+    simulation_->stop();
 }

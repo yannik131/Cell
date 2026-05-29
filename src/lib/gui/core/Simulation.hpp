@@ -26,10 +26,10 @@ public:
 
     void start();
     void stop();
+    bool isRunning() const;
     void reinitialize();
     void loadSettingsFromJson(const fs::path& settingsPath);
-
-    const cell::DiscTypeRegistry& getDiscTypeRegistry();
+    void emitLastFrame();
 
     SimulationConfigUpdater& getSimulationConfigUpdater();
     const cell::SimulationConfig& getSimulationConfig() const;
@@ -38,6 +38,8 @@ private:
     void initializeSimulationRecorder();
 
 signals:
+    void started();
+    void stopped();
     void frame(const cell::SimulationRecorder::Frame& frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);
     void dataPoint(const cell::DataPoint& dataPoint);

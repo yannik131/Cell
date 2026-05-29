@@ -40,6 +40,9 @@ void SimulationRunner::setSimulationDuration(const std::chrono::duration<double>
 
 void SimulationRunner::runSimulation()
 {
+    if (simulationIsRunning())
+        return;
+
     thread_ = std::jthread([this](std::stop_token stopToken) { loop(stopToken); });
 }
 
@@ -57,12 +60,12 @@ void SimulationRunner::stopSimulation()
 
 void SimulationRunner::setPerformanceDataCallback(std::function<void(PerformanceData)> callback)
 {
-    performanceDataCallback_ = callback;
+    performanceDataCallback_ = std::move(callback);
 }
 
 void SimulationRunner::setPostBuildCallback(std::function<void(Cell&)> callback)
 {
-    postBuildCallback_ = callback;
+    postBuildCallback_ = std::move(callback);
 
     if (simulationFactory_.cellIsBuilt())
         postBuildCallback_(simulationFactory_.getCell());
@@ -70,7 +73,20 @@ void SimulationRunner::setPostBuildCallback(std::function<void(Cell&)> callback)
 
 void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback)
 {
-    postUpdateCallback_ = callback;
+    postUpdateCallback_ = std::move(callback);
+}
+
+void SimulationRunner::setPostStartCallback(std::function<void()> callback)
+{
+    postStartCallback_ = std::move(callback);
+    
+    if (simulationIsRunning()) 
+        postStartCallback_();
+}
+
+void SimulationRunner::setPostStopCallback(std::function<void()> callback)
+{
+    postStopCallback_ = std::move(callback);
 }
 
 SimulationContext SimulationRunner::getSimulationContext()
@@ -88,8 +104,17 @@ void SimulationRunner::setUseScaleFromConfig(bool value)
     useScaleFromConfig_ = value;
 }
 
+bool SimulationRunner::simulationIsRunning() const
+{
+    return isRunning_;
+}
+
 void SimulationRunner::loop(std::stop_token stopToken)
 {
+    if (postStartCallback_)
+        postStartCallback_();
+
+    isRunning_ = true;
     auto simulationUpdateTime = ch::duration<double>(0s);
     auto simulationDuration = ch::duration<double>(0s);
     const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);
@@ -120,6 +145,10 @@ void SimulationRunner::loop(std::stop_token stopToken)
     }
 
     sendPerformanceData(start, updates, simulationUpdateTime, Force{true});
+    isRunning_ = false;
+
+    if (postStopCallback_)
+        postStopCallback_();
 }
 
 void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, int& updates,

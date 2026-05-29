@@ -112,20 +112,6 @@ const std::map<std::string, bool>& PlotModel::getActivePlotDiscTypesMap() const
     return activePlotDiscTypes_;
 }
 
-void PlotModel::processFrame(const FrameDTO& frameDTO)
-{
-    if (frameDTO.elapsedSimulationTimeUs == 0)
-    {
-        emitInitialHistogram(frameDTO);
-        return;
-    }
-    else if (dataPointForPlotting_.elapsedTime_ == 0)
-        dataPointForPlotting_.clear(); // Clear the datapoint used for initial histogram display
-
-    DataPoint dataPoint = dataPointFromFrameDTO(frameDTO);
-    storeDataPoint(dataPoint);
-}
-
 void PlotModel::setPlot()
 {
     updateLabelsAndColors();
@@ -294,35 +280,6 @@ void PlotModel::updateLabelsAndColors()
             colors_.push_back(colorMap.at(discType.name));
         }
     }
-}
-
-DataPoint PlotModel::dataPointFromFrameDTO(const FrameDTO& frameDTO)
-{
-    const auto& discTypeRegistry = simulation_->getDiscTypeRegistry();
-    DataPoint dataPoint(simulation_->getSimulationConfig());
-
-    auto& discs = frameDTO.discs_;
-
-    for (const auto& [discType, collisionCount] : frameDTO.collisionCounts_)
-        dataPoint.collisionCounts_[discTypeRegistry.getByID(discType).getName()] = static_cast<double>(collisionCount);
-
-    dataPoint.elapsedTime_ = static_cast<double>(frameDTO.elapsedSimulationTimeUs) / 1'000'000.0;
-    std::unordered_map<std::string, cell::Vector2d> momentumMap;
-
-    for (const auto& disc : discs)
-    {
-        std::string discTypeName = discTypeRegistry.getByID(disc.getTypeID()).getName();
-        ++dataPoint.discTypeCountMap_[discTypeName];
-        dataPoint.totalKineticEnergyMap_[discTypeName] +=
-            disc.getKineticEnergy(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        momentumMap[discTypeName] += disc.getMomentum(discTypeRegistry.getByID(disc.getTypeID()).getMass());
-        dataPoint.vxHistogram_(discTypeName, disc.getVelocity().x);
-    }
-
-    for (const auto& [discTypeName, momentum] : momentumMap)
-        dataPoint.totalMomentumMap_[discTypeName] = cell::mathutils::abs(momentum);
-
-    return dataPoint;
 }
 
 std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint& dataPoint)

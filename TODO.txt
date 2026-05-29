@@ -1,0 +1,2 @@
+- Prevent right click when simulation is running
+- Don't take redraw only frame into account for rendering stats

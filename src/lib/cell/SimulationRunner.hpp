@@ -4,6 +4,7 @@
 #include "SimulationConfig.hpp"
 #include "SimulationFactory.hpp"
 
+#include <atomic>
 #include <chrono>
 #include <filesystem>
 #include <thread>
@@ -39,9 +40,12 @@ public:
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
     void setPostBuildCallback(std::function<void(Cell&)> callback);
     void setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
+    void setPostStartCallback(std::function<void()> callback);
+    void setPostStopCallback(std::function<void()> callback);
     SimulationContext getSimulationContext();
     const SimulationConfig& getSimulationConfig() const;
     void setUseScaleFromConfig(bool value);
+    bool simulationIsRunning() const;
 
 private:
     void loop(std::stop_token stopToken);
@@ -55,8 +59,11 @@ private:
     std::function<void(PerformanceData)> performanceDataCallback_;
     std::function<void(Cell&, const ch::duration<double>&)> postUpdateCallback_;
     std::function<void(Cell&)> postBuildCallback_;
+    std::function<void()> postStartCallback_;
+    std::function<void()> postStopCallback_;
     ch::duration<double> simulationDuration_ = ch::duration<double>::max();
     bool useScaleFromConfig_ = false;
+    std::atomic<bool> isRunning_ = false;
 };
 
 } // namespace cell

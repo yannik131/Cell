@@ -12,6 +12,8 @@
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
+    simulationRunner_.setPostStartCallback([&]() { emit started(); });
+    simulationRunner_.setPostStartCallback([&]() { emit stopped(); });
 }
 
 void Simulation::start()
@@ -22,6 +24,11 @@ void Simulation::start()
 void Simulation::stop()
 {
     simulationRunner_.stopSimulation();
+}
+
+bool Simulation::isRunning() const
+{
+    return simulationRunner_.simulationIsRunning();
 }
 
 void Simulation::reinitialize()
@@ -36,9 +43,9 @@ void Simulation::loadSettingsFromJson(const fs::path& settingsPath)
     reinitialize();
 }
 
-const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
+void Simulation::emitLastFrame()
 {
-    return simulationFactory_.getSimulationContext().discTypeRegistry;
+    emit frame(simulationRecorder_->getLastFrame());
 }
 
 SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
@@ -71,26 +78,4 @@ void Simulation::initializeSimulationRecorder()
         });
     simulationRecorder_->setNewDataPointCallback([&](const cell::DataPoint& dataPoint)
                                                  { emit this->dataPoint(dataPoint); });
-}
-
-sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
-{
-    sf::CircleShape shape;
-    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
-    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
-    const auto R = static_cast<float>(membraneType.getRadius());
-
-    shape.setPointCount(100);
-    shape.setRadius(R);
-    shape.setOrigin({R, R});
-    shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
-    shape.setFillColor(sf::Color::Transparent);
-    shape.setOutlineThickness(1);
-
-    if (membraneType.getName() == cell::config::cellMembraneTypeName)
-        shape.setOutlineColor(sf::Color::Yellow);
-    else
-        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
-
-    return shape;
 }

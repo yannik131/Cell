@@ -65,9 +65,6 @@ void SimulationWidget::toggleFullscreen()
 
 void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-    if (renderingStarted_)
-        return;
-
     QMenu menu(this);
     const QPoint cursorPosition = event->pos();
 
@@ -124,7 +121,6 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     using clock = std::chrono::steady_clock;
     using namespace std::chrono;
 
-    restartTimers(frame);
     const auto targetRenderTime =
         duration_cast<clock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
 
@@ -135,9 +131,6 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     drawFrame(frame, discTypeRegistry);
     const auto now = clock::now();
     const auto renderTime = now - start;
-
-    if (frame.elapsedSimulationTimeUs == 0)
-        return;
 
     nextAllowedRenderTime_ = now + targetRenderTime;
 
@@ -171,33 +164,6 @@ void SimulationWidget::drawFrame(const FrameDTO& frame, const cell::DiscTypeRegi
     }
 
     sf::RenderWindow::display();
-}
-
-void SimulationWidget::restartTimers(const FrameDTO& frame)
-{
-    using clock = std::chrono::steady_clock;
-    using namespace std::chrono;
-
-    // Simulation in progress, do nothing
-    if (renderingStarted_ && frame.elapsedSimulationTimeUs > 0)
-        return;
-
-    // Simulation stopped
-    if (frame.elapsedSimulationTimeUs == 0)
-    {
-        renderingStarted_ = false;
-        return;
-    }
-
-    // Simulation was stopped and now started again - reset timers
-    if (!renderingStarted_ && frame.elapsedSimulationTimeUs > 0)
-    {
-        renderedFrames_ = 0;
-        currentRenderInterval_ = clock::now();
-        nextAllowedRenderTime_ = clock::now();
-        elapsedRenderTime_ = 0ns;
-        renderingStarted_ = true;
-    }
 }
 
 double SimulationWidget::calculateIdealZoom() const
@@ -261,4 +227,26 @@ void SimulationWidget::addMembraneAtCursor(const QPoint& cursorPosition, const s
         cursorPosition, typeName, [](const auto& config) { return config.membranes; },
         [](auto& membrane, const std::string& typeName) { membrane.membraneTypeName = typeName; },
         [](auto& config, auto membranes) { config.membranes = std::move(membranes); });
+}
+
+sf::CircleShape SimulationWidget::circleShapeFromCompartment(const cell::Compartment& compartment)
+{
+    sf::CircleShape shape;
+    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
+    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
+    const auto R = static_cast<float>(membraneType.getRadius());
+
+    shape.setPointCount(100);
+    shape.setRadius(R);
+    shape.setOrigin({R, R});
+    shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
+    shape.setFillColor(sf::Color::Transparent);
+    shape.setOutlineThickness(1);
+
+    if (membraneType.getName() == cell::config::cellMembraneTypeName)
+        shape.setOutlineColor(sf::Color::Yellow);
+    else
+        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
+
+    return shape;
 }

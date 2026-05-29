@@ -82,7 +82,6 @@ private:
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
-    QThread* simulationThread_ = nullptr;
     std::unique_ptr<Simulation> simulation_;
     SimulationConfigUpdater* simulationConfigUpdater_;
     PlotModel* plotModel_;
