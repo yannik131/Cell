@@ -58,7 +58,7 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     }
 }
 
-SimulationContext SimulationFactory::getSimulationContext()
+SimulationContext SimulationFactory::getSimulationContext() const
 {
     if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionHandler_)
         throw ExceptionWithLocation("Can't get simulation context, dependencies haven't been fully created yet");

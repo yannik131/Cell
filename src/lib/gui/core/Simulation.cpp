@@ -58,6 +58,11 @@ const cell::SimulationConfig& Simulation::getSimulationConfig() const
     return simulationConfigUpdater_.getSimulationConfig();
 }
 
+cell::SimulationContext Simulation::getSimulationContext()
+{
+    return simulationRunner_.getSimulationContext();
+}
+
 void Simulation::initializeSimulationRecorder()
 {
     simulationRecorder_ =

@@ -70,8 +70,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
 
-    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
-            [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, [&](const FrameDTO& frame)
+            { ui->simulationWidget->render(frame, simulation_->getSimulationContext().discTypeRegistry); });
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
 
     connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);

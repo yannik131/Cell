@@ -42,7 +42,7 @@ public:
     void setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
     void setPostStartCallback(std::function<void()> callback);
     void setPostStopCallback(std::function<void()> callback);
-    SimulationContext getSimulationContext();
+    SimulationContext getSimulationContext() const;
     const SimulationConfig& getSimulationConfig() const;
     void setUseScaleFromConfig(bool value);
     bool simulationIsRunning() const;

@@ -33,6 +33,7 @@ public:
 
     SimulationConfigUpdater& getSimulationConfigUpdater();
     const cell::SimulationConfig& getSimulationConfig() const;
+    cell::SimulationContext getSimulationContext();
 
 private:
     void initializeSimulationRecorder();

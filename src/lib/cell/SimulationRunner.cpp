@@ -79,8 +79,8 @@ void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch:
 void SimulationRunner::setPostStartCallback(std::function<void()> callback)
 {
     postStartCallback_ = std::move(callback);
-    
-    if (simulationIsRunning()) 
+
+    if (simulationIsRunning())
         postStartCallback_();
 }
 
@@ -89,7 +89,7 @@ void SimulationRunner::setPostStopCallback(std::function<void()> callback)
     postStopCallback_ = std::move(callback);
 }
 
-SimulationContext SimulationRunner::getSimulationContext()
+SimulationContext SimulationRunner::getSimulationContext() const
 {
     return simulationFactory_.getSimulationContext();
 }
