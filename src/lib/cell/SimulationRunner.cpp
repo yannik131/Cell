@@ -24,7 +24,7 @@ void SimulationRunner::useConfigFile(const fs::path& configFile)
 
 void SimulationRunner::useConfig(const SimulationConfig& simulationConfig)
 {
-    if (thread_.joinable())
+    if (simulationIsRunning())
         return;
 
     simulationFactory_.buildSimulationFromConfig(simulationConfig);
@@ -54,7 +54,7 @@ void SimulationRunner::waitForSimulationToFinish()
 
 void SimulationRunner::stopSimulation()
 {
-    if (thread_.joinable())
+    if (thread_.joinable() && simulationIsRunning())
         thread_.request_stop();
 }
 

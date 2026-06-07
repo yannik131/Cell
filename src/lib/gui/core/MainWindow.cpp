@@ -81,6 +81,8 @@ MainWindow::MainWindow(QWidget* parent)
             [&](const Frame& frame) { ui->simulationWidget->renderFrame(frame); });
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
 
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [&]() { simulation_->emitLastFrame(); });
+
     connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
             [&]()
             {
@@ -222,9 +224,11 @@ void MainWindow::startSimulation()
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
     simulation_->start();
+    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }
 
 void MainWindow::stopSimulation()
 {
     simulation_->stop();
+    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }

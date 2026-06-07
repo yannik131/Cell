@@ -46,7 +46,10 @@ void Simulation::loadSettingsFromJson(const fs::path& settingsPath)
 
 void Simulation::emitLastFrame()
 {
-    emit frame(simulationRecorder_->getLastFrame());
+    if (!simulationRecorder_)
+        return;
+
+    emit initialFrame(simulationRecorder_->getLastFrame());
 }
 
 SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
