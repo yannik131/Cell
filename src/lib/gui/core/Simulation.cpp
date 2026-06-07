@@ -33,6 +33,7 @@ bool Simulation::isRunning() const
 
 void Simulation::reinitialize()
 {
+    simulationRunner_.setPostBuildCallback({});
     simulationRunner_.useConfig(simulationConfigUpdater_.getSimulationConfig());
     initializeSimulationRecorder();
 }
@@ -68,12 +69,14 @@ void Simulation::initializeSimulationRecorder()
     simulationRecorder_ =
         std::make_unique<cell::SimulationRecorder>(simulationRunner_.getSimulationContext().discTypeRegistry,
                                                    simulationRunner_.getSimulationConfig().mostProbableSpeed);
+
+    simulationRecorder_->setRecordLastFrame(true);
     simulationRunner_.setPerformanceDataCallback([&](auto data) { emit performanceData(data); });
     simulationRunner_.setPostBuildCallback(
         [&](cell::Cell& cell)
         {
             simulationRecorder_->processInitialSimulationData(cell);
-            emit frame(simulationRecorder_->getLastFrame());
+            emit initialFrame(simulationRecorder_->getLastFrame());
         });
     simulationRunner_.setPostUpdateCallback(
         [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)

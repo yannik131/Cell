@@ -426,19 +426,6 @@ Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const 
                                                   regularAxis.value(regularAxis.size()), regularAxis.metadata()));
 }
 
-void PlotModel::emitInitialHistogram(const FrameDTO& frameDTO)
-{
-    const bool simulationDataCollected =
-        !dataPoints_.empty() || dataPointForStorage_.elapsedTime_ > 0 || dataPointForPlotting_.elapsedTime_ > 0;
-    if (simulationDataCollected)
-        return;
-
-    // Store in case user switches to this plot later
-    dataPointForPlotting_ = dataPointFromFrameDTO(frameDTO);
-    if (plotCategory_ == PlotCategory::VelocityDistribution || plotCategory_ == PlotCategory::VelocityColorMap)
-        setPlot();
-}
-
 DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs)
 {
     lhs.elapsedTime_ += rhs.elapsedTime_;

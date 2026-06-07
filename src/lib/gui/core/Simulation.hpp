@@ -4,7 +4,6 @@
 #include "cell/SimulationConfig.hpp"
 #include "cell/SimulationRecorder.hpp"
 #include "cell/SimulationRunner.hpp"
-#include "core/FrameDTO.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Types.hpp"
 
@@ -41,7 +40,8 @@ private:
 signals:
     void started();
     void stopped();
-    void frame(const cell::SimulationRecorder::Frame& frame);
+    void initialFrame(const Frame& frame);
+    void frame(const Frame& frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);
     void dataPoint(const cell::DataPoint& dataPoint);
 

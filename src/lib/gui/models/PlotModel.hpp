@@ -2,7 +2,6 @@
 #define F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP
 
 #include "cell/SimulationConfig.hpp"
-#include "core/FrameDTO.hpp"
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
 #include "core/Utility.hpp"
@@ -10,9 +9,6 @@
 
 #include <QObject>
 
-/**
- * @brief Struct containing information from a FrameDTO relevant for the plot
- */
 struct DataPoint
 {
     DataPoint(double vxSigma, std::vector<std::string> discTypes)
@@ -67,9 +63,6 @@ public:
     void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
     const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
 
-public slots:
-    void processFrame(const FrameDTO& frameDTO);
-
 signals:
     void setPlot(const PlotWidget::LinePlotParams& linePlotParams);
     void setPlot(const PlotWidget::HistogramParams& histogramParams);
@@ -93,7 +86,6 @@ private:
     void updateColorMapPlot();
 
     void updateLabelsAndColors();
-    DataPoint dataPointFromFrameDTO(const FrameDTO& frameDTO);
     std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
     void storeDataPoint(const DataPoint& dataPoint);
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
@@ -101,7 +93,6 @@ private:
     Histogram discardInactiveDiscTypes(const Histogram& histogram);
     Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
     Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
-    void emitInitialHistogram(const FrameDTO& frameDTO);
 
 private:
     std::vector<DataPoint> dataPoints_;

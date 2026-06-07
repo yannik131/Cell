@@ -1,7 +1,7 @@
 #ifndef F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 #define F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 
-#include "core/FrameDTO.hpp"
+#include "core/Types.hpp"
 #include "widgets/QSFMLWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
@@ -38,12 +38,15 @@ signals:
     void renderData(int targetFPS, int actualFPS, std::chrono::nanoseconds renderTime);
 
 public slots:
-    void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
+    void renderFrame(const Frame& frame);
+    void renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
+                            const cell::MembraneTypeRegistry& membraneTypeRegistry);
     void fitSimulationIntoView();
 
 private:
-    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry);
-    void drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
+    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
+                           const cell::MembraneTypeRegistry& membraneTypeRegistry);
+    void drawFrame(const Frame& frame);
     double calculateIdealZoom() const;
     sf::Vector2i getWidgetSize() const;
     template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
@@ -53,13 +56,13 @@ private:
     sf::CircleShape circleShapeFromCompartment(const cell::Compartment& compartment);
 
 private:
-    std::vector<sf::CircleShape> typeShapes_;
+    std::vector<sf::CircleShape> discTypeShapes_;
+    std::vector<sf::CircleShape> membraneTypeShapes_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
     std::chrono::steady_clock::time_point currentRenderInterval_{};
     std::chrono::steady_clock::time_point nextAllowedRenderTime_{};
     std::chrono::steady_clock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
-    const Simulation* simulation_; // TODO use this for registry access
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

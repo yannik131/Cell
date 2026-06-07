@@ -99,24 +99,45 @@ void SimulationWidget::fitSimulationIntoView()
     resetView(Zoom{zoom});
 }
 
-void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry)
+void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
+                                         const cell::MembraneTypeRegistry& membraneTypeRegistry)
 {
-    typeShapes_.resize(discTypeRegistry.getValues().size());
+    discTypeShapes_.resize(discTypeRegistry.getValues().size());
+    membraneTypeShapes_.resize(membraneTypeRegistry.getValues().size());
+    sf::CircleShape circleShape;
 
     for (const auto& type : discTypeRegistry.getValues())
     {
         const auto ID = discTypeRegistry.getIDFor(type.getName());
 
-        sf::CircleShape circleShape;
         circleShape.setRadius(static_cast<float>(type.getRadius()));
         circleShape.setFillColor(simulationConfigUpdater_->getDiscTypeColorMap().at(type.getName()));
         circleShape.setOrigin(sf::Vector2f{static_cast<float>(type.getRadius()), static_cast<float>(type.getRadius())});
 
-        typeShapes_[ID] = circleShape;
+        discTypeShapes_[ID] = circleShape;
+    }
+
+    circleShape.setPointCount(100);
+    for (const auto& type : membraneTypeRegistry.getValues())
+    {
+        const auto ID = membraneTypeRegistry.getIDFor(type.getName());
+        const auto R = static_cast<float>(type.getRadius());
+
+        if (type.getName() == cell::config::cellMembraneTypeName)
+            circleShape.setOutlineColor(sf::Color::Yellow);
+        else
+            circleShape.setOutlineColor(simulationConfigUpdater_->getMembraneTypeColorMap().at(type.getName()));
+
+        circleShape.setRadius(R);
+        circleShape.setOrigin({R, R});
+        circleShape.setFillColor(sf::Color::Transparent);
+        circleShape.setOutlineThickness(1);
+
+        membraneTypeShapes_[ID] = circleShape;
     }
 }
 
-void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
+void SimulationWidget::renderFrame(const Frame& frame)
 {
     using clock = std::chrono::steady_clock;
     using namespace std::chrono;
@@ -128,7 +149,7 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
         return;
 
     const auto start = clock::now();
-    drawFrame(frame, discTypeRegistry);
+    drawFrame(frame);
     const auto now = clock::now();
     const auto renderTime = now - start;
 
@@ -145,22 +166,29 @@ void SimulationWidget::render(const FrameDTO& frame, const cell::DiscTypeRegistr
     }
 }
 
-void SimulationWidget::drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry)
+void SimulationWidget::renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
+                                          const cell::MembraneTypeRegistry& membraneTypeRegistry)
+{
+    rebuildTypeShapes(discTypeRegistry, membraneTypeRegistry);
+    drawFrame(frame);
+}
+
+void SimulationWidget::drawFrame(const Frame& frame)
 {
     sf::RenderWindow::clear(sf::Color::Black);
-    rebuildTypeShapes(discTypeRegistry); // TODO Only update cache when needed, same for compartments/membranes
 
-    for (const auto& disc : frame.discs_)
+    for (const auto& disc : frame.discs)
     {
-        typeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
-        sf::RenderWindow::draw(typeShapes_[disc.getTypeID()]);
+        discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
+        sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
     }
 
-    for (const auto& membrane : frame.membranes_)
+    for (const auto& membrane : frame.membranes)
     {
-        auto copy = membrane;
-        copy.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
-        sf::RenderWindow::draw(copy);
+        auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
+        membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+        membraneTypeShape.setPosition(utility::toVector2f(membrane.getPosition()));
+        sf::RenderWindow::draw(membraneTypeShape);
     }
 
     sf::RenderWindow::display();
@@ -227,26 +255,4 @@ void SimulationWidget::addMembraneAtCursor(const QPoint& cursorPosition, const s
         cursorPosition, typeName, [](const auto& config) { return config.membranes; },
         [](auto& membrane, const std::string& typeName) { membrane.membraneTypeName = typeName; },
         [](auto& config, auto membranes) { config.membranes = std::move(membranes); });
-}
-
-sf::CircleShape SimulationWidget::circleShapeFromCompartment(const cell::Compartment& compartment)
-{
-    sf::CircleShape shape;
-    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
-    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
-    const auto R = static_cast<float>(membraneType.getRadius());
-
-    shape.setPointCount(100);
-    shape.setRadius(R);
-    shape.setOrigin({R, R});
-    shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
-    shape.setFillColor(sf::Color::Transparent);
-    shape.setOutlineThickness(1);
-
-    if (membraneType.getName() == cell::config::cellMembraneTypeName)
-        shape.setOutlineColor(sf::Color::Yellow);
-    else
-        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
-
-    return shape;
 }

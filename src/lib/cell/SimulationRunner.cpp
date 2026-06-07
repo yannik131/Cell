@@ -67,7 +67,7 @@ void SimulationRunner::setPostBuildCallback(std::function<void(Cell&)> callback)
 {
     postBuildCallback_ = std::move(callback);
 
-    if (simulationFactory_.cellIsBuilt())
+    if (simulationFactory_.cellIsBuilt() && postBuildCallback_)
         postBuildCallback_(simulationFactory_.getCell());
 }
 
@@ -80,7 +80,7 @@ void SimulationRunner::setPostStartCallback(std::function<void()> callback)
 {
     postStartCallback_ = std::move(callback);
 
-    if (simulationIsRunning())
+    if (simulationIsRunning() && postStartCallback_)
         postStartCallback_();
 }
 

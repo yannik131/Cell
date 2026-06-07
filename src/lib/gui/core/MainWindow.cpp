@@ -1,5 +1,6 @@
 #include "core/MainWindow.hpp"
 #include "cell/ExceptionWithLocation.hpp"
+#include "cell/SimulationContext.hpp"
 #include "core/Utility.hpp"
 #include "dialogs/DiscTypesDialog.hpp"
 #include "dialogs/DiscsDialog.hpp"
@@ -70,11 +71,15 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
 
-    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, [&](const FrameDTO& frame)
-            { ui->simulationWidget->render(frame, simulation_->getSimulationContext().discTypeRegistry); });
+    connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
+            [&](const Frame& frame)
+            {
+                ui->simulationWidget->renderInitialFrame(frame, simulation_->getSimulationContext().discTypeRegistry,
+                                                         simulation_->getSimulationContext().membraneTypeRegistry);
+            });
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
+            [&](const Frame& frame) { ui->simulationWidget->renderFrame(frame); });
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
-
-    connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
 
     connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
             [&]()

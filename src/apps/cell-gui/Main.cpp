@@ -2,12 +2,9 @@
 
 #include <QApplication>
 #include <QMessageBox>
-#include <QtCore/QMetaType>
 
 int main(int argc, char* argv[])
 {
-    qRegisterMetaType<FrameDTO>("FrameDTO");
-
     QApplication::setStyle("fusion");
     QApplication app(argc, argv);
 
