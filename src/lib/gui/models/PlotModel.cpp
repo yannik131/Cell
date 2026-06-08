@@ -7,8 +7,6 @@
 #include <cmath>
 #include <unordered_set>
 
-using DataPoint = cell::DataPoint;
-
 PlotModel::PlotModel(QObject* parent, Simulation* simulation)
     : QObject(parent)
     , simulation_(simulation)
@@ -35,7 +33,7 @@ void PlotModel::setPlotTimeInterval(int valueMilliseconds)
     if (valueMilliseconds % 100 != 0)
         throw ExceptionWithLocation("The plot time interval must be a multiple of 100ms");
 
-    plotTimeInterval_ = static_cast<double>(valueMilliseconds) / 1000.0;
+    plotTimeInterval_ = ch::duration<double>{static_cast<double>(valueMilliseconds) / 1000.0};
 
     setPlot();
 }
@@ -186,7 +184,7 @@ void PlotModel::setColorMapPlot()
     emit setPlot(PlotWidget::ColorMapParams{.histograms = histograms, .xStep = plotTimeInterval_.count()});
 }
 
-void PlotModel::updatePlot(const cell::DataPoint& dataPoint)
+void PlotModel::updatePlot(const DataPoint& dataPoint)
 {
     switch (plotCategory_)
     {
@@ -200,7 +198,7 @@ void PlotModel::updatePlot(const cell::DataPoint& dataPoint)
     }
 }
 
-void PlotModel::updateLinePlot(const cell::DataPoint& dataPoint)
+void PlotModel::updateLinePlot(const DataPoint& dataPoint)
 {
     const auto& activeMap = getActiveMap(dataPoint);
 
@@ -214,13 +212,13 @@ void PlotModel::updateLinePlot(const cell::DataPoint& dataPoint)
         emit updatePlot(PlotWidget::LinePlotData{.dataPoint = activeMap, .doReplot = true});
 }
 
-void PlotModel::updateHistogramPlot(const cell::DataPoint& dataPoint)
+void PlotModel::updateHistogramPlot(const DataPoint& dataPoint)
 {
     auto histogram = getVelocityHistogramFromDataPoint(dataPoint, CalculateSum{plotSum_});
     emit updatePlot(PlotWidget::HistogramData{.histogram = histogram});
 }
 
-void PlotModel::updateColorMapPlot(const cell::DataPoint& dataPoint)
+void PlotModel::updateColorMapPlot(const DataPoint& dataPoint)
 {
     auto histogram = getVelocityHistogramFromDataPoint(dataPoint, CalculateSum{true});
     emit updatePlot(PlotWidget::ColorMapData{.histogram = histogram});
@@ -252,9 +250,9 @@ void PlotModel::updateLabelsAndColors()
     }
 }
 
-std::unordered_map<DiscTypeID, double> PlotModel::getActiveMap(const DataPoint& dataPoint)
+std::unordered_map<std::string, double> PlotModel::getActiveMap(const DataPoint& dataPoint)
 {
-    std::unordered_map<DiscTypeID, double> activeMap;
+    std::unordered_map<std::string, double> activeMap;
 
     switch (plotCategory_)
     {
@@ -276,38 +274,7 @@ std::unordered_map<DiscTypeID, double> PlotModel::getActiveMap(const DataPoint& 
     return activeMap;
 }
 
-void PlotModel::storeDataPoint(const DataPoint& dataPoint)
-{
-    dataPointForStorage_ += dataPoint;
-    const double timeStep = simulation_->getSimulationConfig().simulationTimeStep;
-
-    if (dataPointForStorage_.elapsedTime_ >= storageTime_)
-    {
-        const int dataPointsPerStoredPoint = static_cast<int>(std::ceil(storageTime_ / timeStep));
-        averageDataPoint(dataPointForStorage_, dataPointsPerStoredPoint, NormalizeCollisionCounts{false});
-        dataPoints.push_back(dataPointForStorage_);
-        dataPointForStorage_.clear();
-    }
-
-    // TODO The plot widget assumes all data points are equidistant (constant xStep), but data points can have varying
-    // elapsed time, so dt should be calculated as the distance from the last data point and sent to the plot widget as
-    // well. Example: simulation time step = 40ms, plot time interval = 100 ms => we collect 3 datapoints until elapsed
-    // time >= plot time interval (120 ms >= 100 ms), so each dataPointForPlotting_ spans 120ms (same for storage if
-    // storage time = 100ms)
-
-    dataPointForPlotting_ += dataPoint;
-
-    if (dataPointForPlotting_.elapsedTime_ >= plotTimeInterval_)
-    {
-        const int N = static_cast<int>(std::round(dataPointForPlotting_.elapsedTime_ / timeStep));
-        averageDataPoint(dataPointForPlotting_, N);
-        updatePlot();
-
-        dataPointForPlotting_.clear();
-    }
-}
-
-void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes)
+void PlotModel::updateActivePlotDiscTypes(const std::vector<config::DiscType>& discTypes)
 {
     std::unordered_set<std::string> discTypeNames;
 
@@ -330,11 +297,11 @@ void PlotModel::updateActivePlotDiscTypes(const std::vector<cell::config::DiscTy
     }
 }
 
-cell::Histogram PlotModel::sumHistogramStacks(const cell::Histogram& histogram)
+Histogram PlotModel::sumHistogramStacks(const Histogram& histogram)
 {
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
-    cell::Histogram sumcell::Histogram = makeHistogramWithCategories(histogram, {"Sum"});
+    Histogram sumHistogram = makeHistogramWithCategories(histogram, {"Sum"});
 
     for (int i = 0; i < regularAxis.size(); ++i)
     {
@@ -348,7 +315,7 @@ cell::Histogram PlotModel::sumHistogramStacks(const cell::Histogram& histogram)
     return sumHistogram;
 }
 
-cell::Histogram PlotModel::discardInactiveDiscTypes(const cell::Histogram& histogram)
+Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
 {
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
@@ -360,7 +327,7 @@ cell::Histogram PlotModel::discardInactiveDiscTypes(const cell::Histogram& histo
             activeDiscTypes.push_back(discType);
     }
 
-    cell::Histogram filteredcell::Histogram = makeHistogramWithCategories(histogram, activeDiscTypes);
+    Histogram filteredHistogram = makeHistogramWithCategories(histogram, activeDiscTypes);
 
     int category = 0;
     for (int i = 0; i < categoryAxis.size(); ++i)
@@ -378,7 +345,7 @@ cell::Histogram PlotModel::discardInactiveDiscTypes(const cell::Histogram& histo
     return filteredHistogram;
 }
 
-cell::Histogram PlotModel::getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum)
+Histogram PlotModel::getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum)
 {
     auto h = discardInactiveDiscTypes(dataPoint.vxHistogram_);
     if (calculateSum.value)
@@ -387,8 +354,7 @@ cell::Histogram PlotModel::getVelocityHistogramFromDataPoint(const DataPoint& da
     return h;
 }
 
-cell::Histogram PlotModel::makeHistogramWithCategories(const cell::Histogram& source,
-                                                       const std::vector<std::string>& categories)
+Histogram PlotModel::makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories)
 {
     const auto& regularAxis = source.axis<1>();
 

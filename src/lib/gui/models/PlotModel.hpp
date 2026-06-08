@@ -26,7 +26,7 @@ public:
     void setPlotSum(bool value);
     void setInterpolate(bool value);
     void reset();
-    void processDataPoint(const cell::DataPoint& dataPoint);
+    void processDataPoint(const DataPoint& dataPoint);
 
     void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
     const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
@@ -48,19 +48,18 @@ private:
     void setHistogramPlot();
     void setColorMapPlot();
 
-    void updatePlot(const cell::DataPoint& dataPoint);
-    void updateLinePlot(const cell::DataPoint& dataPoint);
-    void updateHistogramPlot(const cell::DataPoint& dataPoint);
-    void updateColorMapPlot(const cell::DataPoint& dataPoint);
+    void updatePlot(const DataPoint& dataPoint);
+    void updateLinePlot(const DataPoint& dataPoint);
+    void updateHistogramPlot(const DataPoint& dataPoint);
+    void updateColorMapPlot(const DataPoint& dataPoint);
 
     void updateLabelsAndColors();
-    std::unordered_map<std::string, double> getActiveMap(const cell::DataPoint& dataPoint);
+    std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
-    cell::Histogram sumHistogramStacks(const cell::Histogram& histogram);
-    cell::Histogram discardInactiveDiscTypes(const cell::Histogram& histogram);
-    cell::Histogram getVelocityHistogramFromDataPoint(const cell::DataPoint& dataPoint, CalculateSum calculateSum);
-    cell::Histogram makeHistogramWithCategories(const cell::Histogram& source,
-                                                const std::vector<std::string>& categories);
+    Histogram sumHistogramStacks(const Histogram& histogram);
+    Histogram discardInactiveDiscTypes(const Histogram& histogram);
+    Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
+    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
 
 private:
     Simulation* simulation_;

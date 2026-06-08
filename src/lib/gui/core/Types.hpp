@@ -11,7 +11,6 @@ using PermeabilityMap = cell::config::PermeabilityMap;
 using PermeabilityMapEntry = std::pair<std::string, cell::MembraneType::Permeability>;
 using DiscTypeDistribution = cell::config::DiscTypeDistribution;
 using DiscTypeDistributionEntry = std::pair<std::string, double>;
-using Frame = cell::SimulationRecorder::Frame;
 
 struct RedrawOnly
 {
