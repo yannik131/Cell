@@ -88,14 +88,14 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, [&]() { simulation_->emitLastFrame(); });
 
-    connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
+    connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
             {
                 ui->menubar->setEnabled(false);
                 ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
             });
 
-    connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
             [&]()
             {
                 ui->menubar->setEnabled(true);

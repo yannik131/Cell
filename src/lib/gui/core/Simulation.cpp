@@ -13,7 +13,7 @@ Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
     simulationRunner_.setPostStartCallback([&]() { emit started(); });
-    simulationRunner_.setPostStartCallback([&]() { emit stopped(); });
+    simulationRunner_.setPostStopCallback([&]() { emit stopped(); });
     simulationRunner_.setUseScaleFromConfig(true);
 }
 
