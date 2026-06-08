@@ -32,6 +32,7 @@ public:
 
     SimulationConfigUpdater& getSimulationConfigUpdater();
     const cell::SimulationConfig& getSimulationConfig() const;
+    const cell::SimulationRecorder& getSimulationRecorder() const;
     cell::SimulationContext getSimulationContext();
     void updateLoopParameters(const cell::SimulationRunner::LoopParameters& loopParameters);
 

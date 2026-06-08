@@ -9,39 +9,6 @@
 
 #include <QObject>
 
-struct DataPoint
-{
-    DataPoint(double vxSigma, std::vector<std::string> discTypes)
-        : vxHistogram_(bh::make_histogram(bh::axis::category<std::string>(std::move(discTypes), "Disc types"),
-                                          bh::axis::regular<>(20, -3 * vxSigma, 3 * vxSigma, "v_x")))
-    {
-    }
-
-    explicit DataPoint(const cell::SimulationConfig& config)
-        : DataPoint(config.mostProbableSpeed, utility::extract(config.discTypes, &cell::config::DiscType::name))
-    {
-    }
-
-    void clear()
-    {
-        elapsedTime_ = 0;
-        collisionCounts_.clear();
-        totalMomentumMap_.clear();
-        totalKineticEnergyMap_.clear();
-        discTypeCountMap_.clear();
-        vxHistogram_.reset();
-    }
-
-    double elapsedTime_ = 0;
-    std::unordered_map<std::string, double> collisionCounts_;
-    std::unordered_map<std::string, double> totalMomentumMap_;
-    std::unordered_map<std::string, double> totalKineticEnergyMap_;
-    std::unordered_map<std::string, double> discTypeCountMap_;
-    Histogram vxHistogram_;
-};
-
-DataPoint& operator+=(DataPoint& lhs, const DataPoint& rhs);
-
 class Simulation;
 
 /**
@@ -59,6 +26,7 @@ public:
     void setPlotSum(bool value);
     void setInterpolate(bool value);
     void reset();
+    void processDataPoint(const cell::DataPoint& dataPoint);
 
     void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
     const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
@@ -80,30 +48,24 @@ private:
     void setHistogramPlot();
     void setColorMapPlot();
 
-    void updatePlot();
-    void updateLinePlot();
-    void updateHistogramPlot();
-    void updateColorMapPlot();
+    void updatePlot(const cell::DataPoint& dataPoint);
+    void updateLinePlot(const cell::DataPoint& dataPoint);
+    void updateHistogramPlot(const cell::DataPoint& dataPoint);
+    void updateColorMapPlot(const cell::DataPoint& dataPoint);
 
     void updateLabelsAndColors();
-    std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
-    void storeDataPoint(const DataPoint& dataPoint);
+    std::unordered_map<std::string, double> getActiveMap(const cell::DataPoint& dataPoint);
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
-    Histogram sumHistogramStacks(const Histogram& histogram);
-    Histogram discardInactiveDiscTypes(const Histogram& histogram);
-    Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
-    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
+    cell::Histogram sumHistogramStacks(const cell::Histogram& histogram);
+    cell::Histogram discardInactiveDiscTypes(const cell::Histogram& histogram);
+    cell::Histogram getVelocityHistogramFromDataPoint(const cell::DataPoint& dataPoint, CalculateSum calculateSum);
+    cell::Histogram makeHistogramWithCategories(const cell::Histogram& source,
+                                                const std::vector<std::string>& categories);
 
 private:
-    std::vector<DataPoint> dataPoints_;
     Simulation* simulation_;
 
-    DataPoint dataPointForStorage_;
-    DataPoint dataPointForPlotting_;
-
-    const double storageTime_ = 0.1;
-
-    double plotTimeInterval_ = 0.1;
+    ch::duration<double> plotTimeInterval_ = ch::duration<double>{0.1};
     bool plotSum_ = false;
     PlotCategory plotCategory_ = PlotCategory::TypeCounts;
 

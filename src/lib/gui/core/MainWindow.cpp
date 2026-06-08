@@ -85,6 +85,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setPerformanceData);
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
+    connect(simulation_.get(), &Simulation::dataPoint, plotModel_, &PlotModel::processDataPoint);
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, [&]() { simulation_->emitLastFrame(); });
 

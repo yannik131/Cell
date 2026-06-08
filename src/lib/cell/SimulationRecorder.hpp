@@ -39,6 +39,7 @@ public:
     void setRecordLastFrame(bool value);
     const Frame& getLastFrame() const;
     void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
+    const ch::duration<double>& getStorageInterval() const;
 
 private:
     void addSimulationDataToDataPoint(Cell& cell, const ch::duration<double>& elapsedTime);

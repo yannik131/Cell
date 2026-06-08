@@ -11,6 +11,11 @@ namespace cell
 SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, double vSigma)
     : discTypeRegistry_(discTypeRegistry)
 {
+    // With a simulation time step of 1ms, we get 1000 data points each second
+    // With an averaging time of 100ms, we save 10 datapoints for 1 second
+    // We'll reserve enough space for 5 minutes, 5*60*10
+    dataPoints_.reserve(3000);
+
     std::vector<DiscTypeID> discTypeIDs = discTypeRegistry.getIDs();
 
     currentDataPoint_.vxHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
@@ -84,6 +89,11 @@ const SimulationRecorder::Frame& SimulationRecorder::getLastFrame() const
 void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback)
 {
     newDataPointCallback_ = callback;
+}
+
+const ch::duration<double>& SimulationRecorder::getStorageInterval() const
+{
+    return storageInterval_;
 }
 
 void SimulationRecorder::addSimulationDataToDataPoint(Cell& cell, const ch::duration<double>& elapsedTime)

@@ -63,6 +63,14 @@ const cell::SimulationConfig& Simulation::getSimulationConfig() const
     return simulationConfigUpdater_.getSimulationConfig();
 }
 
+const cell::SimulationRecorder& Simulation::getSimulationRecorder() const
+{
+    if (!simulationRecorder_)
+        throw ExceptionWithLocation("Simulation recorder has not yet been initialized");
+
+    return *simulationRecorder_;
+}
+
 cell::SimulationContext Simulation::getSimulationContext()
 {
     return simulationRunner_.getSimulationContext();
