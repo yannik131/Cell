@@ -28,6 +28,7 @@ void SimulationRunner::useConfig(const SimulationConfig& simulationConfig)
         return;
 
     simulationFactory_.buildSimulationFromConfig(simulationConfig);
+    simulationConfig_ = simulationConfig;
 
     if (postBuildCallback_)
         postBuildCallback_(simulationFactory_.getCell());
@@ -109,6 +110,13 @@ bool SimulationRunner::simulationIsRunning() const
     return isRunning_;
 }
 
+void SimulationRunner::updateLoopParameters(LoopParameters loopParameters)
+{
+    // Not atomic atm, doesn't need to be yet
+    simulationConfig_.simulationTimeScale = loopParameters.targetScale;
+    simulationConfig_.simulationTimeStep = loopParameters.timeStep;
+}
+
 void SimulationRunner::loop(std::stop_token stopToken)
 {
     if (postStartCallback_)
@@ -168,7 +176,8 @@ void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, 
     const auto timePerWholeUpdate = elapsed / updates;
     const auto timePerSimulationUpdate = simulationUpdateTime / updates;
 
-    performanceDataCallback_(PerformanceData{.actualScale = actualScale,
+    performanceDataCallback_(PerformanceData{.targetScale = simulationConfig_.simulationTimeScale,
+                                             .actualScale = actualScale,
                                              .timePerWholeUpdate = timePerWholeUpdate,
                                              .timePerSimulationUpdate = timePerSimulationUpdate});
 

@@ -14,6 +14,7 @@ Simulation::Simulation(QObject* parent)
 {
     simulationRunner_.setPostStartCallback([&]() { emit started(); });
     simulationRunner_.setPostStartCallback([&]() { emit stopped(); });
+    simulationRunner_.setUseScaleFromConfig(true);
 }
 
 void Simulation::start()
@@ -65,6 +66,11 @@ const cell::SimulationConfig& Simulation::getSimulationConfig() const
 cell::SimulationContext Simulation::getSimulationContext()
 {
     return simulationRunner_.getSimulationContext();
+}
+
+void Simulation::updateLoopParameters(const cell::SimulationRunner::LoopParameters& loopParameters)
+{
+    simulationRunner_.updateLoopParameters(loopParameters);
 }
 
 void Simulation::initializeSimulationRecorder()

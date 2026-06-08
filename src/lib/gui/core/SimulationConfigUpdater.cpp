@@ -23,6 +23,9 @@ void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& 
     oldConfig.simulationTimeScale = simulationConfig.simulationTimeScale;
     oldConfig.simulationTimeStep = simulationConfig.simulationTimeStep;
 
+    emit loopParameters(
+        {.targetScale = simulationConfig.simulationTimeScale, .timeStep = simulationConfig.simulationTimeStep});
+
     if (oldConfig != simulationConfig)
         emit simulationResetRequired();
 }

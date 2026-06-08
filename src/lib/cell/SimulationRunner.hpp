@@ -25,9 +25,16 @@ class SimulationRunner
 public:
     struct PerformanceData
     {
+        double targetScale;
         double actualScale;
         ch::duration<double> timePerWholeUpdate;
         ch::duration<double> timePerSimulationUpdate;
+    };
+
+    struct LoopParameters
+    {
+        double targetScale;
+        double timeStep;
     };
 
 public:
@@ -46,6 +53,7 @@ public:
     const SimulationConfig& getSimulationConfig() const;
     void setUseScaleFromConfig(bool value);
     bool simulationIsRunning() const;
+    void updateLoopParameters(LoopParameters loopParameters);
 
 private:
     void loop(std::stop_token stopToken);

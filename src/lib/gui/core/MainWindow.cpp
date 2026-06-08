@@ -61,12 +61,15 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(simulationConfigUpdater_, &SimulationConfigUpdater::simulationResetRequired, this,
             &MainWindow::resetSimulation);
+    connect(simulationConfigUpdater_, &SimulationConfigUpdater::loopParameters, simulation_.get(),
+            &Simulation::updateLoopParameters);
 
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
     connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::showAboutDialog);
 
     resizeTimer_.setSingleShot(true);
+    connect(&resizeTimer_, &QTimer::timeout, ui->simulationWidget, &SimulationWidget::fitSimulationIntoView);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
@@ -79,6 +82,8 @@ MainWindow::MainWindow(QWidget* parent)
             });
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
             [&](const Frame& frame) { ui->simulationWidget->renderFrame(frame); });
+    connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
+            &SimulationInfoWidget::setPerformanceData);
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, [&]() { simulation_->emitLastFrame(); });
@@ -114,9 +119,9 @@ MainWindow::MainWindow(QWidget* parent)
                 [&]()
                 {
                     if (simulation_->isRunning())
-                        simulation_->stop();
+                        stopSimulation();
                     else
-                        simulation_->start();
+                        startSimulation();
                 });
 
     connect(ui->simulationWidget, &SimulationWidget::requestExitFullscreen, this,

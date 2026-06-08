@@ -2,6 +2,7 @@
 #define B3854111_59D8_4367_AEF9_0248DAF108BC_HPP
 
 #include "cell/SimulationConfig.hpp"
+#include "cell/SimulationRunner.hpp"
 
 #include <QObject>
 #include <SFML/Graphics/Color.hpp>
@@ -30,6 +31,7 @@ public:
 
 signals:
     void simulationResetRequired();
+    void loopParameters(const cell::SimulationRunner::LoopParameters& loopParameters);
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;
