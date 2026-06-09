@@ -1,5 +1,5 @@
-#include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscsTableModel.hpp"
+#include "core/SimulationConfigUpdater.hpp"
 
 DiscsTableModel::DiscsTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : AbstractSimulationConfigTableModel<cell::config::Disc>(parent, {{"Type", "x", "y", "vx", "vy", "Delete"}},
