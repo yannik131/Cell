@@ -18,8 +18,8 @@ int main(int argc, char** argv)
 
     fs::path configFile;
     fs::path outFile;
-    double duration;
-    double storageInterval;
+    double duration{};
+    double storageInterval{};
 
     CLI::Validator positiveDouble{[](const std::string& value) -> std::string
                                   {
