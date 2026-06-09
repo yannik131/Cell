@@ -4,7 +4,7 @@ Checks: >
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
   -modernize-use-ranges,
-  -modernize-return-braced-init-list
-  -bugprone-forward-declaration-namespace
-  -bugprone-easily-swappable-parameters
+  -modernize-return-braced-init-list,
+  -bugprone-forward-declaration-namespace,
+  -bugprone-easily-swappable-parameters,
   -clang-analyzer-*
