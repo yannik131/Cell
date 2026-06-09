@@ -1,55 +1,28 @@
-#include "qcustomplot.h"
-#include <QApplication>
-#include <QMainWindow>
-#include <QTimer>
-#include <vector>
+#include <chrono>
+#include <iostream>
+#include <thread>
 
-int main(int argc, char** argv)
+namespace ch = std::chrono;
+using namespace std::chrono_literals;
+
+int main()
 {
-    QApplication app(argc, argv);
-    QMainWindow window;
-    auto* customPlot = new QCustomPlot();
-    window.setCentralWidget(customPlot);
-    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    QCPColorMap* colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
-    const double xStep = 0.1;
-    std::vector<std::vector<int>> histograms;
-    auto* timer = new QTimer(customPlot);
-    auto addHistogram = [&]()
+    const ch::duration<double> simulationTimeStep = 1ms;
+    const double targetScale = 0.01;
+    const ch::duration<double> realTimePerStep = simulationTimeStep / targetScale;
+    auto next = ch::steady_clock::now();
+    std::cout << "Target scale: " << targetScale << "\n";
+
+    for (int frame = 1; frame <= 10; ++frame)
     {
-        std::vector<int> histogram;
-        for (int i = 0; i < 5; ++i)
-            histogram.push_back(i * (histograms.size() + 1));
-        histograms.push_back(histogram);
-        colorMap->data()->setSize(histograms.size(), 5);
-        for (int i = 0; i < histograms.size(); ++i)
-        {
-            for (int j = 0; j < 5; ++j)
-                colorMap->data()->setCell(i, j, histograms[i][j]);
-        }
-        if (histograms.size() == 1)
-            colorMap->data()->setRange(QCPRange(0, xStep), QCPRange(0.5, 4.5));
-        else
-            colorMap->data()->setRange(QCPRange(xStep / 2, xStep * histograms.size() - xStep / 2), QCPRange(0.5, 4.5));
-        colorMap->rescaleDataRange();
-        customPlot->yAxis->setRange(0, 5);
-        customPlot->xAxis->setRange(0, xStep * histograms.size());
-        customPlot->replot(QCustomPlot::rpQueuedReplot);
-    };
-    QObject::connect(timer, &QTimer::timeout, addHistogram);
-    QCPColorScale* colorScale = new QCPColorScale(customPlot);
-    customPlot->plotLayout()->addElement(0, 1, colorScale);
-    colorScale->setType(QCPAxis::atRight);
-    colorMap->setColorScale(colorScale);
-    colorMap->setGradient(QCPColorGradient::gpGrayscale);
-    colorMap->setInterpolate(false);
-    auto ticker = QSharedPointer<QCPAxisTickerText>::create();
-    for (int i = 0; i < 5; ++i)
-        ticker->addTick(i + 0.5, QString("v") + QString::number(i));
-    customPlot->yAxis->setTicker(ticker);
-    addHistogram();
-    timer->start(100);
-    window.resize(700, 400);
-    window.show();
-    return app.exec();
+        const auto start = ch::steady_clock::now();
+        std::cout << "New frame: " << frame << "\n";
+        next += ch::duration_cast<ch::steady_clock::duration>(realTimePerStep);
+        std::this_thread::sleep_until(next);
+        const auto elapsed = ch::steady_clock::now() - start;
+        std::cout << "Elapsed time: " << ch::duration<double>(elapsed).count() << "s\n";
+        std::cout << "Actual scale: " << simulationTimeStep / elapsed << "\n";
+    }
+
+    return 0;
 }

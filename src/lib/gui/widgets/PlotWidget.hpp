@@ -4,10 +4,12 @@
 #include "core/PlotCategories.hpp"
 #include "core/Types.hpp"
 
-#include "qcustomplot.h"
 #include <SFML/Graphics/Color.hpp>
+#include <qcustomplot.h>
 
 class PlotModel;
+using DiscTypeID = cell::DiscTypeID;
+using Histogram = cell::Histogram;
 
 class PlotWidget : public QCustomPlot
 {
@@ -17,14 +19,14 @@ public:
     {
         const std::vector<std::string>& labels;
         const std::vector<sf::Color>& colors;
-        const std::vector<std::unordered_map<std::string, double>>& dataPoints;
+        const std::vector<std::unordered_map<DiscTypeID, double>>& dataPoints;
         const PlotCategory& plotCategory;
         double xStep;
     };
 
     struct LinePlotData
     {
-        const std::unordered_map<std::string, double>& dataPoint;
+        const std::unordered_map<DiscTypeID, double>& dataPoint;
         bool doReplot;
     };
 
@@ -65,6 +67,7 @@ public:
     void updatePlot(const ColorMapData& colorMapData);
 
     void setInterpolate(bool enabled);
+    const cell::DiscTypeRegistry& getDiscTypeRegistry() const;
 
 private:
     void clear();
@@ -91,6 +94,9 @@ private:
 
     int count_ = 0;
     bool interpolateEnabled_ = false;
+
+    std::function<const cell::DiscTypeRegistry&()> discTypeRegistryProvider_;
+    std::function<bool()> plotSumProvider_;
 };
 
 #endif /* EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP */

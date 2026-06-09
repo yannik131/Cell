@@ -1,0 +1,84 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 6,
+            "discTypeDistribution": {
+                "Type0": 0.33333,
+                "Type1": 0.5,
+                "Type2": 0.16666
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 10.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Type0",
+                "radius": 1.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Type1",
+                "radius": 1.0
+            },
+            {
+                "mass": 2.0,
+                "name": "Type2",
+                "radius": 1.0
+            }
+        ],
+        "discs": [],
+        "membraneTypes": [],
+        "membranes": [],
+        "mostProbableSpeed": 6.0,
+        "reactions": [
+            {
+                "educt1": "Type0",
+                "educt2": "Type1",
+                "probability": 0.5,
+                "product1": "Type2",
+                "product2": ""
+            },
+            {
+                "educt1": "Type2",
+                "educt2": "",
+                "probability": 0.5,
+                "product1": "Type0",
+                "product2": "Type1"
+            }
+        ],
+        "simulationTimeScale": 1.0,
+        "simulationTimeStep": 0.001,
+        "useDistribution": true
+    },
+    "configVersion": "1",
+    "discTypeColorMap": {
+        "Type0": [
+            255,
+            0,
+            0,
+            255
+        ],
+        "Type1": [
+            0,
+            0,
+            255,
+            255
+        ],
+        "Type2": [
+            0,
+            255,
+            0,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ]
+    }
+}

@@ -6,8 +6,6 @@ target_link_libraries(playground PRIVATE
     SFML::System
     SFML::Window
     SFML::Graphics
-    nanoflann::nanoflann
-    glog::glog
     nlohmann_json::nlohmann_json
     Boost::histogram
     qcustomplot

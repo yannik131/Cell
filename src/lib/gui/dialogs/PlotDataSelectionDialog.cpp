@@ -47,7 +47,7 @@ void PlotDataSelectionDialog::showEvent(QShowEvent*)
         auto* item = new QListWidgetItem(QString::fromStdString(discType.name));
         ui->selectedDiscTypesListWidget->addItem(item);
 
-        if (plotModel_->getActivePlotDiscTypesMap().at(discType.name))
+        if (plotModel_->discTypeIsActiveInPlot(discType.name))
             item->setSelected(true);
     }
 }

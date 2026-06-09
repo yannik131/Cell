@@ -1,13 +1,19 @@
 #ifndef F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 #define F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 
-#include "core/FrameDTO.hpp"
+#include "core/Types.hpp"
 #include "widgets/QSFMLWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Clock.hpp>
 
 class SimulationConfigUpdater;
+class Simulation;
+namespace cell
+{
+class Compartment;
+}
+using Frame = cell::SimulationRecorder::Frame;
 
 /**
  * @brief Widget displaying the simulation state by drawing a bunch of circles in different colors each frame based on
@@ -21,6 +27,7 @@ public:
     SimulationWidget(QWidget* parent);
 
     void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
+    void injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider);
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
@@ -33,13 +40,15 @@ signals:
     void renderData(int targetFPS, int actualFPS, std::chrono::nanoseconds renderTime);
 
 public slots:
-    void render(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
+    void renderFrame(const Frame& frame);
+    void renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
+                            const cell::MembraneTypeRegistry& membraneTypeRegistry);
     void fitSimulationIntoView();
 
 private:
-    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry);
-    void drawFrame(const FrameDTO& frame, const cell::DiscTypeRegistry& discTypeRegistry);
-    void restartTimers(const FrameDTO& frame);
+    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
+                           const cell::MembraneTypeRegistry& membraneTypeRegistry);
+    void drawFrame(const Frame& frame);
     double calculateIdealZoom() const;
     sf::Vector2i getWidgetSize() const;
     template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
@@ -48,13 +57,14 @@ private:
     void addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName);
 
 private:
-    std::vector<sf::CircleShape> typeShapes_;
+    std::vector<sf::CircleShape> discTypeShapes_;
+    std::vector<sf::CircleShape> membraneTypeShapes_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
     std::chrono::steady_clock::time_point currentRenderInterval_{};
     std::chrono::steady_clock::time_point nextAllowedRenderTime_{};
     std::chrono::steady_clock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
-    bool renderingStarted_ = false;
+    std::function<bool()> simulationIsRunningProvider_;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

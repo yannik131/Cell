@@ -1,5 +1,4 @@
 #include "core/SimulationConfigUpdater.hpp"
-#include "SimulationConfigUpdater.hpp"
 #include "cell/SimulationFactory.hpp"
 #include "core/SFMLJsonSerializers.hpp"
 
@@ -23,6 +22,9 @@ void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& 
     // These can be changed mid-simulation without needing to reset everything
     oldConfig.simulationTimeScale = simulationConfig.simulationTimeScale;
     oldConfig.simulationTimeStep = simulationConfig.simulationTimeStep;
+
+    emit loopParameters(
+        {.targetScale = simulationConfig.simulationTimeScale, .timeStep = simulationConfig.simulationTimeStep});
 
     if (oldConfig != simulationConfig)
         emit simulationResetRequired();

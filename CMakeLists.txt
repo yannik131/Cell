@@ -24,16 +24,13 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG)
 endif()
 
-add_compile_definitions(GLOG_USE_GLOG_EXPORT)
-
 # On Linux, Qt6 must be found before sfml, otherwise sfml will re-define a target (egl) and screw things up
 find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
 find_package(SFML COMPONENTS System Window Graphics REQUIRED)
-find_package(glog REQUIRED)
-find_package(nanoflann REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost COMPONENTS histogram REQUIRED)
 find_package(GTest REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 enable_testing()
 
@@ -43,4 +40,5 @@ add_subdirectory(src/lib/gui)
 add_subdirectory(src/apps/cell-gui)
 add_subdirectory(src/apps/benchmark)
 add_subdirectory(src/apps/playground)
+add_subdirectory(src/apps/cell-cli)
 add_subdirectory(test/libcell)

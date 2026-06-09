@@ -61,7 +61,7 @@ inline bool circlesIntersect(const Vector2d& M1, double R1, const Vector2d& M2, 
  */
 inline double abs(const Vector2d& vec) noexcept
 {
-    return std::hypot(vec.x, vec.y);
+    return std::sqrt(vec.x * vec.x + vec.y * vec.y);
 }
 
 inline double calculateOverlap(const Vector2d& r, double R1, double R2) noexcept

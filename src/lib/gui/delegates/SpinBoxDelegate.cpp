@@ -1,4 +1,4 @@
-#include "SpinBoxDelegate.hpp"
+#include "delegates/SpinBoxDelegate.hpp"
 
 #include <QAbstractItemView>
 

@@ -27,6 +27,7 @@ public:
 
     KeyType getIDFor(const std::string& name) const;
     const ValueType& getByID(KeyType ID) const;
+    std::vector<KeyType> getIDs() const;
 
 private:
     void buildNameIDMap(const std::vector<ValueType>& values);
@@ -78,6 +79,17 @@ template <typename ValueType> inline const ValueType& TypeRegistry<ValueType>::g
 #endif
 
     return values_[ID];
+}
+
+template <typename ValueType>
+inline std::vector<typename TypeRegistry<ValueType>::KeyType> TypeRegistry<ValueType>::getIDs() const
+{
+    std::vector<KeyType> ids;
+    ids.reserve(values_.size());
+    for (KeyType i = 0; i < static_cast<KeyType>(values_.size()); ++i)
+        ids.push_back(i);
+
+    return ids;
 }
 
 template <typename ValueType> inline void TypeRegistry<ValueType>::buildNameIDMap(const std::vector<ValueType>& values)

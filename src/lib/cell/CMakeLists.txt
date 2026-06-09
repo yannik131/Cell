@@ -6,7 +6,5 @@ add_library(libcell ${LIBCELL_SRC})
 target_include_directories(libcell PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(libcell PUBLIC
-    nanoflann::nanoflann
-    glog::glog
     nlohmann_json::nlohmann_json
 )

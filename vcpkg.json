@@ -6,6 +6,7 @@
         "qtbase",
         "gtest",
         "nlohmann-json",
-        "boost-histogram"
+        "boost-histogram",
+        "cli11"
     ]
 }

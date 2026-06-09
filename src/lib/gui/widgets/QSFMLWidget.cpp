@@ -1,6 +1,5 @@
 #include "widgets/QSFMLWidget.hpp"
 
-#include "QSFMLWidget.hpp"
 #include <QResizeEvent>
 
 QSFMLWidget::QSFMLWidget(QWidget* parent)
