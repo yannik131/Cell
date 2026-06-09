@@ -28,7 +28,6 @@ bool cdUpUntilInTestDir()
  */
 int main(int argc, char** argv)
 {
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
     testing::InitGoogleTest(&argc, argv);
     if (!cdUpUntilInTestDir())
         return 1;
