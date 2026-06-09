@@ -1,5 +1,4 @@
 #include "widgets/PlotWidget.hpp"
-#include "PlotWidget.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"

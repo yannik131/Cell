@@ -97,7 +97,10 @@ void SimulationRecorder::storeDataPoint()
 
     currentDataPoint_.average(NormalizeCollisionCounts{false});
     dataPoints_.push_back(currentDataPoint_);
-    newDataPointCallback_(currentDataPoint_);
+
+    if (newDataPointCallback_)
+        newDataPointCallback_(currentDataPoint_);
+
     currentDataPoint_.clear();
 }
 

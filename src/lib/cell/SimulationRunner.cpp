@@ -45,6 +45,7 @@ void SimulationRunner::runSimulation()
         return;
 
     thread_ = std::jthread([this](std::stop_token stopToken) { loop(stopToken); });
+    isRunning_ = true;
 }
 
 void SimulationRunner::waitForSimulationToFinish()
@@ -122,7 +123,6 @@ void SimulationRunner::loop(std::stop_token stopToken)
     if (postStartCallback_)
         postStartCallback_();
 
-    isRunning_ = true;
     auto simulationUpdateTime = ch::duration<double>(0s);
     auto simulationDuration = ch::duration<double>(0s);
     const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);

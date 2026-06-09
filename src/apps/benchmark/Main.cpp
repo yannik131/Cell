@@ -12,7 +12,7 @@
 
 using namespace cell;
 
-int main(int argc, char** argv)
+int main()
 {
     SimulationConfigBuilder builder;
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     using clock = std::chrono::steady_clock;
     using namespace std::chrono_literals;
 
-    std::cout << "Starting benchmark";
+    std::cout << "Starting benchmark" << "\n";
     auto start = clock::now();
 
     int N = 0;
@@ -62,13 +62,13 @@ int main(int argc, char** argv)
 
     auto end = clock::now();
 
-    std::cout << "Done";
+    std::cout << "Done" << "\n";
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
-    std::cout << "Finished updates: " << N;
-    std::cout << "Elapsed time: " << cell::stringutils::timeString(ns);
-    std::cout << "Time per update: " << cell::stringutils::timeString(ns / N);
+    std::cout << "Finished updates: " << N << "\n";
+    std::cout << "Elapsed time: " << cell::stringutils::timeString(ns) << "\n";
+    std::cout << "Time per update: " << cell::stringutils::timeString(ns / N) << "\n";
 
-    for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
-        std::cout << registry.getByID(typeID).getName() << ": " << count << " collisions";
+    for (const auto& [typeID, count] : CollisionDetector::getAndResetCollisionCounts())
+        std::cout << registry.getByID(typeID).getName() << ": " << count << " collisions" << "\n";
 }

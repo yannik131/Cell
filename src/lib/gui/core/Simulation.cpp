@@ -5,7 +5,6 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "Simulation.hpp"
 #include <QThread>
 #include <QTimer>
 
