@@ -42,14 +42,13 @@ public:
     const ch::duration<double>& getStorageInterval() const;
 
 private:
-    void addSimulationDataToDataPoint(Cell& cell, const ch::duration<double>& elapsedTime);
     void storeDataPoint();
+    void recordFrame(const Cell& cell);
 
 private:
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
     DataPoint currentDataPoint_;
     std::vector<DataPoint> dataPoints_;
-    int frameCount_ = 0;
     const DiscTypeRegistry& discTypeRegistry_;
     bool recordLastFrame_ = false;
     Frame lastFrame_;

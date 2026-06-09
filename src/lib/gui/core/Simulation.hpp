@@ -14,6 +14,8 @@
 
 using json = nlohmann::json;
 
+using Frame = cell::SimulationRecorder::Frame;
+
 /**
  * @brief Contains and runs the cell for the simulation
  */
@@ -35,6 +37,7 @@ public:
     const cell::SimulationRecorder& getSimulationRecorder() const;
     cell::SimulationContext getSimulationContext();
     void updateLoopParameters(const cell::SimulationRunner::LoopParameters& loopParameters);
+    void waitForSimulationToFinish();
 
 private:
     void initializeSimulationRecorder();

@@ -13,6 +13,7 @@ namespace cell
 {
 class Compartment;
 }
+using Frame = cell::SimulationRecorder::Frame;
 
 /**
  * @brief Widget displaying the simulation state by drawing a bunch of circles in different colors each frame based on

@@ -1,4 +1,5 @@
 #include "widgets/PlotWidget.hpp"
+#include "PlotWidget.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
@@ -32,6 +33,10 @@ void PlotWidget::setModel(PlotModel* plotModel)
             qOverload<const ColorMapData&>(&PlotWidget::updatePlot));
 
     connect(plotModel, &PlotModel::interpolateEnabled, this, &PlotWidget::setInterpolate);
+
+    discTypeRegistryProvider_ = [plotModel]() -> const cell::DiscTypeRegistry&
+    { return plotModel->getDiscTypeRegistry(); };
+    plotSumProvider_ = [plotModel]() -> bool { return plotModel->plotSum(); };
 }
 
 void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
@@ -171,13 +176,16 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
 
 void PlotWidget::updatePlot(const LinePlotData& linePlotData)
 {
+    const auto& discTypeRegistry = getDiscTypeRegistry();
     const auto& dataPoint = linePlotData.dataPoint;
     double x = xStep_ * count_++;
+    const bool plotSum = plotSumProvider_();
 
     for (auto& [label, graph] : graphs_)
     {
         double value = 0;
-        const auto& iter = dataPoint.find(label);
+        const auto& discTypeID = plotSum ? 0 : discTypeRegistry.getIDFor(label);
+        const auto& iter = dataPoint.find(discTypeID);
         if (iter != dataPoint.end())
             value = iter->second;
 
@@ -197,9 +205,10 @@ void PlotWidget::updatePlot(const LinePlotData& linePlotData)
 void PlotWidget::updatePlot(const HistogramData& histogramData)
 {
     const auto& histogram = histogramData.histogram;
-
     const auto& categoryAxis = histogram.axis<0>();
     const auto& regularAxis = histogram.axis<1>();
+    const auto& discTypeRegistry = getDiscTypeRegistry();
+    const bool plotSum = plotSumProvider_();
 
     QVector<double> binCenters;
     binCenters.reserve(static_cast<qsizetype>(regularAxis.size()));
@@ -223,7 +232,8 @@ void PlotWidget::updatePlot(const HistogramData& histogramData)
             maxStackedCount = std::max(stackedCounts[j], maxStackedCount);
         }
 
-        histogram_.at(discType)->setData(binCenters, counts, true);
+        histogram_.at(plotSum ? "Sum" : discTypeRegistry.getByID(discType).getName())
+            ->setData(binCenters, counts, true);
         counts.clear();
     }
 
@@ -345,4 +355,9 @@ void PlotWidget::setInterpolate(bool enabled)
 
     colorMap_->setInterpolate(enabled);
     replot(QCustomPlot::rpQueuedReplot);
+}
+
+const cell::DiscTypeRegistry& PlotWidget::getDiscTypeRegistry() const
+{
+    return discTypeRegistryProvider_();
 }

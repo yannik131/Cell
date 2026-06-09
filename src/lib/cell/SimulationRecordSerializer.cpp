@@ -24,10 +24,11 @@ void SimulationRecordSerializer::writeTypeCountsToCsv(const std::vector<DataPoin
 
     for (const auto& dataPoint : dataPoints)
     {
-        elapsedTime += dataPoint.elapsedTime_;
+        elapsedTime += dataPoint.getData().elapsedTime;
         file << elapsedTime.count();
         for (const auto& ID : discTypeIDs)
-            file << "," << ((dataPoint.discTypeCounts_.contains(ID)) ? dataPoint.discTypeCounts_.at(ID) : 0);
+            file << ","
+                 << ((dataPoint.getData().discTypeCounts.contains(ID)) ? dataPoint.getData().discTypeCounts.at(ID) : 0);
         file << "\n";
     }
 }

@@ -49,7 +49,7 @@ void SimulationRunner::runSimulation()
 
 void SimulationRunner::waitForSimulationToFinish()
 {
-    if (thread_.joinable())
+    if (thread_.joinable() && simulationIsRunning())
         thread_.join();
 }
 

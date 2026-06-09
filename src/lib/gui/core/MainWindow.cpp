@@ -202,7 +202,11 @@ void MainWindow::showAboutDialog()
     QMessageBox::about(this, QStringLiteral("About"), aboutMessage.arg(__DATE__).arg(__TIME__));
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow()
+{
+    simulation_->stop();
+    simulation_->waitForSimulationToFinish();
+}
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {

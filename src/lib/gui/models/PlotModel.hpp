@@ -10,6 +10,9 @@
 #include <QObject>
 
 class Simulation;
+using DataPoint = cell::DataPoint;
+using Histogram = cell::Histogram;
+using DiscTypeID = cell::DiscTypeID;
 
 /**
  * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
@@ -29,7 +32,10 @@ public:
     void processDataPoint(const DataPoint& dataPoint);
 
     void setActivePlotDiscTypes(const std::vector<std::string>& activeDiscTypeNames);
-    const std::map<std::string, bool>& getActivePlotDiscTypesMap() const;
+    bool discTypeIsActiveInPlot(const std::string& discTypeName) const;
+
+    const cell::DiscTypeRegistry& getDiscTypeRegistry() const;
+    bool plotSum() const;
 
 signals:
     void setPlot(const PlotWidget::LinePlotParams& linePlotParams);
@@ -49,17 +55,19 @@ private:
     void setColorMapPlot();
 
     void updatePlot(const DataPoint& dataPoint);
-    void updateLinePlot(const DataPoint& dataPoint);
-    void updateHistogramPlot(const DataPoint& dataPoint);
-    void updateColorMapPlot(const DataPoint& dataPoint);
+    void updateLinePlot();
+    void updateHistogramPlot();
+    void updateColorMapPlot();
 
     void updateLabelsAndColors();
-    std::unordered_map<std::string, double> getActiveMap(const DataPoint& dataPoint);
+    std::unordered_map<DiscTypeID, double> getActiveMap(const DataPoint& dataPoint);
     void updateActivePlotDiscTypes(const std::vector<cell::config::DiscType>& discTypes);
     Histogram sumHistogramStacks(const Histogram& histogram);
     Histogram discardInactiveDiscTypes(const Histogram& histogram);
     Histogram getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum);
-    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<std::string>& categories);
+    Histogram makeHistogramWithCategories(const Histogram& source, const std::vector<DiscTypeID>& categories);
+
+    DataPoint createDataPoint() const;
 
 private:
     Simulation* simulation_;
@@ -71,7 +79,8 @@ private:
     std::vector<std::string> labels_;
     std::vector<sf::Color> colors_;
 
-    std::map<std::string, bool> activePlotDiscTypes_;
+    std::map<DiscTypeID, bool> activePlotDiscTypes_;
+    DataPoint dataPoint_;
 };
 
 #endif /* F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP */

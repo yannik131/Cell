@@ -81,6 +81,11 @@ void Simulation::updateLoopParameters(const cell::SimulationRunner::LoopParamete
     simulationRunner_.updateLoopParameters(loopParameters);
 }
 
+void Simulation::waitForSimulationToFinish()
+{
+    simulationRunner_.waitForSimulationToFinish();
+}
+
 void Simulation::initializeSimulationRecorder()
 {
     simulationRecorder_ =

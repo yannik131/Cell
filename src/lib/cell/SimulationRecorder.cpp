@@ -17,15 +17,7 @@ SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry,
     dataPoints_.reserve(3000);
 
     std::vector<DiscTypeID> discTypeIDs = discTypeRegistry.getIDs();
-
-    currentDataPoint_.vxHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                        bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v_x"));
-
-    currentDataPoint_.vyHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                        bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v_y"));
-
-    currentDataPoint_.vHistogram_ = bh::make_histogram(bh::axis::category<DiscTypeID>(discTypeIDs, "Disc type"),
-                                                       bh::axis::regular<>(20, -3 * vSigma, 3 * vSigma, "v"));
+    currentDataPoint_.initializeHistograms(discTypeIDs, vSigma);
 }
 
 void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageInterval)
@@ -46,12 +38,14 @@ void SimulationRecorder::printPerformanceData(SimulationRunner::PerformanceData 
 
 void SimulationRecorder::processInitialSimulationData(Cell& cell)
 {
-    addSimulationDataToDataPoint(cell, ch::seconds{0});
+    currentDataPoint_.addSimulationData(cell, ch::seconds{0}, discTypeRegistry_);
+    recordFrame(cell);
 }
 
 void SimulationRecorder::processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime)
 {
-    addSimulationDataToDataPoint(cell, elapsedTime);
+    currentDataPoint_.addSimulationData(cell, elapsedTime, discTypeRegistry_);
+    recordFrame(cell);
     storeDataPoint();
 }
 
@@ -88,7 +82,7 @@ const SimulationRecorder::Frame& SimulationRecorder::getLastFrame() const
 
 void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback)
 {
-    newDataPointCallback_ = callback;
+    newDataPointCallback_ = std::move(callback);
 }
 
 const ch::duration<double>& SimulationRecorder::getStorageInterval() const
@@ -96,61 +90,36 @@ const ch::duration<double>& SimulationRecorder::getStorageInterval() const
     return storageInterval_;
 }
 
-void SimulationRecorder::addSimulationDataToDataPoint(Cell& cell, const ch::duration<double>& elapsedTime)
+void SimulationRecorder::storeDataPoint()
 {
-    addMapToMap(currentDataPoint_.collisionCounts_, CollisionDetector::getAndResetCollisionCounts());
-    currentDataPoint_.elapsedTime_ += elapsedTime;
+    if (currentDataPoint_.getData().elapsedTime < storageInterval_)
+        return;
 
-    if (recordLastFrame_)
-        lastFrame_.clear();
+    currentDataPoint_.average(NormalizeCollisionCounts{false});
+    dataPoints_.push_back(currentDataPoint_);
+    newDataPointCallback_(currentDataPoint_);
+    currentDataPoint_.clear();
+}
 
-    std::unordered_map<DiscTypeID, cell::Vector2d> momentumMap;
+void SimulationRecorder::recordFrame(const Cell& cell)
+{
+    if (!recordLastFrame_)
+        return;
+
+    lastFrame_.clear();
+
     std::vector<const Compartment*> compartments({&cell});
     while (!compartments.empty())
     {
         const Compartment* compartment = compartments.back();
         compartments.pop_back();
 
-        for (const auto& disc : compartment->getDiscs())
-        {
-            const auto discTypeID = disc.getTypeID();
-            const auto mass = discTypeRegistry_.getByID(disc.getTypeID()).getMass();
-
-            ++currentDataPoint_.discTypeCounts_[discTypeID];
-            currentDataPoint_.totalKineticEnergies_[discTypeID] += disc.getKineticEnergy(mass);
-            momentumMap[discTypeID] += disc.getMomentum(mass);
-            currentDataPoint_.vxHistogram_(discTypeID, disc.getVelocity().x);
-            currentDataPoint_.vyHistogram_(discTypeID, disc.getVelocity().y);
-            currentDataPoint_.vHistogram_(discTypeID, mathutils::abs(disc.getVelocity()));
-        }
-
-        if (recordLastFrame_)
-        {
-            lastFrame_.discs.insert(lastFrame_.discs.end(), compartment->getDiscs().begin(),
-                                    compartment->getDiscs().end());
-            lastFrame_.membranes.push_back(compartment->getMembrane());
-        }
+        lastFrame_.discs.insert(lastFrame_.discs.end(), compartment->getDiscs().begin(), compartment->getDiscs().end());
+        lastFrame_.membranes.push_back(compartment->getMembrane());
 
         for (const auto& subCompartment : compartment->getCompartments())
             compartments.push_back(subCompartment.get());
     }
-
-    for (const auto& [discTypeID, momentum] : momentumMap)
-        currentDataPoint_.totalMomentums_[discTypeID] = mathutils::abs(momentum);
-
-    ++frameCount_;
-}
-
-void SimulationRecorder::storeDataPoint()
-{
-    if (currentDataPoint_.elapsedTime_ < storageInterval_ || frameCount_ == 0)
-        return;
-
-    currentDataPoint_.average(frameCount_, NormalizeCollisionCounts{false});
-    dataPoints_.push_back(currentDataPoint_);
-    newDataPointCallback_(currentDataPoint_);
-    currentDataPoint_.clear();
-    frameCount_ = 0;
 }
 
 } // namespace cell
