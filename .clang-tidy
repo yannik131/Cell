@@ -6,7 +6,3 @@ Checks: >
   -modernize-use-ranges,
   -modernize-return-braced-init-list
   -clang-analyzer-*
-
-WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
-FormatStyle: none
