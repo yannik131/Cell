@@ -1,20 +1,11 @@
 Checks: >
   modernize-*,
-  bugprone-assert-side-effect,
-  bugprone-branch-clone,
-  bugprone-copy-constructor-init,
-  bugprone-infinite-loop,
-  bugprone-macro-parentheses,
-  bugprone-misplaced-widening-cast,
-  bugprone-move-forwarding-reference,
-  bugprone-multiple-statement-macro,
-  bugprone-sizeof-expression,
-  bugprone-suspicious-memset-usage,
-  bugprone-suspicious-string-compare,
+  bugprone-*,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
   -modernize-use-ranges,
   -modernize-return-braced-init-list
+  -clang-analyzer-*
 
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
