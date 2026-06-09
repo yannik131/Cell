@@ -27,6 +27,7 @@ public:
     SimulationWidget(QWidget* parent);
 
     void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
+    void injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider);
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
@@ -54,7 +55,6 @@ private:
     void addObjectAtCursor(const QPoint& cursorPosition, const std::string&, ObjectsGetter, NameSetter, ObjectsSetter);
     void addDiscAtCursor(const QPoint& cursorPosition, const std::string& typeName);
     void addMembraneAtCursor(const QPoint& cursorPosition, const std::string& typeName);
-    sf::CircleShape circleShapeFromCompartment(const cell::Compartment& compartment);
 
 private:
     std::vector<sf::CircleShape> discTypeShapes_;
@@ -64,6 +64,7 @@ private:
     std::chrono::steady_clock::time_point nextAllowedRenderTime_{};
     std::chrono::steady_clock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
+    std::function<bool()> simulationIsRunningProvider_;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

@@ -2,6 +2,7 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
+#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
@@ -22,6 +23,11 @@ SimulationWidget::SimulationWidget(QWidget* parent)
 void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
+}
+
+void SimulationWidget::injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider)
+{
+    simulationIsRunningProvider_ = std::move(simulationIsRunningProvider);
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -65,6 +71,9 @@ void SimulationWidget::toggleFullscreen()
 
 void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
 {
+    if (simulationIsRunningProvider_ && simulationIsRunningProvider_())
+        return;
+
     QMenu menu(this);
     const QPoint cursorPosition = event->pos();
 

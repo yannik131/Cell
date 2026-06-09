@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
     connect(simulation_.get(), &Simulation::dataPoint, plotModel_, &PlotModel::processDataPoint);
 
-    connect(ui->simulationWidget, &SimulationWidget::renderRequired, [&]() { simulation_->emitLastFrame(); });
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);
 
     connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
@@ -135,6 +135,8 @@ MainWindow::MainWindow(QWidget* parent)
                            resetSimulation();
                            ui->simulationWidget->fitSimulationIntoView();
                        });
+
+    ui->simulationWidget->injectIsRunningProvider([&]() { return simulation_->isRunning(); });
 }
 
 void MainWindow::resetSimulation()
@@ -182,7 +184,6 @@ void MainWindow::toggleSimulationFullscreen()
 {
     ui->simulationWidget->toggleFullscreen();
     fullscreenIsToggled_ = !fullscreenIsToggled_;
-    simulation_->emitLastFrame();
 }
 
 void MainWindow::showAboutDialog()
