@@ -89,6 +89,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);
 
+    connect(simulation_.get(), &Simulation::started, ui->simulationWidget, &SimulationWidget::startRenderingTimer);
     connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
             {

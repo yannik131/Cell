@@ -14,6 +14,7 @@ namespace cell
 class Compartment;
 }
 using Frame = cell::SimulationRecorder::Frame;
+using myClock = std::chrono::steady_clock;
 
 /**
  * @brief Widget displaying the simulation state by drawing a bunch of circles in different colors each frame based on
@@ -28,6 +29,7 @@ public:
 
     void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
     void injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider);
+    void startRenderingTimer();
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
@@ -60,9 +62,9 @@ private:
     std::vector<sf::CircleShape> discTypeShapes_;
     std::vector<sf::CircleShape> membraneTypeShapes_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
-    std::chrono::steady_clock::time_point currentRenderInterval_{};
-    std::chrono::steady_clock::time_point nextAllowedRenderTime_{};
-    std::chrono::steady_clock::duration elapsedRenderTime_{};
+    myClock::time_point currentRenderInterval_{};
+    myClock::time_point nextAllowedRenderTime_{};
+    myClock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
     std::function<bool()> simulationIsRunningProvider_;
 };

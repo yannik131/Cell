@@ -30,6 +30,11 @@ void SimulationWidget::injectIsRunningProvider(std::function<bool()> simulationI
     simulationIsRunningProvider_ = std::move(simulationIsRunningProvider);
 }
 
+void SimulationWidget::startRenderingTimer()
+{
+    nextAllowedRenderTime_ = myClock::now();
+}
+
 void SimulationWidget::closeEvent(QCloseEvent* event)
 {
     // If the widget is full screen, exit full screen instead of destroying it
@@ -148,21 +153,20 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
 
 void SimulationWidget::renderFrame(const Frame& frame)
 {
-    using clock = std::chrono::steady_clock;
     using namespace std::chrono;
 
     const auto targetRenderTime =
-        duration_cast<clock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
+        duration_cast<myClock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
+    auto now = myClock::now();
 
-    if (clock::now() < nextAllowedRenderTime_)
+    if (now < nextAllowedRenderTime_)
         return;
+    nextAllowedRenderTime_ += targetRenderTime;
 
-    const auto start = clock::now();
+    const auto start = myClock::now();
     drawFrame(frame);
-    const auto now = clock::now();
+    now = myClock::now();
     const auto renderTime = now - start;
-
-    nextAllowedRenderTime_ = now + targetRenderTime;
 
     ++renderedFrames_;
     elapsedRenderTime_ += renderTime;

@@ -40,11 +40,14 @@ prey = (prey - prey.mean()) / prey.std()
 predator = (predator - predator.mean()) / predator.std()
 
 r = correlate(prey, predator, mode="full")
-lags = correlation_lags(len(prey), len(predator), mode="full") * dt 
+lags = correlation_lags(len(prey), len(predator), mode="full")
+overlap = len(prey) - np.abs(lags)
+r = r / overlap 
 i = np.argmax(r)
 best_lag = lags[i]
 best_corr = r[i]
-mask = (lags >= -30) & (lags <= 30)
+x = lags * dt
+mask = (x >= -30) & (x <= 30)
 
 axes[2].plot(lags[mask], r[mask])
 axes[2].set_title(f"Correlation lags, peak at {best_lag}, {best_corr}")
