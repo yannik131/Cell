@@ -106,9 +106,9 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
 
     // Application-wide shortcuts so they work even when the widget is a separate window
-    const auto addShortcut = [&](auto key, auto callback)
+    const auto addShortcut = [&](const QKeySequence& keySequence, auto callback)
     {
-        auto* shortcut = new QShortcut(QKeySequence(key), this);
+        auto* shortcut = new QShortcut(keySequence, this);
         shortcut->setContext(Qt::ApplicationShortcut);
         connect(shortcut, &QShortcut::activated, this, callback);
     };
