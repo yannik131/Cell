@@ -96,6 +96,7 @@ void Simulation::initializeSimulationRecorder()
     simulationRunner_.setPostBuildCallback(
         [&](cell::Cell& cell)
         {
+            emit simulationContextChanged(simulationRunner_.getSimulationContext());
             simulationRecorder_->processInitialSimulationData(cell);
             emit initialFrame(simulationRecorder_->getLastFrame());
         });

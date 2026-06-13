@@ -1,4 +1,5 @@
 #include "widgets/SimulationWidget.hpp"
+#include "core/Simulation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
@@ -22,13 +23,15 @@ SimulationWidget::SimulationWidget(QWidget* parent)
     renderingTimer_.setTimerType(Qt::PreciseTimer);
 }
 
-void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
+void SimulationWidget::injectDependencies(SimulationConfigUpdater* simulationConfigUpdater, Simulation* simulation)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
     renderingTimer_.setInterval(qRound(1000.0 / simulationConfigUpdater->getFPS()));
 
     connect(simulationConfigUpdater, &SimulationConfigUpdater::fpsChanged,
             [&](int FPS) { renderingTimer_.setInterval(qRound(1000.0 / FPS)); });
+    connect(simulation, &Simulation::simulationContextChanged, this, [&](cell::SimulationContext simulationContext)
+            { rebuildTypeShapes(simulationContext.discTypeRegistry, simulationContext.membraneTypeRegistry); });
 }
 
 void SimulationWidget::startRenderingTimer()
@@ -36,11 +39,13 @@ void SimulationWidget::startRenderingTimer()
     renderingTimer_.start();
     currentRenderInterval_ = myClock::now();
     renderedFrames_ = 0;
+    disableRenderSignal();
 }
 
 void SimulationWidget::stopRenderingTimer()
 {
     renderingTimer_.stop();
+    enableRenderSignal();
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -164,11 +169,15 @@ void SimulationWidget::queueFrameForRendering(Frame frame)
     frameBuffer_.pushFrame(std::move(frame));
 }
 
-void SimulationWidget::renderFrameImmediately(Frame frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                                              const cell::MembraneTypeRegistry& membraneTypeRegistry)
+void SimulationWidget::renderFrameImmediately(Frame frame)
 {
-    rebuildTypeShapes(discTypeRegistry, membraneTypeRegistry);
     frameBuffer_.pushFrame(frame);
+
+    // Use the next draw event, otherwise we'll get a huge FPS increase that could crash the GUI if the user
+    // continously drags the view and causes continous redraws while the simulation is running
+    if (renderingTimer_.isActive())
+        return;
+
     drawFrame();
 }
 

@@ -77,10 +77,7 @@ void SimulationRecorder::setRecordLastFrame(bool value)
 
 SimulationRecorder::Frame SimulationRecorder::getLastFrame()
 {
-    auto frame = std::move(lastFrame_);
-    lastFrame_.clear();
-
-    return frame;
+    return lastFrame_;
 }
 
 void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback)

@@ -49,6 +49,7 @@ signals:
     void frame(Frame frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);
     void dataPoint(const cell::DataPoint& dataPoint);
+    void simulationContextChanged(cell::SimulationContext simulationContext);
 
 private:
     cell::SimulationRunner simulationRunner_;

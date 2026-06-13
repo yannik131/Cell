@@ -1,5 +1,6 @@
 #include "widgets/QSFMLWidget.hpp"
 
+#include "QSFMLWidget.hpp"
 #include <QResizeEvent>
 
 QSFMLWidget::QSFMLWidget(QWidget* parent)
@@ -60,7 +61,7 @@ void QSFMLWidget::mouseMoveEvent(QMouseEvent* event)
 
     offset_ += QPoint(static_cast<int>(worldDelta.x), static_cast<int>(worldDelta.y));
 
-    emit renderRequired();
+    requestRender();
 }
 
 void QSFMLWidget::mouseReleaseEvent(QMouseEvent*)
@@ -102,7 +103,7 @@ void QSFMLWidget::resetView(Zoom zoom, std::optional<sf::Vector2f> size)
 
     RenderWindow::setView(view_);
 
-    emit renderRequired();
+    requestRender();
 }
 
 double QSFMLWidget::getCurrentZoom() const
@@ -113,6 +114,16 @@ double QSFMLWidget::getCurrentZoom() const
 void QSFMLWidget::setMinimumSize(const QSize& s)
 {
     QWidget::setMinimumSize(s);
+}
+
+void QSFMLWidget::enableRenderSignal()
+{
+    renderSignalEnabled_ = true;
+}
+
+void QSFMLWidget::disableRenderSignal()
+{
+    renderSignalEnabled_ = false;
 }
 
 QPaintEngine* QSFMLWidget::paintEngine() const
@@ -137,6 +148,11 @@ void QSFMLWidget::zoom(ZoomDirection direction)
     view_.zoom(zoomFactor);
 
     RenderWindow::setView(view_);
+    requestRender();
+}
 
-    emit renderRequired();
+void QSFMLWidget::requestRender()
+{
+    if (renderSignalEnabled_)
+        emit renderRequired();
 }

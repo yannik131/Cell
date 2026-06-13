@@ -75,16 +75,11 @@ MainWindow::MainWindow(QWidget* parent)
             &SimulationWidget::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
-            [&](Frame frame)
-            {
-                ui->simulationWidget->renderFrameImmediately(std::move(frame),
-                                                             simulation_->getSimulationContext().discTypeRegistry,
-                                                             simulation_->getSimulationContext().membraneTypeRegistry);
-            });
+            &SimulationWidget::renderFrameImmediately);
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, &SimulationWidget::queueFrameForRendering);
     connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setPerformanceData);
-    ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
+    ui->simulationWidget->injectDependencies(simulationConfigUpdater_, simulation_.get());
     connect(simulation_.get(), &Simulation::dataPoint, plotModel_, &PlotModel::processDataPoint);
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);

@@ -30,12 +30,14 @@ class SimulationWidget : public QSFMLWidget
 public:
     SimulationWidget(QWidget* parent);
 
-    void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
+    void injectDependencies(SimulationConfigUpdater* simulationConfigUpdater, Simulation* simulation);
     void startRenderingTimer();
     void stopRenderingTimer();
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
+    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
+                           const cell::MembraneTypeRegistry& membraneTypeRegistry);
 
 protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
@@ -46,13 +48,10 @@ signals:
 
 public slots:
     void queueFrameForRendering(Frame frame);
-    void renderFrameImmediately(Frame frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                                const cell::MembraneTypeRegistry& membraneTypeRegistry);
+    void renderFrameImmediately(Frame Frame);
     void fitSimulationIntoView();
 
 private:
-    void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
-                           const cell::MembraneTypeRegistry& membraneTypeRegistry);
     void drawFrame();
     double calculateIdealZoom() const;
     sf::Vector2i getWidgetSize() const;
