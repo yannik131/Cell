@@ -4,6 +4,7 @@
 #include "cell/SimulationRecorder.hpp"
 
 #include <QMutex>
+#include <QObject>
 
 #include <optional>
 

@@ -3,7 +3,6 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
@@ -171,10 +170,10 @@ void SimulationWidget::queueFrameForRendering(Frame frame)
 
 void SimulationWidget::renderFrameImmediately(Frame frame)
 {
-    frameBuffer_.pushFrame(frame);
+    frameBuffer_.pushFrame(std::move(frame));
 
     // Use the next draw event, otherwise we'll get a huge FPS increase that could crash the GUI if the user
-    // continously drags the view and causes continous redraws while the simulation is running
+    // drags the view and causes continuous redraws while the simulation is running
     if (renderingTimer_.isActive())
         return;
 

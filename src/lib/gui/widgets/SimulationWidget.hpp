@@ -48,7 +48,7 @@ signals:
 
 public slots:
     void queueFrameForRendering(Frame frame);
-    void renderFrameImmediately(Frame Frame);
+    void renderFrameImmediately(Frame frame);
     void fitSimulationIntoView();
 
 private:
