@@ -75,7 +75,7 @@ void SimulationRecorder::setRecordLastFrame(bool value)
     recordLastFrame_ = value;
 }
 
-const SimulationRecorder::Frame& SimulationRecorder::getLastFrame() const
+SimulationRecorder::Frame SimulationRecorder::getLastFrame()
 {
     return lastFrame_;
 }

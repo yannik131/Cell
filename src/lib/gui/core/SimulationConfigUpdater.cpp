@@ -46,6 +46,8 @@ void SimulationConfigUpdater::setFPS(int FPS)
         throw ExceptionWithLocation("FPS must be positive");
 
     FPS_ = FPS;
+
+    emit fpsChanged(FPS);
 }
 
 int SimulationConfigUpdater::getFPS() const

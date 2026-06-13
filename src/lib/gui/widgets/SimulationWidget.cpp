@@ -1,8 +1,8 @@
 #include "widgets/SimulationWidget.hpp"
+#include "core/Simulation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "SimulationWidget.hpp"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
@@ -18,16 +18,33 @@ SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
     setContextMenuPolicy(Qt::DefaultContextMenu);
+    connect(&renderingTimer_, &QTimer::timeout, this, &SimulationWidget::drawFrame);
+    renderingTimer_.setTimerType(Qt::PreciseTimer);
 }
 
-void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
+void SimulationWidget::injectDependencies(SimulationConfigUpdater* simulationConfigUpdater, Simulation* simulation)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
+    renderingTimer_.setInterval(qRound(1000.0 / simulationConfigUpdater->getFPS()));
+
+    connect(simulationConfigUpdater, &SimulationConfigUpdater::fpsChanged,
+            [&](int FPS) { renderingTimer_.setInterval(qRound(1000.0 / FPS)); });
+    connect(simulation, &Simulation::simulationContextChanged, this, [&](cell::SimulationContext simulationContext)
+            { rebuildTypeShapes(simulationContext.discTypeRegistry, simulationContext.membraneTypeRegistry); });
 }
 
-void SimulationWidget::injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider)
+void SimulationWidget::startRenderingTimer()
 {
-    simulationIsRunningProvider_ = std::move(simulationIsRunningProvider);
+    renderingTimer_.start();
+    currentRenderInterval_ = myClock::now();
+    renderedFrames_ = 0;
+    disableRenderSignal();
+}
+
+void SimulationWidget::stopRenderingTimer()
+{
+    renderingTimer_.stop();
+    enableRenderSignal();
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -71,7 +88,7 @@ void SimulationWidget::toggleFullscreen()
 
 void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-    if (simulationIsRunningProvider_ && simulationIsRunningProvider_())
+    if (renderingTimer_.isActive())
         return;
 
     QMenu menu(this);
@@ -146,23 +163,55 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
     }
 }
 
-void SimulationWidget::renderFrame(const Frame& frame)
+void SimulationWidget::queueFrameForRendering(Frame frame)
 {
-    using clock = std::chrono::steady_clock;
-    using namespace std::chrono;
+    frameBuffer_.pushFrame(std::move(frame));
+}
 
-    const auto targetRenderTime =
-        duration_cast<clock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
+void SimulationWidget::renderFrameImmediately(Frame frame)
+{
+    frameBuffer_.pushFrame(std::move(frame));
 
-    if (clock::now() < nextAllowedRenderTime_)
+    // Use the next draw event, otherwise we'll get a huge FPS increase that could crash the GUI if the user
+    // drags the view and causes continuous redraws while the simulation is running
+    if (renderingTimer_.isActive())
         return;
 
-    const auto start = clock::now();
-    drawFrame(frame);
-    const auto now = clock::now();
-    const auto renderTime = now - start;
+    drawFrame();
+}
 
-    nextAllowedRenderTime_ = now + targetRenderTime;
+void SimulationWidget::drawFrame()
+{
+    using namespace std::chrono;
+    auto frame = frameBuffer_.takeLatest();
+    if (!frame)
+        return;
+
+    const auto start = myClock::now();
+
+    sf::RenderWindow::clear(sf::Color::Black);
+
+    for (const auto& disc : frame->discs)
+    {
+        discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
+        sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
+    }
+
+    for (const auto& membrane : frame->membranes)
+    {
+        auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
+        membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+        membraneTypeShape.setPosition(utility::toVector2f(membrane.getPosition()));
+        sf::RenderWindow::draw(membraneTypeShape);
+    }
+
+    sf::RenderWindow::display();
+
+    if (!renderingTimer_.isActive())
+        return;
+
+    const auto now = myClock::now();
+    const auto renderTime = now - start;
 
     ++renderedFrames_;
     elapsedRenderTime_ += renderTime;
@@ -173,34 +222,6 @@ void SimulationWidget::renderFrame(const Frame& frame)
         currentRenderInterval_ = now;
         elapsedRenderTime_ = 0ns;
     }
-}
-
-void SimulationWidget::renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                                          const cell::MembraneTypeRegistry& membraneTypeRegistry)
-{
-    rebuildTypeShapes(discTypeRegistry, membraneTypeRegistry);
-    drawFrame(frame);
-}
-
-void SimulationWidget::drawFrame(const Frame& frame)
-{
-    sf::RenderWindow::clear(sf::Color::Black);
-
-    for (const auto& disc : frame.discs)
-    {
-        discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
-        sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
-    }
-
-    for (const auto& membrane : frame.membranes)
-    {
-        auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
-        membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
-        membraneTypeShape.setPosition(utility::toVector2f(membrane.getPosition()));
-        sf::RenderWindow::draw(membraneTypeShape);
-    }
-
-    sf::RenderWindow::display();
 }
 
 double SimulationWidget::calculateIdealZoom() const

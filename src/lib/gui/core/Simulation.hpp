@@ -45,10 +45,11 @@ private:
 signals:
     void started();
     void stopped();
-    void initialFrame(const Frame& frame);
-    void frame(const Frame& frame);
+    void initialFrame(Frame frame);
+    void frame(Frame frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);
     void dataPoint(const cell::DataPoint& dataPoint);
+    void simulationContextChanged(cell::SimulationContext simulationContext);
 
 private:
     cell::SimulationRunner simulationRunner_;

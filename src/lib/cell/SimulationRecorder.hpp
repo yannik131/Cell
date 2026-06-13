@@ -37,7 +37,7 @@ public:
     void clear();
     const DataPoint& getCurrentDataPoint() const;
     void setRecordLastFrame(bool value);
-    const Frame& getLastFrame() const;
+    Frame getLastFrame();
     void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
     const ch::duration<double>& getStorageInterval() const;
 

@@ -75,19 +75,17 @@ MainWindow::MainWindow(QWidget* parent)
             &SimulationWidget::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
-            [&](const Frame& frame)
-            {
-                ui->simulationWidget->renderInitialFrame(frame, simulation_->getSimulationContext().discTypeRegistry,
-                                                         simulation_->getSimulationContext().membraneTypeRegistry);
-            });
-    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
-            [&](const Frame& frame) { ui->simulationWidget->renderFrame(frame); });
+            &SimulationWidget::renderFrameImmediately);
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, &SimulationWidget::queueFrameForRendering);
     connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setPerformanceData);
-    ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
+    ui->simulationWidget->injectDependencies(simulationConfigUpdater_, simulation_.get());
     connect(simulation_.get(), &Simulation::dataPoint, plotModel_, &PlotModel::processDataPoint);
 
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);
+
+    connect(simulation_.get(), &Simulation::started, ui->simulationWidget, &SimulationWidget::startRenderingTimer);
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationWidget, &SimulationWidget::stopRenderingTimer);
 
     connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
@@ -108,9 +106,9 @@ MainWindow::MainWindow(QWidget* parent)
             &QDialog::show);
 
     // Application-wide shortcuts so they work even when the widget is a separate window
-    const auto addShortcut = [&](auto key, auto callback)
+    const auto addShortcut = [&](const QKeySequence& keySequence, auto callback)
     {
-        auto* shortcut = new QShortcut(QKeySequence(key), this);
+        auto* shortcut = new QShortcut(keySequence, this);
         shortcut->setContext(Qt::ApplicationShortcut);
         connect(shortcut, &QShortcut::activated, this, callback);
     };
@@ -135,8 +133,6 @@ MainWindow::MainWindow(QWidget* parent)
                            resetSimulation();
                            ui->simulationWidget->fitSimulationIntoView();
                        });
-
-    ui->simulationWidget->injectIsRunningProvider([&]() { return simulation_->isRunning(); });
 }
 
 void MainWindow::resetSimulation()
