@@ -1,15 +1,10 @@
-#include "cell/Logging.hpp"
 #include "core/MainWindow.hpp"
 
 #include <QApplication>
 #include <QMessageBox>
-#include <QtCore/QMetaType>
 
 int main(int argc, char* argv[])
 {
-    qRegisterMetaType<FrameDTO>("FrameDTO");
-
-    cell::initLogging(argc, argv);
     QApplication::setStyle("fusion");
     QApplication app(argc, argv);
 

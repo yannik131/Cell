@@ -1,5 +1,6 @@
 #include "core/MainWindow.hpp"
 #include "cell/ExceptionWithLocation.hpp"
+#include "cell/SimulationContext.hpp"
 #include "core/Utility.hpp"
 #include "dialogs/DiscTypesDialog.hpp"
 #include "dialogs/DiscsDialog.hpp"
@@ -10,9 +11,6 @@
 #include "dialogs/SetupDialog.hpp"
 #include "ui_MainWindow.h"
 
-#include <glog/logging.h>
-
-#include "MainWindow.hpp"
 #include <QKeyEvent>
 #include <QMessageBox>
 
@@ -55,8 +53,6 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui->simulationWidget, &SimulationWidget::renderData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setRenderData);
-    connect(simulation_.get(), &Simulation::simulationData, ui->simulationInfoWidget,
-            &SimulationInfoWidget::setSimulationData);
 
     ui->plotWidget->setModel(plotModel_);
 
@@ -65,33 +61,54 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(simulationConfigUpdater_, &SimulationConfigUpdater::simulationResetRequired, this,
             &MainWindow::resetSimulation);
+    connect(simulationConfigUpdater_, &SimulationConfigUpdater::loopParameters, simulation_.get(),
+            &Simulation::updateLoopParameters);
 
     connect(ui->saveSettingsAsJsonAction, &QAction::triggered, this, &MainWindow::saveSettingsAsJson);
     connect(ui->loadSettingsFromJsonAction, &QAction::triggered, this, &MainWindow::loadSettingsFromJson);
     connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::showAboutDialog);
 
     resizeTimer_.setSingleShot(true);
-    connect(&resizeTimer_, &QTimer::timeout, [this]() { simulation_->emitFrame(RedrawOnly{true}); });
+    connect(&resizeTimer_, &QTimer::timeout, ui->simulationWidget, &SimulationWidget::fitSimulationIntoView);
 
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
 
-    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
-            [&](const FrameDTO& frame) { ui->simulationWidget->render(frame, simulation_->getDiscTypeRegistry()); });
-    ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
-    connect(ui->simulationWidget, &SimulationWidget::renderRequired,
-            [this]() { simulation_->emitFrame(RedrawOnly{true}); });
+    connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
+            &SimulationWidget::renderFrameImmediately);
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, &SimulationWidget::queueFrameForRendering);
+    connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
+            &SimulationInfoWidget::setPerformanceData);
+    ui->simulationWidget->injectDependencies(simulationConfigUpdater_, simulation_.get());
+    connect(simulation_.get(), &Simulation::dataPoint, plotModel_, &PlotModel::processDataPoint);
 
-    connect(simulation_.get(), &Simulation::frame, plotModel_, &PlotModel::processFrame);
+    connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);
+
+    connect(simulation_.get(), &Simulation::started, ui->simulationWidget, &SimulationWidget::startRenderingTimer);
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationWidget, &SimulationWidget::stopRenderingTimer);
+
+    connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
+            [&]()
+            {
+                ui->menubar->setEnabled(false);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
+            });
+
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationControlWidget,
+            [&]()
+            {
+                ui->menubar->setEnabled(true);
+                ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
+            });
 
     ui->plotControlWidget->setModel(plotModel_);
     connect(ui->plotControlWidget, &PlotControlWidget::selectDiscTypesClicked, plotDataSelectionDialog_,
             &QDialog::show);
 
     // Application-wide shortcuts so they work even when the widget is a separate window
-    const auto addShortcut = [&](auto key, auto callback)
+    const auto addShortcut = [&](const QKeySequence& keySequence, auto callback)
     {
-        auto* shortcut = new QShortcut(QKeySequence(key), this);
+        auto* shortcut = new QShortcut(keySequence, this);
         shortcut->setContext(Qt::ApplicationShortcut);
         connect(shortcut, &QShortcut::activated, this, callback);
     };
@@ -100,8 +117,8 @@ MainWindow::MainWindow(QWidget* parent)
     addShortcut(Qt::Key_Space,
                 [&]()
                 {
-                    if (simulationThread_)
-                        simulationThread_->requestInterruption();
+                    if (simulation_->isRunning())
+                        stopSimulation();
                     else
                         startSimulation();
                 });
@@ -110,17 +127,18 @@ MainWindow::MainWindow(QWidget* parent)
             &MainWindow::toggleSimulationFullscreen);
 
     // This will queue an event that will be handled as soon as the event loop is available
-    QTimer::singleShot(0, this, [&]() { resetSimulation(); });
+    QTimer::singleShot(0, this,
+                       [&]()
+                       {
+                           resetSimulation();
+                           ui->simulationWidget->fitSimulationIntoView();
+                       });
 }
 
 void MainWindow::resetSimulation()
 {
-    if (simulationThread_)
-        return;
-
-    simulation_->rebuildContext();
+    simulation_->reinitialize();
     plotModel_->reset();
-    ui->simulationWidget->fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -150,6 +168,7 @@ void MainWindow::loadSettingsFromJson()
     {
         // Will emit a signal for simulation reset
         simulationConfigUpdater_->loadConfigFromFile(fs::path{fileName.toStdString()});
+        ui->simulationWidget->fitSimulationIntoView();
     }
     catch (const std::exception& e)
     {
@@ -161,7 +180,6 @@ void MainWindow::toggleSimulationFullscreen()
 {
     ui->simulationWidget->toggleFullscreen();
     fullscreenIsToggled_ = !fullscreenIsToggled_;
-    simulation_->emitFrame(RedrawOnly{true});
 }
 
 void MainWindow::showAboutDialog()
@@ -183,11 +201,8 @@ void MainWindow::showAboutDialog()
 
 MainWindow::~MainWindow()
 {
-    if (simulationThread_ != nullptr)
-    {
-        simulationThread_->requestInterruption();
-        simulationThread_->wait();
-    }
+    simulation_->stop();
+    simulation_->waitForSimulationToFinish();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -212,44 +227,15 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::startSimulation()
 {
-    if (simulationThread_ != nullptr)
+    if (simulation_->isRunning())
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
-    if (!simulation_->cellIsBuilt())
-        throw ExceptionWithLocation("Can't start simulation: Cell has not been built yet.");
-
-    simulationThread_ = new QThread();
-    simulation_->moveToThread(simulationThread_);
-
-    connect(simulationThread_, &QThread::started, ui->simulationControlWidget,
-            [&]()
-            {
-                ui->menubar->setEnabled(false);
-                ui->simulationControlWidget->updateWidgets(SimulationRunning{true});
-            });
-    connect(simulationThread_, &QThread::finished, ui->simulationControlWidget,
-            [&]()
-            {
-                ui->menubar->setEnabled(true);
-                ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
-            });
-
-    connect(simulationThread_, &QThread::started,
-            [&]()
-            {
-                simulation_->run();
-                simulation_->moveToThread(QCoreApplication::instance()->thread());
-                simulationThread_->quit();
-            });
-
-    connect(simulationThread_, &QThread::finished, simulationThread_, &QThread::deleteLater);
-    connect(simulationThread_, &QThread::finished, this, [&]() { simulationThread_ = nullptr; });
-
-    simulationThread_->start();
+    simulation_->start();
+    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }
 
 void MainWindow::stopSimulation()
 {
-    if (simulationThread_)
-        simulationThread_->requestInterruption();
+    simulation_->stop();
+    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }

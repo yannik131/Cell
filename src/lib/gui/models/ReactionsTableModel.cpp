@@ -3,7 +3,6 @@
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
 
-#include "ReactionsTableModel.hpp"
 #include <optional>
 #include <unordered_set>
 

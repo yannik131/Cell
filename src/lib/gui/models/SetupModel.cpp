@@ -1,5 +1,4 @@
 #include "models/SetupModel.hpp"
-#include "SetupModel.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "models/DiscsTableModel.hpp"
@@ -25,9 +24,9 @@ void SetupModel::setTimeScale(double timeScale)
     simulationConfig_.simulationTimeScale = timeScale;
 }
 
-void SetupModel::setMostProbableSpeed(int mostProbableSpeed)
+void SetupModel::setMostProbableSpeed(double mostProbableSpeed)
 {
-    simulationConfig_.mostProbableSpeed = static_cast<double>(mostProbableSpeed);
+    simulationConfig_.mostProbableSpeed = mostProbableSpeed;
 }
 
 void SetupModel::setFPS(int FPS)

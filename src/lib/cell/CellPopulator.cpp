@@ -3,9 +3,8 @@
 #include "Disc.hpp"
 #include "MathUtils.hpp"
 
-#include <glog/logging.h>
-
 #include <algorithm>
+#include <iostream>
 #include <numbers>
 #include <random>
 #include <vector>
@@ -13,10 +12,12 @@
 namespace cell
 {
 
-CellPopulator::CellPopulator(Cell& cell, SimulationConfig simulationConfig, SimulationContext simulationContext)
+CellPopulator::CellPopulator(Cell& cell, SimulationConfig simulationConfig, const DiscTypeRegistry& discTypeRegistry,
+                             const MembraneTypeRegistry& membraneTypeRegistry)
     : cell_(cell)
     , simulationConfig_(std::move(simulationConfig))
-    , simulationContext_(std::move(simulationContext))
+    , discTypeRegistry_(discTypeRegistry)
+    , membraneTypeRegistry_(membraneTypeRegistry)
 {
 }
 
@@ -46,7 +47,7 @@ void CellPopulator::populateDirectly()
 {
     for (const auto& disc : simulationConfig_.discs)
     {
-        Disc newDisc(simulationContext_.discTypeRegistry.getIDFor(disc.discTypeName));
+        Disc newDisc(discTypeRegistry_.getIDFor(disc.discTypeName));
         newDisc.setPosition({disc.x, disc.y});
         newDisc.setVelocity({disc.vx, disc.vy});
 
@@ -64,7 +65,7 @@ double CellPopulator::calculateDistributionSum(const std::map<std::string, doubl
 std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment& compartment, double maxRadius,
                                                                     int discCount) const
 {
-    const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
+    const auto& membraneType = membraneTypeRegistry_.getByID(compartment.getMembrane().getTypeID());
     const auto& membraneCenter = compartment.getMembrane().getPosition();
     const auto& membraneRadius = membraneType.getRadius();
 
@@ -84,7 +85,7 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
         {
             const auto& membrane = (*iter)->getMembrane();
             const auto& M = membrane.getPosition();
-            const auto& R = simulationContext_.membraneTypeRegistry.getByID(membrane.getTypeID()).getRadius();
+            const auto& R = membraneTypeRegistry_.getByID(membrane.getTypeID()).getRadius();
 
             if (mathutils::circlesOverlap(gridPoints[i], maxRadius, M, R))
                 valid = false;
@@ -101,11 +102,8 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
 
     if (static_cast<int>(gridPoints.size()) < discCount)
     {
-        LOG(WARNING) << std::to_string(discCount)
-                     << " discs should be created for membrane of type \"" + membraneType.getName() +
-                            "\", but the grid can only fit "
-                     << std::to_string(gridPoints.size()) << ". " << std::to_string(discCount - gridPoints.size())
-                     << " discs will not be created.";
+        std::cout << "Grid for \"" << membraneType.getName() << "\" can only fit " << gridPoints.size() << "/"
+                  << discCount << " discs\n";
     }
 
     return gridPoints;
@@ -113,8 +111,10 @@ std::vector<Vector2d> CellPopulator::calculateCompartmentGridPoints(Compartment&
 
 void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment, double maxRadius)
 {
-    const auto& membraneTypeName =
-        simulationContext_.membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID()).getName();
+    for (auto& subCompartment : compartment.getCompartments())
+        populateCompartmentWithDistribution(*subCompartment, maxRadius);
+
+    const auto& membraneTypeName = membraneTypeRegistry_.getByID(compartment.getMembrane().getTypeID()).getName();
 
     const auto& membraneType = findMembraneTypeByName(simulationConfig_, membraneTypeName);
     const auto& distribution = membraneType.discTypeDistribution;
@@ -139,8 +139,8 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
     for (const auto& [discTypeName, frequency] : distribution)
     {
         const auto count = static_cast<int>(std::round(frequency * static_cast<double>(discCount)));
-        const auto discTypeID = simulationContext_.discTypeRegistry.getIDFor(discTypeName);
-        const auto& discType = simulationContext_.discTypeRegistry.getByID(discTypeID);
+        const auto discTypeID = discTypeRegistry_.getIDFor(discTypeName);
+        const auto& discType = discTypeRegistry_.getByID(discTypeID);
 
         for (int i = 0; i < count && !gridPoints.empty(); ++i)
         {
@@ -153,9 +153,6 @@ void CellPopulator::populateCompartmentWithDistribution(Compartment& compartment
             gridPoints.pop_back();
         }
     }
-
-    for (auto& subCompartment : compartment.getCompartments())
-        populateCompartmentWithDistribution(*subCompartment, maxRadius);
 }
 
 Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed, double m) const
@@ -168,20 +165,19 @@ Vector2d CellPopulator::sampleVelocityFromDistribution(double mostProbableSpeed,
 Compartment& CellPopulator::findDeepestContainingCompartment(const Disc& disc)
 {
     const auto& M = disc.getPosition();
-    const auto& R = simulationContext_.discTypeRegistry.getByID(disc.getTypeID()).getRadius();
+    const auto& R = discTypeRegistry_.getByID(disc.getTypeID()).getRadius();
 
     auto isFullyContainedIn = [&](const Compartment& compartment)
     {
         const auto& membrane = compartment.getMembrane();
-        const auto& membraneType = simulationContext_.membraneTypeRegistry.getByID(membrane.getTypeID());
+        const auto& membraneType = membraneTypeRegistry_.getByID(membrane.getTypeID());
 
         return mathutils::circleIsFullyContainedByCircle(M, R, membrane.getPosition(), membraneType.getRadius());
     };
 
     if (!isFullyContainedIn(cell_))
     {
-        LOG(WARNING) << "Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) +
-                            ") is not contained by the cell";
+        std::cout << "Disc at (" + std::to_string(M.x) + ", " + std::to_string(M.y) + ") is not contained by the cell";
         return cell_;
     }
 

@@ -2,22 +2,18 @@
 
 #include "cell/Cell.hpp"
 #include "cell/Disc.hpp"
-#include "cell/Logging.hpp"
 #include "cell/SimulationConfigBuilder.hpp"
 #include "cell/SimulationFactory.hpp"
 #include "cell/StringUtils.hpp"
 #include "cell/Types.hpp"
 
 #include <chrono>
-
-#include <glog/logging.h>
+#include <iostream>
 
 using namespace cell;
 
-int main(int argc, char** argv)
+int main()
 {
-    initLogging(argc, argv);
-
     SimulationConfigBuilder builder;
 
     builder.addMembraneType(
@@ -54,7 +50,7 @@ int main(int argc, char** argv)
     using clock = std::chrono::steady_clock;
     using namespace std::chrono_literals;
 
-    LOG(INFO) << "Starting benchmark";
+    std::cout << "Starting benchmark" << "\n";
     auto start = clock::now();
 
     int N = 0;
@@ -66,13 +62,13 @@ int main(int argc, char** argv)
 
     auto end = clock::now();
 
-    LOG(INFO) << "Done";
+    std::cout << "Done" << "\n";
     long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
-    LOG(INFO) << "Finished updates: " << N;
-    LOG(INFO) << "Elapsed time: " << cell::stringutils::timeString(ns);
-    LOG(INFO) << "Time per update: " << cell::stringutils::timeString(ns / N);
+    std::cout << "Finished updates: " << N << "\n";
+    std::cout << "Elapsed time: " << cell::stringutils::timeString(ns) << "\n";
+    std::cout << "Time per update: " << cell::stringutils::timeString(ns / N) << "\n";
 
-    for (const auto& [typeID, count] : simulationContext.getAndResetCollisionCounts())
-        LOG(INFO) << registry.getByID(typeID).getName() << ": " << count << " collisions";
+    for (const auto& [typeID, count] : CollisionDetector::getAndResetCollisionCounts())
+        std::cout << registry.getByID(typeID).getName() << ": " << count << " collisions" << "\n";
 }

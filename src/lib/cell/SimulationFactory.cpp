@@ -10,8 +10,6 @@
 #include "SimulationContext.hpp"
 #include "StringUtils.hpp"
 
-#include <glog/logging.h>
-
 #include <random>
 
 namespace cell
@@ -60,7 +58,7 @@ void SimulationFactory::buildSimulationFromConfig(const SimulationConfig& simula
     }
 }
 
-SimulationContext SimulationFactory::getSimulationContext()
+SimulationContext SimulationFactory::getSimulationContext() const
 {
     if (!discTypeRegistry_ || !membraneTypeRegistry_ || !reactionEngine_ || !collisionHandler_)
         throw ExceptionWithLocation("Can't get simulation context, dependencies haven't been fully created yet");
@@ -82,11 +80,6 @@ Cell& SimulationFactory::getCell()
 bool SimulationFactory::cellIsBuilt() const
 {
     return static_cast<bool>(cell_);
-}
-
-DiscTypeMap<int> SimulationFactory::getAndResetCollisionCounts()
-{
-    return CollisionDetector::getAndResetCollisionCounts();
 }
 
 DiscTypeRegistry SimulationFactory::buildDiscTypeRegistry(const SimulationConfig& simulationConfig)
@@ -172,7 +165,7 @@ std::unique_ptr<Cell> SimulationFactory::buildCell(const SimulationConfig& simul
     std::unique_ptr<Cell> cell(std::make_unique<Cell>(std::move(cellMembrane), getSimulationContext()));
     createCompartments(*cell, std::move(membranes));
 
-    CellPopulator cellPopulator(*cell, simulationConfig, getSimulationContext());
+    CellPopulator cellPopulator(*cell, simulationConfig, *discTypeRegistry_, *membraneTypeRegistry_);
     cellPopulator.populateCell();
 
     return cell;

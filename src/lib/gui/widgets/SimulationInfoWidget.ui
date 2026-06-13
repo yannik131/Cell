@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>160</width>
-    <height>211</height>
+    <height>231</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -27,9 +27,12 @@
     <widget class="QGroupBox" name="groupBox">
      <property name="maximumSize">
       <size>
-       <width>16777215</width>
+       <width>150</width>
        <height>100</height>
       </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;TFPS: Target FPS&lt;br/&gt;FPS: Actual FPS&lt;br/&gt;t: Time to render&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="title">
       <string>Rendering</string>
@@ -38,21 +41,21 @@
       <item>
        <widget class="QLabel" name="targetFPSLabel">
         <property name="text">
-         <string>Target FPS:</string>
+         <string>TFPS:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="actualFPSLabel">
         <property name="text">
-         <string>Actual FPS:</string>
+         <string>FPS:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="renderTimeLabel">
         <property name="text">
-         <string>Render time:</string>
+         <string>t:</string>
         </property>
        </widget>
       </item>
@@ -63,9 +66,12 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="maximumSize">
       <size>
-       <width>16777215</width>
+       <width>150</width>
        <height>120</height>
       </size>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tscale: Target simulation time scale&lt;/p&gt;&lt;p&gt;Ascale: Actual simulation time scale&lt;br/&gt;Ascale = ratio of 1s (real-time) / time to simulate 1s&lt;/p&gt;&lt;p&gt;t: Time to calculate a frame and send data&lt;br/&gt;This takes waiting time into account (target scale)&lt;/p&gt;&lt;p&gt;t_S: Time to calculate a simulation step&lt;br/&gt;Doesn't take data transmission or waiting into account&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="title">
       <string>Simulation</string>
@@ -74,28 +80,28 @@
       <item>
        <widget class="QLabel" name="targetScaleLabel">
         <property name="text">
-         <string>Target scale:</string>
+         <string>Tscale: </string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="actualScaleLabel">
         <property name="text">
-         <string>Actual scale:</string>
+         <string>Ascale:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="updateTimeLabel">
         <property name="text">
-         <string>Update time:</string>
+         <string>t:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="simulationTimeLabel">
         <property name="text">
-         <string>Simulation:</string>
+         <string>t (S): </string>
         </property>
        </widget>
       </item>

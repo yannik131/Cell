@@ -1,5 +1,6 @@
 #include "core/Simulation.hpp"
 #include "cell/Cell.hpp"
+#include "cell/CollisionDetector.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "core/Utility.hpp"
@@ -10,78 +11,45 @@
 Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
+    simulationRunner_.setPostStartCallback([&]() { emit started(); });
+    simulationRunner_.setPostStopCallback([&]() { emit stopped(); });
+    simulationRunner_.setUseScaleFromConfig(true);
 }
 
-void Simulation::run()
+void Simulation::start()
 {
-    using clock = std::chrono::steady_clock;
-    using namespace std::chrono;
-
-    auto lastUpdate = clock::now();
-    auto timeSinceLastUpdate = duration<double>(0s);
-    auto start = clock::now();
-    auto simulationUpdateTime = duration<double>(0s);
-    int updates = 0;
-
-    // Since every change to the config causes an immediate context rebuild, it's always up to date
-    const auto& simulationConfig = simulationConfigUpdater_.getSimulationConfig();
-    const double simulationTimeScale = simulationConfig.simulationTimeScale;
-    const auto simulationTimeStep = duration<double>(simulationConfig.simulationTimeStep);
-
-    const auto emitSimulationData = [&]()
-    {
-        const auto elapsed = clock::now() - start;
-        if (elapsed < 1s || updates == 0)
-            return;
-
-        const double simulationTime = updates * simulationConfig.simulationTimeStep;
-        const double elapsedSeconds = duration<double>(elapsed).count();
-        const double actualScale = simulationTime / elapsedSeconds;
-        emit simulationData(simulationTimeScale, actualScale, duration_cast<nanoseconds>(elapsed / updates),
-                            duration_cast<nanoseconds>(simulationUpdateTime / updates));
-
-        start = clock::now();
-        updates = 0;
-        simulationUpdateTime = 0s;
-    };
-
-    while (!QThread::currentThread()->isInterruptionRequested())
-    {
-        auto now = clock::now();
-        timeSinceLastUpdate += now - lastUpdate;
-        lastUpdate = now;
-
-        emitSimulationData();
-
-        while (timeSinceLastUpdate / simulationTimeScale > simulationTimeStep &&
-               !QThread::currentThread()->isInterruptionRequested())
-        {
-            timeSinceLastUpdate -= simulationTimeStep / simulationTimeScale;
-
-            const auto updateStart = clock::now();
-            simulationFactory_.getCell().update(simulationTimeStep.count());
-            simulationUpdateTime += clock::now() - updateStart;
-            ++updates;
-
-            emitSimulationData();
-            emitFrame(RedrawOnly{false});
-        }
-    }
+    simulationRunner_.runSimulation();
 }
 
-void Simulation::buildContext(const cell::SimulationConfig& config)
+void Simulation::stop()
 {
-    simulationFactory_.buildSimulationFromConfig(config);
+    simulationRunner_.stopSimulation();
 }
 
-void Simulation::rebuildContext()
+bool Simulation::isRunning() const
 {
-    buildContext(simulationConfigUpdater_.getSimulationConfig());
+    return simulationRunner_.simulationIsRunning();
 }
 
-const cell::DiscTypeRegistry& Simulation::getDiscTypeRegistry()
+void Simulation::reinitialize()
 {
-    return simulationFactory_.getSimulationContext().discTypeRegistry;
+    simulationRunner_.setPostBuildCallback({});
+    simulationRunner_.useConfig(simulationConfigUpdater_.getSimulationConfig());
+    initializeSimulationRecorder();
+}
+
+void Simulation::loadSettingsFromJson(const fs::path& settingsPath)
+{
+    simulationConfigUpdater_.loadConfigFromFile(settingsPath);
+    reinitialize();
+}
+
+void Simulation::emitLastFrame()
+{
+    if (!simulationRecorder_)
+        return;
+
+    emit initialFrame(simulationRecorder_->getLastFrame());
 }
 
 SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
@@ -89,69 +57,55 @@ SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()
     return simulationConfigUpdater_;
 }
 
-bool Simulation::cellIsBuilt() const
+const cell::SimulationConfig& Simulation::getSimulationConfig() const
 {
-    return simulationFactory_.cellIsBuilt();
+    return simulationConfigUpdater_.getSimulationConfig();
 }
 
-void Simulation::emitFrame(RedrawOnly redrawOnly)
+const cell::SimulationRecorder& Simulation::getSimulationRecorder() const
 {
-    if (!simulationFactory_.cellIsBuilt())
-        return;
+    if (!simulationRecorder_)
+        throw ExceptionWithLocation("Simulation recorder has not yet been initialized");
 
-    FrameDTO frameDTO;
-    const auto& cell = simulationFactory_.getCell();
-
-    const auto gatherData = [&](const cell::Compartment& compartment)
-    {
-        frameDTO.discs_.insert(frameDTO.discs_.end(), compartment.getDiscs().begin(), compartment.getDiscs().end());
-        frameDTO.membranes_.push_back(circleShapeFromCompartment(compartment));
-    };
-
-    std::vector<const cell::Compartment*> compartments({&cell});
-
-    while (!compartments.empty())
-    {
-        const cell::Compartment* compartment = compartments.back();
-        compartments.pop_back();
-
-        gatherData(*compartment);
-
-        for (const auto& subCompartment : compartment->getCompartments())
-            compartments.push_back(subCompartment.get());
-    }
-
-    if (redrawOnly.value)
-    {
-        emit frame(frameDTO);
-        return;
-    }
-
-    frameDTO.elapsedSimulationTimeUs =
-        static_cast<long long>(simulationConfigUpdater_.getSimulationConfig().simulationTimeStep * 1e6);
-    frameDTO.collisionCounts_ = simulationFactory_.getAndResetCollisionCounts();
-
-    emit frame(frameDTO);
+    return *simulationRecorder_;
 }
 
-sf::CircleShape Simulation::circleShapeFromCompartment(const cell::Compartment& compartment)
+cell::SimulationContext Simulation::getSimulationContext()
 {
-    sf::CircleShape shape;
-    const auto& membraneTypeRegistry = simulationFactory_.getSimulationContext().membraneTypeRegistry;
-    const auto& membraneType = membraneTypeRegistry.getByID(compartment.getMembrane().getTypeID());
-    const auto R = static_cast<float>(membraneType.getRadius());
+    return simulationRunner_.getSimulationContext();
+}
 
-    shape.setPointCount(100);
-    shape.setRadius(R);
-    shape.setOrigin({R, R});
-    shape.setPosition(utility::toVector2f(compartment.getMembrane().getPosition()));
-    shape.setFillColor(sf::Color::Transparent);
-    shape.setOutlineThickness(1);
+void Simulation::updateLoopParameters(const cell::SimulationRunner::LoopParameters& loopParameters)
+{
+    simulationRunner_.updateLoopParameters(loopParameters);
+}
 
-    if (membraneType.getName() == cell::config::cellMembraneTypeName)
-        shape.setOutlineColor(sf::Color::Yellow);
-    else
-        shape.setOutlineColor(simulationConfigUpdater_.getMembraneTypeColorMap().at(membraneType.getName()));
+void Simulation::waitForSimulationToFinish()
+{
+    simulationRunner_.waitForSimulationToFinish();
+}
 
-    return shape;
+void Simulation::initializeSimulationRecorder()
+{
+    simulationRecorder_ =
+        std::make_unique<cell::SimulationRecorder>(simulationRunner_.getSimulationContext().discTypeRegistry,
+                                                   simulationRunner_.getSimulationConfig().mostProbableSpeed);
+
+    simulationRecorder_->setRecordLastFrame(true);
+    simulationRunner_.setPerformanceDataCallback([&](auto data) { emit performanceData(data); });
+    simulationRunner_.setPostBuildCallback(
+        [&](cell::Cell& cell)
+        {
+            emit simulationContextChanged(simulationRunner_.getSimulationContext());
+            simulationRecorder_->processInitialSimulationData(cell);
+            emit initialFrame(simulationRecorder_->getLastFrame());
+        });
+    simulationRunner_.setPostUpdateCallback(
+        [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+        {
+            simulationRecorder_->processSimulationData(cell, elapsedTime);
+            emit frame(simulationRecorder_->getLastFrame());
+        });
+    simulationRecorder_->setNewDataPointCallback([&](const cell::DataPoint& dataPoint)
+                                                 { emit this->dataPoint(dataPoint); });
 }

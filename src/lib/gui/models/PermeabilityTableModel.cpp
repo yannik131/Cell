@@ -2,7 +2,6 @@
 #include "core/PermeabilityMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include "PermeabilityTableModel.hpp"
 #include <unordered_set>
 
 // TODO DRY violation with DiscTypeDistributionTableModel

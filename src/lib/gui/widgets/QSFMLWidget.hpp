@@ -71,6 +71,9 @@ public:
 
     void setMinimumSize(const QSize& s);
 
+    void enableRenderSignal();
+    void disableRenderSignal();
+
 signals:
     void renderRequired();
 
@@ -87,6 +90,8 @@ private:
 
     void zoom(ZoomDirection direction);
 
+    void requestRender();
+
 protected:
     sf::View view_;
 
@@ -96,6 +101,7 @@ private:
     QPoint startPosition_;
     bool dragging_ = false;
     double currentZoom_ = 1;
+    bool renderSignalEnabled_ = true;
 };
 
 #endif /* FEF60E3C_E40A_4709_A34D_F063F099C6DB_HPP */

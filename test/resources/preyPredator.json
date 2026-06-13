@@ -74,8 +74,8 @@
                 "product2": ""
             }
         ],
-        "simulationTimeScale": 0.5,
-        "simulationTimeStep": 0.001,
+        "simulationTimeScale": 0.3,
+        "simulationTimeStep": 0.003,
         "useDistribution": true
     },
     "configVersion": "1",

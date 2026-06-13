@@ -1,0 +1,273 @@
+{
+    "config": {
+        "cellMembraneType": {
+            "discCount": 3,
+            "discTypeDistribution": {
+                "BadSpawn": 1.0
+            },
+            "name": "Cell membrane",
+            "permeabilityMap": {},
+            "radius": 2000.0
+        },
+        "discTypes": [
+            {
+                "mass": 1.0,
+                "name": "Resource",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Good",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Bad",
+                "radius": 15.0
+            },
+            {
+                "mass": 1.0,
+                "name": "EnzymeInactive",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "EnzymeActive",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "Killer",
+                "radius": 10.0
+            },
+            {
+                "mass": 1.0,
+                "name": "KillerSpawn",
+                "radius": 15.0
+            },
+            {
+                "mass": 1.0,
+                "name": "BadSpawn",
+                "radius": 15.0
+            }
+        ],
+        "discs": [
+            {
+                "discTypeName": "EnzymeActive",
+                "vx": 0.0,
+                "vy": 0.0,
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "discTypeName": "Resource",
+                "vx": -10.0,
+                "vy": 0.0,
+                "x": 30.0,
+                "y": 0.0
+            }
+        ],
+        "membraneTypes": [
+            {
+                "discCount": 100,
+                "discTypeDistribution": {
+                    "EnzymeInactive": 1.0
+                },
+                "name": "Liver",
+                "permeabilityMap": {
+                    "Bad": 2,
+                    "Good": 2,
+                    "Killer": 2,
+                    "KillerSpawn": 1,
+                    "Resource": 2
+                },
+                "radius": 300.0
+            },
+            {
+                "discCount": 10000,
+                "discTypeDistribution": {
+                    "Good": 0.3,
+                    "Resource": 0.7
+                },
+                "name": "Container",
+                "permeabilityMap": {
+                    "Bad": 0,
+                    "Resource": 2
+                },
+                "radius": 1950.0
+            }
+        ],
+        "membranes": [
+            {
+                "membraneTypeName": "Liver",
+                "x": 0.0,
+                "y": 0.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": 1000.0,
+                "y": 1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": -1000.0,
+                "y": 1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": 1000.0,
+                "y": -1000.0
+            },
+            {
+                "membraneTypeName": "Liver",
+                "x": -1000.0,
+                "y": -1000.0
+            },
+            {
+                "membraneTypeName": "Container",
+                "x": 0.0,
+                "y": 0.0
+            }
+        ],
+        "mostProbableSpeed": 600.0,
+        "reactions": [
+            {
+                "educt1": "Bad",
+                "educt2": "Good",
+                "probability": 0.2,
+                "product1": "Bad",
+                "product2": "Bad"
+            },
+            {
+                "educt1": "Bad",
+                "educt2": "Killer",
+                "probability": 1.0,
+                "product1": "Good",
+                "product2": "Killer"
+            },
+            {
+                "educt1": "EnzymeInactive",
+                "educt2": "Bad",
+                "probability": 1.0,
+                "product1": "EnzymeActive",
+                "product2": "Bad"
+            },
+            {
+                "educt1": "EnzymeActive",
+                "educt2": "Good",
+                "probability": 0.01,
+                "product1": "EnzymeInactive",
+                "product2": "Good"
+            },
+            {
+                "educt1": "EnzymeActive",
+                "educt2": "Resource",
+                "probability": 1.0,
+                "product1": "EnzymeActive",
+                "product2": "KillerSpawn"
+            },
+            {
+                "educt1": "Killer",
+                "educt2": "Good",
+                "probability": 0.05,
+                "product1": "Resource",
+                "product2": "Good"
+            },
+            {
+                "educt1": "KillerSpawn",
+                "educt2": "Resource",
+                "probability": 1.0,
+                "product1": "Killer",
+                "product2": "KillerSpawn"
+            },
+            {
+                "educt1": "KillerSpawn",
+                "educt2": "",
+                "probability": 0.1,
+                "product1": "Resource",
+                "product2": ""
+            },
+            {
+                "educt1": "BadSpawn",
+                "educt2": "Resource",
+                "probability": 0.001,
+                "product1": "BadSpawn",
+                "product2": "Bad"
+            }
+        ],
+        "simulationTimeScale": 2.0,
+        "simulationTimeStep": 0.003,
+        "useDistribution": true
+    },
+    "configVersion": "1",
+    "discTypeColorMap": {
+        "Bad": [
+            255,
+            0,
+            0,
+            255
+        ],
+        "BadSpawn": [
+            255,
+            0,
+            255,
+            255
+        ],
+        "EnzymeActive": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "EnzymeInactive": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Good": [
+            0,
+            255,
+            0,
+            255
+        ],
+        "Killer": [
+            255,
+            255,
+            255,
+            255
+        ],
+        "KillerSpawn": [
+            255,
+            165,
+            0,
+            255
+        ],
+        "Resource": [
+            128,
+            128,
+            128,
+            255
+        ]
+    },
+    "membraneTypeColorMap": {
+        "Cell membrane": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "Container": [
+            0,
+            128,
+            128,
+            255
+        ],
+        "Liver": [
+            0,
+            0,
+            255,
+            255
+        ]
+    }
+}

@@ -94,7 +94,7 @@ TEST_F(ACell, SimulatesASingleDisc)
     ASSERT_THAT(cell.getDiscs().front().getPosition().x, DoubleNear(50 + timeStep, MaxPositionError));
     ASSERT_THAT(cell.getDiscs().front().getPosition().y, DoubleNear(50 + timeStep, MaxPositionError));
 
-    ASSERT_THAT(simulationFactory.getAndResetCollisionCounts().empty(), Eq(true));
+    ASSERT_THAT(CollisionDetector::getAndResetCollisionCounts().empty(), Eq(true));
 }
 
 TEST_F(ACell, SimulatesUnimolecularReactions)
@@ -113,7 +113,7 @@ TEST_F(ACell, SimulatesUnimolecularReactions)
     ASSERT_THAT(discTypeCounts["B"], Eq(2));
     ASSERT_THAT(discTypeCounts["C"], Eq(0));
 
-    auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
+    auto collisionCounts = CollisionDetector::getAndResetCollisionCounts();
     auto getIDFor = [&](const std::string& name) { return getDiscTypeRegistry().getIDFor(name); };
 
     ASSERT_THAT(collisionCounts[getIDFor("A")], Eq(0));
@@ -140,7 +140,7 @@ TEST_F(ACell, SimulatesBimolecularReactions)
     EXPECT_THAT(discTypeCounts["B"], Eq(1));
     EXPECT_THAT(discTypeCounts["C"], Eq(2));
 
-    auto collisionCounts = simulationFactory.getAndResetCollisionCounts();
+    auto collisionCounts = CollisionDetector::getAndResetCollisionCounts();
 
     EXPECT_THAT(collisionCounts[getIDFor("A")], Eq(2));
     EXPECT_THAT(collisionCounts[getIDFor("B")], Eq(1));
@@ -193,7 +193,7 @@ TEST_F(ACell, SimulatesReactionsOfDiscsInDifferentCompartments)
     ASSERT_EQ(discs.size(), 1);
     EXPECT_EQ(getDiscTypeRegistry().getByID(discs.front().getTypeID()).getName(), "C");
 
-    const auto& collisionCounts = simulationFactory.getAndResetCollisionCounts();
+    const auto& collisionCounts = CollisionDetector::getAndResetCollisionCounts();
 
     ASSERT_EQ(collisionCounts.size(), 2);
     EXPECT_TRUE(collisionCounts.contains(getIDFor("A")) && collisionCounts.at(getIDFor("A")) == 1);
@@ -210,7 +210,7 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
 
     auto& cell = createAndUpdateCell();
     auto discs = getAllDiscs(cell);
-    simulationFactory.getAndResetCollisionCounts(); // Discard the collision between A and B
+    CollisionDetector::getAndResetCollisionCounts(); // Discard the collision between A and B
 
     ASSERT_EQ(discs.size(), 2);
     auto discC = getDisc(discs, "C");
@@ -219,7 +219,7 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
     cell.update(timeStep);
     discs = getAllDiscs(cell);
 
-    auto collisions = simulationFactory.getAndResetCollisionCounts();
+    auto collisions = CollisionDetector::getAndResetCollisionCounts();
     ASSERT_EQ(collisions.size(), 2);
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("C")));
     ASSERT_TRUE(collisions.contains(getDiscTypeRegistry().getIDFor("D")));

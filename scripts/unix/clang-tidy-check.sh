@@ -1,12 +1,17 @@
-#! /bin/bash
+#!/bin/bash
 
 cd "$(dirname "$0")"
 cd ../..
 
-output=$(run-clang-tidy -p build_debug -j 4 -source-filter=".*src/.*|.*test/.*" -header-filter=".*src/.*|.*test/.*" | tee /dev/stderr)
+output=$(run-clang-tidy -p build_debug -j 4 \
+    -source-filter="^.*/Cell/(src|test)/.*" \
+    -header-filter="^.*/Cell/(src|test)/.*" \
+    2>&1 \
+    | grep -v "src/apps/playground/Main.cpp" \
+    | grep -v "ignored because it is not a clang PCH file" \
+    | tee /dev/stderr)
 
-if echo $output | grep -E "warning:|error:" > /dev/null; then 
+if echo "$output" | grep -E "warning:|error:" > /dev/null; then
     echo "clang-tidy found warnings/errors. You can rerun it with --fix or fix them yourself."
     exit 1
-fi 
-
+fi

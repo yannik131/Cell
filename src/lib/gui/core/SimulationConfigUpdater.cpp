@@ -1,5 +1,4 @@
 #include "core/SimulationConfigUpdater.hpp"
-#include "SimulationConfigUpdater.hpp"
 #include "cell/SimulationFactory.hpp"
 #include "core/SFMLJsonSerializers.hpp"
 
@@ -24,6 +23,9 @@ void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& 
     oldConfig.simulationTimeScale = simulationConfig.simulationTimeScale;
     oldConfig.simulationTimeStep = simulationConfig.simulationTimeStep;
 
+    emit loopParameters(
+        {.targetScale = simulationConfig.simulationTimeScale, .timeStep = simulationConfig.simulationTimeStep});
+
     if (oldConfig != simulationConfig)
         emit simulationResetRequired();
 }
@@ -44,6 +46,8 @@ void SimulationConfigUpdater::setFPS(int FPS)
         throw ExceptionWithLocation("FPS must be positive");
 
     FPS_ = FPS;
+
+    emit fpsChanged(FPS);
 }
 
 int SimulationConfigUpdater::getFPS() const

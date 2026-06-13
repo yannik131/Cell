@@ -1,5 +1,4 @@
 #include "dialogs/DiscTypeDistributionDialog.hpp"
-#include "DiscTypeDistributionDialog.hpp"
 #include "core/Utility.hpp"
 #include "delegates/ButtonDelegate.hpp"
 #include "delegates/ComboBoxDelegate.hpp"

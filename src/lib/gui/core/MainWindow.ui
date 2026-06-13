@@ -98,15 +98,24 @@
    <property name="text">
     <string>Save settings as...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="loadSettingsFromJsonAction">
    <property name="text">
     <string>Open JSON settings...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="aboutAction">
    <property name="text">
     <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
  </widget>

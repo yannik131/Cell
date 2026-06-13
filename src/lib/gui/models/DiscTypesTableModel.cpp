@@ -2,7 +2,6 @@
 #include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include "DiscTypesTableModel.hpp"
 #include <set>
 
 DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
