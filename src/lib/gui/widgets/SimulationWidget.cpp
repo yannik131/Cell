@@ -18,21 +18,29 @@ SimulationWidget::SimulationWidget(QWidget* parent)
     : QSFMLWidget(parent)
 {
     setContextMenuPolicy(Qt::DefaultContextMenu);
+    connect(&renderingTimer_, &QTimer::timeout, this, &SimulationWidget::drawFrame);
+    renderingTimer_.setTimerType(Qt::PreciseTimer);
 }
 
 void SimulationWidget::setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater)
 {
     simulationConfigUpdater_ = simulationConfigUpdater;
-}
+    renderingTimer_.setInterval(qRound(1000.0 / simulationConfigUpdater->getFPS()));
 
-void SimulationWidget::injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider)
-{
-    simulationIsRunningProvider_ = std::move(simulationIsRunningProvider);
+    connect(simulationConfigUpdater, &SimulationConfigUpdater::fpsChanged,
+            [&](int FPS) { renderingTimer_.setInterval(qRound(1000.0 / FPS)); });
 }
 
 void SimulationWidget::startRenderingTimer()
 {
-    nextAllowedRenderTime_ = myClock::now();
+    renderingTimer_.start();
+    currentRenderInterval_ = myClock::now();
+    renderedFrames_ = 0;
+}
+
+void SimulationWidget::stopRenderingTimer()
+{
+    renderingTimer_.stop();
 }
 
 void SimulationWidget::closeEvent(QCloseEvent* event)
@@ -76,7 +84,7 @@ void SimulationWidget::toggleFullscreen()
 
 void SimulationWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-    if (simulationIsRunningProvider_ && simulationIsRunningProvider_())
+    if (renderingTimer_.isActive())
         return;
 
     QMenu menu(this);
@@ -151,21 +159,50 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
     }
 }
 
-void SimulationWidget::renderFrame(const Frame& frame)
+void SimulationWidget::queueFrameForRendering(Frame frame)
+{
+    frameBuffer_.pushFrame(std::move(frame));
+}
+
+void SimulationWidget::renderFrameImmediately(Frame frame, const cell::DiscTypeRegistry& discTypeRegistry,
+                                              const cell::MembraneTypeRegistry& membraneTypeRegistry)
+{
+    rebuildTypeShapes(discTypeRegistry, membraneTypeRegistry);
+    frameBuffer_.pushFrame(frame);
+    drawFrame();
+}
+
+void SimulationWidget::drawFrame()
 {
     using namespace std::chrono;
-
-    const auto targetRenderTime =
-        duration_cast<myClock::duration>(duration<double>(1.0 / simulationConfigUpdater_->getFPS()));
-    auto now = myClock::now();
-
-    if (now < nextAllowedRenderTime_)
+    auto frame = frameBuffer_.takeLatest();
+    if (!frame)
         return;
-    nextAllowedRenderTime_ += targetRenderTime;
 
     const auto start = myClock::now();
-    drawFrame(frame);
-    now = myClock::now();
+
+    sf::RenderWindow::clear(sf::Color::Black);
+
+    for (const auto& disc : frame->discs)
+    {
+        discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
+        sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
+    }
+
+    for (const auto& membrane : frame->membranes)
+    {
+        auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
+        membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
+        membraneTypeShape.setPosition(utility::toVector2f(membrane.getPosition()));
+        sf::RenderWindow::draw(membraneTypeShape);
+    }
+
+    sf::RenderWindow::display();
+
+    if (!renderingTimer_.isActive())
+        return;
+
+    const auto now = myClock::now();
     const auto renderTime = now - start;
 
     ++renderedFrames_;
@@ -177,34 +214,6 @@ void SimulationWidget::renderFrame(const Frame& frame)
         currentRenderInterval_ = now;
         elapsedRenderTime_ = 0ns;
     }
-}
-
-void SimulationWidget::renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                                          const cell::MembraneTypeRegistry& membraneTypeRegistry)
-{
-    rebuildTypeShapes(discTypeRegistry, membraneTypeRegistry);
-    drawFrame(frame);
-}
-
-void SimulationWidget::drawFrame(const Frame& frame)
-{
-    sf::RenderWindow::clear(sf::Color::Black);
-
-    for (const auto& disc : frame.discs)
-    {
-        discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
-        sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
-    }
-
-    for (const auto& membrane : frame.membranes)
-    {
-        auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
-        membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));
-        membraneTypeShape.setPosition(utility::toVector2f(membrane.getPosition()));
-        sf::RenderWindow::draw(membraneTypeShape);
-    }
-
-    sf::RenderWindow::display();
 }
 
 double SimulationWidget::calculateIdealZoom() const

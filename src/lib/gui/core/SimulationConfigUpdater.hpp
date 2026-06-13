@@ -32,6 +32,7 @@ public:
 signals:
     void simulationResetRequired();
     void loopParameters(const cell::SimulationRunner::LoopParameters& loopParameters);
+    void fpsChanged(int FPS);
 
 private:
     void removeDiscTypes(cell::SimulationConfig& config, const std::unordered_set<std::string>& removedDiscTypes) const;

@@ -1,11 +1,14 @@
 #ifndef F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 #define F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 
+#include "core/FrameBuffer.hpp"
 #include "core/Types.hpp"
 #include "widgets/QSFMLWidget.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/System/Clock.hpp>
+
+#include <QTimer>
 
 class SimulationConfigUpdater;
 class Simulation;
@@ -28,8 +31,8 @@ public:
     SimulationWidget(QWidget* parent);
 
     void setSimulationConfigUpdater(SimulationConfigUpdater* simulationConfigUpdater);
-    void injectIsRunningProvider(std::function<bool()> simulationIsRunningProvider);
     void startRenderingTimer();
+    void stopRenderingTimer();
 
     void closeEvent(QCloseEvent* event) override;
     void toggleFullscreen();
@@ -42,15 +45,15 @@ signals:
     void renderData(int targetFPS, int actualFPS, std::chrono::nanoseconds renderTime);
 
 public slots:
-    void renderFrame(const Frame& frame);
-    void renderInitialFrame(const Frame& frame, const cell::DiscTypeRegistry& discTypeRegistry,
-                            const cell::MembraneTypeRegistry& membraneTypeRegistry);
+    void queueFrameForRendering(Frame frame);
+    void renderFrameImmediately(Frame frame, const cell::DiscTypeRegistry& discTypeRegistry,
+                                const cell::MembraneTypeRegistry& membraneTypeRegistry);
     void fitSimulationIntoView();
 
 private:
     void rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeRegistry,
                            const cell::MembraneTypeRegistry& membraneTypeRegistry);
-    void drawFrame(const Frame& frame);
+    void drawFrame();
     double calculateIdealZoom() const;
     sf::Vector2i getWidgetSize() const;
     template <typename ObjectType, typename ObjectsGetter, typename NameSetter, typename ObjectsSetter>
@@ -63,10 +66,10 @@ private:
     std::vector<sf::CircleShape> membraneTypeShapes_;
     SimulationConfigUpdater* simulationConfigUpdater_ = nullptr;
     myClock::time_point currentRenderInterval_{};
-    myClock::time_point nextAllowedRenderTime_{};
     myClock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
-    std::function<bool()> simulationIsRunningProvider_;
+    FrameBuffer frameBuffer_;
+    QTimer renderingTimer_;
 };
 
 #endif /* F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP */

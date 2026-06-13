@@ -75,13 +75,13 @@ MainWindow::MainWindow(QWidget* parent)
             &SimulationWidget::fitSimulationIntoView);
 
     connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
-            [&](const Frame& frame)
+            [&](Frame frame)
             {
-                ui->simulationWidget->renderInitialFrame(frame, simulation_->getSimulationContext().discTypeRegistry,
-                                                         simulation_->getSimulationContext().membraneTypeRegistry);
+                ui->simulationWidget->renderFrameImmediately(std::move(frame),
+                                                             simulation_->getSimulationContext().discTypeRegistry,
+                                                             simulation_->getSimulationContext().membraneTypeRegistry);
             });
-    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget,
-            [&](const Frame& frame) { ui->simulationWidget->renderFrame(frame); });
+    connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, &SimulationWidget::queueFrameForRendering);
     connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
             &SimulationInfoWidget::setPerformanceData);
     ui->simulationWidget->setSimulationConfigUpdater(simulationConfigUpdater_);
@@ -90,6 +90,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationWidget, &SimulationWidget::renderRequired, simulation_.get(), &Simulation::emitLastFrame);
 
     connect(simulation_.get(), &Simulation::started, ui->simulationWidget, &SimulationWidget::startRenderingTimer);
+    connect(simulation_.get(), &Simulation::stopped, ui->simulationWidget, &SimulationWidget::stopRenderingTimer);
+
     connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
             {
@@ -136,8 +138,6 @@ MainWindow::MainWindow(QWidget* parent)
                            resetSimulation();
                            ui->simulationWidget->fitSimulationIntoView();
                        });
-
-    ui->simulationWidget->injectIsRunningProvider([&]() { return simulation_->isRunning(); });
 }
 
 void MainWindow::resetSimulation()

@@ -14,9 +14,6 @@ using DataPoint = cell::DataPoint;
 using Histogram = cell::Histogram;
 using DiscTypeID = cell::DiscTypeID;
 
-/**
- * @brief Calculates the plots based on the currently selected plot type from all collected frame data sent to the model
- */
 class PlotModel : public QObject
 {
     Q_OBJECT
