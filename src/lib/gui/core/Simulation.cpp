@@ -12,7 +12,12 @@ Simulation::Simulation(QObject* parent)
     : QObject(parent)
 {
     simulationRunner_.setPostStartCallback([&]() { emit started(); });
-    simulationRunner_.setPostStopCallback([&]() { emit stopped(); });
+    simulationRunner_.setPostStopCallback(
+        [&]()
+        {
+            emit stopped();
+            emitLastFrame();
+        });
     simulationRunner_.setUseScaleFromConfig(true);
 }
 
@@ -90,6 +95,7 @@ void Simulation::initializeSimulationRecorder()
     simulationRecorder_ =
         std::make_unique<cell::SimulationRecorder>(simulationRunner_.getSimulationContext().discTypeRegistry,
                                                    simulationRunner_.getSimulationConfig().mostProbableSpeed);
+    simulationRecorder_->setStorageInterval(ch::milliseconds{10});
 
     simulationRecorder_->setRecordLastFrame(true);
     simulationRunner_.setPerformanceDataCallback([&](auto data) { emit performanceData(data); });
@@ -98,7 +104,6 @@ void Simulation::initializeSimulationRecorder()
         {
             emit simulationContextChanged(simulationRunner_.getSimulationContext());
             simulationRecorder_->processInitialSimulationData(cell);
-            emit initialFrame(simulationRecorder_->getLastFrame());
         });
     simulationRunner_.setPostUpdateCallback(
         [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)

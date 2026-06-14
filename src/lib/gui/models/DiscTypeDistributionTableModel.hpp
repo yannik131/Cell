@@ -10,6 +10,7 @@ public:
     DiscTypeDistributionTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void addRow() override;
+    void distribute();
 
 private:
     QVariant getField(const DiscTypeDistributionEntry& row, const QModelIndex& index) const override;

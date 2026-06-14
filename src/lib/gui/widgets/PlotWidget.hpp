@@ -20,14 +20,15 @@ public:
         const std::vector<std::string>& labels;
         const std::vector<sf::Color>& colors;
         const std::vector<std::unordered_map<DiscTypeID, double>>& dataPoints;
+        const std::vector<double>& x;
         const PlotCategory& plotCategory;
-        double xStep;
     };
 
     struct LinePlotData
     {
         const std::unordered_map<DiscTypeID, double>& dataPoint;
         bool doReplot;
+        double x;
     };
 
     struct HistogramParams
@@ -51,6 +52,7 @@ public:
     struct ColorMapData
     {
         const Histogram& histogram;
+        double xStep;
     };
 
 public:
@@ -69,6 +71,9 @@ public:
     void setInterpolate(bool enabled);
     const cell::DiscTypeRegistry& getDiscTypeRegistry() const;
 
+    void startPlotTimer();
+    void stopPlotTimer();
+
 private:
     void clear();
     void clearRanges();
@@ -77,13 +82,13 @@ private:
     void enableZoom(bool enabled);
     void setHistogramYRange(double yMax);
     QString getYAxisLabelFromPlotCategory(const PlotCategory& plotCategory) const;
+    void replotIfNewPlotAvailable();
 
 private:
     double yMin_ = 0;
     double yMax_ = 0;
     double xMin_ = 0;
     double xMax_ = 0;
-    double xStep_ = 0;
 
     std::unordered_map<std::string, QCPGraph*> graphs_;
     std::unordered_map<std::string, QCPBars*> histogram_;
@@ -92,11 +97,13 @@ private:
 
     std::vector<Histogram> colorMapCache_;
 
-    int count_ = 0;
     bool interpolateEnabled_ = false;
 
     std::function<const cell::DiscTypeRegistry&()> discTypeRegistryProvider_;
     std::function<bool()> plotSumProvider_;
+
+    QTimer plotTimer_;
+    bool newPlotAvailable_ = false;
 };
 
 #endif /* EF3DF9A2_5589_4286_A435_DAC8EC61FB2F_HPP */

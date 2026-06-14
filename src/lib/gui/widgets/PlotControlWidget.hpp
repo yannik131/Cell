@@ -26,7 +26,12 @@ signals:
     void selectDiscTypesClicked();
 
 private:
+    void displayActualPlotTimeIntervalValue();
+    int roundedToNearestMultipleOfTen(int value);
+
+private:
     std::unique_ptr<Ui::PlotControlWidget> ui;
+    QTimer plotTimeIntervalValueTimer_;
 };
 
 #endif /* BC236487_5829_46C6_81D5_E7309D40F63E_HPP */

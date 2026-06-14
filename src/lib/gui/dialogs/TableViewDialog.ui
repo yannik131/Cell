@@ -24,7 +24,7 @@
     <widget class="QTableView" name="tableView"/>
    </item>
    <item>
-    <widget class="QWidget" name="widget_3" native="true">
+    <widget class="QWidget" name="buttonWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QPushButton" name="addPushButton">

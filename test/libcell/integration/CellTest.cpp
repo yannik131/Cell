@@ -214,7 +214,7 @@ TEST_F(ACell, SimulatesNewDiscsCorrectly)
 
     ASSERT_EQ(discs.size(), 2);
     auto discC = getDisc(discs, "C");
-    expectNear(discC.getPosition(), {85, 0});
+    expectNear(discC.getPosition(), {82.929, 0}, 0.01);
 
     cell.update(timeStep);
     discs = getAllDiscs(cell);

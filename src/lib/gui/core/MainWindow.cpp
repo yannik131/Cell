@@ -87,6 +87,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(simulation_.get(), &Simulation::started, ui->simulationWidget, &SimulationWidget::startRenderingTimer);
     connect(simulation_.get(), &Simulation::stopped, ui->simulationWidget, &SimulationWidget::stopRenderingTimer);
 
+    connect(simulation_.get(), &Simulation::started, ui->plotWidget, &PlotWidget::startPlotTimer);
+    connect(simulation_.get(), &Simulation::stopped, ui->plotWidget, &PlotWidget::stopPlotTimer);
+
     connect(simulation_.get(), &Simulation::started, ui->simulationControlWidget,
             [&]()
             {
@@ -139,6 +142,7 @@ void MainWindow::resetSimulation()
 {
     simulation_->reinitialize();
     plotModel_->reset();
+    ui->simulationWidget->fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()
@@ -188,7 +192,7 @@ void MainWindow::showAboutDialog()
     <html>
         <head/>
         <body>
-            <p>This is <b>Cell</b>, version 1.0.0. Build time: %1 %2.</p>
+            <p>This is <b>Cell</b>, version 1.1.0. Build time: %1 %2.</p>
             <p>Application for simulating reaction networks.</p>
             <p>Developed by: Yannik Schroeder</p>
             <p>For additional information, see: <a href='https://github.com/yannik131/Cell'>https://github.com/yannik131/Cell</a></p>
@@ -231,11 +235,9 @@ void MainWindow::startSimulation()
         throw ExceptionWithLocation("Simulation can't be started: It's already running");
 
     simulation_->start();
-    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }
 
 void MainWindow::stopSimulation()
 {
     simulation_->stop();
-    ui->simulationControlWidget->updateWidgets(SimulationRunning{false});
 }

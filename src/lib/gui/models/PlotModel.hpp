@@ -23,6 +23,7 @@ public:
 
     void setPlotCategory(PlotCategory plotCategory);
     void setPlotTimeInterval(int valueMilliseconds);
+    const ch::duration<double> getPlotTimeInterval() const;
     void setPlotSum(bool value);
     void setInterpolate(bool value);
     void reset();
@@ -69,7 +70,7 @@ private:
 private:
     Simulation* simulation_;
 
-    ch::duration<double> plotTimeInterval_ = ch::duration<double>{0.1};
+    ch::duration<double> plotTimeInterval_ = ch::duration<double>{0.01};
     bool plotSum_ = false;
     PlotCategory plotCategory_ = PlotCategory::TypeCounts;
 
@@ -78,6 +79,7 @@ private:
 
     std::map<DiscTypeID, bool> activePlotDiscTypes_;
     DataPoint dataPoint_;
+    double currentX_ = 0;
 };
 
 #endif /* F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP */
