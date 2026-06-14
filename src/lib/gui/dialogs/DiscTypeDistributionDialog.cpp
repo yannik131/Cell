@@ -11,6 +11,13 @@ DiscTypeDistributionDialog::DiscTypeDistributionDialog(QWidget* parent,
     insertDiscTypeComboBoxIntoView(ui->tableView, simulationConfigUpdater, 0);
     insertProbabilitySpinBoxIntoView(ui->tableView, Column{1});
     insertDeleteButtonIntoView(model_, ui->tableView, Column{2});
+
+    auto* distributeButton = new QPushButton("Distribute", ui->buttonWidget);
+    distributeButton->setMaximumWidth(75);
+    auto* layout = safeCast<QHBoxLayout*>(ui->buttonWidget->layout());
+    layout->addWidget(distributeButton);
+    connect(distributeButton, &QPushButton::clicked, qobject_cast<DiscTypeDistributionTableModel*>(model_),
+            &DiscTypeDistributionTableModel::distribute);
 }
 
 void DiscTypeDistributionDialog::setDiscTypeDistribution(const DiscTypeDistribution& discTypeDistribution)

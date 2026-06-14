@@ -29,6 +29,20 @@ void DiscTypeDistributionTableModel::addRow()
     endInsertRows();
 }
 
+void DiscTypeDistributionTableModel::distribute()
+{
+    if (rows_.empty())
+        return;
+
+    const auto size = static_cast<double>(rows_.size());
+    const auto frequency = 1.0 / size;
+
+    beginResetModel();
+    for (auto& row : rows_)
+        row.second = frequency;
+    endResetModel();
+}
+
 QVariant DiscTypeDistributionTableModel::getField(const DiscTypeDistributionEntry& row, const QModelIndex& index) const
 {
     switch (index.column())

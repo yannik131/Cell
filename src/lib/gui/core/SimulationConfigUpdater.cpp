@@ -13,7 +13,8 @@ const cell::SimulationConfig& SimulationConfigUpdater::getSimulationConfig() con
     return simulationConfig_;
 }
 
-void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig)
+void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& simulationConfig,
+                                                  EmitSimulationReset emitSimulationReset)
 {
     auto oldConfig = simulationConfig_;
 
@@ -26,7 +27,7 @@ void SimulationConfigUpdater::setSimulationConfig(const cell::SimulationConfig& 
     emit loopParameters(
         {.targetScale = simulationConfig.simulationTimeScale, .timeStep = simulationConfig.simulationTimeStep});
 
-    if (oldConfig != simulationConfig)
+    if (oldConfig != simulationConfig && emitSimulationReset.value)
         emit simulationResetRequired();
 }
 

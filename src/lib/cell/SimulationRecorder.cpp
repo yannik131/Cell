@@ -12,9 +12,9 @@ SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry,
     : discTypeRegistry_(discTypeRegistry)
 {
     // With a simulation time step of 1ms, we get 1000 data points each second
-    // With an averaging time of 100ms, we save 10 datapoints for 1 second
-    // We'll reserve enough space for 5 minutes, 5*60*10
-    dataPoints_.reserve(3000);
+    // With an averaging time of 10ms, we save 100 datapoints for 1 second
+    // We'll reserve enough space for 5 minutes, 5*60*100
+    dataPoints_.reserve(30000);
 
     std::vector<DiscTypeID> discTypeIDs = discTypeRegistry.getIDs();
     currentDataPoint_.initializeHistograms(discTypeIDs, vSigma);

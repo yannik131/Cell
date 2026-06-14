@@ -9,12 +9,18 @@
 
 #include <unordered_set>
 
+struct EmitSimulationReset
+{
+    bool value;
+};
+
 class SimulationConfigUpdater : public QObject
 {
     Q_OBJECT
 public:
     const cell::SimulationConfig& getSimulationConfig() const;
-    void setSimulationConfig(const cell::SimulationConfig& simulationConfig);
+    void setSimulationConfig(const cell::SimulationConfig& simulationConfig,
+                             EmitSimulationReset emitSimulationReset = {true});
 
     template <typename T>
     void setTypes(const std::vector<T>& newTypes, const std::unordered_set<std::string>& removedTypes,
