@@ -9,22 +9,34 @@ HERE = Path(__file__).resolve().parent
 df = pd.read_csv(HERE / "../datasets/example/bad.csv")
 t, prey, predator = df["ElapsedTime[s]"], df['Prey'], df['Predator']
 
-fig, axes = plt.subplots(3, 1)
+fig, axes = plt.subplots(2, 1)
 df.drop(columns=["Resource"]).plot(x="ElapsedTime[s]", ax=axes[0])
-axes[0].set_title("Original")
 
 dt = 0.003
-T = 3.0
-A = 300.0
+T = 60.0
+total = 1000.0
 
-W = int(round(T / 10 / dt)) | 1
-prom = 0.05 * A 
+W = int(T / dt * 0.02) | 1
+prom = 0.05 * total
 
 prey = savgol_filter(prey, W, 3)
 predator = savgol_filter(predator, W, 3)
 
-px, _ = find_peaks(prey, prominence=prom)
-py, _ = find_peaks(predator, prominence=prom)
+px, _ = find_peaks(prey, prominence=0.01*prey.max())
+py, _ = find_peaks(predator, prominence=0.01*predator.max())
+
+distances = []
+unique_predator_peaks = set()
+
+for p in px:
+    nearest_predator_peak = py[np.argmin(np.abs(p - py))]
+    unique_predator_peaks.add(nearest_predator_peak)
+    distances.append(t.iloc[nearest_predator_peak] - t.iloc[p])
+    print(f"Prey peak at {t.iloc[p]}, {prey[p]}: Nearest predator peak at {t.iloc[nearest_predator_peak]}, {predator[nearest_predator_peak]}")
+
+median = np.median(distances)
+print(median)
+print(f"{int(len(unique_predator_peaks) / len(px) * 100.0)}% match")
 
 for x in t.iloc[px]:
     axes[1].axvline(x, color="green", linestyle="--", alpha=0.5)
@@ -34,23 +46,6 @@ for x in t.iloc[py]:
 
 axes[1].plot(t, prey, label="prey", color="green")
 axes[1].plot(t, predator, label="predator", color="red")
-axes[1].set_title("Smoothed + detected peaks")
-
-prey = (prey - prey.mean()) / prey.std()
-predator = (predator - predator.mean()) / predator.std()
-
-r = correlate(prey, predator, mode="full")
-lags = correlation_lags(len(prey), len(predator), mode="full")
-overlap = len(prey) - np.abs(lags)
-r = r / overlap 
-i = np.argmax(r)
-best_lag = lags[i]
-best_corr = r[i]
-x = lags * dt
-mask = (x >= -30) & (x <= 30)
-
-axes[2].plot(lags[mask], r[mask])
-axes[2].set_title(f"Correlation lags, peak at {best_lag}, {best_corr}")
 
 plt.legend()
 plt.show()

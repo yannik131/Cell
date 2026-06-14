@@ -34,7 +34,7 @@ void PlotControlWidget::setModel(PlotModel* plotModel)
                 plotTimeIntervalValueTimer_.start();
             });
     ui->plotTimeIntervalSpinBox->setValue(
-        ch::duration_cast<ch::milliseconds>(plotModel->getPlotTimeInterval()).count());
+        static_cast<int>(ch::duration_cast<ch::milliseconds>(plotModel->getPlotTimeInterval()).count()));
 }
 
 void PlotControlWidget::displayActualPlotTimeIntervalValue()
