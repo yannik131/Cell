@@ -119,20 +119,14 @@
 	\end{align*}
 	
 	\subsection{Combination: $A + B \rightarrow C$}
-	This is just a classical inelastic collision (see wikipedia for derivation):
+	We do
 	
 	\begin{align*}
-		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2}
+		\vec{v} = \frac{m_1 \vec{v}_1 + m_2 \vec{v}_2}{m_1 + m_2},
 	\end{align*}
 
-	Note that after this collision, $C$ gained internal energy:
-	
-	\begin{align*}
-		\Delta U_C = \frac{1}{2}\frac{m_1 m_2}{m_1 + m_2}(v_1 - v_2)^2
-	\end{align*}
-
-	This internal energy will lead to the reverse reaction $C \rightarrow A + B$ if $U_C > E_a$, where $E_a$ is the activation energy required for the forward reaction.
-	
+	but scale the velocity after to conserve kinetic energy. If resulting velocity is 0, a random direction with the scaled speed is chosen. 
+    
 	\subsection{Exchange: $A + B \rightarrow C + D$}
 	This is handled like a normal collision, we just change the types after. We handle this in terms of 2 separate transformations $A \rightarrow C$ and $B \rightarrow D$, conserving energy:
 	
