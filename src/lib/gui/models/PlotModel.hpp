@@ -78,6 +78,7 @@ private:
 
     std::map<DiscTypeID, bool> activePlotDiscTypes_;
     DataPoint dataPoint_;
+    double currentX_ = 0;
 };
 
 #endif /* F981B716_35F7_4F94_A3F0_1AD44B1AE402_HPP */

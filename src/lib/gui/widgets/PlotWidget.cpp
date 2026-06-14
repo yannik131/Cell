@@ -1,4 +1,5 @@
 #include "widgets/PlotWidget.hpp"
+#include "PlotWidget.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
@@ -14,6 +15,10 @@ PlotWidget::PlotWidget(QWidget* parent)
 
     // Place the legend
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignRight);
+
+    plotTimer_.setTimerType(Qt::PreciseTimer);
+    plotTimer_.setInterval(1000 / 60);
+    connect(&plotTimer_, &QTimer::timeout, this, &PlotWidget::replotIfNewPlotAvailable);
 }
 
 void PlotWidget::setModel(PlotModel* plotModel)
@@ -42,7 +47,6 @@ void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
 {
     const auto& labels = linePlotParams.labels;
     const auto& colors = linePlotParams.colors;
-    xStep_ = linePlotParams.xStep;
 
     clear();
 
@@ -67,8 +71,9 @@ void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
     updateLegend(labels);
     enableZoom(true);
 
-    for (const auto& dataPoint : linePlotParams.dataPoints)
-        updatePlot(LinePlotData{.dataPoint = dataPoint, .doReplot = false});
+    for (std::size_t i = 0; i < linePlotParams.dataPoints.size(); ++i)
+        updatePlot(
+            LinePlotData{.dataPoint = linePlotParams.dataPoints[i], .doReplot = false, .x = linePlotParams.x[i]});
 
     QCustomPlot::replot();
 }
@@ -121,11 +126,12 @@ void PlotWidget::setPlot(const HistogramParams& histogramParams)
     enableZoom(false);
 
     updatePlot(HistogramData{.histogram = histogramParams.histogram});
+    QCustomPlot::replot();
 }
 
 void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
 {
-    xStep_ = colorMapParams.xStep;
+    const auto xStep = colorMapParams.xStep;
     const auto& histograms = colorMapParams.histograms;
 
     clear();
@@ -145,12 +151,12 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     colorMap_->data()->setSize(static_cast<int>(histograms.size()), binCount);
 
     xAxis->setLabel("t [s]");
-    xAxis->setRange(0, xStep_ * static_cast<double>(histograms.size()));
+    xAxis->setRange(0, xStep * static_cast<double>(histograms.size()));
     yAxis->setRange(0, binCount);
     if (histograms.size() == 1)
-        colorMap_->data()->setRange(QCPRange(0, xStep_), QCPRange(0.5, binCount - 0.5));
+        colorMap_->data()->setRange(QCPRange(0, xStep), QCPRange(0.5, binCount - 0.5));
     else
-        colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * static_cast<double>(histograms.size()) - xStep_ / 2),
+        colorMap_->data()->setRange(QCPRange(xStep / 2, xStep * static_cast<double>(histograms.size()) - xStep / 2),
                                     QCPRange(0.5, binCount - 0.5));
 
     for (int x = 0; x < static_cast<int>(histograms.size()); ++x)
@@ -177,7 +183,6 @@ void PlotWidget::updatePlot(const LinePlotData& linePlotData)
 {
     const auto& discTypeRegistry = getDiscTypeRegistry();
     const auto& dataPoint = linePlotData.dataPoint;
-    double x = xStep_ * count_++;
     const bool plotSum = plotSumProvider_();
 
     for (auto& [label, graph] : graphs_)
@@ -188,17 +193,15 @@ void PlotWidget::updatePlot(const LinePlotData& linePlotData)
         if (iter != dataPoint.end())
             value = iter->second;
 
-        graph->addData(x, value);
+        graph->addData(linePlotData.x, value);
 
         yMin_ = std::min(yMin_, value);
         yMax_ = std::max(yMax_, value);
     }
 
     yAxis->setRange(yMin_ - 1, yMax_ + 1);
-    xAxis->setRange(xMin_, x);
-
-    if (linePlotData.doReplot)
-        QCustomPlot::replot();
+    xAxis->setRange(xMin_, linePlotData.x);
+    newPlotAvailable_ = true;
 }
 
 void PlotWidget::updatePlot(const HistogramData& histogramData)
@@ -237,11 +240,12 @@ void PlotWidget::updatePlot(const HistogramData& histogramData)
     }
 
     setHistogramYRange(maxStackedCount);
-    QCustomPlot::replot();
+    newPlotAvailable_ = true;
 }
 
 void PlotWidget::updatePlot(const ColorMapData& colorMapData)
 {
+    const double xStep = colorMapData.xStep;
     colorMapCache_.push_back(colorMapData.histogram);
     const int binCount = colorMap_->data()->valueSize();
     colorMap_->data()->setSize(static_cast<int>(colorMapCache_.size()), binCount);
@@ -253,17 +257,16 @@ void PlotWidget::updatePlot(const ColorMapData& colorMapData)
     }
 
     colorMap_->rescaleDataRange();
-    xAxis->setRange(0, xStep_ * static_cast<double>(colorMapCache_.size()));
-    colorMap_->data()->setRange(QCPRange(xStep_ / 2, xStep_ * static_cast<double>(colorMapCache_.size()) - xStep_ / 2),
+    xAxis->setRange(0, xStep * static_cast<double>(colorMapCache_.size()));
+    colorMap_->data()->setRange(QCPRange(xStep / 2, xStep * static_cast<double>(colorMapCache_.size()) - xStep / 2),
                                 QCPRange(0.5, binCount - 0.5));
-    QCustomPlot::replot();
+    newPlotAvailable_ = true;
 }
 
 void PlotWidget::clear()
 {
     clearRanges();
     clearGraphs();
-    count_ = 0;
     colorMapCache_.clear();
 }
 
@@ -346,6 +349,15 @@ QString PlotWidget::getYAxisLabelFromPlotCategory(const PlotCategory& plotCatego
     }
 }
 
+void PlotWidget::replotIfNewPlotAvailable()
+{
+    if (!newPlotAvailable_)
+        return;
+
+    QCustomPlot::replot();
+    newPlotAvailable_ = false;
+}
+
 void PlotWidget::setInterpolate(bool enabled)
 {
     interpolateEnabled_ = enabled;
@@ -359,4 +371,14 @@ void PlotWidget::setInterpolate(bool enabled)
 const cell::DiscTypeRegistry& PlotWidget::getDiscTypeRegistry() const
 {
     return discTypeRegistryProvider_();
+}
+
+void PlotWidget::startPlotTimer()
+{
+    plotTimer_.start();
+}
+
+void PlotWidget::stopPlotTimer()
+{
+    plotTimer_.stop();
 }
