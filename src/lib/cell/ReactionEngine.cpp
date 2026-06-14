@@ -30,7 +30,7 @@ std::pair<Disc, Disc> ReactionEngine::decompositionReaction(Disc* educt, DiscTyp
     double v = mathutils::abs(educt->getVelocity());
     if (v == 0)
     {
-        const double angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
+        const auto angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
         educt->setVelocity(Vector2d{std::cos(angle), std::sin(angle)});
         v = mathutils::abs(educt->getVelocity());
     }
@@ -77,7 +77,7 @@ Disc ReactionEngine::combinationReaction(Disc* educt1, Disc* educt2, DiscTypeID 
         v *= std::sqrt(kineticEnergyBefore / kineticEnergyAfter);
     else
     {
-        const double angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
+        const auto angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
         const double speed = std::sqrt(2 * kineticEnergyBefore / m);
         v = Vector2d{std::cos(angle), std::sin(angle)} * speed;
     }
