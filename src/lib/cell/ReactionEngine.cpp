@@ -4,6 +4,8 @@
 #include "Reaction.hpp"
 #include "ReactionTable.hpp"
 
+#include <numbers>
+
 namespace cell
 {
 
@@ -28,9 +30,8 @@ std::pair<Disc, Disc> ReactionEngine::decompositionReaction(Disc* educt, DiscTyp
     double v = mathutils::abs(educt->getVelocity());
     if (v == 0)
     {
-        // If the disc is stationary and wants to split apart, we'll give it a random velocity to do so
-        educt->setVelocity(
-            Vector2d{mathutils::getRandomNumber<double>(-10, 10), mathutils::getRandomNumber<double>(-10, 10)});
+        const auto angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
+        educt->setVelocity(Vector2d{std::cos(angle), std::sin(angle)});
         v = mathutils::abs(educt->getVelocity());
     }
 
@@ -60,13 +61,29 @@ std::pair<Disc, Disc> ReactionEngine::decompositionReaction(Disc* educt, DiscTyp
 
 Disc ReactionEngine::combinationReaction(Disc* educt1, Disc* educt2, DiscTypeID productID) const
 {
-    const auto& resultType = discTypeRegistry_.getByID(productID);
-    const auto& d1Type = discTypeRegistry_.getByID(educt1->getTypeID());
-    const auto& d2Type = discTypeRegistry_.getByID(educt2->getTypeID());
+    const double m = discTypeRegistry_.getByID(productID).getMass();
+    const double m1 = discTypeRegistry_.getByID(educt1->getTypeID()).getMass();
+    const double m2 = discTypeRegistry_.getByID(educt2->getTypeID()).getMass();
+
+    const Vector2d v1 = educt1->getVelocity();
+    const Vector2d v2 = educt2->getVelocity();
+    Vector2d v = (m1 * v1 + m2 * v2) / m;
+
+    const double kineticEnergyBefore = educt1->getKineticEnergy(m1) + educt2->getKineticEnergy(m2);
+    const double kineticEnergyAfter = 0.5 * m * (v.x * v.x + v.y * v.y);
+    const double e = 1e-12;
+
+    if (kineticEnergyAfter > e && kineticEnergyBefore > e)
+        v *= std::sqrt(kineticEnergyBefore / kineticEnergyAfter);
+    else
+    {
+        const auto angle = mathutils::getRandomNumber<double>(0, 2 * std::numbers::pi);
+        const double speed = std::sqrt(2 * kineticEnergyBefore / m);
+        v = Vector2d{std::cos(angle), std::sin(angle)} * speed;
+    }
 
     Disc newDisc(productID);
-    newDisc.setVelocity((d1Type.getMass() * educt1->getVelocity() + d2Type.getMass() * educt2->getVelocity()) /
-                        resultType.getMass());
+    newDisc.setVelocity(v);
     newDisc.setPosition((educt1->getPosition() + educt2->getPosition()) / 2.0);
 
     educt1->markDestroyed();
