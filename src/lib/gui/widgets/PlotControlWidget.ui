@@ -100,6 +100,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QCheckBox" name="plotSumCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sum values over all active disc types.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Plot sum</string>
            </property>
@@ -107,6 +110,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="interpolateCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggles interpolation for the velocity color map. Doesn't affect other plots.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>Interpolate</string>
            </property>
@@ -124,11 +130,8 @@
       </item>
       <item>
        <widget class="QSpinBox" name="plotTimeIntervalSpinBox">
-        <property name="minimum">
-         <number>10</number>
-        </property>
         <property name="maximum">
-         <number>10000</number>
+         <number>100000</number>
         </property>
         <property name="singleStep">
          <number>10</number>
