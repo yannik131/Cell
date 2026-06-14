@@ -34,8 +34,8 @@ void DiscTypeDistributionTableModel::distribute()
     if (rows_.empty())
         return;
 
-    const double size = static_cast<double>(rows_.size());
-    const double frequency = 1.0 / size;
+    const auto size = static_cast<double>(rows_.size());
+    const auto frequency = 1.0 / size;
 
     beginResetModel();
     for (auto& row : rows_)

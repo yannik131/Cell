@@ -103,7 +103,8 @@ void PlotModel::setLinePlot()
     auto dataPoint = createDataPoint();
 
     const std::size_t expectedSize =
-        static_cast<std::size_t>(dataPoints.size() * simulation_->getSimulationRecorder().getStorageInterval().count() /
+        static_cast<std::size_t>(static_cast<double>(dataPoints.size()) *
+                                 simulation_->getSimulationRecorder().getStorageInterval().count() /
                                  plotTimeInterval_.count()) +
         1;
     fullPlotData.reserve(expectedSize);
