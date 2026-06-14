@@ -142,6 +142,7 @@ void MainWindow::resetSimulation()
 {
     simulation_->reinitialize();
     plotModel_->reset();
+    ui->simulationWidget->fitSimulationIntoView();
 }
 
 void MainWindow::saveSettingsAsJson()

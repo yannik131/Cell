@@ -104,7 +104,7 @@ void Simulation::initializeSimulationRecorder()
         {
             emit simulationContextChanged(simulationRunner_.getSimulationContext());
             simulationRecorder_->processInitialSimulationData(cell);
-            emit initialFrame(simulationRecorder_->getLastFrame());
+            // emit initialFrame(simulationRecorder_->getLastFrame());
         });
     simulationRunner_.setPostUpdateCallback(
         [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)

@@ -1,5 +1,4 @@
 #include "widgets/PlotWidget.hpp"
-#include "PlotWidget.hpp"
 #include "cell/ExceptionWithLocation.hpp"
 #include "core/Utility.hpp"
 #include "models/PlotModel.hpp"
@@ -11,7 +10,6 @@ PlotWidget::PlotWidget(QWidget* parent)
 
     addLayer("legend layer");
     legend->setLayer("legend layer");
-    legend->setVisible(true);
 
     // Place the legend
     axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop | Qt::AlignRight);
@@ -69,7 +67,6 @@ void PlotWidget::setPlot(const LinePlotParams& linePlotParams)
     }
 
     updateLegend(labels);
-    enableZoom(true);
 
     for (std::size_t i = 0; i < linePlotParams.dataPoints.size(); ++i)
         updatePlot(
@@ -123,7 +120,6 @@ void PlotWidget::setPlot(const HistogramParams& histogramParams)
     yAxis->grid()->setSubGridVisible(true);
 
     updateLegend(labels);
-    enableZoom(false);
 
     updatePlot(HistogramData{.histogram = histogramParams.histogram});
     QCustomPlot::replot();
@@ -175,7 +171,6 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
         ticker->addTick(i + 0.5, QString::number(histograms.front().axis(1).bin(i).center()));
     yAxis->setTicker(ticker);
     yAxis->setLabel(getYAxisLabelFromPlotCategory(PlotCategory::VelocityColorMap));
-    enableZoom(false);
     QCustomPlot::replot();
 }
 
@@ -305,7 +300,7 @@ void PlotWidget::clearGraphs()
 
 void PlotWidget::updateLegend(const std::vector<std::string>& labels)
 {
-    if (labels.size() == 1)
+    if (labels.size() <= 1)
         legend->setVisible(false);
     else
     {
@@ -376,9 +371,11 @@ const cell::DiscTypeRegistry& PlotWidget::getDiscTypeRegistry() const
 void PlotWidget::startPlotTimer()
 {
     plotTimer_.start();
+    enableZoom(false);
 }
 
 void PlotWidget::stopPlotTimer()
 {
     plotTimer_.stop();
+    enableZoom(true);
 }

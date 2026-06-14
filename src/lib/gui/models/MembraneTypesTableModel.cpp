@@ -77,7 +77,7 @@ void MembraneTypesTableModel::saveToConfig()
     // Set cell membrane separately
     auto config = simulationConfigUpdater_->getSimulationConfig();
     config.cellMembraneType = rows_[0];
-    simulationConfigUpdater_->setSimulationConfig(config);
+    simulationConfigUpdater_->setSimulationConfig(config, EmitSimulationReset{false});
 
     std::map<std::string, sf::Color> membraneTypeColorMap;
     membraneTypeColorMap[config.cellMembraneType.name] = sf::Color::Yellow;
