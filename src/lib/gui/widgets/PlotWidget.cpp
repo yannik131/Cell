@@ -300,7 +300,7 @@ void PlotWidget::clearGraphs()
 
 void PlotWidget::updateLegend(const std::vector<std::string>& labels)
 {
-    if (labels.size() <= 1)
+    if (labels.empty())
         legend->setVisible(false);
     else
     {
