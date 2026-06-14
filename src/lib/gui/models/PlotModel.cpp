@@ -4,6 +4,7 @@
 #include "core/Simulation.hpp"
 #include "core/Utility.hpp"
 
+#include "PlotModel.hpp"
 #include <cmath>
 #include <unordered_set>
 
@@ -36,6 +37,11 @@ void PlotModel::setPlotTimeInterval(int valueMilliseconds)
     plotTimeInterval_ = ch::duration<double>{static_cast<double>(valueMilliseconds) / 1000.0};
 
     setPlot();
+}
+
+const ch::duration<double> PlotModel::getPlotTimeInterval() const
+{
+    return plotTimeInterval_;
 }
 
 void PlotModel::setPlotSum(bool value)
