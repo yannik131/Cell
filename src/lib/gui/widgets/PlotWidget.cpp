@@ -338,8 +338,10 @@ QString PlotWidget::getYAxisLabelFromPlotCategory(const PlotCategory& plotCatego
     case PlotCategory::CollisionCounts: return "Collision count";
     case PlotCategory::KineticEnergy: return "E_kin";
     case PlotCategory::TypeCounts: return "Number of discs";
-    case PlotCategory::VelocityColorMap: return "v_x";
-    case PlotCategory::VelocityDistribution: return "Count";
+    case PlotCategory::VelocityColorMap: return "|v|";
+    case PlotCategory::XVelocityDistribution:
+    case PlotCategory::YVelocityDistribution:
+    case PlotCategory::AbsoluteVelocityDistribution: return "Count";
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 }

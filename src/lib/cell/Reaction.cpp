@@ -2,6 +2,8 @@
 #include "ExceptionWithLocation.hpp"
 #include "Hashing.hpp"
 
+#include <numbers>
+
 namespace cell
 {
 
@@ -66,17 +68,31 @@ void Reaction::setProbability(double probability)
 
 void Reaction::validate(const DiscTypeRegistry& discTypeRegistry) const
 {
-    auto getMass = [&](DiscTypeID discTypeID) { return discTypeRegistry.getByID(discTypeID).getMass(); };
+    const auto getMass = [&](DiscTypeID discTypeID) { return discTypeRegistry.getByID(discTypeID).getMass(); };
 
     const auto eductMassSum = getMass(educt1_) + (educt2_ ? getMass(*educt2_) : 0);
     const auto productMassSum = getMass(product1_) + (product2_ ? getMass(*product2_) : 0);
 
-    if (eductMassSum != productMassSum)
+    if (std::abs(eductMassSum - productMassSum) > 1e-6)
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) +
                                     ": Product- and educt masses need to be identical");
 
     if (type_ == Type::Transformation && educt1_ == product1_)
         throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Educt 1 and product 1 are identical");
+}
+
+void Reaction::validateAreaConservation(const DiscTypeRegistry& discTypeRegistry) const
+{
+    const auto getArea = [&](DiscTypeID discTypeID)
+    {
+        const auto R = discTypeRegistry.getByID(discTypeID).getRadius();
+        return std::numbers::pi * R * R;
+    };
+    const auto eductAreaSum = getArea(educt1_) + (educt2_ ? getArea(*educt2_) : 0);
+    const auto productAreaSum = getArea(product1_) + (product2_ ? getArea(*product2_) : 0);
+
+    if (std::abs(eductAreaSum - productAreaSum) > 1e-6)
+        throw ExceptionWithLocation(toString(*this, discTypeRegistry) + ": Area not conserved");
 }
 
 std::string Reaction::getTypeString() const

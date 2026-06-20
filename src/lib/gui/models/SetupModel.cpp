@@ -1,4 +1,5 @@
 #include "models/SetupModel.hpp"
+#include "SetupModel.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 #include "models/DiscTypeDistributionTableModel.hpp"
 #include "models/DiscsTableModel.hpp"
@@ -12,6 +13,11 @@ SetupModel::SetupModel(QObject* parent, SimulationConfigUpdater* simulationConfi
 void SetupModel::setUseDistribution(bool useDistribution)
 {
     simulationConfig_.useDistribution = useDistribution;
+}
+
+void SetupModel::setReactionsConserveArea(bool value)
+{
+    simulationConfig_.reactionsConserveArea = value;
 }
 
 void SetupModel::setTimeStepUs(int timeStepUs)

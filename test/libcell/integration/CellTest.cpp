@@ -254,3 +254,12 @@ TEST_F(ACell, SimulatesDiscsPassingThroughMembranesInBothDirections)
     ASSERT_TRUE(counts.contains("C"));
     EXPECT_EQ(counts["C"], 2);
 }
+
+TEST_F(ACell, EnforcesAreaConservationOfReactions)
+{
+    builder.addReaction("C", "", "A", "B", Probability{1});
+    EXPECT_NO_THROW(createAndUpdateCell());
+
+    builder.setReactionsConserveArea(true);
+    EXPECT_THROW(createAndUpdateCell(), InvalidReactionsException);
+}

@@ -157,6 +157,8 @@ public:
      */
     void validate(const DiscTypeRegistry& discTypeRegistry) const;
 
+    void validateAreaConservation(const DiscTypeRegistry& discTypeRegistry) const;
+
 private:
     std::string getTypeString() const;
 

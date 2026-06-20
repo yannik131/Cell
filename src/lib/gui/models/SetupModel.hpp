@@ -15,6 +15,7 @@ public:
     SetupModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater);
 
     void setUseDistribution(bool useDistribution);
+    void setReactionsConserveArea(bool value);
     void setTimeStepUs(int timeStepUs);
     void setTimeScale(double timeScale);
     void setMostProbableSpeed(double mostProbableSpeed);

@@ -25,6 +25,7 @@ TEST(ASimulationConfig, CanBeSerialized)
     builder.addMembrane("Large", Position{.x = 500, .y = 500});
 
     builder.useDistribution(true);
+    builder.setReactionsConserveArea(true);
     builder.setDistribution("", {{"A", 0.5}, {"B", 0.5}});
     builder.setDistribution("Large", {{"A", 1}, {"B", 0}});
     builder.addDisc("C", Position{.x = 50, .y = 50}, Velocity{.x = 50, .y = 50});

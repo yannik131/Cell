@@ -3,6 +3,8 @@
 #include "models/SetupModel.hpp"
 #include "ui_SetupDialog.h"
 
+#include <QCheckBox>
+
 SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : QDialog(parent)
     , ui(new Ui::SetupDialog)
@@ -21,6 +23,8 @@ SetupDialog::SetupDialog(QWidget* parent, SimulationConfigUpdater* simulationCon
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &QDialog::reject);
 
     connect(ui->useDistributionRadioButton, &QRadioButton::toggled, setupModel_, &SetupModel::setUseDistribution);
+    connect(ui->conserveAreaCheckbox, &QCheckBox::checkStateChanged, setupModel_,
+            &SetupModel::setReactionsConserveArea);
     connect(ui->timeStepSpinBox, &QSpinBox::valueChanged, setupModel_, &SetupModel::setTimeStepUs);
     connect(ui->timeScaleDoubleSpinBox, &QDoubleSpinBox::valueChanged, setupModel_, &SetupModel::setTimeScale);
     connect(ui->mostProbableSpeedSpinBox, &QDoubleSpinBox::valueChanged, setupModel_,
@@ -48,6 +52,7 @@ void SetupDialog::displayCurrentConfig()
 {
     const auto& config = simulationConfigUpdater_->getSimulationConfig();
     ui->useDistributionRadioButton->setChecked(config.useDistribution);
+    ui->conserveAreaCheckbox->setChecked(config.reactionsConserveArea);
     ui->manualPositionsRadioButton->setChecked(!config.useDistribution);
     ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep * 1e6)));
     ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);

@@ -136,6 +136,9 @@ ReactionTable SimulationFactory::buildReactionTable(const SimulationConfig& simu
             reaction.product2.empty() ? std::nullopt : std::make_optional(discTypeRegistry.getIDFor(reaction.product2));
 
         Reaction newReaction(educt1, educt2, product1, product2, reaction.probability);
+        if (simulationConfig.reactionsConserveArea)
+            newReaction.validateAreaConservation(discTypeRegistry);
+
         reactionTable.addReaction(newReaction);
     }
 
