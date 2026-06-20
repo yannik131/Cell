@@ -113,27 +113,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2,
 
 } // namespace config
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
-                                   simulationTimeStep, simulationTimeScale, mostProbableSpeed, useDistribution,
-                                   reactionsConserveArea, discs, membranes)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
+                                                simulationTimeStep, simulationTimeScale, mostProbableSpeed,
+                                                useDistribution, reactionsConserveArea, discs, membranes)
 
 cell::config::MembraneType& findMembraneTypeByName(cell::SimulationConfig& simulationConfig,
                                                    std::string membraneTypeName);
-
-inline void from_json(const nlohmann::json& j, SimulationConfig& config)
-{
-    j.at("discTypes").get_to(config.discTypes);
-    j.at("membraneTypes").get_to(config.membraneTypes);
-    j.at("reactions").get_to(config.reactions);
-    j.at("cellMembraneType").get_to(config.cellMembraneType);
-    j.value("simulationTimeStep", config.simulationTimeStep);
-    j.value("simulationTimeScale", config.simulationTimeScale);
-    j.value("mostProbableSpeed", config.mostProbableSpeed);
-    j.value("useDistribution", config.useDistribution);
-    j.value("reactionsConserveArea", config.reactionsConserveArea);
-    j.at("discs").get_to(config.discs);
-    j.at("membranes").get_to(config.membranes);
-}
 
 } // namespace cell
 
