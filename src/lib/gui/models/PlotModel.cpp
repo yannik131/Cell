@@ -182,7 +182,7 @@ void PlotModel::setColorMapPlot()
     std::vector<cell::Histogram> histograms;
     const auto& simulationRecorder = simulation_->getSimulationRecorder();
     const auto& dataPoints = simulationRecorder.getDataPoints().empty()
-                                 ? std::vector<DataPoint>({simulationRecorder.getCurrentDataPoint()})
+                                 ? std::deque<DataPoint>({simulationRecorder.getCurrentDataPoint()})
                                  : simulationRecorder.getDataPoints();
     histograms.reserve(dataPoints.size());
 
