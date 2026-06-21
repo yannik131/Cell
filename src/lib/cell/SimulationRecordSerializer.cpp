@@ -2,6 +2,7 @@
 #include "DiscType.hpp"
 
 #include <fstream>
+#include <deque>
 
 namespace cell
 {
