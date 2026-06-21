@@ -183,9 +183,7 @@ void SimulationWidget::renderFrameImmediately(Frame frame)
 void SimulationWidget::drawFrame()
 {
     using namespace std::chrono;
-
     const auto start = myClock::now();
-
     sf::RenderWindow::clear(sf::Color::Black);
 
     for (const auto& disc : frame_.discs)
