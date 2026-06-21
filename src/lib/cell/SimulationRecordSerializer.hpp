@@ -10,7 +10,7 @@ namespace cell
 class SimulationRecordSerializer
 {
 public:
-    void writeTypeCountsToCsv(const std::vector<DataPoint>& dataPoints, const DiscTypeRegistry& discTypeRegistry,
+    void writeTypeCountsToCsv(const std::deque<DataPoint>& dataPoints, const DiscTypeRegistry& discTypeRegistry,
                               const fs::path& outFile);
 };
 

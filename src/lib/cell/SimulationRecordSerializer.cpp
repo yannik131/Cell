@@ -6,7 +6,7 @@
 namespace cell
 {
 
-void SimulationRecordSerializer::writeTypeCountsToCsv(const std::vector<DataPoint>& dataPoints,
+void SimulationRecordSerializer::writeTypeCountsToCsv(const std::deque<DataPoint>& dataPoints,
                                                       const DiscTypeRegistry& discTypeRegistry, const fs::path& outFile)
 {
     std::ofstream file(outFile);
