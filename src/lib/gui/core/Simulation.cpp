@@ -54,7 +54,7 @@ void Simulation::emitLastFrame()
     if (!simulationRecorder_)
         return;
 
-    emit initialFrame(simulationRecorder_->getLastFrame());
+    emit drawFrameImmediately(simulationRecorder_->getLastFrame());
 }
 
 SimulationConfigUpdater& Simulation::getSimulationConfigUpdater()

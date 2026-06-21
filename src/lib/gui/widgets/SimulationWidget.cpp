@@ -165,12 +165,12 @@ void SimulationWidget::rebuildTypeShapes(const cell::DiscTypeRegistry& discTypeR
 
 void SimulationWidget::queueFrameForRendering(Frame frame)
 {
-    frameBuffer_.pushFrame(std::move(frame));
+    frame_ = std::move(frame);
 }
 
 void SimulationWidget::renderFrameImmediately(Frame frame)
 {
-    frameBuffer_.pushFrame(std::move(frame));
+    queueFrameForRendering(std::move(frame));
 
     // Use the next draw event, otherwise we'll get a huge FPS increase that could crash the GUI if the user
     // drags the view and causes continuous redraws while the simulation is running
@@ -183,21 +183,18 @@ void SimulationWidget::renderFrameImmediately(Frame frame)
 void SimulationWidget::drawFrame()
 {
     using namespace std::chrono;
-    auto frame = frameBuffer_.takeLatest();
-    if (!frame)
-        return;
 
     const auto start = myClock::now();
 
     sf::RenderWindow::clear(sf::Color::Black);
 
-    for (const auto& disc : frame->discs)
+    for (const auto& disc : frame_.discs)
     {
         discTypeShapes_[disc.getTypeID()].setPosition(utility::toVector2f(disc.getPosition()));
         sf::RenderWindow::draw(discTypeShapes_[disc.getTypeID()]);
     }
 
-    for (const auto& membrane : frame->membranes)
+    for (const auto& membrane : frame_.membranes)
     {
         auto& membraneTypeShape = membraneTypeShapes_[membrane.getTypeID()];
         membraneTypeShape.setOutlineThickness(static_cast<float>(QSFMLWidget::getCurrentZoom()));

@@ -45,7 +45,7 @@ private:
 signals:
     void started();
     void stopped();
-    void initialFrame(Frame frame);
+    void drawFrameImmediately(Frame frame);
     void frame(Frame frame);
     void performanceData(const cell::SimulationRunner::PerformanceData& performanceData);
     void dataPoint(const cell::DataPoint& dataPoint);

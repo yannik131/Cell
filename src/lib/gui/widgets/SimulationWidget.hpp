@@ -1,7 +1,6 @@
 #ifndef F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 #define F8B0BFE1_0E51_424A_A3DE_69E0B57425D7_HPP
 
-#include "core/FrameBuffer.hpp"
 #include "core/Types.hpp"
 #include "widgets/QSFMLWidget.hpp"
 
@@ -67,7 +66,7 @@ private:
     myClock::time_point currentRenderInterval_{};
     myClock::duration elapsedRenderTime_{};
     int renderedFrames_ = 0;
-    FrameBuffer frameBuffer_;
+    Frame frame_;
     QTimer renderingTimer_;
 };
 

@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui->simulationControlWidget, &SimulationControlWidget::fitIntoViewRequested, ui->simulationWidget,
             &SimulationWidget::fitSimulationIntoView);
 
-    connect(simulation_.get(), &Simulation::initialFrame, ui->simulationWidget,
+    connect(simulation_.get(), &Simulation::drawFrameImmediately, ui->simulationWidget,
             &SimulationWidget::renderFrameImmediately);
     connect(simulation_.get(), &Simulation::frame, ui->simulationWidget, &SimulationWidget::queueFrameForRendering);
     connect(simulation_.get(), &Simulation::performanceData, ui->simulationInfoWidget,
@@ -192,7 +192,7 @@ void MainWindow::showAboutDialog()
     <html>
         <head/>
         <body>
-            <p>This is <b>Cell</b>, version 1.1.0. Build time: %1 %2.</p>
+            <p>This is <b>Cell</b>, version 1.1.1. Build time: %1 %2.</p>
             <p>Application for simulating reaction networks.</p>
             <p>Developed by: Yannik Schroeder</p>
             <p>For additional information, see: <a href='https://github.com/yannik131/Cell'>https://github.com/yannik131/Cell</a></p>
