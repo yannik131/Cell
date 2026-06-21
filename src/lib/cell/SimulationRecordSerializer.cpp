@@ -1,7 +1,6 @@
 #include "SimulationRecordSerializer.hpp"
 #include "DiscType.hpp"
 
-#include <deque>
 #include <fstream>
 
 namespace cell

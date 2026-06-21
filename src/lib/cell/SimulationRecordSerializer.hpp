@@ -4,6 +4,8 @@
 #include "DataPoint.hpp"
 #include "Types.hpp"
 
+#include <deque>
+
 namespace cell
 {
 
