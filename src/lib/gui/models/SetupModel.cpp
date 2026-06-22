@@ -14,6 +14,11 @@ void SetupModel::setUseDistribution(bool useDistribution)
     simulationConfig_.useDistribution = useDistribution;
 }
 
+void SetupModel::setReactionsConserveArea(bool value)
+{
+    simulationConfig_.reactionsConserveArea = value;
+}
+
 void SetupModel::setTimeStepUs(int timeStepUs)
 {
     simulationConfig_.simulationTimeStep = timeStepUs / 1e6;

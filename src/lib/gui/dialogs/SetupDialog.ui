@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>517</width>
-    <height>325</height>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -177,6 +177,26 @@
           <widget class="QSpinBox" name="FPSSpinBox">
            <property name="value">
             <number>60</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="widget_7" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Conserve area in reactions</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="conserveAreaCheckbox">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

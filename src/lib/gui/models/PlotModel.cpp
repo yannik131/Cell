@@ -16,10 +16,14 @@ PlotModel::PlotModel(QObject* parent, Simulation* simulation)
 
 void PlotModel::setPlotCategory(PlotCategory plotCategory)
 {
-    static const std::unordered_map<PlotCategory, int> graphType{
-        {PlotCategory::AbsoluteMomentum, 1},     {PlotCategory::CollisionCounts, 1},
-        {PlotCategory::KineticEnergy, 1},        {PlotCategory::TypeCounts, 1},
-        {PlotCategory::VelocityDistribution, 2}, {PlotCategory::VelocityColorMap, 3}};
+    static const std::unordered_map<PlotCategory, int> graphType{{PlotCategory::AbsoluteMomentum, 1},
+                                                                 {PlotCategory::CollisionCounts, 1},
+                                                                 {PlotCategory::KineticEnergy, 1},
+                                                                 {PlotCategory::TypeCounts, 1},
+                                                                 {PlotCategory::XVelocityDistribution, 2},
+                                                                 {PlotCategory::YVelocityDistribution, 2},
+                                                                 {PlotCategory::AbsoluteVelocityDistribution, 2},
+                                                                 {PlotCategory::VelocityColorMap, 3}};
 
     plotCategory_ = plotCategory;
     setPlot();
@@ -94,7 +98,9 @@ void PlotModel::setPlot()
     case PlotCategory::AbsoluteMomentum:
     case PlotCategory::CollisionCounts:
     case PlotCategory::KineticEnergy: setLinePlot(); break;
-    case PlotCategory::VelocityDistribution: setHistogramPlot(); break;
+    case PlotCategory::XVelocityDistribution:
+    case PlotCategory::YVelocityDistribution:
+    case PlotCategory::AbsoluteVelocityDistribution: setHistogramPlot(); break;
     case PlotCategory::VelocityColorMap: setColorMapPlot(); break;
     default: throw ExceptionWithLocation("Invalid plot category");
     }
@@ -176,7 +182,7 @@ void PlotModel::setColorMapPlot()
     std::vector<cell::Histogram> histograms;
     const auto& simulationRecorder = simulation_->getSimulationRecorder();
     const auto& dataPoints = simulationRecorder.getDataPoints().empty()
-                                 ? std::vector<DataPoint>({simulationRecorder.getCurrentDataPoint()})
+                                 ? std::deque<DataPoint>({simulationRecorder.getCurrentDataPoint()})
                                  : simulationRecorder.getDataPoints();
     histograms.reserve(dataPoints.size());
 
@@ -216,7 +222,9 @@ void PlotModel::updatePlot(const DataPoint& dataPoint)
     case PlotCategory::AbsoluteMomentum:
     case PlotCategory::CollisionCounts:
     case PlotCategory::KineticEnergy: updateLinePlot(); break;
-    case PlotCategory::VelocityDistribution: updateHistogramPlot(); break;
+    case PlotCategory::XVelocityDistribution:
+    case PlotCategory::YVelocityDistribution:
+    case PlotCategory::AbsoluteVelocityDistribution: updateHistogramPlot(); break;
     case PlotCategory::VelocityColorMap: updateColorMapPlot(); break;
     default: throw ExceptionWithLocation("Invalid plot category");
     }
@@ -379,7 +387,17 @@ Histogram PlotModel::discardInactiveDiscTypes(const Histogram& histogram)
 
 Histogram PlotModel::getVelocityHistogramFromDataPoint(const DataPoint& dataPoint, CalculateSum calculateSum)
 {
-    auto h = discardInactiveDiscTypes(dataPoint.getData().vxHistogram);
+    cell::Histogram velocityHistogram;
+    switch (plotCategory_)
+    {
+    case PlotCategory::XVelocityDistribution: velocityHistogram = dataPoint.getData().vxHistogram; break;
+    case PlotCategory::YVelocityDistribution: velocityHistogram = dataPoint.getData().vyHistogram; break;
+    case PlotCategory::AbsoluteVelocityDistribution:
+    case PlotCategory::VelocityColorMap: velocityHistogram = dataPoint.getData().vHistogram; break;
+    default: throw ExceptionWithLocation("Invalid plot category");
+    }
+
+    auto h = discardInactiveDiscTypes(velocityHistogram);
     if (calculateSum.value)
         h = sumHistogramStacks(h);
 

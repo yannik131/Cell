@@ -8,6 +8,8 @@
 
 #include <boost/histogram.hpp>
 
+#include <deque>
+
 namespace cell
 {
 
@@ -33,7 +35,7 @@ public:
     void processInitialSimulationData(Cell& cell);
     void processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime);
     void storeRemainingData();
-    const std::vector<DataPoint>& getDataPoints() const;
+    const std::deque<DataPoint>& getDataPoints() const;
     void clear();
     const DataPoint& getCurrentDataPoint() const;
     void setRecordLastFrame(bool value);
@@ -48,7 +50,7 @@ private:
 private:
     ch::duration<double> storageInterval_ = ch::milliseconds{100};
     DataPoint currentDataPoint_;
-    std::vector<DataPoint> dataPoints_;
+    std::deque<DataPoint> dataPoints_;
     const DiscTypeRegistry& discTypeRegistry_;
     bool recordLastFrame_ = false;
     Frame lastFrame_;

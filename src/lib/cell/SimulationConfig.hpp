@@ -91,12 +91,11 @@ struct SimulationConfig
      */
     double simulationTimeScale = 1;
     double mostProbableSpeed = 600;
-
     bool useDistribution = true;
+    bool reactionsConserveArea = false;
 
     // In case of no distribution, these are used
     std::vector<config::Disc> discs;
-
     // These never use a distribution
     std::vector<config::Membrane> membranes;
 
@@ -114,9 +113,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Reaction, educt1, educt2, product1, product2,
 
 } // namespace config
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
-                                   simulationTimeStep, simulationTimeScale, mostProbableSpeed, useDistribution, discs,
-                                   membranes)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SimulationConfig, discTypes, membraneTypes, reactions, cellMembraneType,
+                                                simulationTimeStep, simulationTimeScale, mostProbableSpeed,
+                                                useDistribution, reactionsConserveArea, discs, membranes)
 
 cell::config::MembraneType& findMembraneTypeByName(cell::SimulationConfig& simulationConfig,
                                                    std::string membraneTypeName);

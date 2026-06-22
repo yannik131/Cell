@@ -80,6 +80,11 @@ void SimulationConfigBuilder::setMostProbableSpeed(double mostProbableSpeed)
     simulationConfig_.mostProbableSpeed = mostProbableSpeed;
 }
 
+void SimulationConfigBuilder::setReactionsConserveArea(bool value)
+{
+    simulationConfig_.reactionsConserveArea = value;
+}
+
 const SimulationConfig& SimulationConfigBuilder::getSimulationConfig() const
 {
     return simulationConfig_;

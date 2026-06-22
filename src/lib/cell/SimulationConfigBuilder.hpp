@@ -31,6 +31,7 @@ public:
     void setTimeStep(double simulationTimeStep);
     void setTimeScale(double simulationTimeScale);
     void setMostProbableSpeed(double mostProbableSpeed);
+    void setReactionsConserveArea(bool value);
 
     const SimulationConfig& getSimulationConfig() const;
 

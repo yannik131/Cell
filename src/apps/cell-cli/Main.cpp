@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 int main(int argc, char** argv)
 {
-    CLI::App app{"Command line interface for the cell simulation"};
+    CLI::App app{"Cell 1.1.1\nCommand line interface for the cell simulation"};
 
     fs::path configFile;
     fs::path outFile;
