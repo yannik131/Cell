@@ -140,7 +140,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
         simulationDuration += simulationTimeStep;
         ++updates;
 
-        sendPerformanceData(start, updates, simulationUpdateTime);
+        sendPerformanceData(start, updates, simulationUpdateTime, simulationDuration);
 
         if (postUpdateCallback_)
             postUpdateCallback_(simulationFactory_.getCell(), simulationTimeStep);
@@ -152,7 +152,7 @@ void SimulationRunner::loop(std::stop_token stopToken)
         }
     }
 
-    sendPerformanceData(start, updates, simulationUpdateTime, Force{true});
+    sendPerformanceData(start, updates, simulationUpdateTime, simulationDuration, Force{true});
     isRunning_ = false;
 
     if (postStopCallback_)
@@ -160,7 +160,8 @@ void SimulationRunner::loop(std::stop_token stopToken)
 }
 
 void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                                           ch::duration<double>& simulationUpdateTime, Force force) const
+                                           ch::duration<double>& simulationUpdateTime,
+                                           const ch::duration<double>& elapsedSimulationTime, Force force) const
 {
     if (!performanceDataCallback_)
         return;
@@ -179,7 +180,8 @@ void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, 
     performanceDataCallback_(PerformanceData{.targetScale = simulationConfig_.simulationTimeScale,
                                              .actualScale = actualScale,
                                              .timePerWholeUpdate = timePerWholeUpdate,
-                                             .timePerSimulationUpdate = timePerSimulationUpdate});
+                                             .timePerSimulationUpdate = timePerSimulationUpdate,
+                                             .elapsedSimulationTime = elapsedSimulationTime});
 
     start = ch::steady_clock::now();
     updates = 0;

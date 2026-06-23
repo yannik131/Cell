@@ -29,12 +29,6 @@ std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeR
     return result;
 }
 
-bool contains(const Reaction& reaction, DiscTypeID discType)
-{
-    return reaction.getEduct1() == discType || reaction.getEduct2() == discType || reaction.getProduct1() == discType ||
-           reaction.getProduct2() == discType;
-}
-
 Reaction::Type inferReactionType(bool educt2, bool product2)
 {
     if (!educt2 && !product2)

@@ -29,6 +29,7 @@ public:
         double actualScale;
         ch::duration<double> timePerWholeUpdate;
         ch::duration<double> timePerSimulationUpdate;
+        ch::duration<double> elapsedSimulationTime;
     };
 
     struct LoopParameters
@@ -58,7 +59,8 @@ public:
 private:
     void loop(std::stop_token stopToken);
     void sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                             ch::duration<double>& simulationUpdateTime, Force force = {}) const;
+                             ch::duration<double>& simulationUpdateTime,
+                             const ch::duration<double>& elapsedSimulationTime, Force force = {}) const;
 
 private:
     SimulationFactory simulationFactory_;

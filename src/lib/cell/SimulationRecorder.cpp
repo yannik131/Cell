@@ -22,6 +22,7 @@ void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageI
 
 void SimulationRecorder::printPerformanceData(SimulationRunner::PerformanceData data)
 {
+    std::cout << "Elapsed simulation time: " << data.elapsedSimulationTime.count() << "s\n";
     std::cout << "Actual scale: " << data.actualScale << "\n";
     std::cout << "Time per simulation update: "
               << stringutils::timeString(ch::duration_cast<ch::nanoseconds>(data.timePerSimulationUpdate).count())

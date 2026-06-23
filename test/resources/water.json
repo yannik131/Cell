@@ -15,47 +15,47 @@
             {
                 "mass": 1.0,
                 "name": "H⁺",
-                "radius": 1.13
+                "radius": 1.0
             },
             {
                 "mass": 18.0,
                 "name": "H₂O",
-                "radius": 4.79
+                "radius": 4.242640687119285
             },
             {
                 "mass": 40.0,
                 "name": "Ca²⁺",
-                "radius": 7.14
+                "radius": 6.324555320336759
             },
             {
                 "mass": 44.0,
                 "name": "CO₂ (g)",
-                "radius": 7.48
+                "radius": 6.6332495807108
             },
             {
                 "mass": 44.0,
                 "name": "CO₂ (aq)",
-                "radius": 7.48
+                "radius": 6.6332495807108
             },
             {
                 "mass": 60.0,
                 "name": "CO₃²⁻",
-                "radius": 8.74
+                "radius": 7.745966692414834
             },
             {
                 "mass": 61.0,
                 "name": "HCO₃⁻",
-                "radius": 8.81
+                "radius": 7.810249675906654
             },
             {
                 "mass": 62.0,
                 "name": "H₂CO₃",
-                "radius": 8.88
+                "radius": 7.874007874011811
             },
             {
                 "mass": 100.0,
                 "name": "CaCO₃ (s)",
-                "radius": 11.28
+                "radius": 10.0
             }
         ],
         "discs": [],
@@ -134,7 +134,7 @@
                 "product2": ""
             }
         ],
-        "reactionsConserveArea": false,
+        "reactionsConserveArea": true,
         "simulationTimeScale": 15.0,
         "simulationTimeStep": 0.003,
         "useDistribution": true

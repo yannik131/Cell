@@ -2,8 +2,6 @@
 #include "core/ColorMapping.hpp"
 #include "core/SimulationConfigUpdater.hpp"
 
-#include <set>
-
 DiscTypesTableModel::DiscTypesTableModel(QObject* parent, SimulationConfigUpdater* simulationConfigUpdater)
     : Base(parent, {{"Name", "Radius", "Mass", "Color", "Delete"}}, simulationConfigUpdater)
 {
@@ -80,11 +78,17 @@ QVariant DiscTypesTableModel::getField(const cell::config::DiscType& row, const 
 
 bool DiscTypesTableModel::setField(cell::config::DiscType& row, const QModelIndex& index, const QVariant& value)
 {
+    const bool areaIsConserved = simulationConfigUpdater_->getSimulationConfig().reactionsConserveArea;
+
     switch (index.column())
     {
     case 0: row.name = value.toString().toStdString(); break;
     case 1: row.radius = value.toDouble(); break;
-    case 2: row.mass = value.toDouble(); break;
+    case 2:
+        row.mass = value.toDouble();
+        if (areaIsConserved)
+            row.radius = std::sqrt(row.mass); // A = pi*r^2 = m <-> r = sqrt(m)
+        break;
     case 3: discColors_[index.row()] = getNameColorMapping()[value.toString()]; break;
     default: return false;
     }
@@ -94,5 +98,9 @@ bool DiscTypesTableModel::setField(cell::config::DiscType& row, const QModelInde
 
 bool DiscTypesTableModel::isEditable(const QModelIndex& index) const
 {
-    return index.column() != 4;
+    const bool isDeleteButton = index.column() == 4;
+    const bool isRadiusColumn = index.column() == 1;
+    const bool areaIsConserved = simulationConfigUpdater_->getSimulationConfig().reactionsConserveArea;
+
+    return !isDeleteButton && !(isRadiusColumn && areaIsConserved);
 }

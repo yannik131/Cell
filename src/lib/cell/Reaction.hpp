@@ -22,11 +22,6 @@ bool operator==(const Reaction& reaction1, const Reaction& reaction2);
 std::string toString(const Reaction& reaction, const DiscTypeRegistry& discTypeRegistry);
 
 /**
- * @returns `true` if the given disctype is part of the educts or products of the reaction
- */
-bool contains(const Reaction& reaction, DiscTypeID discType);
-
-/**
  * @brief Contains a uni- or bimolecular reaction.
  *
  * Given `DiscType`s A, B, C and D, and reaction probability 0 <= p <=
