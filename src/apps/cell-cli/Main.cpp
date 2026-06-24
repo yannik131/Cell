@@ -14,7 +14,8 @@ using namespace std::chrono_literals;
 
 int main(int argc, char** argv)
 {
-    CLI::App app{"Cell 1.1.1\nCommand line interface for the cell simulation"};
+    CLI::App app{"Cell 1.1.1\nCommand line interface for the cell simulation\nBuild time: " + std::string{__DATE__} +
+                 " " + std::string{__TIME__}};
 
     fs::path configFile;
     fs::path outFile;
@@ -51,16 +52,17 @@ int main(int argc, char** argv)
 
     cell::SimulationRunner simulationRunner;
     simulationRunner.useConfigFile(configFile);
-    simulationRunner.setSimulationDuration(std::chrono::duration<double>{duration});
+    simulationRunner.setSimulationDuration(ch::duration_cast<ch::nanoseconds>(ch::duration<double>{duration}));
 
     cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
                                                 simulationRunner.getSimulationConfig().mostProbableSpeed);
-    simulationRecorder.setStorageInterval(ch::duration<double>(storageInterval));
+    simulationRecorder.setStorageInterval(ch::duration_cast<ch::nanoseconds>(ch::duration<double>(storageInterval)));
+    simulationRecorder.setStoreInitialDatapoint(true);
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.printPerformanceData(std::move(data)); });
     simulationRunner.setPostBuildCallback([&](cell::Cell& cell)
                                           { simulationRecorder.processInitialSimulationData(cell); });
-    simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+    simulationRunner.setPostUpdateCallback([&](cell::Cell& cell, const ch::nanoseconds& elapsedTime)
                                            { simulationRecorder.processSimulationData(cell, elapsedTime); });
 
     std::cout << "Starting simulation\n";

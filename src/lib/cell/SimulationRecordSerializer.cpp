@@ -13,7 +13,7 @@ void SimulationRecordSerializer::writeTypeCountsToCsv(const std::deque<DataPoint
     if (!file)
         throw ExceptionWithLocation("Couldn't open file '" + outFile.string() + "' for writing");
 
-    ch::duration<double> elapsedTime{};
+    ch::nanoseconds elapsedTime{};
     const auto& discTypes = discTypeRegistry.getValues();
     std::vector<DiscTypeID> discTypeIDs = discTypeRegistry.getIDs();
 
@@ -25,7 +25,7 @@ void SimulationRecordSerializer::writeTypeCountsToCsv(const std::deque<DataPoint
     for (const auto& dataPoint : dataPoints)
     {
         elapsedTime += dataPoint.getData().elapsedTime;
-        file << elapsedTime.count();
+        file << ch::duration<double>(elapsedTime).count();
         for (const auto& ID : discTypeIDs)
             file << ","
                  << ((dataPoint.getData().discTypeCounts.contains(ID)) ? dataPoint.getData().discTypeCounts.at(ID) : 0);

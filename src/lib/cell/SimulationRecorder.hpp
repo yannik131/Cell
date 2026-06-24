@@ -30,10 +30,10 @@ public:
 
 public:
     SimulationRecorder(const DiscTypeRegistry& discTypeRegistry, double vSigma);
-    void setStorageInterval(const ch::duration<double>& storageInterval);
+    void setStorageInterval(const ch::nanoseconds& storageInterval);
     void printPerformanceData(SimulationRunner::PerformanceData data);
     void processInitialSimulationData(Cell& cell);
-    void processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime);
+    void processSimulationData(Cell& cell, const ch::nanoseconds& elapsedTime);
     void storeRemainingData();
     const std::deque<DataPoint>& getDataPoints() const;
     void clear();
@@ -41,7 +41,7 @@ public:
     void setRecordLastFrame(bool value);
     Frame getLastFrame();
     void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
-    const ch::duration<double>& getStorageInterval() const;
+    const ch::nanoseconds& getStorageInterval() const;
     void setStoreInitialDatapoint(bool value);
 
 private:
@@ -49,7 +49,7 @@ private:
     void recordFrame(const Cell& cell);
 
 private:
-    ch::duration<double> storageInterval_ = ch::milliseconds{100};
+    ch::nanoseconds storageInterval_ = ch::milliseconds{100};
     DataPoint currentDataPoint_;
     std::deque<DataPoint> dataPoints_;
     const DiscTypeRegistry& discTypeRegistry_;

@@ -1,154 +1,154 @@
 {
-    "config": {
-        "cellMembraneType": {
-            "discCount": 3000,
-            "discTypeDistribution": {
-                "Large": 0.33,
-                "Medium": 0.33,
-                "Small": 0.34
-            },
-            "name": "Cell membrane",
-            "permeabilityMap": {},
-            "radius": 2000.0
+  "config": {
+    "cellMembraneType": {
+      "discCount": 3000,
+      "discTypeDistribution": {
+        "Large": 0.33,
+        "Medium": 0.33,
+        "Small": 0.34
+      },
+      "name": "Cell membrane",
+      "permeabilityMap": {},
+      "radius": 2000.0
+    },
+    "discTypes": [
+      {
+        "mass": 5.0,
+        "name": "Small",
+        "radius": 5.0
+      },
+      {
+        "mass": 10.0,
+        "name": "Medium",
+        "radius": 10.0
+      },
+      {
+        "mass": 30.0,
+        "name": "Large",
+        "radius": 30.0
+      },
+      {
+        "mass": 1.0,
+        "name": "Destroyer",
+        "radius": 10.0
+      },
+      {
+        "mass": 5.0,
+        "name": "Destroyed",
+        "radius": 1.0
+      }
+    ],
+    "discs": [],
+    "membraneTypes": [
+      {
+        "discCount": 1,
+        "discTypeDistribution": {
+          "Destroyer": 1.0
         },
-        "discTypes": [
-            {
-                "mass": 5.0,
-                "name": "Small",
-                "radius": 5.0
-            },
-            {
-                "mass": 10.0,
-                "name": "Medium",
-                "radius": 10.0
-            },
-            {
-                "mass": 30.0,
-                "name": "Large",
-                "radius": 30.0
-            },
-            {
-                "mass": 1.0,
-                "name": "Destroyer",
-                "radius": 10.0
-            },
-            {
-                "mass": 5.0,
-                "name": "Destroyed",
-                "radius": 1.0
-            }
-        ],
-        "discs": [],
-        "membraneTypes": [
-            {
-                "discCount": 1,
-                "discTypeDistribution": {
-                    "Destroyer": 1.0
-                },
-                "name": "Sink",
-                "permeabilityMap": {
-                    "Destroyed": 1,
-                    "Small": 0
-                },
-                "radius": 150.0
-            }
-        ],
-        "membranes": [
-            {
-                "membraneTypeName": "Sink",
-                "x": 357.1429138183594,
-                "y": -766.2337036132813
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": -226.99960327148438,
-                "y": -72.07673645019531
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": -45.17124938964844,
-                "y": 953.2330932617188
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": -1232.1065673828125,
-                "y": 564.3223266601563
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": 722.5484619140625,
-                "y": 347.1386413574219
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": -1181.598876953125,
-                "y": -1168.0972900390625
-            },
-            {
-                "membraneTypeName": "Sink",
-                "x": 20.488037109375,
-                "y": -1683.27783203125
-            }
-        ],
-        "mostProbableSpeed": 600.0,
-        "reactions": [
-            {
-                "educt1": "Small",
-                "educt2": "Destroyer",
-                "probability": 1.0,
-                "product1": "Destroyed",
-                "product2": "Destroyer"
-            }
-        ],
-        "simulationTimeScale": 2.0,
-        "simulationTimeStep": 0.003,
-        "useDistribution": true
-    },
-    "configVersion": "1",
-    "discTypeColorMap": {
-        "Destroyed": [
-            0,
-            255,
-            255,
-            255
-        ],
-        "Destroyer": [
-            255,
-            0,
-            0,
-            255
-        ],
-        "Large": [
-            0,
-            128,
-            128,
-            255
-        ],
-        "Medium": [
-            0,
-            0,
-            255,
-            255
-        ],
-        "Small": [
-            0,
-            255,
-            0,
-            255
-        ]
-    },
-    "membraneTypeColorMap": {
-        "Cell membrane": [
-            255,
-            255,
-            0,
-            255
-        ],
-        "Sink": [
-            0,
-            255,
-            0,
-            255
-        ]
-    }
+        "name": "Sink",
+        "permeabilityMap": {
+          "Destroyed": 1,
+          "Small": 0
+        },
+        "radius": 150.0
+      }
+    ],
+    "membranes": [
+      {
+        "membraneTypeName": "Sink",
+        "x": 357.1429138183594,
+        "y": -766.2337036132812
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": -226.99960327148438,
+        "y": -72.07673645019531
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": -45.17124938964844,
+        "y": 953.2330932617188
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": -1232.1065673828125,
+        "y": 564.3223266601562
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": 722.5484619140625,
+        "y": 347.1386413574219
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": -1181.598876953125,
+        "y": -1168.0972900390625
+      },
+      {
+        "membraneTypeName": "Sink",
+        "x": 20.488037109375,
+        "y": -1683.27783203125
+      }
+    ],
+    "mostProbableSpeed": 600.0,
+    "reactions": [
+      {
+        "educt1": "Small",
+        "educt2": "Destroyer",
+        "probability": 1.0,
+        "product1": "Destroyed",
+        "product2": "Destroyer"
+      }
+    ],
+    "simulationTimeScale": 2.0,
+    "simulationTimeStep": 3000000,
+    "useDistribution": true
+  },
+  "configVersion": "1",
+  "discTypeColorMap": {
+    "Destroyed": [
+      0,
+      255,
+      255,
+      255
+    ],
+    "Destroyer": [
+      255,
+      0,
+      0,
+      255
+    ],
+    "Large": [
+      0,
+      128,
+      128,
+      255
+    ],
+    "Medium": [
+      0,
+      0,
+      255,
+      255
+    ],
+    "Small": [
+      0,
+      255,
+      0,
+      255
+    ]
+  },
+  "membraneTypeColorMap": {
+    "Cell membrane": [
+      255,
+      255,
+      0,
+      255
+    ],
+    "Sink": [
+      0,
+      255,
+      0,
+      255
+    ]
+  }
 }

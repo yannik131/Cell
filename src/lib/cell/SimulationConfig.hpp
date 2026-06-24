@@ -4,11 +4,14 @@
 #include "MembraneType.hpp"
 #include "Vector2d.hpp"
 
+#include <chrono>
 #include <map>
 #include <string>
 #include <vector>
 
 #include <nlohmann/json.hpp>
+
+namespace ch = std::chrono;
 
 namespace cell
 {
@@ -81,7 +84,7 @@ struct SimulationConfig
      * but requires more updates to advance the simulation in time. If this value is too small, the simulation might not
      * be able to keep up and start lagging
      */
-    double simulationTimeStep = 1e-3;
+    long long simulationTimeStep = ch::milliseconds{1}.count();
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.

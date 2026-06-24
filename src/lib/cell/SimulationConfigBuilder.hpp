@@ -28,7 +28,7 @@ public:
                      const std::string& product2, Probability probability);
     void setCellMembraneType(Radius radius,
                              const std::unordered_map<std::string, MembraneType::Permeability>& permeabilityMap);
-    void setTimeStep(double simulationTimeStep);
+    void setTimeStep(ch::nanoseconds simulationTimeStep);
     void setTimeScale(double simulationTimeScale);
     void setMostProbableSpeed(double mostProbableSpeed);
     void setReactionsConserveArea(bool value);

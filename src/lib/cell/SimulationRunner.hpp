@@ -27,27 +27,27 @@ public:
     {
         double targetScale;
         double actualScale;
-        ch::duration<double> timePerWholeUpdate;
-        ch::duration<double> timePerSimulationUpdate;
-        ch::duration<double> elapsedSimulationTime;
+        ch::nanoseconds timePerWholeUpdate;
+        ch::nanoseconds timePerSimulationUpdate;
+        ch::nanoseconds elapsedSimulationTime;
     };
 
     struct LoopParameters
     {
         double targetScale;
-        double timeStep;
+        ch::nanoseconds timeStep;
     };
 
 public:
     void useConfigFile(const fs::path& configFile);
     void useConfig(const SimulationConfig& simulationConfig);
-    void setSimulationDuration(const ch::duration<double>& simulationDuration);
+    void setSimulationDuration(const ch::nanoseconds& simulationDuration);
     void runSimulation();
     void waitForSimulationToFinish();
     void stopSimulation();
     void setPerformanceDataCallback(std::function<void(PerformanceData)> callback);
     void setPostBuildCallback(std::function<void(Cell&)> callback);
-    void setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback);
+    void setPostUpdateCallback(std::function<void(Cell&, const ch::nanoseconds&)> callback);
     void setPostStartCallback(std::function<void()> callback);
     void setPostStopCallback(std::function<void()> callback);
     SimulationContext getSimulationContext() const;
@@ -58,20 +58,19 @@ public:
 
 private:
     void loop(std::stop_token stopToken);
-    void sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                             ch::duration<double>& simulationUpdateTime,
-                             const ch::duration<double>& elapsedSimulationTime, Force force = {}) const;
+    void sendPerformanceData(ch::steady_clock::time_point& start, int& updates, ch::nanoseconds& simulationUpdateTime,
+                             const ch::nanoseconds& elapsedSimulationTime, Force force = {}) const;
 
 private:
     SimulationFactory simulationFactory_;
     SimulationConfig simulationConfig_;
     std::jthread thread_;
     std::function<void(PerformanceData)> performanceDataCallback_;
-    std::function<void(Cell&, const ch::duration<double>&)> postUpdateCallback_;
+    std::function<void(Cell&, const ch::nanoseconds&)> postUpdateCallback_;
     std::function<void(Cell&)> postBuildCallback_;
     std::function<void()> postStartCallback_;
     std::function<void()> postStopCallback_;
-    ch::duration<double> simulationDuration_ = ch::duration<double>::max();
+    ch::nanoseconds simulationDuration_ = ch::nanoseconds::max();
     bool useScaleFromConfig_ = false;
     std::atomic<bool> isRunning_ = false;
 };

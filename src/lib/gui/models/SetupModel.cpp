@@ -21,7 +21,7 @@ void SetupModel::setReactionsConserveArea(bool value)
 
 void SetupModel::setTimeStepUs(int timeStepUs)
 {
-    simulationConfig_.simulationTimeStep = timeStepUs / 1e6;
+    simulationConfig_.simulationTimeStep = timeStepUs * 1000LL;
 }
 
 void SetupModel::setTimeScale(double timeScale)

@@ -43,7 +43,7 @@ class DataPoint
 public:
     struct Data
     {
-        ch::duration<double> elapsedTime = {};
+        ch::nanoseconds elapsedTime = {};
         std::unordered_map<DiscTypeID, double> collisionCounts;
         std::unordered_map<DiscTypeID, double> totalMomentums;
         std::unordered_map<DiscTypeID, double> totalKineticEnergies;
@@ -59,8 +59,7 @@ public:
     void add(const DataPoint& rhs);
     void average(NormalizeCollisionCounts normalizeCollisionCounts = {});
     void initializeHistograms(const std::vector<DiscTypeID>& discTypeIDs, double vSigma);
-    void addSimulationData(Cell& cell, const ch::duration<double>& elapsedTime,
-                           const DiscTypeRegistry& discTypeRegistry);
+    void addSimulationData(Cell& cell, const ch::nanoseconds& elapsedTime, const DiscTypeRegistry& discTypeRegistry);
 
 private:
     Data data_;

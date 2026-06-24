@@ -34,7 +34,7 @@ void SimulationRunner::useConfig(const SimulationConfig& simulationConfig)
         postBuildCallback_(simulationFactory_.getCell());
 }
 
-void SimulationRunner::setSimulationDuration(const std::chrono::duration<double>& simulationDuration)
+void SimulationRunner::setSimulationDuration(const ch::nanoseconds& simulationDuration)
 {
     simulationDuration_ = simulationDuration;
 }
@@ -73,7 +73,7 @@ void SimulationRunner::setPostBuildCallback(std::function<void(Cell&)> callback)
         postBuildCallback_(simulationFactory_.getCell());
 }
 
-void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch::duration<double>&)> callback)
+void SimulationRunner::setPostUpdateCallback(std::function<void(Cell&, const ch::nanoseconds&)> callback)
 {
     postUpdateCallback_ = std::move(callback);
 }
@@ -115,7 +115,7 @@ void SimulationRunner::updateLoopParameters(LoopParameters loopParameters)
 {
     // Not atomic atm, doesn't need to be yet
     simulationConfig_.simulationTimeScale = loopParameters.targetScale;
-    simulationConfig_.simulationTimeStep = loopParameters.timeStep;
+    simulationConfig_.simulationTimeStep = loopParameters.timeStep.count();
 }
 
 void SimulationRunner::loop(std::stop_token stopToken)
@@ -123,18 +123,19 @@ void SimulationRunner::loop(std::stop_token stopToken)
     if (postStartCallback_)
         postStartCallback_();
 
-    auto simulationUpdateTime = ch::duration<double>(0s);
-    auto simulationDuration = ch::duration<double>(0s);
-    const auto simulationTimeStep = ch::duration<double>(simulationConfig_.simulationTimeStep);
+    auto simulationUpdateTime = 0ns;
+    auto simulationDuration = 0ns;
+    const auto simulationTimeStep = ch::nanoseconds{simulationConfig_.simulationTimeStep};
     int updates = 0;
     auto start = ch::steady_clock::now();
-    const ch::duration<double> realTimePerStep = simulationTimeStep / simulationConfig_.simulationTimeScale;
+    const auto scaled = simulationTimeStep / simulationConfig_.simulationTimeScale;
+    const auto realTimePerStep = ch::duration_cast<ch::steady_clock::duration>(scaled);
     auto nextTick = start;
 
     while (!stopToken.stop_requested() && simulationDuration < simulationDuration_)
     {
         const auto updateStart = ch::steady_clock::now();
-        simulationFactory_.getCell().update(simulationTimeStep.count());
+        simulationFactory_.getCell().update(ch::duration<double>(simulationTimeStep).count());
         const auto elapsed = ch::steady_clock::now() - updateStart;
         simulationUpdateTime += elapsed;
         simulationDuration += simulationTimeStep;
@@ -160,8 +161,8 @@ void SimulationRunner::loop(std::stop_token stopToken)
 }
 
 void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, int& updates,
-                                           ch::duration<double>& simulationUpdateTime,
-                                           const ch::duration<double>& elapsedSimulationTime, Force force) const
+                                           ch::nanoseconds& simulationUpdateTime,
+                                           const ch::nanoseconds& elapsedSimulationTime, Force force) const
 {
     if (!performanceDataCallback_)
         return;
@@ -171,7 +172,8 @@ void SimulationRunner::sendPerformanceData(ch::steady_clock::time_point& start, 
     if (updates == 0 || (elapsed < 1s && !force.value))
         return;
 
-    const double simulationTime = updates * simulationConfig_.simulationTimeStep;
+    const double simulationTime =
+        updates * ch::duration<double>(ch::nanoseconds{simulationConfig_.simulationTimeStep}).count();
     const double elapsedSeconds = ch::duration<double>(elapsed).count();
     const double actualScale = simulationTime / elapsedSeconds;
     const auto timePerWholeUpdate = elapsed / updates;

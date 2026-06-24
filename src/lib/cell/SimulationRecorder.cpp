@@ -15,20 +15,18 @@ SimulationRecorder::SimulationRecorder(const DiscTypeRegistry& discTypeRegistry,
     currentDataPoint_.initializeHistograms(discTypeIDs, vSigma);
 }
 
-void SimulationRecorder::setStorageInterval(const ch::duration<double>& storageInterval)
+void SimulationRecorder::setStorageInterval(const ch::nanoseconds& storageInterval)
 {
     storageInterval_ = storageInterval;
 }
 
 void SimulationRecorder::printPerformanceData(SimulationRunner::PerformanceData data)
 {
-    std::cout << "Elapsed simulation time: " << data.elapsedSimulationTime.count() << "s\n";
+    std::cout << "Elapsed simulation time: " << ch::duration<double>(data.elapsedSimulationTime).count() << "s\n";
     std::cout << "Actual scale: " << data.actualScale << "\n";
-    std::cout << "Time per simulation update: "
-              << stringutils::timeString(ch::duration_cast<ch::nanoseconds>(data.timePerSimulationUpdate).count())
+    std::cout << "Time per simulation update: " << stringutils::timeString(data.timePerSimulationUpdate.count())
               << "\n";
-    std::cout << "Time per update: "
-              << stringutils::timeString(ch::duration_cast<ch::nanoseconds>(data.timePerWholeUpdate).count()) << "\n";
+    std::cout << "Time per update: " << stringutils::timeString(data.timePerWholeUpdate.count()) << "\n";
     std::cout << std::endl;
 }
 
@@ -40,7 +38,7 @@ void SimulationRecorder::processInitialSimulationData(Cell& cell)
         dataPoints_.push_back(currentDataPoint_);
 }
 
-void SimulationRecorder::processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime)
+void SimulationRecorder::processSimulationData(Cell& cell, const ch::nanoseconds& elapsedTime)
 {
     currentDataPoint_.addSimulationData(cell, elapsedTime, discTypeRegistry_);
     recordFrame(cell);
@@ -83,7 +81,7 @@ void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPo
     newDataPointCallback_ = std::move(callback);
 }
 
-const ch::duration<double>& SimulationRecorder::getStorageInterval() const
+const ch::nanoseconds& SimulationRecorder::getStorageInterval() const
 {
     return storageInterval_;
 }

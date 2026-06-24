@@ -1,83 +1,83 @@
 {
-    "config": {
-        "cellMembraneType": {
-            "discCount": 3000,
-            "discTypeDistribution": {
-                "A": 0.5,
-                "B": 0.5
-            },
-            "name": "Cell membrane",
-            "permeabilityMap": {},
-            "radius": 100.0
-        },
-        "discTypes": [
-            {
-                "mass": 1.0,
-                "name": "A",
-                "radius": 1.0
-            },
-            {
-                "mass": 1.0,
-                "name": "B",
-                "radius": 1.0
-            },
-            {
-                "mass": 2.0,
-                "name": "C",
-                "radius": 1.0
-            }
-        ],
-        "discs": [],
-        "membraneTypes": [],
-        "membranes": [],
-        "mostProbableSpeed": 100.0,
-        "reactions": [
-            {
-                "educt1": "A",
-                "educt2": "B",
-                "probability": 0.5,
-                "product1": "C",
-                "product2": ""
-            },
-            {
-                "educt1": "C",
-                "educt2": "",
-                "probability": 0.4,
-                "product1": "A",
-                "product2": "B"
-            }
-        ],
-        "simulationTimeScale": 1.0,
-        "simulationTimeStep": 0.001,
-        "useDistribution": true
+  "config": {
+    "cellMembraneType": {
+      "discCount": 3000,
+      "discTypeDistribution": {
+        "A": 0.5,
+        "B": 0.5
+      },
+      "name": "Cell membrane",
+      "permeabilityMap": {},
+      "radius": 100.0
     },
-    "configVersion": "1",
-    "discTypeColorMap": {
-        "A": [
-            0,
-            0,
-            255,
-            255
-        ],
-        "B": [
-            255,
-            0,
-            0,
-            255
-        ],
-        "C": [
-            0,
-            255,
-            0,
-            255
-        ]
-    },
-    "membraneTypeColorMap": {
-        "Cell membrane": [
-            255,
-            255,
-            0,
-            255
-        ]
-    }
+    "discTypes": [
+      {
+        "mass": 1.0,
+        "name": "A",
+        "radius": 1.0
+      },
+      {
+        "mass": 1.0,
+        "name": "B",
+        "radius": 1.0
+      },
+      {
+        "mass": 2.0,
+        "name": "C",
+        "radius": 1.0
+      }
+    ],
+    "discs": [],
+    "membraneTypes": [],
+    "membranes": [],
+    "mostProbableSpeed": 100.0,
+    "reactions": [
+      {
+        "educt1": "A",
+        "educt2": "B",
+        "probability": 0.5,
+        "product1": "C",
+        "product2": ""
+      },
+      {
+        "educt1": "C",
+        "educt2": "",
+        "probability": 0.4,
+        "product1": "A",
+        "product2": "B"
+      }
+    ],
+    "simulationTimeScale": 1.0,
+    "simulationTimeStep": 1000000,
+    "useDistribution": true
+  },
+  "configVersion": "1",
+  "discTypeColorMap": {
+    "A": [
+      0,
+      0,
+      255,
+      255
+    ],
+    "B": [
+      255,
+      0,
+      0,
+      255
+    ],
+    "C": [
+      0,
+      255,
+      0,
+      255
+    ]
+  },
+  "membraneTypeColorMap": {
+    "Cell membrane": [
+      255,
+      255,
+      0,
+      255
+    ]
+  }
 }

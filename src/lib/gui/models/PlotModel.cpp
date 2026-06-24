@@ -143,7 +143,7 @@ void PlotModel::setLinePlot()
             fullPlotData.push_back(getActiveMap(dataPoint));
 
         x.push_back(currentX);
-        currentX += dataPoint.getData().elapsedTime.count();
+        currentX += ch::duration<double>(dataPoint.getData().elapsedTime).count();
         dataPoint.clear();
     }
     currentX_ = currentX;
@@ -229,7 +229,7 @@ void PlotModel::updatePlot(const DataPoint& dataPoint)
     default: throw ExceptionWithLocation("Invalid plot category");
     }
 
-    currentX_ += dataPoint_.getData().elapsedTime.count();
+    currentX_ += ch::duration<double>(dataPoint_.getData().elapsedTime).count();
     dataPoint_.clear();
 }
 

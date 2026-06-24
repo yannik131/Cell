@@ -106,7 +106,7 @@ void Simulation::initializeSimulationRecorder()
             simulationRecorder_->processInitialSimulationData(cell);
         });
     simulationRunner_.setPostUpdateCallback(
-        [&](cell::Cell& cell, const ch::duration<double>& elapsedTime)
+        [&](cell::Cell& cell, const ch::nanoseconds& elapsedTime)
         {
             simulationRecorder_->processSimulationData(cell, elapsedTime);
             emit frame(simulationRecorder_->getLastFrame());

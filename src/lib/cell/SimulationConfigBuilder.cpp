@@ -65,9 +65,9 @@ void SimulationConfigBuilder::setCellMembraneType(
     simulationConfig_.cellMembraneType.permeabilityMap = permeabilityMap;
 }
 
-void SimulationConfigBuilder::setTimeStep(double simulationTimeStep)
+void SimulationConfigBuilder::setTimeStep(ch::nanoseconds simulationTimeStep)
 {
-    simulationConfig_.simulationTimeStep = simulationTimeStep;
+    simulationConfig_.simulationTimeStep = simulationTimeStep.count();
 }
 
 void SimulationConfigBuilder::setTimeScale(double simulationTimeScale)

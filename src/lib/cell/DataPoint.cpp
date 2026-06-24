@@ -63,7 +63,7 @@ void DataPoint::initializeHistograms(const std::vector<DiscTypeID>& discTypeIDs,
                                           bh::axis::regular<>(20, 0, 4 * vSigma, "v"));
 }
 
-void DataPoint::addSimulationData(Cell& cell, const ch::duration<double>& elapsedTime,
+void DataPoint::addSimulationData(Cell& cell, const ch::nanoseconds& elapsedTime,
                                   const DiscTypeRegistry& discTypeRegistry)
 {
     addMapToMap(data_.collisionCounts, CollisionDetector::getAndResetCollisionCounts());
