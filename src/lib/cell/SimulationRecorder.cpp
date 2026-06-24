@@ -36,6 +36,8 @@ void SimulationRecorder::processInitialSimulationData(Cell& cell)
 {
     currentDataPoint_.addSimulationData(cell, ch::seconds{0}, discTypeRegistry_);
     recordFrame(cell);
+    if (storeInitialDatapoint_)
+        dataPoints_.push_back(currentDataPoint_);
 }
 
 void SimulationRecorder::processSimulationData(Cell& cell, const ch::duration<double>& elapsedTime)
@@ -84,6 +86,11 @@ void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPo
 const ch::duration<double>& SimulationRecorder::getStorageInterval() const
 {
     return storageInterval_;
+}
+
+void SimulationRecorder::setStoreInitialDatapoint(bool value)
+{
+    storeInitialDatapoint_ = value;
 }
 
 void SimulationRecorder::storeDataPoint()

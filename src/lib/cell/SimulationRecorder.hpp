@@ -42,6 +42,7 @@ public:
     Frame getLastFrame();
     void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
     const ch::duration<double>& getStorageInterval() const;
+    void setStoreInitialDatapoint(bool value);
 
 private:
     void storeDataPoint();
@@ -55,6 +56,7 @@ private:
     bool recordLastFrame_ = false;
     Frame lastFrame_;
     std::function<void(const DataPoint&)> newDataPointCallback_;
+    bool storeInitialDatapoint_ = false;
 };
 
 } // namespace cell
