@@ -27,6 +27,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG)
 endif()
 
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Boost COMPONENTS histogram REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
+
 if(ENABLE_GUI)
     # On Linux, Qt6 must be found before sfml, otherwise sfml will re-define a target (egl) and screw things up
     find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
@@ -43,10 +47,6 @@ if(ENABLE_TESTS)
     enable_testing()
     add_subdirectory(test/libcell)
 endif()
-
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Boost COMPONENTS histogram REQUIRED)
-find_package(CLI11 CONFIG REQUIRED)
 
 add_subdirectory(src/lib/cell)
 add_subdirectory(src/apps/cell-cli)

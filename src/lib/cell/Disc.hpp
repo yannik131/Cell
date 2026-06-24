@@ -5,8 +5,6 @@
 #include "PhysicalObject.hpp"
 #include "Vector2d.hpp"
 
-#include <SFML/System/Vector2.hpp>
-
 namespace cell
 {
 

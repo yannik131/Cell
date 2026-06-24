@@ -4,8 +4,6 @@
 #include "Hashing.hpp"
 #include "Types.hpp"
 
-#include <SFML/Graphics/Color.hpp>
-
 #include <string>
 
 namespace cell
