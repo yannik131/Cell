@@ -1,8 +1,5 @@
 {
     "dependencies": [
-        "sfml",
-        "qtbase",
-        "gtest",
         "nlohmann-json",
         "boost-histogram",
         "cli11"
