@@ -6,6 +6,9 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 cmake_policy(SET CMP0091 NEW)
 cmake_policy(SET CMP0057 NEW)
 
+option(ENABLE_GUI "Build GUI targets" ON)
+option(ENABLE_TESTS "Build tests" ON)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -24,21 +27,26 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG)
 endif()
 
-# On Linux, Qt6 must be found before sfml, otherwise sfml will re-define a target (egl) and screw things up
-find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
-find_package(SFML COMPONENTS System Window Graphics REQUIRED)
+if(ENABLE_GUI)
+    # On Linux, Qt6 must be found before sfml, otherwise sfml will re-define a target (egl) and screw things up
+    find_package(Qt6 COMPONENTS Core Widgets PrintSupport OpenGLWidgets Test REQUIRED)
+    find_package(SFML COMPONENTS System Window Graphics REQUIRED)
+    add_subdirectory(contrib/qcustomplot)
+    add_subdirectory(src/lib/gui)
+    add_subdirectory(src/apps/cell-gui)
+endif()
+
+if(ENABLE_TESTS)
+    find_package(GTest REQUIRED)
+    enable_testing()
+    add_subdirectory(test/libcell)
+endif()
+
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Boost COMPONENTS histogram REQUIRED)
-find_package(GTest REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 
-enable_testing()
-
-add_subdirectory(contrib/qcustomplot)
 add_subdirectory(src/lib/cell)
-add_subdirectory(src/lib/gui)
-add_subdirectory(src/apps/cell-gui)
 add_subdirectory(src/apps/benchmark)
 add_subdirectory(src/apps/playground)
 add_subdirectory(src/apps/cell-cli)
-add_subdirectory(test/libcell)
