@@ -37,12 +37,10 @@ public:
     void storeRemainingData();
     const std::deque<DataPoint>& getDataPoints() const;
     void clear();
-    const DataPoint& getCurrentDataPoint() const;
     void setRecordLastFrame(bool value);
     Frame getLastFrame();
     void setNewDataPointCallback(std::function<void(const DataPoint& dataPoint)> callback);
     const ch::nanoseconds& getStorageInterval() const;
-    void setStoreInitialDatapoint(bool value);
 
 private:
     void storeDataPoint();
@@ -56,7 +54,6 @@ private:
     bool recordLastFrame_ = false;
     Frame lastFrame_;
     std::function<void(const DataPoint&)> newDataPointCallback_;
-    bool storeInitialDatapoint_ = false;
 };
 
 } // namespace cell

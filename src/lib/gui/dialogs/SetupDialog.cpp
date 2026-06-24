@@ -54,7 +54,8 @@ void SetupDialog::displayCurrentConfig()
     ui->useDistributionRadioButton->setChecked(config.useDistribution);
     ui->conserveAreaCheckbox->setChecked(config.reactionsConserveArea);
     ui->manualPositionsRadioButton->setChecked(!config.useDistribution);
-    ui->timeStepSpinBox->setValue(static_cast<int>(std::round(config.simulationTimeStep / 1000.0)));
+    ui->timeStepSpinBox->setValue(
+        static_cast<int>(std::round(static_cast<double>(config.simulationTimeStep) / 1000.0)));
     ui->timeScaleDoubleSpinBox->setValue(config.simulationTimeScale);
     ui->mostProbableSpeedSpinBox->setValue(config.mostProbableSpeed);
     ui->FPSSpinBox->setValue(simulationConfigUpdater_->getFPS());

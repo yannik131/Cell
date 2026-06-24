@@ -115,35 +115,44 @@ void PlotModel::setLinePlot()
     auto dataPoint = createDataPoint();
 
     const std::size_t expectedSize =
-        static_cast<std::size_t>(static_cast<double>(dataPoints.size()) *
-                                 simulation_->getSimulationRecorder().getStorageInterval().count() /
-                                 plotTimeInterval_.count()) +
+        static_cast<std::size_t>(
+            static_cast<double>(dataPoints.size()) *
+            ch::duration<double>(simulation_->getSimulationRecorder().getStorageInterval()).count() /
+            plotTimeInterval_.count()) +
         1;
     fullPlotData.reserve(expectedSize);
     x.reserve(expectedSize);
 
-    for (const auto& p : dataPoints)
+    const auto addDataPoint = [&](const DataPoint& dataPoint)
+    {
+        const auto& activeMap = getActiveMap(dataPoint);
+
+        if (plotSum_)
+        {
+            const auto sum =
+                std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
+                                [](double partialSum, const auto& pair) { return pair.second + partialSum; });
+            fullPlotData.push_back({{0, sum}});
+        }
+        else
+            fullPlotData.push_back(getActiveMap(dataPoint));
+    };
+
+    addDataPoint(dataPoints.front());
+    x.push_back(0);
+
+    for (std::size_t i = 1; i < dataPoints.size(); ++i)
     {
         // TODO This adds everything, but we only need the current plot category
-        dataPoint.add(p);
+        dataPoint.add(dataPoints[i]);
 
         if (dataPoint.getData().elapsedTime < plotTimeInterval_)
             continue;
 
         dataPoint.average(cell::NormalizeCollisionCounts{true});
-        const auto& activeMap = getActiveMap(dataPoint);
-
-        if (plotSum_)
-        {
-            auto sum = std::accumulate(activeMap.begin(), activeMap.end(), 0.0,
-                                       [](double partialSum, const auto& pair) { return pair.second + partialSum; });
-            fullPlotData.push_back({{0, sum}});
-        }
-        else
-            fullPlotData.push_back(getActiveMap(dataPoint));
-
-        x.push_back(currentX);
+        addDataPoint(dataPoint);
         currentX += ch::duration<double>(dataPoint.getData().elapsedTime).count();
+        x.push_back(currentX);
         dataPoint.clear();
     }
     currentX_ = currentX;
@@ -160,10 +169,7 @@ void PlotModel::setHistogramPlot()
     const int requiredDataPoints = std::max(1, static_cast<int>(std::ceil(plotTimeInterval_ / storageTime)));
 
     if (static_cast<int>(dataPoints.size()) < requiredDataPoints)
-    {
-        const auto& dataPoint = simulation_->getSimulationRecorder().getCurrentDataPoint();
-        histogram = getVelocityHistogramFromDataPoint(dataPoint, CalculateSum{plotSum_});
-    }
+        histogram = getVelocityHistogramFromDataPoint(dataPoints.front(), CalculateSum{plotSum_});
     else
     {
         histogram = getVelocityHistogramFromDataPoint(dataPoints.back(), CalculateSum{plotSum_});
@@ -181,9 +187,7 @@ void PlotModel::setColorMapPlot()
 {
     std::vector<cell::Histogram> histograms;
     const auto& simulationRecorder = simulation_->getSimulationRecorder();
-    const auto& dataPoints = simulationRecorder.getDataPoints().empty()
-                                 ? std::deque<DataPoint>({simulationRecorder.getCurrentDataPoint()})
-                                 : simulationRecorder.getDataPoints();
+    const auto& dataPoints = simulationRecorder.getDataPoints();
     histograms.reserve(dataPoints.size());
 
     auto dataPoint = createDataPoint();
@@ -256,7 +260,12 @@ void PlotModel::updateHistogramPlot()
 void PlotModel::updateColorMapPlot()
 {
     auto histogram = getVelocityHistogramFromDataPoint(dataPoint_, CalculateSum{true});
-    emit updatePlot(PlotWidget::ColorMapData{.histogram = histogram, .xStep = plotTimeInterval_.count()});
+    // The initial data point display spans no elapsed simulation time, so the first real data point needs to reset the
+    // plot
+    if (currentX_ == 0)
+        setColorMapPlot();
+    else
+        emit updatePlot(PlotWidget::ColorMapData{.histogram = histogram, .xStep = plotTimeInterval_.count()});
 }
 
 void PlotModel::updateLabelsAndColors()

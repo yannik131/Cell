@@ -33,9 +33,9 @@ void SimulationRecorder::printPerformanceData(SimulationRunner::PerformanceData 
 void SimulationRecorder::processInitialSimulationData(Cell& cell)
 {
     currentDataPoint_.addSimulationData(cell, ch::seconds{0}, discTypeRegistry_);
+    dataPoints_.push_back(currentDataPoint_);
+    currentDataPoint_.clear();
     recordFrame(cell);
-    if (storeInitialDatapoint_)
-        dataPoints_.push_back(currentDataPoint_);
 }
 
 void SimulationRecorder::processSimulationData(Cell& cell, const ch::nanoseconds& elapsedTime)
@@ -61,11 +61,6 @@ void SimulationRecorder::clear()
     dataPoints_.clear();
 }
 
-const DataPoint& SimulationRecorder::getCurrentDataPoint() const
-{
-    return currentDataPoint_;
-}
-
 void SimulationRecorder::setRecordLastFrame(bool value)
 {
     recordLastFrame_ = value;
@@ -84,11 +79,6 @@ void SimulationRecorder::setNewDataPointCallback(std::function<void(const DataPo
 const ch::nanoseconds& SimulationRecorder::getStorageInterval() const
 {
     return storageInterval_;
-}
-
-void SimulationRecorder::setStoreInitialDatapoint(bool value)
-{
-    storeInitialDatapoint_ = value;
 }
 
 void SimulationRecorder::storeDataPoint()

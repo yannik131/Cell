@@ -57,7 +57,6 @@ int main(int argc, char** argv)
     cell::SimulationRecorder simulationRecorder(simulationRunner.getSimulationContext().discTypeRegistry,
                                                 simulationRunner.getSimulationConfig().mostProbableSpeed);
     simulationRecorder.setStorageInterval(ch::duration_cast<ch::nanoseconds>(ch::duration<double>(storageInterval)));
-    simulationRecorder.setStoreInitialDatapoint(true);
     simulationRunner.setPerformanceDataCallback([&](auto data)
                                                 { simulationRecorder.printPerformanceData(std::move(data)); });
     simulationRunner.setPostBuildCallback([&](cell::Cell& cell)

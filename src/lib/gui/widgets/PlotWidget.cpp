@@ -17,6 +17,7 @@ PlotWidget::PlotWidget(QWidget* parent)
     plotTimer_.setTimerType(Qt::PreciseTimer);
     plotTimer_.setInterval(1000 / 60);
     connect(&plotTimer_, &QTimer::timeout, this, &PlotWidget::replotIfNewPlotAvailable);
+    enableZoom(true);
 }
 
 void PlotWidget::setModel(PlotModel* plotModel)
@@ -131,8 +132,6 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     const auto& histograms = colorMapParams.histograms;
 
     clear();
-    if (histograms.empty())
-        throw ExceptionWithLocation("Can't initialize plot with empty histograms");
 
     legend->setVisible(false);
 
@@ -143,12 +142,16 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
     colorMap_->setColorScale(colorScale_);
     colorMap_->setInterpolate(interpolateEnabled_);
 
+    if (histograms.empty())
+        throw ExceptionWithLocation("Can't initialize plot with empty histograms");
+
     const int binCount = histograms.front().axis(1).size();
     colorMap_->data()->setSize(static_cast<int>(histograms.size()), binCount);
 
     xAxis->setLabel("t [s]");
     xAxis->setRange(0, xStep * static_cast<double>(histograms.size()));
     yAxis->setRange(0, binCount);
+
     if (histograms.size() == 1)
         colorMap_->data()->setRange(QCPRange(0, xStep), QCPRange(0.5, binCount - 0.5));
     else
@@ -160,10 +163,9 @@ void PlotWidget::setPlot(const ColorMapParams& colorMapParams)
         for (int y = 0; y < binCount; ++y)
             colorMap_->data()->setCell(x, y, histograms[x].at(0, y));
     }
+
     colorMapCache_ = histograms;
-
     colorMap_->rescaleDataRange();
-
     colorMap_->setGradient(QCPColorGradient::gpGrayscale);
 
     auto ticker = QSharedPointer<QCPAxisTickerText>::create();
