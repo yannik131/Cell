@@ -40,7 +40,7 @@ void DataPoint::average(NormalizeCollisionCounts normalizeCollisionCounts)
         return;
 
     if (normalizeCollisionCounts.value && data_.elapsedTime.count() > 0)
-        divideMapByValue(data_.collisionCounts, data_.elapsedTime.count());
+        divideMapByValue(data_.collisionCounts, ch::duration<double>(data_.elapsedTime).count());
 
     divideMapByValue(data_.totalKineticEnergies, n_);
     divideMapByValue(data_.totalMomentums, n_);
