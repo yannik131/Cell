@@ -84,7 +84,7 @@ struct SimulationConfig
      * but requires more updates to advance the simulation in time. If this value is too small, the simulation might not
      * be able to keep up and start lagging
      */
-    long long simulationTimeStep = ch::milliseconds{1}.count();
+    long long simulationTimeStep = ch::duration_cast<ch::nanoseconds>(ch::milliseconds{3}).count();
 
     /**
      * @brief Defines how many seconds should pass in real time for 1 second in the simulation.

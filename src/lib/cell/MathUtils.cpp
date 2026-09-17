@@ -18,7 +18,7 @@ std::vector<Vector2d> calculateGrid(double width, double height, double edgeLeng
     std::vector<Vector2d> gridPoints;
     gridPoints.reserve(static_cast<std::size_t>((static_cast<double>(width) / edgeLength) *
                                                 (static_cast<double>(height) / edgeLength)));
-    double spacing = edgeLength + 1;
+    double spacing = edgeLength;
 
     for (int i = 0; i < static_cast<int>(width / spacing); ++i)
     {
